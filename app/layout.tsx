@@ -2,7 +2,11 @@ import type { Metadata } from "next"
 import { Archivo, Oswald } from "next/font/google"
 import Link from "next/link"
 import { Suspense } from "react"
+import { cacheLife } from "next/cache"
+import { supabase } from "@/lib/supabase"
 import { AskPanel } from "@/components/ask-panel"
+import { NextBarca, type NextBarcaMatch } from "@/components/next-barca"
+import { BARCA_ID } from "@/lib/teams"
 import { SeasonToggle } from "@/components/season-toggle"
 import { MainNav, MainNavFallback } from "@/components/main-nav"
 import { TooltipProvider } from "@/components/ui/tooltip"
@@ -26,6 +30,55 @@ export const metadata: Metadata = {
     "Search, compare, and analyze football player stats across Europe's top leagues.",
 }
 
+const COLS = "event_id, date, league, home, home_id, away, away_id"
+
+async function NextBarcaGame() {
+  // Cached, not dynamic: a dynamic hole in the root layout renders empty on
+  // client navigations. The clock lives in the client pill instead, which picks
+  // the next of these fixtures itself — so nothing here reads the time.
+  "use cache"
+  cacheLife("hours")
+  const q = (cols: string) =>
+    supabase
+      .from("matches")
+      .select(cols)
+      .eq("status", "upcoming")
+      .or(`home_id.eq.${BARCA_ID},away_id.eq.${BARCA_ID}`)
+      .order("date", { ascending: true })
+      .limit(6)
+  // `kickoff` is a newer column; drop it rather than lose the pill if the
+  // database hasn't been migrated yet.
+  let { data } = await q(`${COLS}, kickoff`)
+  if (!data) ({ data } = await q(COLS))
+  if (!data?.length) return null
+
+  const rows = data as unknown as Array<{
+    event_id: number
+    date: string
+    league: string
+    home: string
+    home_id: number | null
+    away: string
+    away_id: number | null
+    kickoff?: string | null
+  }>
+
+  const matches: NextBarcaMatch[] = rows.map((r) => {
+    const atHome = r.home_id === BARCA_ID
+    return {
+      event_id: r.event_id,
+      kickoff: r.kickoff ?? null,
+      date: r.date,
+      league: r.league,
+      opponent: atHome ? r.away : r.home,
+      opponent_id: atHome ? r.away_id : r.home_id,
+      home: atHome,
+    }
+  })
+
+  return <NextBarca matches={matches} />
+}
+
 export default function RootLayout({
   children,
 }: {
@@ -44,6 +97,7 @@ export default function RootLayout({
             className="absolute inset-x-0 top-0 h-24 -z-10 bg-gradient-to-b from-background via-background/85 to-transparent"
           />
           <div className="mx-auto max-w-6xl flex items-center justify-between px-4 pt-4 pb-2">
+            <div className="flex items-center gap-2">
             <Link
               href="/"
               className="pointer-events-auto nav-pill flex items-center gap-2 pl-3 pr-4 py-2 group"
@@ -71,6 +125,8 @@ export default function RootLayout({
                 FOOTYY
               </span>
             </Link>
+            <NextBarcaGame />
+            </div>
             <div className="pointer-events-auto flex items-center gap-2">
               <Suspense fallback={null}>
                 <SeasonToggle />

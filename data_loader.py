@@ -417,7 +417,12 @@ def fetch_matches(start: int, leagues: dict | None = None, refresh: bool = False
     if df.empty:
         return df
     if "date" in df.columns:
-        df["date"] = pd.to_datetime(df["date"], unit="s", utc=True).dt.strftime("%Y-%m-%d")
+        ts = pd.to_datetime(df["date"], unit="s", utc=True)
+        # Sofascore gives the real kickoff epoch; `date` keeps the day-only form
+        # everything downstream already groups by, `kickoff` keeps the time so a
+        # countdown has something true to count to.
+        df["kickoff"] = ts.dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+        df["date"] = ts.dt.strftime("%Y-%m-%d")
     return df
 
 

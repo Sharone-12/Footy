@@ -99,6 +99,8 @@ export const LEAGUE_ABBR: Record<string, string> = {
 }
 
 /** Sofascore tournament IDs, used for league crest images. */
+export const BARCA_ID = 2817
+
 export const LEAGUE_TOURNAMENT_ID: Record<string, number> = {
   "Premier League": 17,
   "La Liga": 8,
