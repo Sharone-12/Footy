@@ -9,6 +9,7 @@ import { NextBarca, type NextBarcaMatch } from "@/components/next-barca"
 import { BARCA_ID } from "@/lib/teams"
 import { SeasonToggle } from "@/components/season-toggle"
 import { MainNav, MainNavFallback } from "@/components/main-nav"
+import { UclBackdrop } from "@/components/ucl-backdrop"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import "./globals.css"
 
@@ -90,11 +91,14 @@ export default function RootLayout({
       className={`${sans.variable} ${condensed.variable} dark h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        <Suspense fallback={null}>
+          <UclBackdrop />
+        </Suspense>
         <TooltipProvider delay={150}>
         <nav className="sticky top-0 z-40 pointer-events-none">
           <div
             aria-hidden
-            className="absolute inset-x-0 top-0 h-24 -z-10 bg-gradient-to-b from-background via-background/85 to-transparent"
+            className="nav-fade absolute inset-x-0 top-0 h-24 -z-10 bg-gradient-to-b from-background via-background/85 to-transparent"
           />
           <div className="mx-auto max-w-6xl flex items-center justify-between px-4 pt-4 pb-2">
             <div className="flex items-center gap-2">
