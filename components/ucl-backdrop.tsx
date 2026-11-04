@@ -4,12 +4,18 @@ import { useSearchParams } from "next/navigation"
 import { resolveCompetition } from "@/lib/competition"
 
 /**
- * Champions League wallpaper behind the page while ?comp=ucl is set. The
- * data-on attribute is what globals.css keys off to drop the nav's dark
- * gradient, which otherwise smears black over the top of the image.
+ * Champions League wallpaper behind the page in UCL mode. The data-on
+ * attribute is what globals.css keys off to drop the nav's dark gradient,
+ * which otherwise smears black over the top of the image.
+ *
+ * Two params mean UCL: ?comp=ucl everywhere, and /predictions' own
+ * ?league=UCL filter, which predates it and doesn't write ?comp=.
  */
 export function UclBackdrop() {
-  const on = resolveCompetition(useSearchParams().get("comp")) === "ucl"
+  const params = useSearchParams()
+  const on =
+    resolveCompetition(params.get("comp")) === "ucl" ||
+    params.get("league") === "UCL"
   return (
     <div
       aria-hidden
