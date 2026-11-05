@@ -1,4 +1,5 @@
 import { Suspense } from "react"
+import { connection } from "next/server"
 import { supabase } from "@/lib/supabase"
 import { LiveSections, type LiveFixture } from "@/components/live-sections"
 import { ExternalSources } from "@/components/external-sources"
@@ -11,6 +12,7 @@ const DAYS_AHEAD = 7
 const LIMIT = 60
 
 async function Fixtures() {
+  await connection()
   // Yesterday, because a late kickoff is still in play after midnight UTC.
   const from = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10)
   const to = new Date(Date.now() + DAYS_AHEAD * 86_400_000).toISOString().slice(0, 10)
