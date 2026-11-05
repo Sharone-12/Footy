@@ -3,6 +3,7 @@ import { Archivo, Oswald } from "next/font/google"
 import Link from "next/link"
 import { Suspense } from "react"
 import { cacheLife } from "next/cache"
+import { Analytics } from "@vercel/analytics/next"
 import { supabase } from "@/lib/supabase"
 import { AskPanel } from "@/components/ask-panel"
 import { NextBarca, type NextBarcaMatch } from "@/components/next-barca"
@@ -148,6 +149,7 @@ export default function RootLayout({
           <AskPanel />
         </Suspense>
         </TooltipProvider>
+        <Analytics />
       </body>
     </html>
   )
