@@ -267,7 +267,6 @@
   transition:
     transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
     box-shadow 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  will-change: transform;
 }
 .card-lift::before {
   content: "";
@@ -436,6 +435,28 @@
     );
 }
 
+/* Fullscreen: the card's 16:9 box would letterbox inside the viewport, so let
+   the frame take the whole screen and drop the card's rounding. YouTube still
+   pillarboxes the video itself to its own ratio, which is what we want. */
+.player:fullscreen {
+  border-radius: 0;
+  background: #000;
+}
+.player:fullscreen .player-frame {
+  aspect-ratio: auto;
+  height: 100vh;
+}
+
+/* Champions League fixtures in a mixed list wear the UCL wallpaper itself —
+   no scrim, no inset highlight, so the banner reads as the banner. In UCL
+   mode the rows drop it: the page already wears the wallpaper behind them. */
+.ucl-row {
+  background-color: var(--card);
+  background-image: url(/ucl-bg.png);
+  background-size: cover;
+  background-position: center;
+}
+
 /* Yamal backdrop — full-viewport photo with a dark overlay so the UI stays
    legible on top. Pages opt in by rendering <div className="yamal-bg" />. */
 .yamal-bg {
@@ -503,4 +524,19 @@ body:has(.ucl-bg[data-on="true"]) :is(.bg-card, .bg-popover) {
 }
 body:has(.ucl-bg[data-on="true"]) .nav-pill {
   background: oklch(0.26 0.08 266 / 62%);
+}
+
+/* Squad cards and fixture rows keep the lift but not card-lift's chasing
+   green border: on a wall of cards it reads as noise. */
+.squad-card.card-lift::before,
+.fixture-row.card-lift::before {
+  content: none;
+}
+
+/* 22 cutout cards is a lot of raster to keep live. Skip layout and paint for
+   the ones off screen; the intrinsic size is a real card's height, so the
+   scrollbar doesn't jump as they come and go. */
+.squad-card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 420px;
 }

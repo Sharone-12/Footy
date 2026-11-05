@@ -11,6 +11,8 @@ const LINKS = [
   { href: "/signals", label: "Signals", hint: "Derived metrics only we track" },
   { href: "/predictions", label: "Predict", hint: "Match predictions" },
   { href: "/compare", label: "Compare", hint: "Side-by-side player stats" },
+  { href: "/squad", label: "Barça", hint: "The Barça squad" },
+  { href: "/live", label: "Live", hint: "Live & streaming" },
 ]
 
 function isActive(pathname: string, href: string) {

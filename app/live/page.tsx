@@ -1,0 +1,82 @@
+import { Suspense } from "react"
+import { supabase } from "@/lib/supabase"
+import { LiveSections, type LiveFixture } from "@/components/live-sections"
+import { ExternalSources } from "@/components/external-sources"
+import { Skeleton } from "@/components/ui/skeleton"
+
+const COLS = "event_id, date, league, home, home_id, away, away_id"
+
+/** Enough to fill "Upcoming" without pulling a whole season into the page. */
+const DAYS_AHEAD = 7
+const LIMIT = 60
+
+async function Fixtures() {
+  // Yesterday, because a late kickoff is still in play after midnight UTC.
+  const from = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10)
+  const to = new Date(Date.now() + DAYS_AHEAD * 86_400_000).toISOString().slice(0, 10)
+
+  const q = (cols: string) =>
+    supabase
+      .from("matches")
+      .select(cols)
+      .eq("status", "upcoming")
+      .gte("date", from)
+      .lte("date", to)
+      .order("date", { ascending: true })
+      .limit(LIMIT)
+
+  // `kickoff` is a newer column; fall back rather than lose the page if the
+  // database hasn't been migrated (same fallback as the fixtures list).
+  let { data } = await q(`${COLS}, kickoff`)
+  if (!data) ({ data } = await q(COLS))
+
+  const matches = ((data || []) as unknown as LiveFixture[]).map((m) => ({
+    ...m,
+    kickoff: m.kickoff ?? null,
+  }))
+
+  return <LiveSections matches={matches} />
+}
+
+export default function LivePage() {
+  return (
+    <div className="mx-auto max-w-5xl px-4 py-14">
+      <div className="mb-8 animate-fade-in">
+        <h1
+          className="text-4xl sm:text-5xl font-bold tracking-[-0.035em] leading-none"
+          style={{ fontFamily: "var(--font-condensed)" }}
+        >
+          LIVE &amp; STREAMING
+        </h1>
+        <p className="text-muted-foreground text-sm mt-2">
+          What&apos;s on now and next, from our own fixture data.
+        </p>
+      </div>
+
+      <Suspense
+        fallback={
+          <div className="flex flex-col gap-2.5">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-[74px] rounded-2xl" />
+            ))}
+          </div>
+        }
+      >
+        <Fixtures />
+      </Suspense>
+
+      <section className="mt-12">
+        <h2
+          className="text-lg font-semibold tracking-tight uppercase mb-1"
+          style={{ fontFamily: "var(--font-condensed)" }}
+        >
+          Available External Sources
+        </h2>
+        <p className="text-muted-foreground text-sm mb-4">
+          Every link here opens in a new tab and leaves the app.
+        </p>
+        <ExternalSources />
+      </section>
+    </div>
+  )
+}

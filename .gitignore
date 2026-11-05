@@ -9,3 +9,4 @@ data/browser_profile/
 node_modules/
 .next/
 *.tsbuildinfo
+data/browser_profile*/

@@ -17,3 +17,1813 @@
 2026-10-07 21:09 syncing to supabase
 2026-10-07 21:10 supabase sync done
 2026-10-07 21:10 committed 2 files and pushed
+2026-10-08 08:01 refresh started
+2026-10-08 08:01 refresh started
+2026-10-08 08:01 FAILED: git pull --ff-only
+fatal: unable to access 'https://github.com/Sharone-12/sofascore-scraper.git/': Could not resolve host: github.com
+
+2026-10-08 08:01 FAILED: git pull --ff-only
+fatal: unable to access 'https://github.com/Sharone-12/sofascore-scraper.git/': Could not resolve host: github.com
+
+2026-10-08 08:01 git pull failed, continuing with local state
+2026-10-08 08:01 git pull failed, continuing with local state
+2026-10-08 08:04 FAILED: /Users/AntonyThomasSharone/footyy/.venv/bin/python3 data_loader.py
+py", line 403, in fetch_matches
+    data = _get(url, cache, refresh)
+  File "/Users/AntonyThomasSharone/footyy/data_loader.py", line 197, in _get
+    _init_browser()
+    ~~~~~~~~~~~~~^^
+  File "/Users/AntonyThomasSharone/footyy/data_loader.py", line 174, in _init_browser
+    _page.goto(f"{SOFASCORE}/football", wait_until="load", timeout=30000)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/sync_api/_generated.py", line 9903, in goto
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.goto(
+        ^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        )
+        ^
+    )
+    ^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_page.py", line 562, in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_frame.py", line 157, in goto
+    await self._channel.send(
+        "goto", self._navigation_timeout, locals_to_params(locals())
+    )
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_connection.py", line 76, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_connection.py", line 632, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "https://www.sofascore.com/football", waiting until "load"
+
+
+2026-10-08 08:04 FAILED: /Users/AntonyThomasSharone/footyy/.venv/bin/python3 data_loader.py
+py", line 403, in fetch_matches
+    data = _get(url, cache, refresh)
+  File "/Users/AntonyThomasSharone/footyy/data_loader.py", line 197, in _get
+    _init_browser()
+    ~~~~~~~~~~~~~^^
+  File "/Users/AntonyThomasSharone/footyy/data_loader.py", line 174, in _init_browser
+    _page.goto(f"{SOFASCORE}/football", wait_until="load", timeout=30000)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/sync_api/_generated.py", line 9903, in goto
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.goto(
+        ^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        )
+        ^
+    )
+    ^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_page.py", line 562, in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_frame.py", line 157, in goto
+    await self._channel.send(
+        "goto", self._navigation_timeout, locals_to_params(locals())
+    )
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_connection.py", line 76, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_connection.py", line 632, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "https://www.sofascore.com/football", waiting until "load"
+
+
+2026-10-09 08:09 refresh started
+2026-10-09 12:13 Premier League 2025/26: 474 players
+2026-10-09 12:13 La Liga 2025/26: 500 players
+2026-10-09 12:13 Ligue 1 2025/26: 463 players
+2026-10-09 12:13 Bundesliga 2025/26: 445 players
+2026-10-09 12:13 saved 850 players with 10%+ of available minutes
+2026-10-09 12:13 Fetching matches...
+2026-10-09 12:13 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-09 12:13 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-09 12:13 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-09 12:13 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-09 12:13 saved 828 results, 4 upcoming
+2026-10-09 12:13 Premier League 2026/27: 397 players
+2026-10-09 12:13 La Liga 2026/27: 434 players
+2026-10-09 12:13 Ligue 1 2026/27: 354 players
+2026-10-09 12:13 Bundesliga 2026/27: 327 players
+2026-10-09 12:13 saved 730 players with 10%+ of available minutes
+2026-10-09 12:13 Fetching matches...
+2026-10-09 12:13 Premier League 2026/27: 160 matches (16 rounds)
+2026-10-09 12:13 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-09 12:13 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-10-09 12:13 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-10-09 12:13 saved 128 results, 481 upcoming
+2026-10-09 12:13 syncing to supabase
+  players players_25_26: 850 rows
+2026-10-09 12:29 supabase sync failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-10-09 12:29 mirroring images
+2026-10-09 12:29 image mirror done
+2026-10-09 12:29 FAILED: git push
+To https://github.com/Sharone-12/sofascore-scraper.git
+ ! [rejected]        main -> main (fetch first)
+error: failed to push some refs to 'https://github.com/Sharone-12/sofascore-scraper.git'
+hint: Updates were rejected because the remote contains work that you do not
+hint: have locally. This is usually caused by another repository pushing to
+hint: the same ref. If you want to integrate the remote changes, use
+hint: 'git pull' before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+
+  players: 1072 known, 1072 mirrored, 0 to fetch
+  teams: 48 known, 48 mirrored, 0 to fetch
+  mirrored 0 players, 0 teams (0 with no image at source)
+2026-10-09 21:36 refresh started
+2026-10-09 21:36 FAILED: /Users/AntonyThomasSharone/footyy/.venv/bin/python data_loader.py
+,
+        RAW / f"seasons_{tournament}.json",
+        refresh,
+    )
+  File "/Users/AntonyThomasSharone/footyy/data_loader.py", line 198, in _get
+    _init_browser()
+    ~~~~~~~~~~~~~^^
+  File "/Users/AntonyThomasSharone/footyy/data_loader.py", line 175, in _init_browser
+    _page.goto(f"{SOFASCORE}/football", wait_until="load", timeout=30000)
+    ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/sync_api/_generated.py", line 9903, in goto
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.goto(
+        ^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        )
+        ^
+    )
+    ^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_page.py", line 562, in goto
+    return await self._main_frame.goto(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_frame.py", line 157, in goto
+    await self._channel.send(
+        "goto", self._navigation_timeout, locals_to_params(locals())
+    )
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_connection.py", line 76, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_connection.py", line 632, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Page.goto: Timeout 30000ms exceeded.
+Call log:
+  - navigating to "https://www.sofascore.com/football", waiting until "load"
+
+
+2026-10-09 21:41 refresh started
+2026-10-09 21:46 refresh started
+2026-10-09 22:07 refresh started
+2026-10-09 22:12 FAILED: /Users/AntonyThomasSharone/footyy/.venv/bin/python data_loader.py
+_browser()
+    ~~~~~~~~~~~~~^^
+  File "/Users/AntonyThomasSharone/footyy/data_loader.py", line 188, in _init_browser
+    _page.wait_for_function(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        '!window.location.href.includes("captcha") && !window.location.href.includes("challenge")',
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        timeout=300000,
+        ^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/sync_api/_generated.py", line 12809, in wait_for_function
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.wait_for_function(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        )
+        ^
+    )
+    ^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_page.py", line 1153, in wait_for_function
+    return await self._main_frame.wait_for_function(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_frame.py", line 941, in wait_for_function
+    await self._channel.send("waitForFunction", self._timeout, params)
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_connection.py", line 76, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_connection.py", line 632, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Page.wait_for_function: Timeout 300000ms exceeded.
+
+2026-10-09 22:14 refresh started
+2026-10-09 23:09 FAILED: /Users/AntonyThomasSharone/footyy/.venv/bin/python data_loader.py
+_browser()
+    ~~~~~~~~~~~~~^^
+  File "/Users/AntonyThomasSharone/footyy/data_loader.py", line 188, in _init_browser
+    _page.wait_for_function(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        '!window.location.href.includes("captcha") && !window.location.href.includes("challenge")',
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        timeout=300000,
+        ^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/sync_api/_generated.py", line 12809, in wait_for_function
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.wait_for_function(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        )
+        ^
+    )
+    ^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_page.py", line 1153, in wait_for_function
+    return await self._main_frame.wait_for_function(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_frame.py", line 941, in wait_for_function
+    await self._channel.send("waitForFunction", self._timeout, params)
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_connection.py", line 76, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_connection.py", line 632, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Page.wait_for_function: Timeout 300000ms exceeded.
+
+2026-10-10 07:51 refresh started
+2026-10-10 07:56 FAILED: /Users/AntonyThomasSharone/footyy/.venv/bin/python data_loader.py
+~~^^
+  File "/Users/AntonyThomasSharone/footyy/data_loader.py", line 188, in _init_browser
+    _page.wait_for_function(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        '!window.location.href.includes("captcha") && !window.location.href.includes("challenge")',
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        timeout=300000,
+        ^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/sync_api/_generated.py", line 12809, in wait_for_function
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.wait_for_function(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        )
+        ^
+    )
+    ^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_page.py", line 1153, in wait_for_function
+    return await self._main_frame.wait_for_function(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_frame.py", line 941, in wait_for_function
+    await self._channel.send("waitForFunction", self._timeout, params)
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_connection.py", line 76, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_connection.py", line 632, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TargetClosedError: Page.wait_for_function: Target page, context or browser has been closed
+
+2026-10-10 08:00 refresh started
+2026-10-10 08:05 FAILED: /Users/AntonyThomasSharone/footyy/.venv/bin/python3 data_loader.py
+_browser()
+    ~~~~~~~~~~~~~^^
+  File "/Users/AntonyThomasSharone/footyy/data_loader.py", line 188, in _init_browser
+    _page.wait_for_function(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        '!window.location.href.includes("captcha") && !window.location.href.includes("challenge")',
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        timeout=300000,
+        ^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/sync_api/_generated.py", line 12809, in wait_for_function
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.wait_for_function(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        )
+        ^
+    )
+    ^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_page.py", line 1153, in wait_for_function
+    return await self._main_frame.wait_for_function(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_frame.py", line 941, in wait_for_function
+    await self._channel.send("waitForFunction", self._timeout, params)
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_connection.py", line 76, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/Users/AntonyThomasSharone/footyy/.venv/lib/python3.14/site-packages/playwright/_impl/_connection.py", line 632, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Page.wait_for_function: Timeout 300000ms exceeded.
+
+2026-10-10 08:45 refresh started
+2026-10-10 08:52 Premier League 2025/26: 474 players
+2026-10-10 08:52 La Liga 2025/26: 500 players
+2026-10-10 08:52 Ligue 1 2025/26: 463 players
+2026-10-10 08:52 Bundesliga 2025/26: 445 players
+2026-10-10 08:52 Champions League 2025/26: 779 players
+2026-10-10 08:52 saved 1459 players with 10%+ of available minutes
+2026-10-10 08:52 Fetching matches...
+2026-10-10 08:52 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-10 08:52 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-10 08:52 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-10 08:52 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-10 08:52 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-10 08:52 saved 972 results, 4 upcoming
+2026-10-10 08:52 fetching team stats for 67 new matches...
+2026-10-10 08:52 Premier League 2026/27: 397 players
+2026-10-10 08:52 La Liga 2026/27: 436 players
+2026-10-10 08:52 Ligue 1 2026/27: 354 players
+2026-10-10 08:52 Bundesliga 2026/27: 327 players
+2026-10-10 08:52 Champions League 2026/27: 526 players
+2026-10-10 08:52 saved 1229 players with 10%+ of available minutes
+2026-10-10 08:52 Fetching matches...
+2026-10-10 08:52 Premier League 2026/27: 380 matches (38 rounds)
+2026-10-10 08:52 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-10 08:52 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-10-10 08:52 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-10-10 08:52 Champions League 2026/27: 144 matches (8 rounds)
+2026-10-10 08:52 saved 147 results, 826 upcoming
+2026-10-10 08:52 fetching team stats for 19 new matches...
+2026-10-10 08:52 syncing to supabase
+2026-10-10 08:53 supabase sync done
+2026-10-10 08:53 mirroring images
+2026-10-10 09:03 image mirror done
+2026-10-10 09:03 nothing new
+2026-10-10 19:24 refresh started
+2026-10-10 19:27 Premier League 2025/26: 474 players
+2026-10-10 19:27 La Liga 2025/26: 500 players
+2026-10-10 19:27 Ligue 1 2025/26: 463 players
+2026-10-10 19:27 Bundesliga 2025/26: 445 players
+2026-10-10 19:27 Champions League 2025/26: 779 players
+2026-10-10 19:27 saved 1459 players with 10%+ of available minutes
+2026-10-10 19:27 Fetching matches...
+2026-10-10 19:27 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-10 19:27 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-10 19:27 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-10 19:27 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-10 19:27 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-10 19:27 saved 972 results, 4 upcoming
+2026-10-10 19:27 Premier League 2026/27: 397 players
+2026-10-10 19:27 La Liga 2026/27: 436 players
+2026-10-10 19:27 Ligue 1 2026/27: 354 players
+2026-10-10 19:27 Bundesliga 2026/27: 327 players
+2026-10-10 19:27 Champions League 2026/27: 526 players
+2026-10-10 19:27 saved 1224 players with 10%+ of available minutes
+2026-10-10 19:27 Fetching matches...
+2026-10-10 19:27 Premier League 2026/27: 380 matches (38 rounds)
+2026-10-10 19:27 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-10 19:27 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-10-10 19:27 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-10-10 19:27 Champions League 2026/27: 144 matches (8 rounds)
+2026-10-10 19:27 saved 148 results, 825 upcoming
+2026-10-10 19:27 fetching team stats for 1 new matches...
+2026-10-10 19:27 syncing to supabase
+2026-10-10 19:28 supabase sync done
+2026-10-10 19:28 mirroring images
+2026-10-10 19:28 image mirror done
+2026-10-10 19:28 committed 3 files and pushed
+2026-10-11 00:44 refresh started
+2026-10-11 00:47 Premier League 2025/26: 474 players
+2026-10-11 00:47 La Liga 2025/26: 500 players
+2026-10-11 00:47 Ligue 1 2025/26: 463 players
+2026-10-11 00:47 Bundesliga 2025/26: 445 players
+2026-10-11 00:47 Champions League 2025/26: 779 players
+2026-10-11 00:47 saved 1459 players with 10%+ of available minutes
+2026-10-11 00:47 Fetching matches...
+2026-10-11 00:47 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-11 00:47 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-11 00:47 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-11 00:47 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-11 00:47 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-11 00:47 saved 972 results, 4 upcoming
+2026-10-11 00:47 Premier League 2026/27: 406 players
+2026-10-11 00:47 La Liga 2026/27: 437 players
+2026-10-11 00:47 Ligue 1 2026/27: 375 players
+2026-10-11 00:47 Bundesliga 2026/27: 358 players
+2026-10-11 00:47 Champions League 2026/27: 526 players
+2026-10-11 00:47 saved 1239 players with 10%+ of available minutes
+2026-10-11 00:47 Fetching matches...
+2026-10-11 00:47 Premier League 2026/27: 380 matches (38 rounds)
+2026-10-11 00:47 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-11 00:47 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-10-11 00:47 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-10-11 00:47 Champions League 2026/27: 144 matches (8 rounds)
+2026-10-11 00:47 saved 156 results, 817 upcoming
+2026-10-11 00:47 fetching team stats for 8 new matches...
+2026-10-11 00:47 syncing to supabase
+2026-10-11 00:48 supabase sync done
+2026-10-11 00:48 mirroring images
+2026-10-11 00:48 image mirror done
+2026-10-11 00:48 committed 3 files and pushed
+2026-10-11 08:10 refresh started
+2026-10-11 11:00 Premier League 2025/26: 474 players
+2026-10-11 11:00 La Liga 2025/26: 500 players
+2026-10-11 11:00 Ligue 1 2025/26: 463 players
+2026-10-11 11:00 Bundesliga 2025/26: 445 players
+2026-10-11 11:00 Champions League 2025/26: 779 players
+2026-10-11 11:00 saved 1459 players with 10%+ of available minutes
+2026-10-11 11:00 Fetching matches...
+2026-10-11 11:00 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-11 11:00 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-11 11:00 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-11 11:00 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-11 11:00 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-11 11:00 saved 972 results, 4 upcoming
+2026-10-11 11:00 Premier League 2026/27: 406 players
+2026-10-11 11:00 La Liga 2026/27: 438 players
+2026-10-11 11:00 Ligue 1 2026/27: 383 players
+2026-10-11 11:00 Bundesliga 2026/27: 358 players
+2026-10-11 11:00 Champions League 2026/27: 526 players
+2026-10-11 11:00 saved 1242 players with 10%+ of available minutes
+2026-10-11 11:00 Fetching matches...
+2026-10-11 11:00 Premier League 2026/27: 380 matches (38 rounds)
+2026-10-11 11:00 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-11 11:00 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-10-11 11:00 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-10-11 11:00 Champions League 2026/27: 144 matches (8 rounds)
+2026-10-11 11:00 saved 158 results, 815 upcoming
+2026-10-11 11:00 fetching team stats for 2 new matches...
+2026-10-11 11:00 syncing to supabase
+2026-10-11 11:13 supabase sync failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-10-11 11:13 mirroring images
+2026-10-11 11:14 image mirror failed: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-10-11 11:14 committed 3 files and pushed
+2026-10-12 08:03 refresh started
+2026-10-12 08:03 FAILED: git pull --ff-only
+fatal: unable to access 'https://github.com/Sharone-12/sofascore-scraper.git/': Could not resolve host: github.com
+
+2026-10-12 08:03 git pull failed, continuing with local state
+2026-10-12 11:35 Premier League 2025/26: 474 players
+2026-10-12 11:35 La Liga 2025/26: 500 players
+2026-10-12 11:35 Ligue 1 2025/26: 463 players
+2026-10-12 11:35 Bundesliga 2025/26: 445 players
+2026-10-12 11:35 Champions League 2025/26: 779 players
+2026-10-12 11:35 saved 1459 players with 10%+ of available minutes
+2026-10-12 11:35 Fetching matches...
+2026-10-12 11:35 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-12 11:35 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-12 11:35 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-12 11:35 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-12 11:35 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-12 11:35 saved 972 results, 4 upcoming
+2026-10-12 11:35 Champions League 2026/27: 526 players
+2026-10-12 11:35 saved 508 players with 10%+ of available minutes
+2026-10-12 11:35 Fetching matches...
+2026-10-12 11:35 Premier League 2026/27: 380 matches (38 rounds)
+2026-10-12 11:35 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-12 11:35 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-10-12 11:35 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-10-12 11:35 Champions League 2026/27: 144 matches (8 rounds)
+2026-10-12 11:35 saved 165 results, 808 upcoming
+2026-10-12 11:35 fetching team stats for 7 new matches...
+2026-10-12 11:35 syncing to supabase
+2026-10-12 11:39 supabase sync attempt 1/3 failed: could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-10-12 11:49 supabase sync attempt 2/3 failed: could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-10-12 11:56 supabase sync attempt 3/3 failed: could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-10-12 11:56 supabase sync FAILED after 3 attempts
+2026-10-12 11:56 mirroring images
+2026-10-12 11:57 image mirror attempt 1/3 failed: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-10-12 11:57 no network yet, waiting...
+2026-10-12 12:48 image mirror attempt 2/3 failed: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-10-12 12:48 no network yet, waiting...
+2026-10-12 13:30 image mirror attempt 3/3 failed: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-10-12 13:30 image mirror FAILED after 3 attempts
+2026-10-12 13:30 FAILED: git push
+fatal: unable to access 'https://github.com/Sharone-12/sofascore-scraper.git/': Could not resolve host: github.com
+
+2026-10-12 17:34 refresh started
+2026-10-12 17:34 FAILED: /opt/homebrew/opt/python@3.14/bin/python3.14 data_loader.py
+Traceback (most recent call last):
+  File "/Users/AntonyThomasSharone/footyy/data_loader.py", line 158, in <module>
+    from botasaurus.browser import browser as _bot_browser  # type: ignore
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'botasaurus'
+
+2026-10-13 08:15 refresh started
+2026-10-13 10:26 Premier League 2025/26: 514 players
+2026-10-13 10:26 La Liga 2025/26: 539 players
+2026-10-13 10:26 Ligue 1 2025/26: 502 players
+2026-10-13 10:26 Bundesliga 2025/26: 475 players
+2026-10-13 10:26 Champions League 2025/26: 842 players
+2026-10-13 10:26 saved 1578 players with 10%+ of available minutes
+2026-10-13 10:26 Fetching matches...
+2026-10-13 10:26 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-13 10:26 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-13 10:26 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-13 10:26 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-13 10:26 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-13 10:26 saved 972 results, 4 upcoming
+2026-10-13 10:26 Premier League 2026/27: 436 players
+2026-10-13 10:26 La Liga 2026/27: 470 players
+2026-10-13 10:26 Ligue 1 2026/27: 411 players
+2026-10-13 10:26 Bundesliga 2026/27: 384 players
+2026-10-13 10:26 Champions League 2026/27: 564 players
+2026-10-13 10:26 saved 1348 players with 10%+ of available minutes
+2026-10-13 10:26 Fetching matches...
+2026-10-13 10:26 Premier League 2026/27: 380 matches (38 rounds)
+2026-10-13 10:26 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-13 10:26 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-10-13 10:26 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-10-13 10:26 Champions League 2026/27: 144 matches (8 rounds)
+2026-10-13 10:26 saved 167 results, 806 upcoming
+2026-10-13 10:26 fetching team stats for 2 new matches...
+2026-10-13 10:26 syncing to supabase
+  players players_25_26: 1578 rows
+  players players_26_27: 1348 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 973 rows
+  match_stats match_stats_25_26: 45946 rows
+  match_stats match_stats_26_27: 8067 rows
+  synced 58888 total rows
+2026-10-13 10:27 supabase sync done
+2026-10-13 10:27 mirroring images
+  players: 1782 known, 1655 mirrored, 136 to fetch
+    100/136...
+2026-10-13 10:30 image mirror done
+2026-10-13 10:30 committed 4 files and pushed
+  teams: 86 known, 86 mirrored, 0 to fetch
+  mirrored 136 players, 0 teams (0 with no image at source)
+2026-10-14 08:05 refresh started
+2026-10-14 08:05 FAILED: git pull --ff-only
+fatal: unable to access 'https://github.com/Sharone-12/sofascore-scraper.git/': Could not resolve host: github.com
+
+2026-10-14 08:05 git pull failed, continuing with local state
+2026-10-14 10:35 Premier League 2025/26: 514 players
+2026-10-14 10:35 La Liga 2025/26: 539 players
+2026-10-14 10:35 Ligue 1 2025/26: 502 players
+2026-10-14 10:35 Bundesliga 2025/26: 475 players
+2026-10-14 10:35 Champions League 2025/26: 842 players
+2026-10-14 10:35 saved 1578 players with 10%+ of available minutes
+2026-10-14 10:35 Fetching matches...
+2026-10-14 10:35 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-14 10:35 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-14 10:35 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-14 10:35 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-14 10:35 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-14 10:35 saved 972 results, 4 upcoming
+2026-10-14 10:35 Premier League 2026/27: 436 players
+2026-10-14 10:35 La Liga 2026/27: 470 players
+2026-10-14 10:35 Ligue 1 2026/27: 411 players
+2026-10-14 10:35 Bundesliga 2026/27: 384 players
+2026-10-14 10:35 Champions League 2026/27: 623 players
+2026-10-14 10:35 saved 1358 players with 10%+ of available minutes
+2026-10-14 10:35 Fetching matches...
+2026-10-14 10:35 Premier League 2026/27: 380 matches (38 rounds)
+2026-10-14 10:35 SKIPPED La Liga matches 2026/27: non-json response for https://www.sofascore.com/api/v1/unique-tournament/8/seasons: Press space to play
+2026-10-14 10:35 SKIPPED Ligue 1 matches 2026/27: non-json response for https://www.sofascore.com/api/v1/unique-tournament/34/seasons: Press space to play
+2026-10-14 10:35 Bundesliga 2026/27: 270 matches (30 rounds)
+2026-10-14 10:35 SKIPPED Champions League matches 2026/27: non-json response for https://www.sofascore.com/api/v1/unique-tournament/7/seasons: Press space to play
+2026-10-14 10:35 saved 65 results, 345 upcoming
+2026-10-14 10:35 syncing to supabase
+2026-10-14 10:35 supabase sync attempt 1/3 failed: could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-10-14 10:35 no network yet, waiting...
+2026-10-14 11:04 network is up
+  players players_25_26: 1578 rows
+  players players_26_27: 1358 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 410 rows
+2026-10-14 11:10 supabase sync attempt 2/3 failed: could not receive data from server: Can't assign requested address
+SSL SYSCALL error: Can't assign requested address
+
+  players players_25_26: 1578 rows
+  players players_26_27: 1358 rows
+2026-10-14 11:21 supabase sync attempt 3/3 failed: could not receive data from server: Operation timed out
+SSL SYSCALL error: Operation timed out
+
+2026-10-14 11:21 supabase sync FAILED after 3 attempts
+2026-10-14 11:21 mirroring images
+2026-10-14 11:22 image mirror done
+2026-10-14 11:22 committed 4 files and pushed
+  players: 1777 known, 1791 mirrored, 13 to fetch
+  teams: 86 known, 86 mirrored, 0 to fetch
+  mirrored 13 players, 0 teams (0 with no image at source)
+2026-10-15 08:06 refresh started
+2026-10-15 08:06 FAILED: git pull --ff-only
+fatal: unable to access 'https://github.com/Sharone-12/sofascore-scraper.git/': Could not resolve host: github.com
+
+2026-10-15 08:06 git pull failed, continuing with local state
+2026-10-15 14:51 Premier League 2025/26: 514 players
+2026-10-15 14:51 La Liga 2025/26: 539 players
+2026-10-15 14:51 Ligue 1 2025/26: 502 players
+2026-10-15 14:51 Bundesliga 2025/26: 475 players
+2026-10-15 14:51 Champions League 2025/26: 842 players
+2026-10-15 14:51 saved 1578 players with 10%+ of available minutes
+2026-10-15 14:51 Fetching matches...
+2026-10-15 14:51 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-15 14:51 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-15 14:51 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-15 14:51 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-15 14:51 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-15 14:51 saved 972 results, 4 upcoming
+2026-10-15 14:51 Premier League 2026/27: 436 players
+2026-10-15 14:51 La Liga 2026/27: 470 players
+2026-10-15 14:51 Ligue 1 2026/27: 411 players
+2026-10-15 14:51 Bundesliga 2026/27: 384 players
+2026-10-15 14:51 Champions League 2026/27: 668 players
+2026-10-15 14:51 saved 1423 players with 10%+ of available minutes
+2026-10-15 14:51 Fetching matches...
+2026-10-15 14:51 Premier League 2026/27: 380 matches (38 rounds)
+2026-10-15 14:51 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-15 14:51 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-10-15 14:51 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-10-15 14:51 Champions League 2026/27: 144 matches (8 rounds)
+2026-10-15 14:51 saved 185 results, 788 upcoming
+2026-10-15 14:51 fetching team stats for 18 new matches...
+2026-10-15 14:51 syncing to supabase
+  players players_25_26: 1578 rows
+  players players_26_27: 1423 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 973 rows
+  match_stats match_stats_25_26: 45946 rows
+  match_stats match_stats_26_27: 8913 rows
+  synced 59809 total rows
+2026-10-15 14:52 supabase sync done
+2026-10-15 14:52 mirroring images
+2026-10-15 14:52 image mirror done
+2026-10-15 14:53 committed 3 files and pushed
+  players: 1807 known, 1804 mirrored, 22 to fetch
+  teams: 86 known, 86 mirrored, 0 to fetch
+  mirrored 22 players, 0 teams (0 with no image at source)
+2026-10-16 08:06 refresh started
+2026-10-16 08:06 FAILED: git pull --ff-only
+fatal: unable to access 'https://github.com/Sharone-12/sofascore-scraper.git/': Could not resolve host: github.com
+
+2026-10-16 08:06 git pull failed, continuing with local state
+2026-10-16 10:20 Premier League 2025/26: 514 players
+2026-10-16 10:20 La Liga 2025/26: 539 players
+2026-10-16 10:20 Ligue 1 2025/26: 502 players
+2026-10-16 10:20 Bundesliga 2025/26: 475 players
+2026-10-16 10:20 Champions League 2025/26: 842 players
+2026-10-16 10:20 saved 1578 players with 10%+ of available minutes
+2026-10-16 10:20 Fetching matches...
+2026-10-16 10:20 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-16 10:20 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-16 10:20 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-16 10:20 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-16 10:20 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-16 10:20 saved 972 results, 4 upcoming
+2026-10-16 10:20 Premier League 2026/27: 436 players
+2026-10-16 10:20 Ligue 1 2026/27: 411 players
+2026-10-16 10:20 Bundesliga 2026/27: 384 players
+2026-10-16 10:20 Champions League 2026/27: 668 players
+2026-10-16 10:20 saved 1016 players with 10%+ of available minutes
+2026-10-16 10:20 Fetching matches...
+2026-10-16 10:20 Premier League 2026/27: 380 matches (38 rounds)
+2026-10-16 10:20 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-16 10:20 Ligue 1 2026/27: 27 matches (3 rounds)
+2026-10-16 10:20 SKIPPED Bundesliga matches 2026/27: non-json response for https://www.sofascore.com/api/v1/unique-tournament/35/seasons: Press space to play
+2026-10-16 10:20 SKIPPED Champions League matches 2026/27: non-json response for https://www.sofascore.com/api/v1/unique-tournament/7/seasons: Press space to play
+2026-10-16 10:20 saved 141 results, 623 upcoming
+2026-10-16 10:20 syncing to supabase
+2026-10-16 10:20 supabase sync attempt 1/3 failed: could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-10-16 10:20 no network yet, waiting...
+  players players_25_26: 1578 rows
+  players players_26_27: 1016 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 764 rows
+  match_stats match_stats_25_26: 45946 rows
+  match_stats match_stats_26_27: 6816 rows
+  synced 57096 total rows
+2026-10-16 10:31 supabase sync done
+2026-10-16 10:31 mirroring images
+2026-10-16 10:31 image mirror done
+2026-10-16 10:31 committed 3 files and pushed
+  players: 1680 known, 1826 mirrored, 0 to fetch
+  teams: 83 known, 86 mirrored, 0 to fetch
+  mirrored 0 players, 0 teams (0 with no image at source)
+2026-10-17 08:00 refresh started
+2026-10-17 08:00 FAILED: git pull --ff-only
+fatal: unable to access 'https://github.com/Sharone-12/sofascore-scraper.git/': Could not resolve host: github.com
+
+2026-10-17 08:00 git pull failed, continuing with local state
+2026-10-17 09:24 Premier League 2025/26: 514 players
+2026-10-17 09:24 La Liga 2025/26: 539 players
+2026-10-17 09:24 Ligue 1 2025/26: 502 players
+2026-10-17 09:24 Bundesliga 2025/26: 475 players
+2026-10-17 09:24 Champions League 2025/26: 842 players
+2026-10-17 09:24 saved 1578 players with 10%+ of available minutes
+2026-10-17 09:24 Fetching matches...
+2026-10-17 09:24 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-17 09:24 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-17 09:24 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-17 09:24 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-17 09:24 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-17 09:24 saved 972 results, 4 upcoming
+2026-10-17 09:24 Premier League 2026/27: 436 players
+2026-10-17 09:24 La Liga 2026/27: 470 players
+2026-10-17 09:24 Ligue 1 2026/27: 411 players
+2026-10-17 09:24 Bundesliga 2026/27: 384 players
+2026-10-17 09:24 Champions League 2026/27: 668 players
+2026-10-17 09:24 saved 1419 players with 10%+ of available minutes
+2026-10-17 09:24 Fetching matches...
+2026-10-17 09:24 Premier League 2026/27: 380 matches (38 rounds)
+2026-10-17 09:24 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-17 09:24 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-10-17 09:24 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-10-17 09:24 Champions League 2026/27: 144 matches (8 rounds)
+2026-10-17 09:24 saved 186 results, 787 upcoming
+2026-10-17 09:24 fetching team stats for 1 new matches...
+2026-10-17 09:24 syncing to supabase
+2026-10-17 09:24 supabase sync attempt 1/3 failed: could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-10-17 09:25 no network yet, waiting...
+2026-10-17 09:26 network is up
+  players players_25_26: 1578 rows
+  players players_26_27: 1419 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 973 rows
+  match_stats match_stats_25_26: 45946 rows
+  match_stats match_stats_26_27: 8960 rows
+  synced 59852 total rows
+2026-10-17 09:27 supabase sync done
+2026-10-17 09:27 mirroring images
+2026-10-17 09:27 image mirror done
+2026-10-17 09:27 committed 3 files and pushed
+  players: 1805 known, 1826 mirrored, 0 to fetch
+  teams: 86 known, 86 mirrored, 0 to fetch
+  mirrored 0 players, 0 teams (0 with no image at source)
+2026-10-18 08:09 refresh started
+2026-10-18 09:54 Premier League 2025/26: 514 players
+2026-10-18 09:54 La Liga 2025/26: 539 players
+2026-10-18 09:54 Ligue 1 2025/26: 502 players
+2026-10-18 09:54 Bundesliga 2025/26: 475 players
+2026-10-18 09:54 Champions League 2025/26: 842 players
+2026-10-18 09:54 saved 1578 players with 10%+ of available minutes
+2026-10-18 09:54 Fetching matches...
+2026-10-18 09:54 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-18 09:54 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-18 09:54 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-18 09:54 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-18 09:54 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-18 09:54 saved 972 results, 4 upcoming
+2026-10-18 09:54 Premier League 2026/27: 442 players
+2026-10-18 09:54 La Liga 2026/27: 470 players
+2026-10-18 09:54 Ligue 1 2026/27: 413 players
+2026-10-18 09:54 Bundesliga 2026/27: 392 players
+2026-10-18 09:54 Champions League 2026/27: 668 players
+2026-10-18 09:54 saved 1421 players with 10%+ of available minutes
+2026-10-18 09:54 Fetching matches...
+2026-10-18 09:54 Premier League 2026/27: 380 matches (38 rounds)
+2026-10-18 09:54 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-18 09:54 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-10-18 09:54 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-10-18 09:54 Champions League 2026/27: 144 matches (8 rounds)
+2026-10-18 09:54 saved 197 results, 776 upcoming
+2026-10-18 09:54 fetching team stats for 11 new matches...
+2026-10-18 09:54 syncing to supabase
+  players players_25_26: 1578 rows
+  players players_26_27: 1421 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 973 rows
+2026-10-18 10:10 supabase sync attempt 1/3 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-10-18 10:10 no network yet, waiting...
+2026-10-18 10:26 network is up
+  players players_25_26: 1578 rows
+  players players_26_27: 1421 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 973 rows
+2026-10-18 10:41 supabase sync attempt 2/3 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+  players players_25_26: 1578 rows
+  players players_26_27: 1421 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 973 rows
+2026-10-18 12:57 supabase sync attempt 3/3 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-10-18 12:57 supabase sync FAILED after 3 attempts
+2026-10-18 12:57 mirroring images
+2026-10-18 12:57 image mirror done
+2026-10-18 12:58 committed 3 files and pushed
+  players: 1809 known, 1826 mirrored, 2 to fetch
+  teams: 86 known, 86 mirrored, 0 to fetch
+  mirrored 2 players, 0 teams (0 with no image at source)
+2026-10-19 08:08 refresh started
+2026-10-19 09:41 Premier League 2025/26: 514 players
+2026-10-19 09:41 La Liga 2025/26: 539 players
+2026-10-19 09:41 Ligue 1 2025/26: 502 players
+2026-10-19 09:41 Bundesliga 2025/26: 475 players
+2026-10-19 09:41 Champions League 2025/26: 842 players
+2026-10-19 09:41 saved 1578 players with 10%+ of available minutes
+2026-10-19 09:41 Fetching matches...
+2026-10-19 09:41 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-19 09:41 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-19 09:41 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-19 09:41 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-19 09:41 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-19 09:41 saved 972 results, 4 upcoming
+2026-10-19 09:41 Premier League 2026/27: 446 players
+2026-10-19 09:41 La Liga 2026/27: 472 players
+2026-10-19 09:41 Ligue 1 2026/27: 418 players
+2026-10-19 09:41 Bundesliga 2026/27: 394 players
+2026-10-19 09:41 Champions League 2026/27: 668 players
+2026-10-19 09:41 saved 1433 players with 10%+ of available minutes
+2026-10-19 09:41 Fetching matches...
+2026-10-19 09:41 Premier League 2026/27: 380 matches (38 rounds)
+2026-10-19 09:41 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-19 09:41 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-10-19 09:41 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-10-19 09:41 Champions League 2026/27: 144 matches (8 rounds)
+2026-10-19 09:41 saved 205 results, 768 upcoming
+2026-10-19 09:41 fetching team stats for 8 new matches...
+2026-10-19 09:41 syncing to supabase
+  players players_25_26: 1578 rows
+2026-10-19 09:54 supabase sync attempt 1/3 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+  players players_25_26: 1578 rows
+2026-10-19 10:18 supabase sync attempt 2/3 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+  players players_25_26: 1578 rows
+  players players_26_27: 1433 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 973 rows
+  match_stats match_stats_25_26: 45946 rows
+  match_stats match_stats_26_27: 9862 rows
+  synced 60768 total rows
+2026-10-19 10:19 supabase sync done
+2026-10-19 10:19 mirroring images
+2026-10-19 10:19 image mirror done
+2026-10-19 10:19 committed 3 files and pushed
+  players: 1811 known, 1828 mirrored, 1 to fetch
+  teams: 86 known, 86 mirrored, 0 to fetch
+  mirrored 1 players, 0 teams (0 with no image at source)
+2026-10-20 08:08 refresh started
+2026-10-20 08:08 FAILED: git pull --ff-only
+fatal: unable to access 'https://github.com/Sharone-12/sofascore-scraper.git/': Could not resolve host: github.com
+
+2026-10-20 08:08 git pull failed, continuing with local state
+2026-10-20 10:35 Premier League 2025/26: 514 players
+2026-10-20 10:35 La Liga 2025/26: 539 players
+2026-10-20 10:35 Ligue 1 2025/26: 502 players
+2026-10-20 10:35 Bundesliga 2025/26: 475 players
+2026-10-20 10:35 Champions League 2025/26: 842 players
+2026-10-20 10:35 saved 1578 players with 10%+ of available minutes
+2026-10-20 10:35 Fetching matches...
+2026-10-20 10:35 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-20 10:35 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-20 10:35 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-20 10:35 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-20 10:35 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-20 10:35 saved 972 results, 4 upcoming
+2026-10-20 10:35 Premier League 2026/27: 449 players
+2026-10-20 10:35 La Liga 2026/27: 473 players
+2026-10-20 10:35 Ligue 1 2026/27: 418 players
+2026-10-20 10:35 Bundesliga 2026/27: 394 players
+2026-10-20 10:35 Champions League 2026/27: 668 players
+2026-10-20 10:35 saved 1436 players with 10%+ of available minutes
+2026-10-20 10:35 Fetching matches...
+2026-10-20 10:35 Premier League 2026/27: 382 matches (38 rounds)
+2026-10-20 10:35 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-20 10:35 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-10-20 10:35 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-10-20 10:35 Champions League 2026/27: 144 matches (8 rounds)
+2026-10-20 10:35 saved 207 results, 768 upcoming
+2026-10-20 10:35 fetching team stats for 2 new matches...
+2026-10-20 10:35 syncing to supabase
+  players players_25_26: 1578 rows
+  players players_26_27: 1436 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 975 rows
+  match_stats match_stats_25_26: 45946 rows
+  match_stats match_stats_26_27: 9957 rows
+  synced 60868 total rows
+2026-10-20 10:36 supabase sync done
+2026-10-20 10:36 mirroring images
+2026-10-20 10:36 image mirror done
+2026-10-20 10:36 committed 3 files and pushed
+  players: 1813 known, 1829 mirrored, 1 to fetch
+  teams: 86 known, 86 mirrored, 0 to fetch
+  mirrored 1 players, 0 teams (0 with no image at source)
+2026-10-21 08:02 refresh started
+2026-10-21 08:02 FAILED: git pull --ff-only
+fatal: unable to access 'https://github.com/Sharone-12/sofascore-scraper.git/': Could not resolve host: github.com
+
+2026-10-21 08:02 git pull failed, continuing with local state
+2026-10-21 10:04 Premier League 2025/26: 514 players
+2026-10-21 10:04 La Liga 2025/26: 539 players
+2026-10-21 10:04 Ligue 1 2025/26: 502 players
+2026-10-21 10:04 Bundesliga 2025/26: 475 players
+2026-10-21 10:04 Champions League 2025/26: 842 players
+2026-10-21 10:04 saved 1578 players with 10%+ of available minutes
+2026-10-21 10:04 Fetching matches...
+2026-10-21 10:04 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-21 10:04 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-21 10:04 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-21 10:04 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-21 10:04 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-21 10:04 saved 972 results, 4 upcoming
+2026-10-21 10:04 Premier League 2026/27: 449 players
+2026-10-21 10:04 La Liga 2026/27: 473 players
+2026-10-21 10:04 Ligue 1 2026/27: 418 players
+2026-10-21 10:04 Bundesliga 2026/27: 394 players
+2026-10-21 10:04 Champions League 2026/27: 709 players
+2026-10-21 10:04 saved 1434 players with 10%+ of available minutes
+2026-10-21 10:04 Fetching matches...
+2026-10-21 10:04 Premier League 2026/27: 381 matches (38 rounds)
+2026-10-21 10:04 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-21 10:04 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-10-21 10:04 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-10-21 10:04 Champions League 2026/27: 144 matches (8 rounds)
+2026-10-21 10:04 saved 216 results, 758 upcoming
+2026-10-21 10:04 fetching team stats for 9 new matches...
+2026-10-21 10:04 syncing to supabase
+  players players_25_26: 1578 rows
+  players players_26_27: 1434 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 974 rows
+2026-10-21 10:16 supabase sync attempt 1/3 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-10-21 10:16 no network yet, waiting...
+2026-10-21 10:32 network is up
+  players players_25_26: 1578 rows
+  players players_26_27: 1434 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 974 rows
+2026-10-21 10:47 supabase sync attempt 2/3 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+  players players_25_26: 1578 rows
+  players players_26_27: 1434 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 974 rows
+2026-10-21 12:05 supabase sync attempt 3/3 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-10-21 12:05 supabase sync FAILED after 3 attempts
+2026-10-21 12:05 mirroring images
+2026-10-21 12:06 image mirror done
+2026-10-21 12:18 FAILED: git push
+fatal: unable to access 'https://github.com/Sharone-12/sofascore-scraper.git/': Resolving timed out after 768033 milliseconds
+
+  players: 1813 known, 1830 mirrored, 13 to fetch
+  teams: 86 known, 86 mirrored, 0 to fetch
+  mirrored 13 players, 0 teams (0 with no image at source)
+2026-10-22 08:03 refresh started
+2026-10-22 08:03 FAILED: git pull --ff-only
+fatal: unable to access 'https://github.com/Sharone-12/sofascore-scraper.git/': Could not resolve host: github.com
+
+2026-10-22 08:03 git pull failed, continuing with local state
+2026-10-22 08:19 Premier League 2025/26: 514 players
+2026-10-22 08:19 La Liga 2025/26: 539 players
+2026-10-22 08:19 Ligue 1 2025/26: 502 players
+2026-10-22 08:19 Bundesliga 2025/26: 475 players
+2026-10-22 08:19 Champions League 2025/26: 842 players
+2026-10-22 08:19 saved 1578 players with 10%+ of available minutes
+2026-10-22 08:19 Fetching matches...
+2026-10-22 08:19 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-22 08:19 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-22 08:19 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-22 08:19 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-22 08:19 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-22 08:19 saved 972 results, 4 upcoming
+2026-10-22 08:19 Champions League 2026/27: 719 players
+2026-10-22 08:19 saved 654 players with 10%+ of available minutes
+2026-10-22 08:19 Fetching matches...
+2026-10-22 08:19 Premier League 2026/27: 381 matches (38 rounds)
+2026-10-22 08:19 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-22 08:19 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-10-22 08:19 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-10-22 08:19 Champions League 2026/27: 144 matches (8 rounds)
+2026-10-22 08:19 saved 226 results, 748 upcoming
+2026-10-22 08:19 fetching team stats for 10 new matches...
+2026-10-22 08:19 syncing to supabase
+  players players_25_26: 1578 rows
+  players players_26_27: 654 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 974 rows
+  match_stats match_stats_25_26: 45946 rows
+  match_stats match_stats_26_27: 10829 rows
+  synced 60957 total rows
+2026-10-22 08:22 supabase sync done
+2026-10-22 08:22 mirroring images
+2026-10-22 08:23 image mirror done
+2026-10-22 08:23 committed 3 files and pushed
+  players: 1626 known, 1843 mirrored, 8 to fetch
+  teams: 80 known, 86 mirrored, 0 to fetch
+  mirrored 8 players, 0 teams (0 with no image at source)
+2026-10-23 08:04 refresh started
+2026-10-23 08:04 FAILED: git pull --ff-only
+fatal: unable to access 'https://github.com/Sharone-12/sofascore-scraper.git/': Could not resolve host: github.com
+
+2026-10-23 08:04 git pull failed, continuing with local state
+2026-10-23 08:29 Premier League 2025/26: 514 players
+2026-10-23 08:29 La Liga 2025/26: 539 players
+2026-10-23 08:29 Ligue 1 2025/26: 502 players
+2026-10-23 08:29 Bundesliga 2025/26: 475 players
+2026-10-23 08:29 Champions League 2025/26: 842 players
+2026-10-23 08:29 saved 1578 players with 10%+ of available minutes
+2026-10-23 08:29 Fetching matches...
+2026-10-23 08:29 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-23 08:29 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-23 08:29 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-23 08:29 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-23 08:29 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-23 08:29 saved 972 results, 4 upcoming
+2026-10-23 08:29 Premier League 2026/27: 449 players
+2026-10-23 08:29 La Liga 2026/27: 473 players
+2026-10-23 08:29 Ligue 1 2026/27: 418 players
+2026-10-23 08:29 Bundesliga 2026/27: 394 players
+2026-10-23 08:29 Champions League 2026/27: 719 players
+2026-10-23 08:29 saved 1470 players with 10%+ of available minutes
+2026-10-23 08:29 Fetching matches...
+2026-10-23 08:29 Premier League 2026/27: 381 matches (38 rounds)
+2026-10-23 08:29 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-23 08:29 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-10-23 08:29 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-10-23 08:29 Champions League 2026/27: 144 matches (8 rounds)
+2026-10-23 08:29 saved 226 results, 748 upcoming
+2026-10-23 08:29 syncing to supabase
+  players players_25_26: 1578 rows
+  players players_26_27: 1470 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 974 rows
+  match_stats match_stats_25_26: 45946 rows
+  match_stats match_stats_26_27: 10829 rows
+  synced 61773 total rows
+2026-10-23 08:34 supabase sync done
+2026-10-23 08:34 mirroring images
+2026-10-23 08:34 image mirror done
+2026-10-23 08:35 committed 1 files and pushed
+  players: 1829 known, 1851 mirrored, 0 to fetch
+  teams: 86 known, 86 mirrored, 0 to fetch
+  mirrored 0 players, 0 teams (0 with no image at source)
+2026-10-24 08:12 refresh started
+2026-10-24 08:12 FAILED: git pull --ff-only
+fatal: unable to access 'https://github.com/Sharone-12/sofascore-scraper.git/': Could not resolve host: github.com
+
+2026-10-24 08:12 git pull failed, continuing with local state
+2026-10-24 10:14 Premier League 2025/26: 514 players
+2026-10-24 10:14 La Liga 2025/26: 539 players
+2026-10-24 10:14 Ligue 1 2025/26: 502 players
+2026-10-24 10:14 Bundesliga 2025/26: 475 players
+2026-10-24 10:14 Champions League 2025/26: 842 players
+2026-10-24 10:14 saved 1578 players with 10%+ of available minutes
+2026-10-24 10:14 Fetching matches...
+2026-10-24 10:14 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-24 10:14 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-24 10:14 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-24 10:14 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-24 10:14 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-24 10:14 saved 972 results, 4 upcoming
+2026-10-24 10:14 Premier League 2026/27: 449 players
+2026-10-24 10:14 La Liga 2026/27: 473 players
+2026-10-24 10:14 Ligue 1 2026/27: 418 players
+2026-10-24 10:14 Bundesliga 2026/27: 396 players
+2026-10-24 10:14 Champions League 2026/27: 719 players
+2026-10-24 10:14 saved 1460 players with 10%+ of available minutes
+2026-10-24 10:14 Fetching matches...
+2026-10-24 10:14 Premier League 2026/27: 381 matches (38 rounds)
+2026-10-24 10:14 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-24 10:14 Ligue 1 2026/27: 72 matches (8 rounds)
+2026-10-24 10:14 Bundesliga 2026/27: 72 matches (8 rounds)
+2026-10-24 10:14 SKIPPED Champions League matches 2026/27: non-json response for https://www.sofascore.com/api/v1/unique-tournament/7/seasons: Press space to play
+2026-10-24 10:14 saved 174 results, 604 upcoming
+2026-10-24 10:14 fetching team stats for 2 new matches...
+2026-10-24 10:14 syncing to supabase
+  players players_25_26: 1578 rows
+  players players_26_27: 1460 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 778 rows
+  match_stats match_stats_25_26: 45946 rows
+  match_stats match_stats_26_27: 8388 rows
+  synced 59126 total rows
+2026-10-24 10:19 supabase sync done
+2026-10-24 10:19 mirroring images
+2026-10-24 10:19 image mirror done
+2026-10-24 10:19 committed 3 files and pushed
+  players: 1827 known, 1851 mirrored, 1 to fetch
+  teams: 86 known, 86 mirrored, 0 to fetch
+  mirrored 1 players, 0 teams (0 with no image at source)
+2026-10-25 08:06 refresh started
+2026-10-25 09:38 Premier League 2025/26: 514 players
+2026-10-25 09:38 La Liga 2025/26: 539 players
+2026-10-25 09:38 Ligue 1 2025/26: 502 players
+2026-10-25 09:38 Bundesliga 2025/26: 475 players
+2026-10-25 09:38 Champions League 2025/26: 842 players
+2026-10-25 09:38 saved 1578 players with 10%+ of available minutes
+2026-10-25 09:38 Fetching matches...
+2026-10-25 09:38 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-25 09:38 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-25 09:38 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-25 09:38 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-25 09:38 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-25 09:38 saved 972 results, 4 upcoming
+2026-10-25 09:38 Premier League 2026/27: 450 players
+2026-10-25 09:38 La Liga 2026/27: 473 players
+2026-10-25 09:38 Ligue 1 2026/27: 419 players
+2026-10-25 09:38 Bundesliga 2026/27: 401 players
+2026-10-25 09:38 Champions League 2026/27: 719 players
+2026-10-25 09:38 saved 1467 players with 10%+ of available minutes
+2026-10-25 09:38 Fetching matches...
+2026-10-25 09:38 Premier League 2026/27: 381 matches (38 rounds)
+2026-10-25 09:38 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-25 09:38 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-10-25 09:38 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-10-25 09:38 Champions League 2026/27: 144 matches (8 rounds)
+2026-10-25 09:38 saved 236 results, 738 upcoming
+2026-10-25 09:38 fetching team stats for 8 new matches...
+2026-10-25 09:38 syncing to supabase
+  players players_25_26: 1578 rows
+  players players_26_27: 1467 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 974 rows
+2026-10-25 09:52 supabase sync attempt 1/3 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+  players players_25_26: 1578 rows
+  players players_26_27: 1467 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 974 rows
+2026-10-25 12:18 supabase sync attempt 2/3 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+  players players_25_26: 1578 rows
+  players players_26_27: 1467 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 974 rows
+2026-10-25 12:34 supabase sync attempt 3/3 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-10-25 12:34 supabase sync FAILED after 3 attempts
+2026-10-25 12:34 mirroring images
+2026-10-25 12:34 image mirror done
+2026-10-25 12:34 committed 3 files and pushed
+  players: 1828 known, 1852 mirrored, 1 to fetch
+  teams: 86 known, 86 mirrored, 0 to fetch
+  mirrored 1 players, 0 teams (0 with no image at source)
+2026-10-26 08:00 refresh started
+2026-10-26 08:00 FAILED: git pull --ff-only
+fatal: unable to access 'https://github.com/Sharone-12/sofascore-scraper.git/': Could not resolve host: github.com
+
+2026-10-26 08:00 git pull failed, continuing with local state
+2026-10-26 08:39 Premier League 2025/26: 514 players
+2026-10-26 08:39 La Liga 2025/26: 539 players
+2026-10-26 08:39 Ligue 1 2025/26: 502 players
+2026-10-26 08:39 Bundesliga 2025/26: 475 players
+2026-10-26 08:39 Champions League 2025/26: 842 players
+2026-10-26 08:39 saved 1578 players with 10%+ of available minutes
+2026-10-26 08:39 Fetching matches...
+2026-10-26 08:39 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-26 08:39 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-26 08:39 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-26 08:39 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-26 08:39 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-26 08:39 saved 972 results, 4 upcoming
+2026-10-26 08:39 Premier League 2026/27: 451 players
+2026-10-26 08:39 La Liga 2026/27: 478 players
+2026-10-26 08:39 Ligue 1 2026/27: 423 players
+2026-10-26 08:39 Bundesliga 2026/27: 403 players
+2026-10-26 08:39 Champions League 2026/27: 719 players
+2026-10-26 08:39 saved 1481 players with 10%+ of available minutes
+2026-10-26 08:39 Fetching matches...
+2026-10-26 08:39 Premier League 2026/27: 381 matches (38 rounds)
+2026-10-26 08:39 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-26 08:39 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-10-26 08:39 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-10-26 08:39 Champions League 2026/27: 144 matches (8 rounds)
+2026-10-26 08:39 saved 246 results, 728 upcoming
+2026-10-26 08:39 fetching team stats for 10 new matches...
+2026-10-26 08:39 syncing to supabase
+2026-10-26 08:43 supabase sync attempt 1/3 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+  players players_25_26: 1578 rows
+  players players_26_27: 1481 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 974 rows
+  match_stats match_stats_25_26: 45946 rows
+  match_stats match_stats_26_27: 11778 rows
+  synced 62733 total rows
+2026-10-26 08:48 supabase sync done
+2026-10-26 08:48 mirroring images
+2026-10-26 08:48 image mirror done
+2026-10-26 08:48 committed 3 files and pushed
+  players: 1829 known, 1853 mirrored, 1 to fetch
+  teams: 86 known, 86 mirrored, 0 to fetch
+  mirrored 1 players, 0 teams (0 with no image at source)
+2026-10-27 08:13 refresh started
+2026-10-27 08:13 FAILED: git pull --ff-only
+fatal: unable to access 'https://github.com/Sharone-12/sofascore-scraper.git/': Could not resolve host: github.com
+
+2026-10-27 08:13 git pull failed, continuing with local state
+2026-10-27 09:52 Premier League 2025/26: 514 players
+2026-10-27 09:52 La Liga 2025/26: 539 players
+2026-10-27 09:52 Ligue 1 2025/26: 502 players
+2026-10-27 09:52 Bundesliga 2025/26: 475 players
+2026-10-27 09:52 Champions League 2025/26: 842 players
+2026-10-27 09:52 saved 1578 players with 10%+ of available minutes
+2026-10-27 09:52 Fetching matches...
+2026-10-27 09:52 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-27 09:52 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-27 09:52 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-27 09:52 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-27 09:52 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-27 09:52 saved 972 results, 4 upcoming
+2026-10-27 09:52 Premier League 2026/27: 451 players
+2026-10-27 09:52 La Liga 2026/27: 478 players
+2026-10-27 09:52 Ligue 1 2026/27: 423 players
+2026-10-27 09:52 Bundesliga 2026/27: 403 players
+2026-10-27 09:52 Champions League 2026/27: 719 players
+2026-10-27 09:52 saved 1481 players with 10%+ of available minutes
+2026-10-27 09:52 Fetching matches...
+2026-10-27 09:52 Premier League 2026/27: 381 matches (38 rounds)
+2026-10-27 09:52 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-27 09:52 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-10-27 09:52 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-10-27 09:52 Champions League 2026/27: 144 matches (8 rounds)
+2026-10-27 09:52 saved 248 results, 726 upcoming
+2026-10-27 09:52 fetching team stats for 2 new matches...
+2026-10-27 09:52 syncing to supabase
+2026-10-27 09:53 supabase sync attempt 1/3 failed: could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-10-27 09:56 supabase sync attempt 2/3 failed: could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-10-27 09:56 no network yet, waiting...
+2026-10-27 09:57 network is up
+  players players_25_26: 1578 rows
+  players players_26_27: 1481 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 974 rows
+2026-10-27 10:21 supabase sync attempt 3/3 failed: could not receive data from server: Can't assign requested address
+SSL SYSCALL error: Can't assign requested address
+
+2026-10-27 10:21 supabase sync FAILED after 3 attempts
+2026-10-27 10:21 mirroring images
+2026-10-27 10:22 image mirror attempt 1/3 failed: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-10-27 10:22 no network yet, waiting...
+2026-10-27 10:33 network is up
+2026-10-27 10:34 image mirror done
+2026-10-27 10:34 committed 3 files and pushed
+  players: 1829 known, 1854 mirrored, 0 to fetch
+  teams: 86 known, 86 mirrored, 0 to fetch
+  mirrored 0 players, 0 teams (0 with no image at source)
+2026-10-28 08:04 refresh started
+2026-10-28 08:04 FAILED: git pull --ff-only
+fatal: unable to access 'https://github.com/Sharone-12/sofascore-scraper.git/': Could not resolve host: github.com
+
+2026-10-28 08:04 git pull failed, continuing with local state
+2026-10-28 09:27 Premier League 2025/26: 514 players
+2026-10-28 09:27 La Liga 2025/26: 539 players
+2026-10-28 09:27 Ligue 1 2025/26: 502 players
+2026-10-28 09:27 Bundesliga 2025/26: 475 players
+2026-10-28 09:27 Champions League 2025/26: 842 players
+2026-10-28 09:27 saved 1578 players with 10%+ of available minutes
+2026-10-28 09:27 Fetching matches...
+2026-10-28 09:27 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-28 09:27 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-28 09:27 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-28 09:27 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-28 09:27 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-28 09:27 saved 972 results, 4 upcoming
+2026-10-28 09:27 Premier League 2026/27: 451 players
+2026-10-28 09:27 La Liga 2026/27: 478 players
+2026-10-28 09:27 Ligue 1 2026/27: 423 players
+2026-10-28 09:27 Bundesliga 2026/27: 403 players
+2026-10-28 09:27 Champions League 2026/27: 719 players
+2026-10-28 09:27 saved 1481 players with 10%+ of available minutes
+2026-10-28 09:27 Fetching matches...
+2026-10-28 09:27 Premier League 2026/27: 381 matches (38 rounds)
+2026-10-28 09:27 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-28 09:27 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-10-28 09:27 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-10-28 09:27 Champions League 2026/27: 144 matches (8 rounds)
+2026-10-28 09:27 saved 248 results, 726 upcoming
+2026-10-28 09:27 syncing to supabase
+  players players_25_26: 1578 rows
+  players players_26_27: 1481 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 974 rows
+  match_stats match_stats_25_26: 45946 rows
+2026-10-28 09:35 supabase sync attempt 1/3 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+  players players_25_26: 1578 rows
+  players players_26_27: 1481 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 974 rows
+2026-10-28 09:54 supabase sync attempt 2/3 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+  players players_25_26: 1578 rows
+  players players_26_27: 1481 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 974 rows
+2026-10-28 10:10 supabase sync attempt 3/3 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-10-28 10:10 supabase sync FAILED after 3 attempts
+2026-10-28 10:10 mirroring images
+2026-10-28 10:10 image mirror attempt 1/3 failed: <urlopen error [Errno 8] nodename nor servname provided, or not known>
+2026-10-28 10:26 image mirror done
+2026-10-28 10:26 committed 1 files and pushed
+  players: 1829 known, 1854 mirrored, 0 to fetch
+  teams: 86 known, 86 mirrored, 0 to fetch
+  mirrored 0 players, 0 teams (0 with no image at source)
+2026-10-29 08:12 refresh started
+2026-10-29 08:12 FAILED: git pull --ff-only
+fatal: unable to access 'https://github.com/Sharone-12/sofascore-scraper.git/': Could not resolve host: github.com
+
+2026-10-29 08:12 git pull failed, continuing with local state
+2026-10-29 09:46 Premier League 2025/26: 514 players
+2026-10-29 09:46 La Liga 2025/26: 539 players
+2026-10-29 09:46 Ligue 1 2025/26: 502 players
+2026-10-29 09:46 Bundesliga 2025/26: 475 players
+2026-10-29 09:46 Champions League 2025/26: 842 players
+2026-10-29 09:46 saved 1578 players with 10%+ of available minutes
+2026-10-29 09:46 Fetching matches...
+2026-10-29 09:46 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-29 09:46 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-29 09:46 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-29 09:46 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-29 09:46 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-29 09:46 saved 972 results, 4 upcoming
+2026-10-29 09:46 Premier League 2026/27: 451 players
+2026-10-29 09:46 La Liga 2026/27: 478 players
+2026-10-29 09:46 Ligue 1 2026/27: 423 players
+2026-10-29 09:46 Bundesliga 2026/27: 403 players
+2026-10-29 09:46 Champions League 2026/27: 719 players
+2026-10-29 09:46 saved 1481 players with 10%+ of available minutes
+2026-10-29 09:46 Fetching matches...
+2026-10-29 09:46 Premier League 2026/27: 381 matches (38 rounds)
+2026-10-29 09:46 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-29 09:46 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-10-29 09:46 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-10-29 09:46 Champions League 2026/27: 144 matches (8 rounds)
+2026-10-29 09:46 saved 248 results, 726 upcoming
+2026-10-29 09:46 syncing to supabase
+2026-10-29 09:50 supabase sync attempt 1/3 failed: could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-10-29 09:55 supabase sync attempt 2/3 failed: could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-10-29 10:04 supabase sync attempt 3/3 failed: could not translate host name "aws-0-us-east-1.pooler.supabase.com" to address: nodename nor servname provided, or not known
+
+2026-10-29 10:04 supabase sync FAILED after 3 attempts
+2026-10-29 10:04 mirroring images
+2026-10-29 10:04 image mirror done
+2026-10-29 10:04 committed 1 files and pushed
+  players: 1829 known, 1854 mirrored, 0 to fetch
+  teams: 86 known, 86 mirrored, 0 to fetch
+  mirrored 0 players, 0 teams (0 with no image at source)
+2026-10-30 08:01 refresh started
+2026-10-30 08:01 FAILED: git pull --ff-only
+fatal: unable to access 'https://github.com/Sharone-12/sofascore-scraper.git/': Could not resolve host: github.com
+
+2026-10-30 08:01 git pull failed, continuing with local state
+2026-10-30 09:43 Premier League 2025/26: 514 players
+2026-10-30 09:43 La Liga 2025/26: 539 players
+2026-10-30 09:43 Ligue 1 2025/26: 502 players
+2026-10-30 09:43 Bundesliga 2025/26: 475 players
+2026-10-30 09:43 Champions League 2025/26: 842 players
+2026-10-30 09:43 saved 1578 players with 10%+ of available minutes
+2026-10-30 09:43 Fetching matches...
+2026-10-30 09:43 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-30 09:43 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-30 09:43 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-30 09:43 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-30 09:43 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-30 09:43 saved 972 results, 4 upcoming
+2026-10-30 09:43 Premier League 2026/27: 451 players
+2026-10-30 09:43 La Liga 2026/27: 478 players
+2026-10-30 09:43 Ligue 1 2026/27: 423 players
+2026-10-30 09:43 Bundesliga 2026/27: 403 players
+2026-10-30 09:43 Champions League 2026/27: 719 players
+2026-10-30 09:43 saved 1481 players with 10%+ of available minutes
+2026-10-30 09:43 Fetching matches...
+2026-10-30 09:43 Premier League 2026/27: 110 matches (11 rounds)
+2026-10-30 09:43 SKIPPED La Liga matches 2026/27: non-json response for https://www.sofascore.com/api/v1/unique-tournament/8/seasons: This site can’t be reached
+2026-10-30 09:43 SKIPPED Ligue 1 matches 2026/27: non-json response for https://www.sofascore.com/api/v1/unique-tournament/34/seasons: This site can’t be reached
+2026-10-30 09:43 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-10-30 09:43 Champions League 2026/27: 144 matches (8 rounds)
+2026-10-30 09:43 saved 141 results, 147 upcoming
+2026-10-30 09:43 syncing to supabase
+  players players_25_26: 1578 rows
+  players players_26_27: 1481 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 288 rows
+  match_stats match_stats_25_26: 45946 rows
+  match_stats match_stats_26_27: 6753 rows
+  synced 57022 total rows
+2026-10-30 09:52 supabase sync done
+2026-10-30 09:52 mirroring images
+2026-10-30 10:01 image mirror done
+2026-10-30 10:02 committed 3 files and pushed
+  players: 1829 known, 1854 mirrored, 0 to fetch
+  teams: 86 known, 86 mirrored, 0 to fetch
+  mirrored 0 players, 0 teams (0 with no image at source)
+2026-10-31 08:04 refresh started
+2026-10-31 08:04 FAILED: git pull --ff-only
+fatal: unable to access 'https://github.com/Sharone-12/sofascore-scraper.git/': Could not resolve host: github.com
+
+2026-10-31 08:04 git pull failed, continuing with local state
+2026-10-31 08:27 Premier League 2025/26: 514 players
+2026-10-31 08:27 La Liga 2025/26: 539 players
+2026-10-31 08:27 Ligue 1 2025/26: 502 players
+2026-10-31 08:27 Bundesliga 2025/26: 475 players
+2026-10-31 08:27 Champions League 2025/26: 842 players
+2026-10-31 08:27 saved 1578 players with 10%+ of available minutes
+2026-10-31 08:27 Fetching matches...
+2026-10-31 08:27 Premier League 2025/26: 381 matches (38 rounds)
+2026-10-31 08:27 La Liga 2025/26: 383 matches (38 rounds)
+2026-10-31 08:27 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-10-31 08:27 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-10-31 08:27 Champions League 2025/26: 144 matches (8 rounds)
+2026-10-31 08:27 saved 972 results, 4 upcoming
+2026-10-31 08:27 Premier League 2026/27: 451 players
+2026-10-31 08:27 La Liga 2026/27: 480 players
+2026-10-31 08:27 Ligue 1 2026/27: 425 players
+2026-10-31 08:27 Bundesliga 2026/27: 403 players
+2026-10-31 08:27 Champions League 2026/27: 719 players
+2026-10-31 08:27 saved 1476 players with 10%+ of available minutes
+2026-10-31 08:27 Fetching matches...
+2026-10-31 08:27 Premier League 2026/27: 380 matches (38 rounds)
+2026-10-31 08:27 La Liga 2026/27: 381 matches (38 rounds)
+2026-10-31 08:27 Ligue 1 2026/27: 234 matches (26 rounds)
+2026-10-31 08:27 SKIPPED Bundesliga matches 2026/27: non-json response for https://www.sofascore.com/api/v1/unique-tournament/35/seasons: This site can’t be reached
+2026-10-31 08:27 SKIPPED Champions League matches 2026/27: non-json response for https://www.sofascore.com/api/v1/unique-tournament/7/seasons: Press space to play
+2026-10-31 08:27 saved 189 results, 598 upcoming
+2026-10-31 08:27 fetching team stats for 2 new matches...
+2026-10-31 08:27 syncing to supabase
+2026-10-31 08:42 supabase sync attempt 1/3 failed: could not receive data from server: Can't assign requested address
+SSL SYSCALL error: Can't assign requested address
+
+  players players_25_26: 1578 rows
+  players players_26_27: 1476 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 787 rows
+  match_stats match_stats_25_26: 45946 rows
+  match_stats match_stats_26_27: 9085 rows
+  synced 59848 total rows
+2026-10-31 08:46 supabase sync done
+2026-10-31 08:46 mirroring images
+2026-10-31 08:46 image mirror done
+2026-10-31 08:46 committed 3 files and pushed
+  players: 1826 known, 1854 mirrored, 0 to fetch
+  teams: 86 known, 86 mirrored, 0 to fetch
+  mirrored 0 players, 0 teams (0 with no image at source)
+2026-11-01 08:45 refresh started
+2026-11-01 08:45 FAILED: git pull --ff-only
+fatal: unable to access 'https://github.com/Sharone-12/sofascore-scraper.git/': Could not resolve host: github.com
+
+2026-11-01 08:45 git pull failed, continuing with local state
+2026-11-01 08:49 Premier League 2025/26: 514 players
+2026-11-01 08:49 La Liga 2025/26: 539 players
+2026-11-01 08:49 Ligue 1 2025/26: 502 players
+2026-11-01 08:49 Bundesliga 2025/26: 475 players
+2026-11-01 08:49 Champions League 2025/26: 842 players
+2026-11-01 08:49 saved 1578 players with 10%+ of available minutes
+2026-11-01 08:49 Fetching matches...
+2026-11-01 08:49 Premier League 2025/26: 381 matches (38 rounds)
+2026-11-01 08:49 La Liga 2025/26: 383 matches (38 rounds)
+2026-11-01 08:49 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-11-01 08:49 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-11-01 08:49 Champions League 2025/26: 144 matches (8 rounds)
+2026-11-01 08:49 saved 972 results, 4 upcoming
+2026-11-01 08:49 Premier League 2026/27: 454 players
+2026-11-01 08:49 La Liga 2026/27: 483 players
+2026-11-01 08:49 Ligue 1 2026/27: 427 players
+2026-11-01 08:49 Bundesliga 2026/27: 413 players
+2026-11-01 08:49 Champions League 2026/27: 716 players
+2026-11-01 08:49 saved 1474 players with 10%+ of available minutes
+2026-11-01 08:49 Fetching matches...
+2026-11-01 08:49 Premier League 2026/27: 380 matches (38 rounds)
+2026-11-01 08:49 La Liga 2026/27: 381 matches (38 rounds)
+2026-11-01 08:49 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-11-01 08:49 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-11-01 08:49 Champions League 2026/27: 144 matches (8 rounds)
+2026-11-01 08:49 saved 263 results, 710 upcoming
+2026-11-01 08:49 fetching team stats for 13 new matches...
+2026-11-01 08:49 syncing to supabase
+  players players_25_26: 1578 rows
+  players players_26_27: 1474 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 973 rows
+  match_stats match_stats_25_26: 45946 rows
+  match_stats match_stats_26_27: 12581 rows
+  synced 63528 total rows
+2026-11-01 08:50 supabase sync done
+2026-11-01 08:50 mirroring images
+2026-11-01 08:50 image mirror done
+2026-11-01 08:50 committed 3 files and pushed
+  players: 1827 known, 1854 mirrored, 1 to fetch
+  teams: 86 known, 86 mirrored, 0 to fetch
+  mirrored 1 players, 0 teams (0 with no image at source)
+2026-11-02 08:06 refresh started
+2026-11-02 08:06 FAILED: git pull --ff-only
+fatal: unable to access 'https://github.com/Sharone-12/sofascore-scraper.git/': Could not resolve host: github.com
+
+2026-11-02 08:06 git pull failed, continuing with local state
+2026-11-02 10:47 Premier League 2025/26: 514 players
+2026-11-02 10:47 La Liga 2025/26: 539 players
+2026-11-02 10:47 Ligue 1 2025/26: 502 players
+2026-11-02 10:47 Bundesliga 2025/26: 475 players
+2026-11-02 10:47 Champions League 2025/26: 842 players
+2026-11-02 10:47 saved 1578 players with 10%+ of available minutes
+2026-11-02 10:47 Fetching matches...
+2026-11-02 10:47 Premier League 2025/26: 381 matches (38 rounds)
+2026-11-02 10:47 La Liga 2025/26: 383 matches (38 rounds)
+2026-11-02 10:47 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-11-02 10:47 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-11-02 10:47 Champions League 2025/26: 144 matches (8 rounds)
+2026-11-02 10:47 saved 972 results, 4 upcoming
+2026-11-02 10:47 Fetching matches...
+2026-11-02 10:47 SKIPPED Premier League matches 2026/27: gave up on https://www.sofascore.com/api/v1/unique-tournament/17/seasons
+2026-11-02 10:47 SKIPPED La Liga matches 2026/27: gave up on https://www.sofascore.com/api/v1/unique-tournament/8/seasons
+2026-11-02 10:47 SKIPPED Ligue 1 matches 2026/27: gave up on https://www.sofascore.com/api/v1/unique-tournament/34/seasons
+2026-11-02 10:47 SKIPPED Bundesliga matches 2026/27: gave up on https://www.sofascore.com/api/v1/unique-tournament/35/seasons
+2026-11-02 10:47 SKIPPED Champions League matches 2026/27: gave up on https://www.sofascore.com/api/v1/unique-tournament/7/seasons
+2026-11-02 10:47 syncing to supabase
+  players players_25_26: 1578 rows
+  players players_26_27: 1474 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 973 rows
+  match_stats match_stats_25_26: 45946 rows
+  match_stats match_stats_26_27: 12581 rows
+  synced 63528 total rows
+2026-11-02 10:48 supabase sync done
+2026-11-02 10:48 mirroring images
+2026-11-02 10:48 image mirror done
+2026-11-02 10:48 committed 2 files and pushed
+  players: 1827 known, 1855 mirrored, 0 to fetch
+  teams: 86 known, 86 mirrored, 0 to fetch
+  mirrored 0 players, 0 teams (0 with no image at source)
+2026-11-02 17:59 refresh started
+2026-11-02 18:03 Premier League 2025/26: 514 players
+2026-11-02 18:03 La Liga 2025/26: 539 players
+2026-11-02 18:03 Ligue 1 2025/26: 502 players
+2026-11-02 18:03 Bundesliga 2025/26: 475 players
+2026-11-02 18:03 Champions League 2025/26: 842 players
+2026-11-02 18:03 saved 1578 players with 10%+ of available minutes
+2026-11-02 18:03 Fetching matches...
+2026-11-02 18:03 Premier League 2025/26: 381 matches (38 rounds)
+2026-11-02 18:03 La Liga 2025/26: 383 matches (38 rounds)
+2026-11-02 18:03 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-11-02 18:03 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-11-02 18:03 Champions League 2025/26: 144 matches (8 rounds)
+2026-11-02 18:03 saved 972 results, 4 upcoming
+2026-11-02 18:03 Premier League 2026/27: 454 players
+2026-11-02 18:03 La Liga 2026/27: 483 players
+2026-11-02 18:03 Ligue 1 2026/27: 428 players
+2026-11-02 18:03 Bundesliga 2026/27: 416 players
+2026-11-02 18:03 Champions League 2026/27: 716 players
+2026-11-02 18:03 saved 1479 players with 10%+ of available minutes
+2026-11-02 18:03 Fetching matches...
+2026-11-02 18:03 Premier League 2026/27: 380 matches (38 rounds)
+2026-11-02 18:03 La Liga 2026/27: 381 matches (38 rounds)
+2026-11-02 18:03 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-11-02 18:03 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-11-02 18:03 Champions League 2026/27: 144 matches (8 rounds)
+2026-11-02 18:03 saved 268 results, 705 upcoming
+2026-11-02 18:03 fetching team stats for 5 new matches...
+2026-11-02 18:03 syncing to supabase
+2026-11-02 18:04 supabase sync done
+2026-11-02 18:04 mirroring images
+2026-11-02 18:04 image mirror done
+2026-11-02 18:04 committed 3 files and pushed
+2026-11-03 08:05 refresh started
+2026-11-03 08:31 no network after 900s, giving up
+2026-11-04 13:12 refresh started
+2026-11-04 13:12 no network yet, waiting...
+2026-11-04 13:13 network is up
+2026-11-04 13:17 Premier League 2025/26: 514 players
+2026-11-04 13:17 La Liga 2025/26: 539 players
+2026-11-04 13:17 Ligue 1 2025/26: 502 players
+2026-11-04 13:17 Bundesliga 2025/26: 475 players
+2026-11-04 13:17 Champions League 2025/26: 842 players
+2026-11-04 13:17 saved 1578 players with 10%+ of available minutes
+2026-11-04 13:17 Fetching matches...
+2026-11-04 13:17 Premier League 2025/26: 381 matches (38 rounds)
+2026-11-04 13:17 La Liga 2025/26: 383 matches (38 rounds)
+2026-11-04 13:17 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-11-04 13:17 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-11-04 13:17 Champions League 2025/26: 144 matches (8 rounds)
+2026-11-04 13:17 saved 972 results, 4 upcoming
+2026-11-04 13:17 Premier League 2026/27: 454 players
+2026-11-04 13:17 La Liga 2026/27: 483 players
+2026-11-04 13:17 Ligue 1 2026/27: 428 players
+2026-11-04 13:17 Bundesliga 2026/27: 416 players
+2026-11-04 13:17 Champions League 2026/27: 727 players
+2026-11-04 13:17 saved 1476 players with 10%+ of available minutes
+2026-11-04 13:17 Fetching matches...
+2026-11-04 13:17 Premier League 2026/27: 380 matches (38 rounds)
+2026-11-04 13:17 La Liga 2026/27: 381 matches (38 rounds)
+2026-11-04 13:17 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-11-04 13:17 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-11-04 13:17 Champions League 2026/27: 144 matches (8 rounds)
+2026-11-04 13:17 saved 279 results, 694 upcoming
+2026-11-04 13:17 fetching team stats for 11 new matches...
+2026-11-04 13:17 syncing to supabase
+  players players_25_26: 1578 rows
+  players players_26_27: 1476 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 973 rows
+  match_stats match_stats_25_26: 45946 rows
+  match_stats match_stats_26_27: 13342 rows
+  synced 64291 total rows
+2026-11-04 13:18 supabase sync done
+2026-11-04 13:18 mirroring images
+2026-11-04 13:18 image mirror done
+2026-11-04 13:18 committed 3 files and pushed
+  players: 1829 known, 1856 mirrored, 10 to fetch
+  teams: 86 known, 86 mirrored, 0 to fetch
+  mirrored 10 players, 0 teams (0 with no image at source)
+2026-11-05 08:06 refresh started
+2026-11-05 08:06 no network yet, waiting...
+2026-11-05 08:22 network is up
+2026-11-05 09:55 Premier League 2025/26: 514 players
+2026-11-05 09:55 La Liga 2025/26: 539 players
+2026-11-05 09:55 Ligue 1 2025/26: 502 players
+2026-11-05 09:55 Bundesliga 2025/26: 475 players
+2026-11-05 09:55 Champions League 2025/26: 842 players
+2026-11-05 09:55 saved 1578 players with 10%+ of available minutes
+2026-11-05 09:55 Fetching matches...
+2026-11-05 09:55 Premier League 2025/26: 381 matches (38 rounds)
+2026-11-05 09:55 La Liga 2025/26: 383 matches (38 rounds)
+2026-11-05 09:55 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-11-05 09:55 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-11-05 09:55 Champions League 2025/26: 144 matches (8 rounds)
+2026-11-05 09:55 saved 972 results, 4 upcoming
+2026-11-05 09:55 Premier League 2026/27: 454 players
+2026-11-05 09:55 La Liga 2026/27: 483 players
+2026-11-05 09:55 Ligue 1 2026/27: 428 players
+2026-11-05 09:55 Bundesliga 2026/27: 416 players
+2026-11-05 09:55 Champions League 2026/27: 733 players
+2026-11-05 09:55 saved 1497 players with 10%+ of available minutes
+2026-11-05 09:55 Fetching matches...
+2026-11-05 09:55 Premier League 2026/27: 380 matches (38 rounds)
+2026-11-05 09:55 La Liga 2026/27: 381 matches (38 rounds)
+2026-11-05 09:55 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-11-05 09:55 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-11-05 09:55 Champions League 2026/27: 144 matches (8 rounds)
+2026-11-05 09:55 saved 288 results, 685 upcoming
+2026-11-05 09:55 fetching team stats for 9 new matches...
+2026-11-05 09:55 syncing to supabase
+  players players_25_26: 1578 rows
+  players players_26_27: 1497 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 973 rows
+2026-11-05 10:08 supabase sync attempt 1/3 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+  players players_25_26: 1578 rows
+  players players_26_27: 1497 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 973 rows
+2026-11-05 10:24 supabase sync attempt 2/3 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+  players players_25_26: 1578 rows
+  players players_26_27: 1497 rows
+  matches matches_25_26: 976 rows
+  matches matches_26_27: 973 rows
+2026-11-05 10:40 supabase sync attempt 3/3 failed: server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+server closed the connection unexpectedly
+	This probably means the server terminated abnormally
+	before or while processing the request.
+
+2026-11-05 10:40 supabase sync FAILED after 3 attempts
+2026-11-05 10:40 mirroring images
+2026-11-05 10:40 image mirror done
+2026-11-05 10:40 committed 3 files and pushed
+  players: 1841 known, 1866 mirrored, 5 to fetch
+  teams: 86 known, 86 mirrored, 0 to fetch
+  mirrored 5 players, 0 teams (0 with no image at source)

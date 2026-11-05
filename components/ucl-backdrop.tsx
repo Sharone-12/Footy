@@ -16,12 +16,15 @@ export function UclBackdrop() {
   const on =
     resolveCompetition(params.get("comp")) === "ucl" ||
     params.get("league") === "UCL"
+  // Rendered only in UCL mode. Kept mounted at opacity 0 it still cost every
+  // other page a 1.4 MB background fetch and a full-viewport fixed layer.
+  if (!on) return null
   return (
     <div
       aria-hidden
-      data-on={on}
-      className="ucl-bg fixed inset-0 -z-10 bg-cover bg-center transition-opacity duration-700"
-      style={{ backgroundImage: "url(/ucl-bg.png)", opacity: on ? 1 : 0 }}
+      data-on
+      className="ucl-bg animate-fade-in fixed inset-0 -z-10 bg-cover bg-center"
+      style={{ backgroundImage: "url(/ucl-bg.png)" }}
     >
       {/* Just enough to keep body text readable over the bright blue. */}
       <div className="absolute inset-0 bg-background/35" />

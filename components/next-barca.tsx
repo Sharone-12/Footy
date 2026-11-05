@@ -1,9 +1,12 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { BARCA_ID, LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
+// A kickoff stays "next" through the match, so the pill reads KICK OFF
+// instead of jumping to the following fixture at the whistle.
+import { PLAYING_MS, startOf } from "@/lib/live"
 
 export type NextBarcaMatch = {
   event_id: number
@@ -14,14 +17,6 @@ export type NextBarcaMatch = {
   opponent_id: number | null
   home: boolean
 }
-
-// A kickoff stays "next" for two hours so the pill reads KICK OFF through the
-// match instead of jumping to the following fixture at the whistle.
-const PLAYING_MS = 2 * 60 * 60 * 1000
-
-// Without a kickoff time all we know is the day, so count to the end of it.
-const startOf = (m: NextBarcaMatch) =>
-  new Date(m.kickoff ?? `${m.date}T23:59:59Z`).getTime()
 
 function pick(matches: NextBarcaMatch[], now: number) {
   return matches.find((m) => startOf(m) + PLAYING_MS > now) ?? null
@@ -39,6 +34,14 @@ function parts(ms: number) {
 
 const pad = (n: number) => String(n).padStart(2, "0")
 
+// Pre-kickoff provider discovery, hung off the clock this component already
+// runs rather than a second scheduler. At T-5 the providers are queried and
+// the answer cached server-side, so opening /squad/stream is instant; the
+// T-1 repeat catches providers that only publish a stream near kickoff.
+// Discovery, metadata, matching and the embed check are one server round
+// trip, so they do not need a tick each.
+const DISCOVER_AT_MS = [5 * 60_000, 60_000]
+
 export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
   // Starts null and fills on mount: the server has no live clock to pick a
   // fixture with, and rendering a different second would break hydration.
@@ -50,6 +53,26 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
     const t = setInterval(tick, 1000)
     return () => clearInterval(t)
   }, [])
+
+  // Keyed per fixture and per threshold so a reload or a second crossing
+  // cannot re-fire one that already went out.
+  const fired = useRef(new Set<string>())
+
+  useEffect(() => {
+    if (now == null) return
+    const next = pick(matches, now)
+    if (!next) return
+    const left = startOf(next) - now
+    for (const at of DISCOVER_AT_MS) {
+      const key = `${next.event_id}:${at}`
+      if (left > 0 && left <= at && !fired.current.has(key)) {
+        fired.current.add(key)
+        // Fire and forget: the page reads the cached result, and a failure
+        // here must never disturb the countdown.
+        fetch(`/api/streams?event_id=${next.event_id}`).catch(() => {})
+      }
+    }
+  }, [matches, now])
 
   const match = pick(matches, now ?? 0) ?? matches[0]
   if (!match) return null

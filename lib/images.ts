@@ -22,6 +22,11 @@ export function playerImageFallback(playerId: number | string): string {
   return `${SOURCE}/player/${playerId}/image`
 }
 
+/** Squad cutout mirrored by sync_squad_portraits.py (path from SQUAD_PORTRAITS). */
+export function squadPortrait(path: string): string {
+  return `${MIRROR}/${path}`
+}
+
 export function teamImage(teamId: number | string): string {
   return `${MIRROR}/teams/${teamId}.png`
 }

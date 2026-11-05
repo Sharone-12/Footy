@@ -74,6 +74,12 @@ def main() -> None:
     push = "--no-push" not in sys.argv
     log("refresh started")
 
+    # The wait existed but was only reached from with_retry, so an 08:00 wake
+    # still hit `git pull` and the Sofascore fetch with no DNS (2026-11-02).
+    if not wait_for_network():
+        log(f"no network after {NETWORK_WAIT}s, giving up")
+        return
+
     try:
         sh("git", "pull", "--ff-only")
     except SystemExit:
