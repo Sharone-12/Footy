@@ -1,6 +1,7 @@
 import { ExternalLinkIcon } from "lucide-react"
 import {
   CATEGORY_LABEL,
+  GATEWAY_NOTE,
   UNVERIFIED_NOTE,
   directoryBy,
   type DirectoryCategory,
@@ -15,7 +16,7 @@ import {
  * come from the registry, so adding a destination is a config change.
  */
 
-const GROUPS: DirectoryCategory[] = ["official", "platform", "unverified"]
+const GROUPS: DirectoryCategory[] = ["gateway", "official", "platform", "unverified"]
 
 function SiteCard({ entry }: { entry: DirectoryEntry }) {
   return (
@@ -24,13 +25,15 @@ function SiteCard({ entry }: { entry: DirectoryEntry }) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`${entry.name} — ${entry.domain}, opens in a new tab`}
-      className="card-lift surface bg-card rounded-2xl px-4 py-3.5 flex items-center gap-3"
+      className="card-lift surface bg-card rounded-2xl px-4 py-3.5 flex items-center gap-3 group"
     >
       <span className="min-w-0 flex-1">
-        <span className="block font-semibold text-[0.95rem] truncate">{entry.name}</span>
+        <span className="block font-semibold text-[0.95rem] truncate group-hover:text-foreground transition-colors">
+          {entry.name}
+        </span>
         <span className="stat-label block text-[0.65rem] truncate">{entry.domain}</span>
       </span>
-      <ExternalLinkIcon className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+      <ExternalLinkIcon className="size-4 shrink-0 text-muted-foreground group-hover:text-foreground transition-colors" aria-hidden />
     </a>
   )
 }
@@ -43,7 +46,10 @@ export function ExternalSources() {
         if (entries.length === 0) return null
         return (
           <section key={category}>
-            <h3 className="stat-label text-[0.65rem] mb-2.5">{CATEGORY_LABEL[category]}</h3>
+            <h3 className="stat-label text-[0.65rem] mb-2.5 uppercase tracking-wider">{CATEGORY_LABEL[category]}</h3>
+            {category === "gateway" && (
+              <p className="text-muted-foreground text-xs mb-2.5">{GATEWAY_NOTE}</p>
+            )}
             {category === "unverified" && (
               <p className="text-muted-foreground text-xs mb-2.5">{UNVERIFIED_NOTE}</p>
             )}

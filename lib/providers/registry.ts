@@ -35,16 +35,20 @@ export const callable = (entries: ProviderEntry[]) =>
 // than plays. Separate from the adapters above because these have no API and
 // produce no player — a pill opens a tab and nothing more.
 
-export type DirectoryCategory = "official" | "platform" | "unverified"
+export type DirectoryCategory = "official" | "platform" | "gateway" | "unverified"
 
 export const CATEGORY_LABEL: Record<DirectoryCategory, string> = {
-  official: "Official competition & club sites",
-  platform: "Video platforms",
-  unverified: "Other external sites",
+  gateway: "External Gateways",
+  official: "Official Broadcasters & Clubs",
+  platform: "Video Platforms",
+  unverified: "Other External Sites",
 }
 
-/** Shown under the unverified group so directory presence is never read as
- *  a claim about what a site carries. */
+/** Shown under external gateways and unverified groups so directory presence
+ *  is never read as a claim about what a site carries or official broadcasting rights. */
+export const GATEWAY_NOTE =
+  "External redirect links. Not official broadcasters and not hosted or verified by us. Links open in a new tab."
+
 export const UNVERIFIED_NOTE =
   "Not broadcasters and not verified by us. We don't check what these sites carry."
 
@@ -54,6 +58,8 @@ export type DirectoryEntry = {
   domain: string
   url: string
   category: DirectoryCategory
+  /** Enabled/disabled toggle so destinations can be turned on or off without removing configuration. */
+  enabled: boolean
   /** Optional, and only for assets you hold a licence to use — nothing in
    *  this repo ships a third-party logo. */
   logo?: string
@@ -61,36 +67,58 @@ export type DirectoryEntry = {
 
 /**
  * Data-driven on purpose: a destination is a row here and needs no component
- * change. Anything added under `unverified` renders in its own group with
- * UNVERIFIED_NOTE attached.
+ * change. Gateways are kept visually and categorially separate from verified
+ * official broadcasters.
  */
 export const DIRECTORY: DirectoryEntry[] = [
+  {
+    name: "RoxieStreams",
+    domain: "roxiestreams.su",
+    url: "https://roxiestreams.su/soccer-streams-1",
+    category: "gateway",
+    enabled: true,
+  },
+  {
+    name: "StreamCorner",
+    domain: "streamcorner.st",
+    url: "https://streamcorner.st/",
+    category: "gateway",
+    enabled: true,
+  },
   {
     name: "LaLiga",
     domain: "laliga.com",
     url: "https://www.laliga.com/",
     category: "official",
+    enabled: true,
   },
   {
     name: "UEFA Champions League",
     domain: "uefa.com",
     url: "https://www.uefa.com/uefachampionsleague/",
     category: "official",
+    enabled: true,
   },
   {
     name: "FC Barcelona",
     domain: "fcbarcelona.com",
     url: "https://www.fcbarcelona.com/",
     category: "official",
+    enabled: true,
   },
   {
     name: "YouTube",
     domain: "youtube.com",
     url: "https://www.youtube.com/",
     category: "platform",
+    enabled: true,
   },
 ]
 
-/** Entries of one category, in declaration order. */
+/** Enabled entries of one category, in declaration order. */
 export const directoryBy = (category: DirectoryCategory) =>
-  DIRECTORY.filter((e) => e.category === category)
+  DIRECTORY.filter((e) => e.enabled && e.category === category)
+
+/** Prominent gateway sources for the live section. */
+export const gatewaySources = () =>
+  DIRECTORY.filter((e) => e.enabled && (e.category === "gateway" || e.category === "unverified"))
