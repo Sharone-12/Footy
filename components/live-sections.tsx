@@ -9,6 +9,7 @@ import { splitFixtures, startOf, type Timed } from "@/lib/live"
 import { gatewaySources } from "@/lib/providers/registry"
 import type { MatchedStream } from "@/lib/streamfree/types"
 import type { MatchedZLive, ZLiveChannel } from "@/lib/zlive/types"
+import type { MatchedDaddyLive } from "@/lib/daddylive/types"
 import { UnifiedPlayer } from "@/components/unified-player"
 
 export type LiveFixture = Timed & {
@@ -47,8 +48,9 @@ type ActivePlayerState = {
   league?: string
   streamFree?: MatchedStream | null
   zLive?: MatchedZLive | null
+  daddyLive?: MatchedDaddyLive | null
   genericChannel?: ZLiveChannel | null
-  initialProvider?: "streamfree" | "zlive"
+  initialProvider?: "streamfree" | "zlive" | "daddylive"
 }
 
 function Row({
@@ -57,6 +59,7 @@ function Row({
   live,
   matchedStream,
   matchedZLive,
+  matchedDaddyLive,
   onWatch,
 }: {
   m: LiveFixture
@@ -64,10 +67,11 @@ function Row({
   live: boolean
   matchedStream?: MatchedStream
   matchedZLive?: MatchedZLive
+  matchedDaddyLive?: MatchedDaddyLive
   onWatch: (state: ActivePlayerState) => void
 }) {
   const tid = LEAGUE_TOURNAMENT_ID[m.league]
-  const hasStream = Boolean(matchedStream || matchedZLive)
+  const hasStream = Boolean(matchedStream || matchedZLive || matchedDaddyLive)
 
   return (
     <div className="card-lift fixture-row surface bg-card rounded-2xl px-4 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 transition-all">
@@ -129,6 +133,19 @@ function Row({
                   ZLive
                 </span>
               )}
+
+              {matchedDaddyLive && (
+                <span
+                  title={`DaddyLiveHD (${matchedDaddyLive.channels.length} channel${matchedDaddyLive.channels.length === 1 ? "" : "s"})`}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/25"
+                >
+                  <TvIcon className="size-2.5" />
+                  DaddyLive
+                  {matchedDaddyLive.channels.length > 1 && (
+                    <span className="text-[10px] opacity-75">({matchedDaddyLive.channels.length})</span>
+                  )}
+                </span>
+              )}
             </div>
 
             <button
@@ -139,7 +156,8 @@ function Row({
                   league: m.league,
                   streamFree: matchedStream ?? null,
                   zLive: matchedZLive ?? null,
-                  initialProvider: matchedStream ? "streamfree" : "zlive",
+                  daddyLive: matchedDaddyLive ?? null,
+                  initialProvider: matchedStream ? "streamfree" : matchedDaddyLive ? "daddylive" : "zlive",
                 })
               }
               aria-label={`Watch streams for ${m.home} vs ${m.away}`}
@@ -170,6 +188,7 @@ function Section({
   empty,
   streamMap,
   zliveMap,
+  daddyliveMap,
   onWatch,
 }: {
   title: string
@@ -179,6 +198,7 @@ function Section({
   empty: string
   streamMap: Record<number, MatchedStream>
   zliveMap: Record<number, MatchedZLive>
+  daddyliveMap: Record<number, MatchedDaddyLive>
   onWatch: (state: ActivePlayerState) => void
 }) {
   return (
@@ -208,6 +228,7 @@ function Section({
               live={Boolean(live)}
               matchedStream={streamMap[m.event_id]}
               matchedZLive={zliveMap[m.event_id]}
+              matchedDaddyLive={daddyliveMap[m.event_id]}
               onWatch={onWatch}
             />
           ))}
@@ -221,6 +242,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
   const [now, setNow] = useState<number | null>(null)
   const [streamMap, setStreamMap] = useState<Record<number, MatchedStream>>({})
   const [zliveMap, setZliveMap] = useState<Record<number, MatchedZLive>>({})
+  const [daddyliveMap, setDaddyliveMap] = useState<Record<number, MatchedDaddyLive>>({})
   const [genericChannels, setGenericChannels] = useState<ZLiveChannel[]>([])
   const [activePlayer, setActivePlayer] = useState<ActivePlayerState | null>(null)
   const gateways = gatewaySources()
@@ -252,6 +274,31 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
       }
     }
     loadStreamFree()
+    return () => {
+      unmounted = true
+    }
+  }, [])
+
+  // Fetch DaddyLive stream matches on mount
+  useEffect(() => {
+    let unmounted = false
+    async function loadDaddyLive() {
+      try {
+        const res = await fetch("/api/streams/daddylive")
+        if (!res.ok) return
+        const data = await res.json()
+        if (data?.streams && Array.isArray(data.streams) && !unmounted) {
+          const map: Record<number, MatchedDaddyLive> = {}
+          for (const s of data.streams) {
+            if (s.event_id) map[s.event_id] = s
+          }
+          setDaddyliveMap(map)
+        }
+      } catch (err) {
+        console.warn("[live] Could not load DaddyLive streams:", err)
+      }
+    }
+    loadDaddyLive()
     return () => {
       unmounted = true
     }
@@ -328,6 +375,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
               league={activePlayer.league}
               streamFree={activePlayer.streamFree}
               zLive={activePlayer.zLive}
+              daddyLive={activePlayer.daddyLive}
               genericChannel={activePlayer.genericChannel}
               initialProvider={activePlayer.initialProvider}
               onClose={() => setActivePlayer(null)}
@@ -445,6 +493,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
         empty="No matches in play."
         streamMap={streamMap}
         zliveMap={zliveMap}
+        daddyliveMap={daddyliveMap}
         onWatch={setActivePlayer}
       />
       <Section
@@ -454,6 +503,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
         empty="Nothing kicking off in the next three hours."
         streamMap={streamMap}
         zliveMap={zliveMap}
+        daddyliveMap={daddyliveMap}
         onWatch={setActivePlayer}
       />
       <Section
@@ -463,6 +513,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
         empty="No upcoming fixtures."
         streamMap={streamMap}
         zliveMap={zliveMap}
+        daddyliveMap={daddyliveMap}
         onWatch={setActivePlayer}
       />
     </div>

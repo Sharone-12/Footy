@@ -30,3 +30,4 @@ export type MatchedZLive = {
   isConfirmedMatch: boolean
   isGenericBroadcaster: boolean
 }
+

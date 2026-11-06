@@ -13,6 +13,7 @@ import { manualAdapter } from "./manual"
 import { streamfreeAdapter } from "./streamfree"
 import { youtubeAdapter } from "./youtube"
 import { zliveAdapter } from "./zlive"
+import { daddyliveAdapter } from "./daddylive"
 import type { ProviderEntry } from "./types"
 
 /** Every provider, in display and preference order. */
@@ -20,6 +21,11 @@ export function registry(): ProviderEntry[] {
   return [
     { adapter: streamfreeAdapter, supported: true, configured: true },
     { adapter: zliveAdapter, supported: true, configured: true },
+    {
+      adapter: daddyliveAdapter,
+      supported: true,
+      configured: Boolean(process.env.DADDYLIVE_API_KEY),
+    },
     { adapter: manualAdapter, supported: true, configured: true },
     {
       adapter: youtubeAdapter,
@@ -100,6 +106,13 @@ export const DIRECTORY: DirectoryEntry[] = [
     name: "ZLive",
     domain: "zlive.st",
     url: "https://zlive.st",
+    category: "platform",
+    enabled: true,
+  },
+  {
+    name: "DaddyLive",
+    domain: "thedaddy.li",
+    url: "https://thedaddy.li",
     category: "platform",
     enabled: true,
   },

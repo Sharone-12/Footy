@@ -3,7 +3,7 @@
  * Normalizes streams across StreamFree, ZLive, and future providers.
  */
 
-export type StreamingProviderId = "streamfree" | "zlive"
+export type StreamingProviderId = "streamfree" | "zlive" | "daddylive"
 
 export type NormalizedQualityVariant = {
   quality: string // "4K" | "FHD" | "HD" | "SD" | string
@@ -32,3 +32,4 @@ export type NormalizedFixtureStreams = {
   kickoff?: string | null
   sources: NormalizedStreamSource[]
 }
+
