@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server"
 import { fetchDaddyLiveSchedule } from "@/lib/daddylive/client"
+import { requireLiveAuth } from "@/lib/live/auth"
 
-export async function GET() {
+export async function GET(request: Request) {
+  const authError = requireLiveAuth(request)
+  if (authError) return authError
+
   try {
     const schedule = await fetchDaddyLiveSchedule()
     return NextResponse.json(

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { supabase } from "@/lib/supabase"
 import type { Fixture } from "@/lib/providers/types"
+import { requireLiveAuth } from "@/lib/live/auth"
 import {
   fetchFootballChannels,
   getGenericFootballChannels,
@@ -19,6 +20,9 @@ import {
  *   - (none)                   -> Returns matched channels for upcoming fixtures
  */
 export async function GET(request: Request) {
+  const authError = requireLiveAuth(request)
+  if (authError) return authError
+
   try {
     const { searchParams } = new URL(request.url)
     const fixtureIdRaw = searchParams.get("fixture_id")

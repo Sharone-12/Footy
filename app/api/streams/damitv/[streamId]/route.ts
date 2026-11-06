@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server"
 import { fetchDamiTvStreamById } from "@/lib/damitv/client"
+import { requireLiveAuth } from "@/lib/live/auth"
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ streamId: string }> },
 ) {
+  const authError = requireLiveAuth(request)
+  if (authError) return authError
+
   try {
     const { streamId } = await params
     if (!streamId) {
@@ -39,3 +43,4 @@ export async function GET(
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
+

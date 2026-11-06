@@ -6,6 +6,7 @@ data/browser_profile/
 *.egg-info/
 .vercel
 .env*
+!.env.example
 node_modules/
 .next/
 *.tsbuildinfo

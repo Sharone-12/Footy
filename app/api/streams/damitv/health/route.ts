@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server"
 import { checkDamiTvHealth } from "@/lib/damitv/client"
+import { requireLiveAuth } from "@/lib/live/auth"
 
-export async function GET() {
+export async function GET(request: Request) {
+  const authError = requireLiveAuth(request)
+  if (authError) return authError
+
   try {
     const health = await checkDamiTvHealth()
     return NextResponse.json(health, {
@@ -25,3 +29,4 @@ export async function GET() {
     return NextResponse.json({ status: "error", ok: false }, { status: 500 })
   }
 }
+
