@@ -85,14 +85,15 @@ function streamFreeProvider(m: MatchedStream): WatchProvider | null {
   }
 }
 
-function damiTvProvider(m: MatchedDamiTv): WatchProvider | null {
-  const stream = m.stream
+function damiTvProvider(m: MatchedDamiTv | any): WatchProvider | null {
+  if (!m) return null
+  const stream = m.stream || (m.embedUrl || m.sources ? m : null)
   if (!stream) return null
-  const named = (stream.sources || []).filter((s) => s.embed)
+  const named = (stream.sources || []).filter((s: any) => s.embed)
   // `embedUrl` is the stream's default player; only fall back to it so a
   // single-source stream still plays when `sources` comes back empty.
   const sources: WatchSource[] = named.length
-    ? named.map((s) => ({
+    ? named.map((s: any) => ({
         provider: "damitv" as const,
         key: `damitv:${s.id}`,
         label: s.name || "Source",
@@ -121,15 +122,17 @@ function damiTvProvider(m: MatchedDamiTv): WatchProvider | null {
   }
 }
 
-function daddyLiveProvider(m: MatchedDaddyLive): WatchProvider | null {
-  const channels = (m.channels || []).filter((c) => c.player_url)
+function daddyLiveProvider(m: MatchedDaddyLive | any): WatchProvider | null {
+  if (!m) return null
+  const rawChannels = m.channels || (Array.isArray(m) ? m : [])
+  const channels = rawChannels.filter((c: any) => c.player_url)
   if (!channels.length) return null
   return {
     id: "daddylive",
     name: PROVIDER_NAME.daddylive,
     // The schedule only lists events that are on, so a matched channel is on.
     status: "LIVE",
-    sources: channels.map((c) => ({
+    sources: channels.map((c: any) => ({
       provider: "daddylive" as const,
       key: `daddylive:${c.channel_id}`,
       label: c.channel_name || `Channel ${c.channel_id}`,
@@ -142,14 +145,14 @@ function daddyLiveProvider(m: MatchedDaddyLive): WatchProvider | null {
 }
 
 function zLiveProvider(
-  m: MatchedZLive | null | undefined,
+  m: MatchedZLive | any | null | undefined,
   generic: ZLiveChannel | null | undefined,
   allGenerics?: ZLiveChannel[] | null,
 ): WatchProvider | null {
   const sources: WatchSource[] = []
 
   // 1. Primary fixture-matched channel or specific generic channel
-  const primary = m?.channel || generic
+  const primary = m?.channel || (m?.id && m?.url ? m : null) || generic
   if (primary && primary.id) {
     sources.push({
       provider: "zlive",
@@ -157,7 +160,7 @@ function zLiveProvider(
       label: primary.name || "Channel",
       quality: primary.quality,
       url: primary.url || `https://zlive.st/embed/${primary.id}`,
-      live: Boolean(primary.live),
+      live: Boolean(primary.live ?? true),
     })
   }
 
@@ -171,7 +174,7 @@ function zLiveProvider(
           label: ch.name || "Channel",
           quality: ch.quality,
           url: ch.url || `https://zlive.st/embed/${ch.id}`,
-          live: Boolean(ch.live),
+          live: Boolean(ch.live ?? true),
         })
       }
     }

@@ -85,7 +85,23 @@ export function matchFixtureToZLive(
     }
   }
 
-  return bestConfirmed
+  if (bestConfirmed) {
+    return bestConfirmed
+  }
+
+  // 2. Second pass: look for league-specific generic broadcaster
+  for (const ch of channels) {
+    if (matchesLeagueBroadcaster(ch.name, fixture.league)) {
+      return {
+        channel: ch,
+        confidence: 0.65,
+        isConfirmedMatch: false,
+        isGenericBroadcaster: true,
+      }
+    }
+  }
+
+  return null
 }
 
 /**

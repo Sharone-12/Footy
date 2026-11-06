@@ -172,9 +172,9 @@ export function WatchStudio({
         if (unmounted) return
 
         let sfData: { stream?: MatchedStream } = {}
-        let zlData: { channel?: MatchedZLive } = {}
-        let dlData: { match?: MatchedDaddyLive } = {}
-        let dtData: { stream?: MatchedDamiTv } = {}
+        let zlData: { channel?: ZLiveChannel; match?: MatchedZLive; matched?: boolean } = {}
+        let dlData: { match?: MatchedDaddyLive; channels?: any[]; matched?: boolean } = {}
+        let dtData: { stream?: any; match?: MatchedDamiTv; matched?: boolean } = {}
         let genData: { channels?: ZLiveChannel[] } = {}
 
         if (sfRes.ok) try { sfData = await sfRes.json() } catch { }
@@ -192,11 +192,48 @@ export function WatchStudio({
           matchingGeneric = generics.find((c) => c.id === initialChannelId) ?? null
         }
 
+        // Properly normalize matches for all 4 providers:
+        const sfMatch: MatchedStream | null = sfData.stream ?? null
+
+        let zlMatch: MatchedZLive | null = null
+        if (zlData.match) {
+          zlMatch = zlData.match
+        } else if (zlData.channel && (zlData as any).confidence !== undefined) {
+          zlMatch = zlData as unknown as MatchedZLive
+        } else if (zlData.channel) {
+          zlMatch = {
+            channel: zlData.channel,
+            confidence: (zlData as any).confidence ?? 1,
+            isConfirmedMatch: Boolean((zlData as any).isConfirmedMatch),
+            isGenericBroadcaster: Boolean((zlData as any).isGenericBroadcaster),
+          }
+        }
+
+        let dlMatch: MatchedDaddyLive | null = null
+        if (dlData.match) {
+          dlMatch = dlData.match
+        } else if (Array.isArray(dlData.channels) && dlData.channels.length > 0) {
+          dlMatch = dlData as unknown as MatchedDaddyLive
+        }
+
+        let dtMatch: MatchedDamiTv | null = null
+        if (dtData.match) {
+          dtMatch = dtData.match
+        } else if (dtData.stream && (dtData as any).confidence !== undefined) {
+          dtMatch = dtData as unknown as MatchedDamiTv
+        } else if (dtData.stream) {
+          dtMatch = {
+            stream: dtData.stream,
+            confidence: (dtData as any).confidence ?? 1,
+            isConfirmedMatch: Boolean((dtData as any).isConfirmedMatch ?? true),
+          }
+        }
+
         const newBundle: StreamBundle = {
-          streamFree: sfData.stream ?? null,
-          zLive: zlData.channel ?? null,
-          daddyLive: dlData.match ?? null,
-          damiTv: dtData.stream ?? null,
+          streamFree: sfMatch,
+          zLive: zlMatch,
+          daddyLive: dlMatch,
+          damiTv: dtMatch,
           genericChannel: matchingGeneric,
           genericChannels: generics,
         }
