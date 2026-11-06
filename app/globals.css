@@ -134,6 +134,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
     background-image:
@@ -141,33 +142,51 @@
       linear-gradient(to bottom, transparent 55%, var(--deep) 100%);
     background-attachment: fixed;
   }
+
   html {
     @apply font-sans;
   }
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slide-down {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Lit-from-above surfaces: top edge catches light, body falls off, shadow pools below. */
 .surface {
-  background-image: linear-gradient(
-    to bottom,
-    oklch(1 0 0 / 5%) 0%,
-    transparent 38%
-  );
+  background-image: linear-gradient(to bottom,
+      oklch(1 0 0 / 5%) 0%,
+      transparent 38%);
   box-shadow:
     inset 0 1px 0 oklch(1 0 0 / 11%),
     inset 0 -1px 0 oklch(0 0 0 / 22%),
@@ -176,11 +195,9 @@
 }
 
 .surface-raised {
-  background-image: linear-gradient(
-    to bottom,
-    oklch(1 0 0 / 7%) 0%,
-    transparent 45%
-  );
+  background-image: linear-gradient(to bottom,
+      oklch(1 0 0 / 7%) 0%,
+      transparent 45%);
   box-shadow:
     inset 0 1px 0 oklch(1 0 0 / 15%),
     0 2px 4px oklch(0 0 0 / 30%),
@@ -198,6 +215,7 @@
     0 1px 2px oklch(0 0 0 / 35%),
     0 10px 28px -14px oklch(0 0 0 / 55%);
 }
+
 .segment-item {
   box-shadow: inset 0 1px 0 oklch(1 0 0 / 12%);
 }
@@ -215,6 +233,7 @@
     0 10px 28px -14px oklch(0 0 0 / 55%);
   transition: box-shadow 220ms ease, transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
+
 .nav-pill:hover {
   box-shadow:
     inset 0 1px 0 oklch(1 0 0 / 14%),
@@ -240,19 +259,49 @@
   line-height: 1;
 }
 
-.stagger > * {
+.stagger>* {
   animation: slide-up 0.4s ease-out both;
 }
-.stagger > *:nth-child(1) { animation-delay: 0ms; }
-.stagger > *:nth-child(2) { animation-delay: 60ms; }
-.stagger > *:nth-child(3) { animation-delay: 120ms; }
-.stagger > *:nth-child(4) { animation-delay: 180ms; }
-.stagger > *:nth-child(5) { animation-delay: 240ms; }
-.stagger > *:nth-child(6) { animation-delay: 300ms; }
-.stagger > *:nth-child(7) { animation-delay: 360ms; }
-.stagger > *:nth-child(8) { animation-delay: 420ms; }
-.stagger > *:nth-child(9) { animation-delay: 480ms; }
-.stagger > *:nth-child(10) { animation-delay: 540ms; }
+
+.stagger>*:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.stagger>*:nth-child(2) {
+  animation-delay: 60ms;
+}
+
+.stagger>*:nth-child(3) {
+  animation-delay: 120ms;
+}
+
+.stagger>*:nth-child(4) {
+  animation-delay: 180ms;
+}
+
+.stagger>*:nth-child(5) {
+  animation-delay: 240ms;
+}
+
+.stagger>*:nth-child(6) {
+  animation-delay: 300ms;
+}
+
+.stagger>*:nth-child(7) {
+  animation-delay: 360ms;
+}
+
+.stagger>*:nth-child(8) {
+  animation-delay: 420ms;
+}
+
+.stagger>*:nth-child(9) {
+  animation-delay: 480ms;
+}
+
+.stagger>*:nth-child(10) {
+  animation-delay: 540ms;
+}
 
 /* Interactive card: lifts, and a bright pitch-green beam sweeps around the
    full perimeter on hover using a rotating conic gradient. The mask leaves
@@ -262,12 +311,14 @@
   initial-value: 0deg;
   inherits: false;
 }
+
 .card-lift {
   position: relative;
   transition:
     transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
     box-shadow 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
+
 .card-lift::before {
   content: "";
   position: absolute;
@@ -275,26 +326,25 @@
   border-radius: inherit;
   padding: 1.5px;
   pointer-events: none;
-  background: conic-gradient(
-    from var(--card-lift-angle),
-    transparent 0%,
-    oklch(0.95 0.17 150 / 0%) 65%,
-    oklch(0.95 0.17 150 / 95%) 80%,
-    oklch(0.95 0.17 150 / 0%) 95%,
-    transparent 100%
-  );
+  background: conic-gradient(from var(--card-lift-angle),
+      transparent 0%,
+      oklch(0.95 0.17 150 / 0%) 65%,
+      oklch(0.95 0.17 150 / 95%) 80%,
+      oklch(0.95 0.17 150 / 0%) 95%,
+      transparent 100%);
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
-          mask:
+  mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
-          mask-composite: exclude;
+  mask-composite: exclude;
   opacity: 0;
   transition: opacity 160ms ease;
   filter: drop-shadow(0 0 4px oklch(0.80 0.19 150 / 70%));
 }
+
 .card-lift:hover {
   transform: translateY(-8px);
   box-shadow:
@@ -302,14 +352,22 @@
     0 8px 18px oklch(0 0 0 / 50%),
     0 36px 70px -16px oklch(0 0 0 / 70%);
 }
+
 .card-lift:hover::before {
   opacity: 1;
   animation: card-lift-spin 1.6s linear infinite;
 }
+
 @keyframes card-lift-spin {
-  to { --card-lift-angle: 360deg; }
+  to {
+    --card-lift-angle: 360deg;
+  }
 }
-.card-lift:active { transform: translateY(-1px); transition-duration: 100ms; }
+
+.card-lift:active {
+  transform: translateY(-1px);
+  transition-duration: 100ms;
+}
 
 /* Row item: hairline outline rises on hover — monochrome, premium, no fill. */
 .row-item {
@@ -319,6 +377,7 @@
     box-shadow 220ms cubic-bezier(0.2, 0.8, 0.2, 1),
     transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
+
 .row-item:hover {
   box-shadow: inset 0 0 0 1px oklch(1 0 0 / 14%);
   transform: translateX(1px);
@@ -340,6 +399,7 @@
   background: oklch(1 0 0 / 5%);
   box-shadow: inset 0 1px 0 oklch(1 0 0 / 8%);
 }
+
 .rank-badge[data-rank="1"] {
   color: oklch(0.12 0 0);
   background: linear-gradient(145deg, oklch(0.92 0.17 95), oklch(0.78 0.17 70));
@@ -347,11 +407,13 @@
     inset 0 1px 0 oklch(1 0 0 / 55%),
     0 0 14px oklch(0.85 0.17 85 / 35%);
 }
+
 .rank-badge[data-rank="2"] {
   color: oklch(0.14 0 0);
   background: linear-gradient(145deg, oklch(0.90 0 0), oklch(0.72 0 0));
   box-shadow: inset 0 1px 0 oklch(1 0 0 / 50%);
 }
+
 .rank-badge[data-rank="3"] {
   color: oklch(0.14 0 0);
   background: linear-gradient(145deg, oklch(0.78 0.11 55), oklch(0.60 0.13 40));
@@ -359,36 +421,59 @@
 }
 
 /* Stat figure: subtle pop-in on mount. */
-.stat-pop { animation: stat-pop 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.stat-pop {
+  animation: stat-pop 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
 @keyframes stat-pop {
-  from { opacity: 0; transform: scale(0.7); }
-  60%  { opacity: 1; transform: scale(1.08); }
-  to   { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+
+  60% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* Shimmer sweep for the leader's figure. */
 .shimmer-text {
-  background: linear-gradient(
-    100deg,
-    var(--pitch) 20%,
-    oklch(from var(--pitch) calc(l + 0.12) c h) 50%,
-    var(--pitch) 80%
-  );
+  background: linear-gradient(100deg,
+      var(--pitch) 20%,
+      oklch(from var(--pitch) calc(l + 0.12) c h) 50%,
+      var(--pitch) 80%);
   background-size: 200% 100%;
   -webkit-background-clip: text;
-          background-clip: text;
+  background-clip: text;
   color: transparent;
   animation: shimmer 3.5s linear infinite;
 }
+
 @keyframes shimmer {
-  from { background-position: 200% 0; }
-  to   { background-position: -200% 0; }
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
 }
 
 /* Sparkle sweep: a thin pitch-green beam travels across the top edge of a
    card every ~5s. Lives on ::before so markup stays clean. Plain oklch
    values (not relative-color syntax) for broad browser support. */
-.spark { position: relative; isolation: isolate; overflow: hidden; }
+.spark {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
 .spark::before {
   content: "";
   position: absolute;
@@ -398,12 +483,10 @@
   width: 40%;
   pointer-events: none;
   z-index: 1;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    oklch(0.95 0.17 150 / 95%) 50%,
-    transparent 100%
-  );
+  background: linear-gradient(90deg,
+      transparent 0%,
+      oklch(0.95 0.17 150 / 95%) 50%,
+      transparent 100%);
   box-shadow:
     0 0 10px oklch(0.80 0.19 150 / 85%),
     0 0 22px oklch(0.80 0.19 150 / 55%);
@@ -411,12 +494,31 @@
   transform: translateX(-100%);
   animation: spark-sweep 5s linear infinite;
 }
+
 @keyframes spark-sweep {
-  0%   { transform: translateX(-100%); opacity: 0; }
-  10%  { opacity: 1; }
-  80%  { transform: translateX(220%); opacity: 1; }
-  90%  { transform: translateX(260%); opacity: 0; }
-  100% { transform: translateX(260%); opacity: 0; }
+  0% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  80% {
+    transform: translateX(220%);
+    opacity: 1;
+  }
+
+  90% {
+    transform: translateX(260%);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateX(260%);
+    opacity: 0;
+  }
 }
 
 /* Blaugrana stripes — vivid Barca palette dimmed by a dark overlay so
@@ -425,13 +527,41 @@
   background-color: var(--card);
   background-image:
     linear-gradient(oklch(0.15 0 0 / 70%), oklch(0.15 0 0 / 78%)),
-    repeating-linear-gradient(
-      90deg,
+    repeating-linear-gradient(90deg,
       oklch(0.44 0.24 265) 0 42px,
       oklch(0.22 0.10 265) 42px 70px,
-      oklch(0.32 0.18 10)  70px 110px,
-      oklch(0.55 0.22 25)  110px 150px,
-      oklch(0.32 0.18 10)  150px 180px
+      oklch(0.32 0.18 10) 70px 110px,
+      oklch(0.55 0.22 25) 110px 150px,
+      oklch(0.32 0.18 10) 150px 180px);
+}
+
+/* Compact Blaugrana stripes for pills, buttons and nav items.
+   Cycles every 20px (10px FCB blue #004D98, 10px FCB claret #A50044) so
+   both iconic colors alternate visibly multiple times across the capsule. */
+.barca-stripes-pill {
+  background-color: #004D98;
+  background-image:
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(0, 0, 0, 0.35)),
+    repeating-linear-gradient(120deg,
+      #004D98 0px,
+      #004D98 10px,
+      #A50044 10px,
+      #A50044 20px);
+}
+
+/* The same banner for elements too narrow to fit its 180px stripe cycle.
+   Identical palette and identical dimming — only the lengths are quartered,
+   so a ~130px nav pill shows the whole pattern instead of one slice of it. */
+.barca-stripes-tight {
+  background-image:
+    linear-gradient(oklch(0.15 0 0 / 70%), oklch(0.15 0 0 / 78%)),
+    repeating-linear-gradient(
+      90deg,
+      oklch(0.44 0.24 265) 0 10.5px,
+      oklch(0.22 0.10 265) 10.5px 17.5px,
+      oklch(0.32 0.18 10)  17.5px 27.5px,
+      oklch(0.55 0.22 25)  27.5px 37.5px,
+      oklch(0.32 0.18 10)  37.5px 45px
     );
 }
 
@@ -442,6 +572,7 @@
   border-radius: 0;
   background: #000;
 }
+
 .player:fullscreen .player-frame {
   aspect-ratio: auto;
   height: 100vh;
@@ -488,9 +619,15 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .stagger > *, .stat-pop, .shimmer-text, .card-lift, .row-item,
+
+  .stagger>*,
+  .stat-pop,
+  .shimmer-text,
+  .card-lift,
+  .row-item,
   .spark::before {
-    animation: none !important; transition: none !important;
+    animation: none !important;
+    transition: none !important;
   }
 }
 
@@ -498,6 +635,7 @@
 .nav-fade {
   transition: opacity 0.7s ease;
 }
+
 body:has(.ucl-bg[data-on="true"]) .nav-fade {
   opacity: 0;
 }
@@ -513,15 +651,18 @@ body:has(.ucl-bg[data-on="true"]) {
   --accent: oklch(0.38 0.10 266 / 70%);
   --border: oklch(0.80 0.10 250 / 20%);
 }
+
 body:has(.ucl-bg[data-on="true"]) :is(.bg-card, .bg-popover, .nav-pill, .segment) {
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
 }
+
 body:has(.ucl-bg[data-on="true"]) :is(.bg-card, .bg-popover) {
   box-shadow:
     inset 0 1px 0 oklch(0.9 0.09 250 / 18%),
     0 20px 44px -24px oklch(0 0 0 / 70%);
 }
+
 body:has(.ucl-bg[data-on="true"]) .nav-pill {
   background: oklch(0.26 0.08 266 / 62%);
 }

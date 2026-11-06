@@ -31,9 +31,15 @@ export function MainNavFallback() {
       {LINKS.map((l) => (
         <span
           key={l.href}
-          className="relative z-10 px-3.5 sm:px-4 py-1.5 rounded-full text-sm font-medium text-muted-foreground"
+          className={`relative z-10 px-3.5 sm:px-4 py-1.5 rounded-full text-sm font-medium ${
+            l.href === "/squad"
+              ? "barca-stripes barca-stripes-tight overflow-hidden text-white font-bold min-w-[5.25rem] inline-flex items-center justify-center text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
+              : "text-muted-foreground"
+          }`}
         >
-          {l.label}
+          <span className={l.href === "/squad" ? "drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" : undefined}>
+            {l.label}
+          </span>
         </span>
       ))}
     </div>
@@ -95,6 +101,7 @@ export function MainNav() {
       )}
       {LINKS.map((l, i) => {
         const active = i === activeIdx
+        const isBarca = l.href === "/squad"
         return (
           <Tooltip key={l.href}>
             <TooltipTrigger
@@ -108,9 +115,15 @@ export function MainNav() {
                   onFocus={() => setHoveredIdx(i)}
                   onBlur={() => setHoveredIdx(null)}
                   data-active={active || undefined}
-                  className="relative z-10 px-3.5 sm:px-4 py-1.5 rounded-full text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-200 data-[active]:text-foreground"
+                  className={`relative z-10 px-3.5 sm:px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
+                    isBarca
+                      ? "barca-stripes barca-stripes-tight overflow-hidden text-white font-bold min-w-[5.25rem] inline-flex items-center justify-center text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_2px_6px_rgba(0,0,0,0.5)] hover:brightness-110"
+                      : "text-muted-foreground hover:text-foreground data-[active]:text-foreground"
+                  }`}
                 >
-                  {l.label}
+                  <span className={isBarca ? "drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" : undefined}>
+                    {l.label}
+                  </span>
                 </Link>
               }
             />
