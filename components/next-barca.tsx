@@ -115,7 +115,15 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
           )}
         </span>
       </span>
-      {tid && <LeagueCrest tournamentId={tid} name={match.league} size={16} className="hidden sm:block shrink-0" />}
+      {tid && (
+        <LeagueCrest
+          tournamentId={tid}
+          name={match.league}
+          size={18}
+          variant="transparent"
+          className="hidden sm:inline-block shrink-0"
+        />
+      )}
     </Link>
   )
 }

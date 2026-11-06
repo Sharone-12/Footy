@@ -90,11 +90,13 @@ export function LeagueCrest({
   name,
   size = 18,
   className = "",
+  variant = "tile",
 }: {
   tournamentId: number | string
   name: string
   size?: number
   className?: string
+  variant?: "tile" | "transparent"
 }) {
   const { ref, src, exhausted, next } = useFallbackChain([
     leagueImage(tournamentId),
@@ -102,14 +104,42 @@ export function LeagueCrest({
   ])
   if (exhausted) return null
 
+  if (variant === "transparent") {
+    return (
+      /* eslint-disable-next-line @next/next/no-img-element */
+      <img
+        key={src}
+        ref={ref}
+        src={src}
+        alt={name}
+        title={name}
+        width={size}
+        height={size}
+        loading="lazy"
+        decoding="async"
+        referrerPolicy="no-referrer"
+        onError={next}
+        className={`inline-block shrink-0 object-contain ${className}`}
+        style={{ width: size, height: size }}
+      />
+    )
+  }
+
   // The Premier League and Champions League marks are dark purple and navy,
   // invisible on a dark card, so league crests sit on a light tile. Same outer
   // size as before, so layouts don't shift.
   const inner = Math.round(size * 0.78)
   return (
     <span
-      className={`inline-flex shrink-0 items-center justify-center rounded-md ${className}`}
-      style={{ width: size, height: size, background: "oklch(0.96 0 0)" }}
+      className={`shrink-0 rounded-md overflow-hidden ${className}`}
+      style={{
+        width: size,
+        height: size,
+        background: "oklch(0.96 0 0)",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
       title={name}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
