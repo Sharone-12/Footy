@@ -17,6 +17,7 @@ import { UCL } from "@/lib/competition"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { PredictionsLeagueToggle } from "@/components/predictions-league-toggle"
+import { formatDateIST } from "@/lib/time"
 
 const OUTCOME_COLORS = {
   home: "oklch(0.80 0.19 150)",
@@ -65,11 +66,7 @@ function MatchCard({ p }: { p: MatchPrediction }) {
         </span>
         <span className="stat-label">R{p.round}</span>
         <span className="stat-label ml-auto">
-          {new Date(p.date + "T12:00:00").toLocaleDateString("en-GB", {
-            weekday: "short",
-            day: "numeric",
-            month: "short",
-          })}
+          {formatDateIST(`${p.date}T12:00:00Z`)}
         </span>
       </div>
 

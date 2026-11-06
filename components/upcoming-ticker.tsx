@@ -5,6 +5,7 @@ import Link from "next/link"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
+import { formatDateIST } from "@/lib/time"
 
 export type UpcomingMatch = {
   event_id: number
@@ -17,8 +18,7 @@ export type UpcomingMatch = {
 }
 
 function formatWhen(iso: string) {
-  const d = new Date(iso + "T12:00:00")
-  return d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })
+  return formatDateIST(`${iso}T12:00:00Z`)
 }
 
 const SLOT_MS = 4000

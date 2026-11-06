@@ -19,6 +19,7 @@ import { withFrozenPredictions } from "@/lib/predictions-freeze"
 import { percentileRank } from "@/lib/stats"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
+import { formatDateIST } from "@/lib/time"
 
 const TEAM_COLORS = ["#4ade80", "#60a5fa"]
 
@@ -311,11 +312,7 @@ function H2HResults({
           return (
             <div key={m.event_id} className="flex items-center gap-3 px-2 py-2 rounded-lg bg-white/[0.02]">
               <span className="stat-label shrink-0">
-                {new Date(m.date + "T12:00:00").toLocaleDateString("en-GB", {
-                  day: "numeric",
-                  month: "short",
-                  year: "2-digit",
-                })}
+                {formatDateIST(`${m.date}T12:00:00Z`, { year: "2-digit" })}
               </span>
               <span
                 className="flex-1 text-right text-sm font-medium truncate"
@@ -415,9 +412,8 @@ async function Content({
 
   const leagueLabel = LEAGUE_ABBR[match.league] ?? match.league
   const leagueTournamentId = LEAGUE_TOURNAMENT_ID[match.league]
-  const dateStr = new Date(match.date + "T12:00:00").toLocaleDateString("en-GB", {
+  const dateStr = formatDateIST(`${match.date}T12:00:00Z`, {
     weekday: "long",
-    day: "numeric",
     month: "long",
     year: "numeric",
   })

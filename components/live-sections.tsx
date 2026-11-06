@@ -12,6 +12,7 @@ import type { MatchedZLive, ZLiveChannel } from "@/lib/zlive/types"
 import type { MatchedDaddyLive } from "@/lib/daddylive/types"
 import type { MatchedDamiTv } from "@/lib/damitv/types"
 import { UnifiedPlayer } from "@/components/unified-player"
+import { formatKickoffIST } from "@/lib/time"
 
 export type LiveFixture = Timed & {
   event_id: number
@@ -23,21 +24,7 @@ export type LiveFixture = Timed & {
 }
 
 function formatKickoff(m: LiveFixture) {
-  if (!m.kickoff) {
-    return new Date(`${m.date}T12:00:00Z`).toLocaleDateString("en-GB", {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-      timeZone: "UTC",
-    })
-  }
-  const d = new Date(m.kickoff)
-  const today = new Date().toDateString() === d.toDateString()
-  return d.toLocaleString("en-GB", {
-    ...(today ? {} : { weekday: "short", day: "numeric", month: "short" }),
-    hour: "2-digit",
-    minute: "2-digit",
-  })
+  return formatKickoffIST(m.kickoff, m.date)
 }
 
 function elapsed(m: LiveFixture, now: number) {

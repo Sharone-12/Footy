@@ -7,6 +7,7 @@ import { StreamProviders } from "@/components/stream-providers"
 import { ExternalSources } from "@/components/external-sources"
 import { BarcaNav } from "@/components/barca-nav"
 import { Skeleton } from "@/components/ui/skeleton"
+import { formatDateIST, formatTimeIST } from "@/lib/time"
 
 const BARCA = "FC Barcelona"
 
@@ -21,13 +22,11 @@ type Row = {
   away_id: number | null
 }
 
-function formatDate(iso: string) {
-  return new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-GB", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    timeZone: "UTC",
-  })
+function formatDate(iso: string, kickoff?: string | null) {
+  if (kickoff) {
+    return formatDateIST(kickoff, { weekday: "long", month: "long" })
+  }
+  return formatDateIST(`${iso}T12:00:00Z`, { weekday: "long", month: "long" })
 }
 
 async function Stream() {
@@ -61,7 +60,10 @@ async function Stream() {
           )}
           <span className="min-w-0">
             <span className="block font-semibold truncate">{opponent}</span>
-            <span className="stat-label block text-xs">{formatDate(m.date)}</span>
+            <span className="stat-label block text-xs">
+              {formatDate(m.date, m.kickoff)}
+              {m.kickoff && ` · ${formatTimeIST(m.kickoff, { withSuffix: true })}`}
+            </span>
           </span>
         </span>
         {tid && <LeagueCrest tournamentId={tid} name={m.league} size={24} />}

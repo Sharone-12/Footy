@@ -44,6 +44,7 @@ import {
   type WatchSource,
   type StreamBundle,
 } from "@/lib/streaming/resolve"
+import { formatKickoffIST, formatTimeIST } from "@/lib/time"
 
 export type WatchStudioProps = {
   fixture: LiveFixture | null
@@ -54,20 +55,7 @@ export type WatchStudioProps = {
 }
 
 function formatKickoffDate(kickoff: string | null, date: string) {
-  if (!kickoff) {
-    return new Date(`${date}T12:00:00Z`).toLocaleDateString("en-GB", {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-      timeZone: "UTC",
-    })
-  }
-  const d = new Date(kickoff)
-  const isToday = new Date().toDateString() === d.toDateString()
-  return (
-    (isToday ? "Today, " : d.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }) + " ") +
-    d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })
-  )
+  return formatKickoffIST(kickoff, date)
 }
 
 function formatCountdown(targetMs: number, nowMs: number) {
@@ -1260,7 +1248,7 @@ export function WatchStudio({
                     <div className="flex items-center justify-between text-muted-foreground">
                       <span>Kickoff:</span>
                       <span className="text-foreground font-semibold font-mono">
-                        {new Date(fixture.kickoff).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" })} UTC
+                        {formatTimeIST(fixture.kickoff, { withSuffix: true })}
                       </span>
                     </div>
                   )}

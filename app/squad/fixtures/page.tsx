@@ -11,6 +11,7 @@ import { FormStrip, OUTCOME_TONE, OUTCOME_LABEL } from "@/components/form-strip"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { BarcaNav } from "@/components/barca-nav"
 import { Skeleton } from "@/components/ui/skeleton"
+import { formatDateIST, formatTimeIST } from "@/lib/time"
 
 const BARCA = "FC Barcelona"
 const COLS = "event_id, date, league, home, home_id, away, away_id"
@@ -35,21 +36,15 @@ type Row = {
   kickoff?: string | null
 }
 
-function formatDate(iso: string) {
-  return new Date(`${iso}T12:00:00Z`).toLocaleDateString("en-GB", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    timeZone: "UTC",
-  })
+function formatDate(iso: string, kickoff?: string | null) {
+  if (kickoff) {
+    return formatDateIST(kickoff)
+  }
+  return formatDateIST(`${iso}T12:00:00Z`)
 }
 
 function formatTime(kickoff: string) {
-  return new Date(kickoff).toLocaleTimeString("en-GB", {
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZone: "Europe/Madrid",
-  })
+  return formatTimeIST(kickoff, { withSuffix: true })
 }
 
 function FixtureRow({ m, banner }: { m: Row; banner: boolean }) {
@@ -64,8 +59,8 @@ function FixtureRow({ m, banner }: { m: Row; banner: boolean }) {
         banner && m.league === UCL ? "ucl-row" : "bg-card"
       }`}
     >
-      <span className="flex flex-col leading-none w-20 shrink-0">
-        <span className="stat-label text-xs">{formatDate(m.date)}</span>
+      <span className="flex flex-col leading-none w-24 shrink-0">
+        <span className="stat-label text-xs">{formatDate(m.date, m.kickoff)}</span>
         <span className="stat-figure text-sm mt-1 text-muted-foreground">
           {m.kickoff ? formatTime(m.kickoff) : "TBC"}
         </span>
