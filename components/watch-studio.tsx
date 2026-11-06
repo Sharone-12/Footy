@@ -620,7 +620,9 @@ export function WatchStudio({
                     key={`${currentSource.key}-${reloadKey}`}
                     src={currentSource.url}
                     title={`${fixture?.home ?? "Live"} vs ${fixture?.away ?? "Match"} — ${currentSource.label}`}
-                    className="w-full h-full border-0 bg-black block"
+                    className={`w-full h-full border-0 bg-black block transition-transform ${
+                      currentProvider?.id === "zlive" ? "scale-[1.035] origin-center" : ""
+                    }`}
                     allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                     allowFullScreen
                     referrerPolicy="no-referrer"
