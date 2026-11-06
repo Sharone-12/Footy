@@ -4,6 +4,7 @@ import { UnifiedPlayer } from "./unified-player"
 import type { MatchedStream, StreamFreeQuality } from "@/lib/streamfree/types"
 import type { MatchedZLive, ZLiveChannel } from "@/lib/zlive/types"
 import type { MatchedDaddyLive } from "@/lib/daddylive/types"
+import type { MatchedDamiTv } from "@/lib/damitv/types"
 import type { StreamingProviderId } from "@/lib/streaming/types"
 
 /**
@@ -14,6 +15,7 @@ export function StreamFreePlayer({
   stream,
   zLive,
   daddyLive,
+  damiTv,
   genericChannel,
   initialProvider = "streamfree",
   onClose,
@@ -22,6 +24,7 @@ export function StreamFreePlayer({
   stream: MatchedStream
   zLive?: MatchedZLive | null
   daddyLive?: MatchedDaddyLive | null
+  damiTv?: MatchedDamiTv | null
   genericChannel?: ZLiveChannel | null
   initialProvider?: StreamingProviderId
   onClose?: () => void
@@ -34,6 +37,7 @@ export function StreamFreePlayer({
       streamFree={stream}
       zLive={zLive}
       daddyLive={daddyLive}
+      damiTv={damiTv}
       genericChannel={genericChannel}
       initialProvider={initialProvider}
       onClose={onClose}

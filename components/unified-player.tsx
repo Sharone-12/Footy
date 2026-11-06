@@ -13,10 +13,13 @@ import {
   RadioIcon,
   SparklesIcon,
   TvIcon,
+  MonitorPlayIcon,
+  UsersIcon,
 } from "lucide-react"
 import type { MatchedStream, StreamFreeQuality, StreamFreeSource } from "@/lib/streamfree/types"
 import type { MatchedZLive, ZLiveChannel } from "@/lib/zlive/types"
 import type { MatchedDaddyLive, DaddyLiveChannel } from "@/lib/daddylive/types"
+import type { MatchedDamiTv, DamiTvSource } from "@/lib/damitv/types"
 import type { StreamingProviderId } from "@/lib/streaming/types"
 
 export type UnifiedPlayerProps = {
@@ -25,6 +28,7 @@ export type UnifiedPlayerProps = {
   streamFree?: MatchedStream | null
   zLive?: MatchedZLive | null
   daddyLive?: MatchedDaddyLive | null
+  damiTv?: MatchedDamiTv | null
   genericChannel?: ZLiveChannel | null
   initialProvider?: StreamingProviderId
   onClose?: () => void
@@ -36,6 +40,7 @@ export function UnifiedPlayer({
   streamFree,
   zLive,
   daddyLive,
+  damiTv,
   genericChannel,
   initialProvider,
   onClose,
@@ -49,15 +54,24 @@ export function UnifiedPlayer({
   const hasStreamFree = Boolean(streamFree && streamFree.sources?.length > 0)
   const hasZLive = Boolean(zLive?.channel || genericChannel)
   const hasDaddyLive = Boolean(daddyLive && daddyLive.channels?.length > 0)
+  const hasDamiTv = Boolean(damiTv && (damiTv.stream?.embedUrl || damiTv.stream?.sources?.length > 0))
 
   // Initial provider selection
   const defaultProvider: StreamingProviderId =
     initialProvider ??
-    (hasStreamFree ? "streamfree" : hasDaddyLive ? "daddylive" : hasZLive ? "zlive" : "streamfree")
+    (hasStreamFree
+      ? "streamfree"
+      : hasDamiTv
+      ? "damitv"
+      : hasDaddyLive
+      ? "daddylive"
+      : hasZLive
+      ? "zlive"
+      : "streamfree")
 
   const [selectedProvider, setSelectedProvider] = useState<StreamingProviderId>(defaultProvider)
 
-  // StreamFree quality selection
+  // 1. StreamFree quality selection
   const sfDefaultQuality =
     streamFree?.bestSource?.quality || streamFree?.availableQualities?.[0] || "HD"
   const [sfQuality, setSfQuality] = useState<StreamFreeQuality>(sfDefaultQuality)
@@ -67,10 +81,10 @@ export function UnifiedPlayer({
     streamFree?.bestSource ||
     streamFree?.sources?.[0]
 
-  // ZLive active channel
+  // 2. ZLive active channel
   const activeZLiveChannel: ZLiveChannel | undefined = zLive?.channel || genericChannel || undefined
 
-  // DaddyLive active channel selection
+  // 3. DaddyLive active channel selection
   const [selectedDaddyChannelId, setSelectedDaddyChannelId] = useState<string>(
     daddyLive?.channels?.[0]?.channel_id || "",
   )
@@ -78,6 +92,16 @@ export function UnifiedPlayer({
   const activeDaddyChannel: DaddyLiveChannel | undefined =
     daddyLive?.channels?.find((ch) => ch.channel_id === selectedDaddyChannelId) ||
     daddyLive?.channels?.[0]
+
+  // 4. DAMITV source selection
+  const [selectedDamiSourceId, setSelectedDamiSourceId] = useState<string>(
+    damiTv?.stream?.sources?.[0]?.id || "",
+  )
+
+  const activeDamiSource: DamiTvSource | undefined =
+    damiTv?.stream?.sources?.find((src) => src.id === selectedDamiSourceId) ||
+    damiTv?.activeSource ||
+    damiTv?.stream?.sources?.[0]
 
   useEffect(() => {
     function onFullscreenChange() {
@@ -117,6 +141,13 @@ export function UnifiedPlayer({
     setHasError(false)
   }
 
+  function handleDamiSourceSwitch(sourceId: string) {
+    if (sourceId === selectedDamiSourceId) return
+    setSelectedDamiSourceId(sourceId)
+    setIsLoading(true)
+    setHasError(false)
+  }
+
   function handleRetry() {
     setIsLoading(true)
     setHasError(false)
@@ -133,6 +164,13 @@ export function UnifiedPlayer({
     isCurrentLive = Boolean(streamFree?.isLive || activeSfSource?.live)
     currentStatusLabel = streamFree?.status ?? (isCurrentLive ? "LIVE" : "OFFLINE")
     providerDisplayName = "StreamFree"
+  } else if (selectedProvider === "damitv") {
+    currentUrl = activeDamiSource?.embed || damiTv?.stream?.embedUrl
+    isCurrentLive = Boolean(damiTv?.stream?.isLive)
+    currentStatusLabel = damiTv?.stream?.status ?? (isCurrentLive ? "LIVE" : "OFFLINE")
+    providerDisplayName = activeDamiSource?.name
+      ? `DAMITV · ${activeDamiSource.name}`
+      : "DAMITV (OnDemand)"
   } else if (selectedProvider === "daddylive") {
     currentUrl = activeDaddyChannel?.player_url
     isCurrentLive = true
@@ -190,12 +228,12 @@ export function UnifiedPlayer({
           )}
         </div>
 
-        {/* Controls: provider toggle, channels, qualities, fullscreen, close */}
+        {/* Controls: 4-provider toggle, sources, qualities, fullscreen, close */}
         <div className="flex items-center gap-2 shrink-0">
-          {/* Provider selector pill: [ StreamFree ] [ ZLive ] [ DaddyLive ] */}
-          {(hasStreamFree || hasZLive || hasDaddyLive) && (
+          {/* Provider selector pill: [ StreamFree ] [ ZLive ] [ DaddyLive ] [ DAMITV ] */}
+          {(hasStreamFree || hasZLive || hasDaddyLive || hasDamiTv) && (
             <div
-              className="flex items-center bg-black/50 rounded-xl p-0.5 border border-border/60 text-xs shadow-inner"
+              className="flex items-center bg-black/50 rounded-xl p-0.5 border border-border/60 text-xs shadow-inner overflow-x-auto"
               role="tablist"
               aria-label="Streaming Provider"
             >
@@ -215,6 +253,24 @@ export function UnifiedPlayer({
               >
                 <SparklesIcon className="size-3 text-cyan-400" />
                 StreamFree
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                aria-selected={selectedProvider === "damitv"}
+                disabled={!hasDamiTv}
+                onClick={() => handleProviderSwitch("damitv")}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[0.7rem] font-bold transition-all ${
+                  selectedProvider === "damitv"
+                    ? "bg-white/20 text-white shadow-sm"
+                    : hasDamiTv
+                    ? "text-muted-foreground hover:text-foreground"
+                    : "opacity-35 cursor-not-allowed text-muted-foreground"
+                }`}
+              >
+                <MonitorPlayIcon className="size-3 text-violet-400" />
+                DAMITV
               </button>
 
               <button
@@ -252,6 +308,36 @@ export function UnifiedPlayer({
                 <TvIcon className="size-3 text-amber-400" />
                 DaddyLive
               </button>
+            </div>
+          )}
+
+          {/* DAMITV Source Variants selector */}
+          {selectedProvider === "damitv" && damiTv?.stream?.sources && damiTv.stream.sources.length > 1 && (
+            <div className="flex items-center bg-black/40 rounded-lg p-0.5 border border-border/50 text-xs">
+              {damiTv.stream.sources.map((src) => {
+                const isSelected = src.id === (activeDamiSource?.id || "")
+                const badge = src.hd ? "HD" : src.sd ? "SD" : null
+                return (
+                  <button
+                    key={src.id}
+                    type="button"
+                    onClick={() => handleDamiSourceSwitch(src.id)}
+                    title={src.name}
+                    className={`flex items-center gap-1 px-2 py-1 rounded-md text-[0.7rem] font-bold transition-all truncate max-w-[130px] ${
+                      isSelected
+                        ? "bg-violet-500/25 text-violet-300 shadow-sm border border-violet-500/40"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <span className="truncate">{src.name}</span>
+                    {badge && (
+                      <span className="text-[9px] px-1 rounded bg-black/40 text-violet-300 font-mono">
+                        {badge}
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
             </div>
           )}
 
@@ -309,6 +395,13 @@ export function UnifiedPlayer({
             </span>
           )}
 
+          {/* Quality badge for DAMITV if only 1 source */}
+          {selectedProvider === "damitv" && activeDamiSource && (activeDamiSource.hd || activeDamiSource.sd) && (
+            <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md text-[0.65rem] font-semibold bg-violet-500/15 text-violet-300 border border-violet-500/30">
+              {activeDamiSource.hd ? "HD" : "SD"}
+            </span>
+          )}
+
           <button
             type="button"
             onClick={toggleFullscreen}
@@ -347,7 +440,9 @@ export function UnifiedPlayer({
             <AlertCircleIcon className="size-10 text-amber-500" />
             <div>
               <p className="font-semibold text-sm text-foreground">
-                {selectedProvider === "daddylive"
+                {selectedProvider === "damitv"
+                  ? "DAMITV Stream Unavailable"
+                  : selectedProvider === "daddylive"
                   ? "DaddyLive Channel Unavailable"
                   : selectedProvider === "zlive"
                   ? "ZLive Channel Unavailable"
@@ -418,6 +513,19 @@ export function UnifiedPlayer({
           <span>Active Provider: <strong className="text-foreground">{providerDisplayName}</strong></span>
           {selectedProvider === "streamfree" && (
             <span className="hidden sm:inline">· Quality: {activeSfSource?.quality ?? sfQuality}</span>
+          )}
+          {selectedProvider === "damitv" && (
+            <>
+              {activeDamiSource?.name && (
+                <span className="hidden sm:inline">· Source: {activeDamiSource.name}</span>
+              )}
+              {damiTv?.stream?.viewers && (
+                <span className="hidden sm:inline-flex items-center gap-1 text-[var(--pitch)] font-medium">
+                  <UsersIcon className="size-3" />
+                  {damiTv.stream.viewers.toLocaleString()} watching
+                </span>
+              )}
+            </>
           )}
           {selectedProvider === "zlive" && activeZLiveChannel?.region && (
             <span className="hidden sm:inline">· Region: {activeZLiveChannel.region}</span>

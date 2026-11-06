@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { ExternalLinkIcon, PlayIcon, RadioIcon, SparklesIcon, TvIcon } from "lucide-react"
+import { ExternalLinkIcon, MonitorPlayIcon, PlayIcon, RadioIcon, SparklesIcon, TvIcon } from "lucide-react"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
 import { splitFixtures, startOf, type Timed } from "@/lib/live"
@@ -10,6 +10,7 @@ import { gatewaySources } from "@/lib/providers/registry"
 import type { MatchedStream } from "@/lib/streamfree/types"
 import type { MatchedZLive, ZLiveChannel } from "@/lib/zlive/types"
 import type { MatchedDaddyLive } from "@/lib/daddylive/types"
+import type { MatchedDamiTv } from "@/lib/damitv/types"
 import { UnifiedPlayer } from "@/components/unified-player"
 
 export type LiveFixture = Timed & {
@@ -49,8 +50,9 @@ type ActivePlayerState = {
   streamFree?: MatchedStream | null
   zLive?: MatchedZLive | null
   daddyLive?: MatchedDaddyLive | null
+  damiTv?: MatchedDamiTv | null
   genericChannel?: ZLiveChannel | null
-  initialProvider?: "streamfree" | "zlive" | "daddylive"
+  initialProvider?: "streamfree" | "zlive" | "daddylive" | "damitv"
 }
 
 function Row({
@@ -60,6 +62,7 @@ function Row({
   matchedStream,
   matchedZLive,
   matchedDaddyLive,
+  matchedDamiTv,
   onWatch,
 }: {
   m: LiveFixture
@@ -68,10 +71,11 @@ function Row({
   matchedStream?: MatchedStream
   matchedZLive?: MatchedZLive
   matchedDaddyLive?: MatchedDaddyLive
+  matchedDamiTv?: MatchedDamiTv
   onWatch: (state: ActivePlayerState) => void
 }) {
   const tid = LEAGUE_TOURNAMENT_ID[m.league]
-  const hasStream = Boolean(matchedStream || matchedZLive || matchedDaddyLive)
+  const hasStream = Boolean(matchedStream || matchedZLive || matchedDaddyLive || matchedDamiTv)
 
   return (
     <div className="card-lift fixture-row surface bg-card rounded-2xl px-4 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 transition-all">
@@ -146,6 +150,16 @@ function Row({
                   )}
                 </span>
               )}
+
+              {matchedDamiTv && (
+                <span
+                  title={`DAMITV (${matchedDamiTv.stream.sources.length} source${matchedDamiTv.stream.sources.length === 1 ? "" : "s"})`}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-semibold bg-violet-500/10 text-violet-400 border border-violet-500/25"
+                >
+                  <MonitorPlayIcon className="size-2.5" />
+                  DAMITV
+                </span>
+              )}
             </div>
 
             <button
@@ -157,7 +171,14 @@ function Row({
                   streamFree: matchedStream ?? null,
                   zLive: matchedZLive ?? null,
                   daddyLive: matchedDaddyLive ?? null,
-                  initialProvider: matchedStream ? "streamfree" : matchedDaddyLive ? "daddylive" : "zlive",
+                  damiTv: matchedDamiTv ?? null,
+                  initialProvider: matchedStream
+                    ? "streamfree"
+                    : matchedDamiTv
+                    ? "damitv"
+                    : matchedDaddyLive
+                    ? "daddylive"
+                    : "zlive",
                 })
               }
               aria-label={`Watch streams for ${m.home} vs ${m.away}`}
@@ -189,6 +210,7 @@ function Section({
   streamMap,
   zliveMap,
   daddyliveMap,
+  damitvMap,
   onWatch,
 }: {
   title: string
@@ -199,6 +221,7 @@ function Section({
   streamMap: Record<number, MatchedStream>
   zliveMap: Record<number, MatchedZLive>
   daddyliveMap: Record<number, MatchedDaddyLive>
+  damitvMap: Record<number, MatchedDamiTv>
   onWatch: (state: ActivePlayerState) => void
 }) {
   return (
@@ -229,6 +252,7 @@ function Section({
               matchedStream={streamMap[m.event_id]}
               matchedZLive={zliveMap[m.event_id]}
               matchedDaddyLive={daddyliveMap[m.event_id]}
+              matchedDamiTv={damitvMap[m.event_id]}
               onWatch={onWatch}
             />
           ))}
@@ -243,6 +267,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
   const [streamMap, setStreamMap] = useState<Record<number, MatchedStream>>({})
   const [zliveMap, setZliveMap] = useState<Record<number, MatchedZLive>>({})
   const [daddyliveMap, setDaddyliveMap] = useState<Record<number, MatchedDaddyLive>>({})
+  const [damitvMap, setDamitvMap] = useState<Record<number, MatchedDamiTv>>({})
   const [genericChannels, setGenericChannels] = useState<ZLiveChannel[]>([])
   const [activePlayer, setActivePlayer] = useState<ActivePlayerState | null>(null)
   const gateways = gatewaySources()
@@ -274,6 +299,31 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
       }
     }
     loadStreamFree()
+    return () => {
+      unmounted = true
+    }
+  }, [])
+
+  // Fetch DAMITV stream matches on mount
+  useEffect(() => {
+    let unmounted = false
+    async function loadDamiTv() {
+      try {
+        const res = await fetch("/api/streams/damitv")
+        if (!res.ok) return
+        const data = await res.json()
+        if (data?.streams && Array.isArray(data.streams) && !unmounted) {
+          const map: Record<number, MatchedDamiTv> = {}
+          for (const s of data.streams) {
+            if (s.event_id) map[s.event_id] = s
+          }
+          setDamitvMap(map)
+        }
+      } catch (err) {
+        console.warn("[live] Could not load DAMITV streams:", err)
+      }
+    }
+    loadDamiTv()
     return () => {
       unmounted = true
     }
@@ -376,6 +426,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
               streamFree={activePlayer.streamFree}
               zLive={activePlayer.zLive}
               daddyLive={activePlayer.daddyLive}
+              damiTv={activePlayer.damiTv}
               genericChannel={activePlayer.genericChannel}
               initialProvider={activePlayer.initialProvider}
               onClose={() => setActivePlayer(null)}
@@ -494,6 +545,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
         streamMap={streamMap}
         zliveMap={zliveMap}
         daddyliveMap={daddyliveMap}
+        damitvMap={damitvMap}
         onWatch={setActivePlayer}
       />
       <Section
@@ -504,6 +556,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
         streamMap={streamMap}
         zliveMap={zliveMap}
         daddyliveMap={daddyliveMap}
+        damitvMap={damitvMap}
         onWatch={setActivePlayer}
       />
       <Section
@@ -514,6 +567,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
         streamMap={streamMap}
         zliveMap={zliveMap}
         daddyliveMap={daddyliveMap}
+        damitvMap={damitvMap}
         onWatch={setActivePlayer}
       />
     </div>

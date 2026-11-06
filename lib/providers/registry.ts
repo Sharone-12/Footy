@@ -14,6 +14,7 @@ import { streamfreeAdapter } from "./streamfree"
 import { youtubeAdapter } from "./youtube"
 import { zliveAdapter } from "./zlive"
 import { daddyliveAdapter } from "./daddylive"
+import { damitvAdapter } from "./damitv"
 import type { ProviderEntry } from "./types"
 
 /** Every provider, in display and preference order. */
@@ -21,6 +22,7 @@ export function registry(): ProviderEntry[] {
   return [
     { adapter: streamfreeAdapter, supported: true, configured: true },
     { adapter: zliveAdapter, supported: true, configured: true },
+    { adapter: damitvAdapter, supported: true, configured: true },
     {
       adapter: daddyliveAdapter,
       supported: true,
@@ -117,6 +119,13 @@ export const DIRECTORY: DirectoryEntry[] = [
     name: "DaddyLive",
     domain: "thedaddy.li",
     url: "https://thedaddy.li",
+    category: "platform",
+    enabled: true,
+  },
+  {
+    name: "DAMITV",
+    domain: "damitv.st",
+    url: "https://damitv.st",
     category: "platform",
     enabled: true,
   },
