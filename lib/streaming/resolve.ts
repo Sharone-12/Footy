@@ -49,6 +49,8 @@ export type StreamBundle = {
   damiTv?: MatchedDamiTv | null
   /** A 24/7 broadcaster picked by hand, with no fixture behind it. */
   genericChannel?: ZLiveChannel | null
+  /** All available 24/7 football channels from the manifest. */
+  genericChannels?: ZLiveChannel[] | null
 }
 
 export const PROVIDER_NAME: Record<StreamingProviderId, string> = {
@@ -142,26 +144,47 @@ function daddyLiveProvider(m: MatchedDaddyLive): WatchProvider | null {
 function zLiveProvider(
   m: MatchedZLive | null | undefined,
   generic: ZLiveChannel | null | undefined,
+  allGenerics?: ZLiveChannel[] | null,
 ): WatchProvider | null {
-  const channel = m?.channel || generic
-  if (!channel) return null
-  const url = channel.url || (channel.id ? `https://zlive.st/embed/${channel.id}` : "")
-  if (!url) return null
+  const sources: WatchSource[] = []
+
+  // 1. Primary fixture-matched channel or specific generic channel
+  const primary = m?.channel || generic
+  if (primary && primary.id) {
+    sources.push({
+      provider: "zlive",
+      key: `zlive:${primary.id}`,
+      label: primary.name || "Channel",
+      quality: primary.quality,
+      url: primary.url || `https://zlive.st/embed/${primary.id}`,
+      live: Boolean(primary.live),
+    })
+  }
+
+  // 2. Also register all available generic 24/7 channels as selectable sources
+  if (allGenerics && allGenerics.length > 0) {
+    for (const ch of allGenerics) {
+      if (ch.id && !sources.some((s) => s.key === `zlive:${ch.id}`)) {
+        sources.push({
+          provider: "zlive",
+          key: `zlive:${ch.id}`,
+          label: ch.name || "Channel",
+          quality: ch.quality,
+          url: ch.url || `https://zlive.st/embed/${ch.id}`,
+          live: Boolean(ch.live),
+        })
+      }
+    }
+  }
+
+  if (!sources.length) return null
+
   return {
     id: "zlive",
     name: PROVIDER_NAME.zlive,
-    status: channel.live ? "LIVE" : "OFFLINE",
-    sources: [
-      {
-        provider: "zlive",
-        key: `zlive:${channel.id}`,
-        label: channel.name || "Channel",
-        quality: channel.quality,
-        url,
-        live: Boolean(channel.live),
-      },
-    ],
-    qualities: dedupe([channel.quality]),
+    status: "LIVE",
+    sources,
+    qualities: dedupe(sources.map((s) => s.quality)),
     caveat:
       m && !m.isConfirmedMatch
         ? "Broadcaster channel, not a confirmed fixture match"
@@ -179,7 +202,7 @@ export function buildProviders(bundle: StreamBundle): WatchProvider[] {
     streamfree: bundle.streamFree ? streamFreeProvider(bundle.streamFree) : null,
     damitv: bundle.damiTv ? damiTvProvider(bundle.damiTv) : null,
     daddylive: bundle.daddyLive ? daddyLiveProvider(bundle.daddyLive) : null,
-    zlive: zLiveProvider(bundle.zLive, bundle.genericChannel),
+    zlive: zLiveProvider(bundle.zLive, bundle.genericChannel, bundle.genericChannels),
   }
   return ORDER.map((id) => built[id]).filter((p): p is WatchProvider => Boolean(p))
 }

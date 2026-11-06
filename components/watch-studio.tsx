@@ -206,6 +206,7 @@ export function WatchStudio({
           daddyLive: dlData.match ?? null,
           damiTv: dtData.stream ?? null,
           genericChannel: matchingGeneric,
+          genericChannels: generics,
         }
 
         setBundle(newBundle)
@@ -241,6 +242,14 @@ export function WatchStudio({
   const currentProvider = activeResolution?.provider ?? null
   const currentSource = activeResolution?.source ?? null
 
+  // Auto-dismiss iframe loading overlay after max 1.6s so cross-origin feeds are never blocked
+  useEffect(() => {
+    if (isFrameLoading) {
+      const timer = setTimeout(() => setIsFrameLoading(false), 1600)
+      return () => clearTimeout(timer)
+    }
+  }, [isFrameLoading, reloadKey, currentSource?.key])
+
   // Keep state and URL query params synchronized
   const selectSource = useCallback(
     (providerId: StreamingProviderId, sourceKey: string) => {
@@ -248,6 +257,18 @@ export function WatchStudio({
       setSelectedSourceKey(sourceKey)
       setIsFrameLoading(true)
       setHasFrameError(false)
+
+      // When picking a ZLive channel, ensure bundle's genericChannel is updated immediately
+      if (providerId === "zlive") {
+        const rawId = sourceKey.replace(/^zlive:/, "")
+        const ch = genericChannels.find((c) => c.id === rawId)
+        if (ch) {
+          setBundle((prev) => ({
+            ...prev,
+            genericChannel: ch,
+          }))
+        }
+      }
 
       // Update URL without a page reload so refresh preserves the stream
       if (typeof window !== "undefined") {
@@ -257,7 +278,7 @@ export function WatchStudio({
         window.history.replaceState({}, "", url.toString())
       }
     },
-    [],
+    [genericChannels],
   )
 
   // Fullscreen container handler
@@ -488,12 +509,14 @@ export function WatchStudio({
               </div>
 
               <div className="flex items-center gap-2">
-                {currentProvider && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/10 text-white/90 border border-white/15">
-                    {currentProvider.name}
-                    {currentSource?.quality && (
+                {currentProvider && currentSource && (
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/10 text-white/90 border border-white/15">
+                    <span className="size-1.5 rounded-full bg-[var(--pitch)] animate-pulse" />
+                    <span>{currentProvider.name}:</span>
+                    <strong className="text-foreground">{currentSource.label}</strong>
+                    {currentSource.quality && (
                       <span className="text-[10px] text-[var(--pitch)] font-mono ml-0.5">
-                        {currentSource.quality}
+                        ({currentSource.quality})
                       </span>
                     )}
                   </span>
@@ -597,10 +620,10 @@ export function WatchStudio({
               {!isBundleLoading && currentSource && (
                 <>
                   {isFrameLoading && (
-                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/85 backdrop-blur-xs">
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/85 backdrop-blur-xs pointer-events-none transition-opacity duration-300">
                       <div className="size-10 rounded-full border-2 border-white/10 border-t-[var(--pitch)] animate-spin mb-3" />
                       <span className="text-xs text-muted-foreground font-mono">
-                        INITIALIZING {currentProvider?.name.toUpperCase()} FEED...
+                        INITIALIZING {currentSource.label.toUpperCase()} ({currentProvider?.name.toUpperCase()})...
                       </span>
                     </div>
                   )}
@@ -646,9 +669,12 @@ export function WatchStudio({
               <div className="flex items-center gap-2.5">
                 {currentSource ? (
                   <>
-                    <span className="size-2 rounded-full bg-[var(--pitch)]" />
-                    <span className="font-semibold text-foreground truncate max-w-[150px] sm:max-w-xs">
+                    <span className="size-2 rounded-full bg-[var(--pitch)] animate-pulse" />
+                    <span className="font-bold text-foreground truncate max-w-[150px] sm:max-w-xs">
                       {currentSource.label}
+                    </span>
+                    <span className="text-muted-foreground text-[11px]">
+                      via {currentProvider?.name}
                     </span>
                     {currentSource.quality && (
                       <span className="px-2 py-0.5 rounded-md bg-white/10 text-foreground font-mono text-[10px] font-bold">
@@ -662,6 +688,18 @@ export function WatchStudio({
               </div>
 
               <div className="flex items-center gap-2">
+                {currentSource?.url && (
+                  <a
+                    href={currentSource.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
+                    title="Open Stream in New Tab (Direct Feed)"
+                  >
+                    <ExternalLinkIcon className="size-4" />
+                  </a>
+                )}
+
                 <button
                   type="button"
                   onClick={reloadStream}
@@ -822,6 +860,41 @@ export function WatchStudio({
                   </p>
                 </div>
 
+                {/* CURRENTLY ACTIVE STREAM HIGHLIGHT BANNER */}
+                {currentSource && (
+                  <div className="p-3.5 rounded-2xl bg-[var(--pitch)]/10 border-2 border-[var(--pitch)]/40 flex items-center justify-between shadow-md">
+                    <div className="flex items-center gap-3">
+                      <span className="relative flex size-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--pitch)] opacity-75" />
+                        <span className="relative inline-flex rounded-full size-3 bg-[var(--pitch)]" />
+                      </span>
+                      <div>
+                        <span className="text-[10px] uppercase font-black tracking-widest text-muted-foreground block">
+                          NOW PLAYING IN STUDIO
+                        </span>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-sm sm:text-base font-bold text-foreground">
+                            {currentSource.label}
+                          </span>
+                          <span className="px-2 py-0.5 rounded bg-[var(--pitch)] text-black text-[10px] font-black uppercase font-mono">
+                            {currentProvider?.name}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {currentSource.quality && (
+                        <span className="px-2.5 py-1 rounded-lg bg-black/70 text-[var(--pitch)] font-mono text-xs font-bold border border-[var(--pitch)]/30">
+                          {currentSource.quality}
+                        </span>
+                      )}
+                      <span className="hidden sm:inline-flex px-2 py-1 rounded-lg bg-[var(--pitch)]/20 text-[var(--pitch)] text-xs font-bold">
+                        STREAMING
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 {providers.length === 0 ? (
                   <p className="text-xs text-muted-foreground py-4 text-center">
                     No active match streams available currently.
@@ -846,7 +919,7 @@ export function WatchStudio({
                         </div>
 
                         <div className="flex flex-wrap items-center gap-2">
-                          {p.sources.map((src) => {
+                          {p.sources.slice(0, 12).map((src) => {
                             const isCurrent = currentSource?.key === src.key
                             return (
                               <button
@@ -855,14 +928,23 @@ export function WatchStudio({
                                 onClick={() => selectSource(p.id, src.key)}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
                                   isCurrent
-                                    ? "bg-[var(--pitch)] text-black font-bold shadow-md"
+                                    ? "bg-[var(--pitch)] text-black font-bold shadow-md scale-[1.03]"
                                     : "bg-card hover:bg-accent border border-border/80 text-foreground"
                                 }`}
                               >
-                                <PlayIcon className="size-2.5 fill-current" />
+                                {isCurrent ? (
+                                  <span className="size-2 rounded-full bg-black animate-pulse" />
+                                ) : (
+                                  <PlayIcon className="size-2.5 fill-current" />
+                                )}
                                 <span>{src.label}</span>
                                 {src.quality && (
                                   <span className="text-[10px] opacity-75 font-mono">({src.quality})</span>
+                                )}
+                                {isCurrent && (
+                                  <span className="text-[9px] px-1 rounded bg-black text-[var(--pitch)] font-mono font-black ml-1">
+                                    ON AIR
+                                  </span>
                                 )}
                               </button>
                             )
@@ -876,25 +958,54 @@ export function WatchStudio({
                 {/* 24/7 Football Broadcasters */}
                 {genericChannels.length > 0 && (
                   <div className="pt-4 border-t border-border/40">
-                    <h5 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-                      24/7 Football Broadcasters Directory (Backup Channels)
-                    </h5>
+                    <div className="flex items-center justify-between mb-2.5">
+                      <div>
+                        <h5 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                          24/7 Football Broadcasters Directory (Backup Channels)
+                        </h5>
+                        <p className="text-[11px] text-muted-foreground">
+                          Click any channel to switch the live player instantly.
+                        </p>
+                      </div>
+                      <span className="text-[11px] font-mono text-muted-foreground">
+                        {genericChannels.length} channels
+                      </span>
+                    </div>
+
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                      {genericChannels.slice(0, 12).map((ch) => (
-                        <button
-                          key={ch.id}
-                          type="button"
-                          onClick={() => selectSource("zlive", `zlive:${ch.id}`)}
-                          className="p-2 rounded-xl bg-background/40 hover:bg-accent/40 border border-border/40 hover:border-emerald-500/50 flex items-center justify-between text-left text-xs transition-all"
-                        >
-                          <span className="font-medium text-foreground truncate mr-1">{ch.name}</span>
-                          {ch.quality && (
-                            <span className="text-[9px] px-1 rounded bg-black/40 text-muted-foreground font-mono">
-                              {ch.quality}
-                            </span>
-                          )}
-                        </button>
-                      ))}
+                      {genericChannels.map((ch) => {
+                        const isCurrent = currentSource?.key === `zlive:${ch.id}`
+                        return (
+                          <button
+                            key={ch.id}
+                            type="button"
+                            onClick={() => selectSource("zlive", `zlive:${ch.id}`)}
+                            className={`p-2.5 rounded-xl border flex items-center justify-between text-left text-xs transition-all ${
+                              isCurrent
+                                ? "bg-[var(--pitch)] text-black border-2 border-[var(--pitch)] font-bold shadow-[0_0_15px_-2px_var(--pitch)] scale-[1.02]"
+                                : "bg-background/40 hover:bg-accent/40 border-border/40 hover:border-emerald-500/50 text-foreground"
+                            }`}
+                          >
+                            <div className="flex items-center gap-1.5 truncate mr-1">
+                              {isCurrent && (
+                                <span className="size-2 rounded-full bg-black animate-pulse shrink-0" />
+                              )}
+                              <span className="truncate font-semibold">{ch.name}</span>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              {isCurrent ? (
+                                <span className="px-1.5 py-0.5 rounded bg-black text-[var(--pitch)] text-[9px] font-mono font-black uppercase tracking-wider">
+                                  ACTIVE
+                                </span>
+                              ) : ch.quality ? (
+                                <span className="text-[9px] px-1 rounded bg-black/40 text-muted-foreground font-mono">
+                                  {ch.quality}
+                                </span>
+                              ) : null}
+                            </div>
+                          </button>
+                        )
+                      })}
                     </div>
                   </div>
                 )}
