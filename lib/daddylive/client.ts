@@ -25,7 +25,12 @@ let infoCache: { timestamp: number; data: Record<string, unknown> } | null = nul
 let inflightInfo: Promise<Record<string, unknown> | null> | null = null
 
 function getApiKey(): string | undefined {
-  return process.env.DADDYLIVE_API_KEY?.trim()
+  return (
+    process.env.DADDYLIVE_API_KEY?.trim() ||
+    process.env.daddylive_api_key?.trim() ||
+    process.env["daddylive-api-key"]?.trim() ||
+    process.env.Daddylive_Api_Key?.trim()
+  )
 }
 
 /**
@@ -361,3 +366,4 @@ export function _clearDaddyLiveCache(): void {
   infoCache = null
   inflightInfo = null
 }
+

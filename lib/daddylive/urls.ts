@@ -43,3 +43,4 @@ export function normalizeDaddyLiveLogo(rawLogo?: string | null): string | undefi
   const cleanPath = trimmed.replace(/^\/?(logos\/)?/, "")
   return `${DADDYLIVE_BASE}/logos/${cleanPath}`
 }
+

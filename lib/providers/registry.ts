@@ -24,7 +24,11 @@ export function registry(): ProviderEntry[] {
     {
       adapter: daddyliveAdapter,
       supported: true,
-      configured: Boolean(process.env.DADDYLIVE_API_KEY),
+      configured: Boolean(
+        process.env.DADDYLIVE_API_KEY ||
+          process.env.daddylive_api_key ||
+          process.env["daddylive-api-key"],
+      ),
     },
     { adapter: manualAdapter, supported: true, configured: true },
     {
