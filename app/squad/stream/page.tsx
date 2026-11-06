@@ -4,6 +4,7 @@ import { BARCA_ID, LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
 import { discover } from "@/lib/providers/discover"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { StreamProviders } from "@/components/stream-providers"
+import { ExternalSources } from "@/components/external-sources"
 import { BarcaNav } from "@/components/barca-nav"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -72,7 +73,7 @@ async function Stream() {
 
 export default function BarcaStreamPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-14">
+    <div className="mx-auto max-w-6xl px-4 py-14">
       <div className="mb-6 flex items-center gap-3 animate-fade-in">
         <TeamCrest teamId={BARCA_ID} name={BARCA} size={40} />
         <div>
@@ -102,6 +103,22 @@ export default function BarcaStreamPage() {
       >
         <Stream />
       </Suspense>
+
+      {/* Same directory the Live page shows, rendered from the one registry
+          in lib/providers/registry.ts — a destination added there appears on
+          both pages without a component change. */}
+      <section className="mt-12">
+        <h2
+          className="text-lg font-semibold tracking-tight uppercase mb-1"
+          style={{ fontFamily: "var(--font-condensed)" }}
+        >
+          Available External Sources
+        </h2>
+        <p className="text-muted-foreground text-sm mb-4">
+          Every link here opens in a new tab and leaves the app.
+        </p>
+        <ExternalSources />
+      </section>
     </div>
   )
 }

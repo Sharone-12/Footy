@@ -15,12 +15,6 @@ const LINKS = [
   { href: "/live", label: "Live", hint: "Live & streaming" },
 ]
 
-const BARCA_PILL_STYLE = {
-  backgroundImage:
-    "linear-gradient(to bottom, rgba(255, 255, 255, 0.18), rgba(0, 0, 0, 0.38)), repeating-linear-gradient(120deg, #004D98 0px, #004D98 10px, #A50044 10px, #A50044 20px)",
-  backgroundColor: "#004D98",
-}
-
 function isActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/"
   return pathname === href || pathname.startsWith(`${href}/`)
@@ -37,10 +31,9 @@ export function MainNavFallback() {
       {LINKS.map((l) => (
         <span
           key={l.href}
-          style={l.href === "/squad" ? BARCA_PILL_STYLE : undefined}
           className={`relative z-10 px-3.5 sm:px-4 py-1.5 rounded-full text-sm font-medium ${
             l.href === "/squad"
-              ? "barca-stripes-pill overflow-hidden text-white font-bold min-w-[5.25rem] inline-flex items-center justify-center text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
+              ? "barca-stripes barca-stripes-tight overflow-hidden text-white font-bold min-w-[5.25rem] inline-flex items-center justify-center text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
               : "text-muted-foreground"
           }`}
         >
@@ -122,10 +115,9 @@ export function MainNav() {
                   onFocus={() => setHoveredIdx(i)}
                   onBlur={() => setHoveredIdx(null)}
                   data-active={active || undefined}
-                  style={isBarca ? BARCA_PILL_STYLE : undefined}
                   className={`relative z-10 px-3.5 sm:px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
                     isBarca
-                      ? "barca-stripes-pill overflow-hidden text-white font-bold min-w-[5.25rem] inline-flex items-center justify-center text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_2px_6px_rgba(0,0,0,0.5)] hover:brightness-110"
+                      ? "barca-stripes barca-stripes-tight overflow-hidden text-white font-bold min-w-[5.25rem] inline-flex items-center justify-center text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_2px_6px_rgba(0,0,0,0.5)] hover:brightness-110"
                       : "text-muted-foreground hover:text-foreground data-[active]:text-foreground"
                   }`}
                 >

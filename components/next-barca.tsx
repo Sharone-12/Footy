@@ -42,12 +42,6 @@ const pad = (n: number) => String(n).padStart(2, "0")
 // trip, so they do not need a tick each.
 const DISCOVER_AT_MS = [5 * 60_000, 60_000]
 
-const BARCA_PILL_STYLE = {
-  backgroundImage:
-    "linear-gradient(to bottom, rgba(255, 255, 255, 0.16), rgba(0, 0, 0, 0.40)), repeating-linear-gradient(120deg, #004D98 0px, #004D98 12px, #A50044 12px, #A50044 24px)",
-  backgroundColor: "#004D98",
-}
-
 export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
   // Starts null and fills on mount: the server has no live clock to pick a
   // fixture with, and rendering a different second would break hydration.
@@ -90,8 +84,7 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
   return (
     <Link
       href={`/predictions/match?id=${match.event_id}`}
-      style={BARCA_PILL_STYLE}
-      className="pointer-events-auto nav-pill barca-stripes-pill overflow-hidden flex items-center gap-2 pl-2 pr-3 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] hover:brightness-110 transition-all"
+      className="pointer-events-auto nav-pill barca-stripes overflow-hidden flex items-center gap-2 pl-2 pr-3 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] hover:brightness-110 transition-all"
       title={`${match.league} — Barça ${match.home ? "vs" : "away at"} ${match.opponent}`}
     >
       <span className="flex items-center gap-1">

@@ -1,3 +1,5 @@
+import { UCL } from "@/lib/competition"
+
 /**
  * The Barça squad view. `bucket` matches the `position` column verbatim —
  * Sofascore's four broad buckets, which is all the loader stores (see
@@ -74,4 +76,40 @@ export function resolveFixtureScope(value?: string | string[] | null): FixtureSc
   return FIXTURE_SCOPES.some((s) => s.key === v)
     ? (v as FixtureScope)
     : DEFAULT_FIXTURE_SCOPE
+}
+
+type Filterable = {
+  eq(column: string, value: string): unknown
+  neq(column: string, value: string): unknown
+}
+
+/**
+ * Apply the fixture list's three-way scope to a `matches` query.
+ *
+ * One definition for every view on the page — the fixture list, the results
+ * list and the form strip — because three hand-rolled copies is exactly how
+ * the form strip ended up ignoring the filter.
+ *
+ * Q is left unconstrained for the same reason as scopeLeague in
+ * lib/competition.ts: bounding it by the builder's own methods sends
+ * TypeScript into "excessively deep" instantiation on supabase-js types.
+ */
+export function scopeFixtures<Q>(query: Q, scope: FixtureScope): Q {
+  if (scope === "all") return query
+  const q = query as unknown as Filterable
+  return (scope === "ucl" ? q.eq("league", UCL) : q.neq("league", UCL)) as Q
+}
+
+/**
+ * Roles the source data gets wrong for how a player is actually being used.
+ *
+ * Unlike SQUAD_POSITION_OVERRIDES above, this one DOES change rankings — that
+ * is the point. Sofascore files Raphinha as LW off his nominal slot, but he
+ * leads the squad in goals at a centre-forward's rate, and scoring him on a
+ * winger profile judges him on dribbles and crosses instead of finishing.
+ *
+ * Keys are slugs; values must be roles from ROLE_MAP in data_loader.py.
+ */
+export const ROLE_OVERRIDES: Record<string, string> = {
+  raphinha: "Striker",
 }

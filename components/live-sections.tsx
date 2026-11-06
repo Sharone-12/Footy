@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { ExternalLinkIcon } from "lucide-react"
+import { ExternalLinkIcon, PlayIcon, TvMinimalPlayIcon } from "lucide-react"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
 import { splitFixtures, startOf, type Timed } from "@/lib/live"
 import { gatewaySources } from "@/lib/providers/registry"
+import type { MatchedStream } from "@/lib/streamfree/types"
+import { StreamFreePlayer } from "@/components/streamfree-player"
 
 export type LiveFixture = Timed & {
   event_id: number
@@ -16,15 +18,6 @@ export type LiveFixture = Timed & {
   away: string
   away_id: number | null
 }
-
-/**
- * Live Now / Starting Soon / Upcoming, bucketed against a live clock.
- *
- * Client-side because which bucket a fixture belongs to changes every minute,
- * and a server render would be frozen at build or cache time. `now` starts
- * null and fills on mount, so the server and hydration markup agree — the
- * same approach the nav countdown uses.
- */
 
 function formatKickoff(m: LiveFixture) {
   if (!m.kickoff) {
@@ -44,20 +37,32 @@ function formatKickoff(m: LiveFixture) {
   })
 }
 
-/** Minutes played, from the kickoff instant — the database has no clock. */
 function elapsed(m: LiveFixture, now: number) {
   return Math.max(1, Math.floor((now - startOf(m)) / 60_000))
 }
 
-function Row({ m, now, live }: { m: LiveFixture; now: number; live: boolean }) {
+function Row({
+  m,
+  now,
+  live,
+  matchedStream,
+  onWatch,
+}: {
+  m: LiveFixture
+  now: number
+  live: boolean
+  matchedStream?: MatchedStream
+  onWatch?: (stream: MatchedStream) => void
+}) {
   const tid = LEAGUE_TOURNAMENT_ID[m.league]
+
   return (
-    <Link
-      href={`/predictions/match?id=${m.event_id}`}
-      className="card-lift fixture-row surface bg-card rounded-2xl px-4 py-3.5 flex items-center justify-between gap-4"
-    >
-      <div className="flex items-center gap-4 min-w-0 flex-1">
-        <span className="flex flex-col leading-none w-24 shrink-0">
+    <div className="card-lift fixture-row surface bg-card rounded-2xl px-4 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 transition-all">
+      <Link
+        href={`/predictions/match?id=${m.event_id}`}
+        className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1 group"
+      >
+        <span className="flex flex-col leading-none w-20 sm:w-24 shrink-0">
           {live ? (
             <span className="inline-flex items-center gap-1.5">
               <span className="relative flex size-2">
@@ -76,30 +81,89 @@ function Row({ m, now, live }: { m: LiveFixture; now: number; live: boolean }) {
         </span>
         <span className="flex items-center gap-2 min-w-0 flex-1">
           {m.home_id != null && <TeamCrest teamId={m.home_id} name={m.home} size={26} />}
-          <span className="truncate font-semibold text-[0.9rem]">{m.home}</span>
+          <span className="truncate font-semibold text-[0.9rem] group-hover:text-[var(--pitch)] transition-colors">
+            {m.home}
+          </span>
           <span className="stat-label text-[0.6rem] shrink-0 text-muted-foreground">v</span>
           {m.away_id != null && <TeamCrest teamId={m.away_id} name={m.away} size={26} />}
-          <span className="truncate font-semibold text-[0.9rem]">{m.away}</span>
+          <span className="truncate font-semibold text-[0.9rem] group-hover:text-[var(--pitch)] transition-colors">
+            {m.away}
+          </span>
         </span>
+      </Link>
+
+      <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50">
+        {/* StreamFree stream badge and watch button */}
+        {matchedStream && (
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              {matchedStream.isLive ? (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-bold bg-[var(--pitch)]/15 text-[var(--pitch)] border border-[var(--pitch)]/30">
+                  <span className="relative flex size-1.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--pitch)] opacity-75 motion-reduce:hidden" />
+                    <span className="relative inline-flex rounded-full size-1.5 bg-[var(--pitch)]" />
+                  </span>
+                  STREAM
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded-full text-[0.65rem] font-medium bg-white/5 text-muted-foreground border border-white/10">
+                  {matchedStream.status}
+                </span>
+              )}
+
+              {matchedStream.availableQualities.length > 0 && (
+                <div className="hidden md:flex items-center gap-0.5">
+                  {matchedStream.availableQualities.slice(0, 2).map((q) => (
+                    <span
+                      key={q}
+                      className="px-1.5 py-0.5 rounded bg-black/40 text-[0.65rem] font-mono text-muted-foreground border border-border/60"
+                    >
+                      {q}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => onWatch?.(matchedStream)}
+              aria-label={`Watch stream for ${m.home} vs ${m.away}`}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--pitch)] text-black hover:brightness-110 font-bold text-xs shadow-md transition-all hover:scale-[1.03]"
+            >
+              <PlayIcon className="size-3 fill-current" />
+              Watch
+            </button>
+          </div>
+        )}
+
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="hidden sm:inline text-xs text-muted-foreground truncate max-w-[130px]">
+            {m.league}
+          </span>
+          {tid && <LeagueCrest tournamentId={tid} name={m.league} size={20} />}
+        </div>
       </div>
-      <div className="flex items-center gap-2 shrink-0">
-        <span className="hidden sm:inline text-xs text-muted-foreground truncate max-w-[130px]">
-          {m.league}
-        </span>
-        {tid && <LeagueCrest tournamentId={tid} name={m.league} size={20} />}
-      </div>
-    </Link>
+    </div>
   )
 }
 
 function Section({
-  title, rows, now, live, empty,
+  title,
+  rows,
+  now,
+  live,
+  empty,
+  streamMap,
+  onWatch,
 }: {
   title: string
   rows: LiveFixture[]
   now: number
   live?: boolean
   empty: string
+  streamMap: Record<number, MatchedStream>
+  onWatch: (stream: MatchedStream) => void
 }) {
   return (
     <section>
@@ -121,7 +185,14 @@ function Section({
       ) : (
         <div className="flex flex-col gap-2.5 stagger">
           {rows.map((m) => (
-            <Row key={m.event_id} m={m} now={now} live={Boolean(live)} />
+            <Row
+              key={m.event_id}
+              m={m}
+              now={now}
+              live={Boolean(live)}
+              matchedStream={streamMap[m.event_id]}
+              onWatch={onWatch}
+            />
           ))}
         </div>
       )}
@@ -131,22 +202,79 @@ function Section({
 
 export function LiveSections({ matches }: { matches: LiveFixture[] }) {
   const [now, setNow] = useState<number | null>(null)
+  const [streamMap, setStreamMap] = useState<Record<number, MatchedStream>>({})
+  const [activeStream, setActiveStream] = useState<MatchedStream | null>(null)
   const gateways = gatewaySources()
 
   useEffect(() => {
     const tick = () => setNow(Date.now())
     tick()
-    // A minute is enough: the buckets and the elapsed counter both move in
-    // minutes, so a one-second tick would re-render for nothing.
     const t = setInterval(tick, 60_000)
     return () => clearInterval(t)
   }, [])
+
+  // Fetch StreamFree stream matches on mount
+  useEffect(() => {
+    let unmounted = false
+    async function loadStreams() {
+      try {
+        const res = await fetch("/api/streamfree")
+        if (!res.ok) return
+        const data = await res.json()
+        if (data?.streams && Array.isArray(data.streams) && !unmounted) {
+          const map: Record<number, MatchedStream> = {}
+          for (const s of data.streams) {
+            if (s.event_id) map[s.event_id] = s
+          }
+          setStreamMap(map)
+        }
+      } catch (err) {
+        console.warn("[live] Could not load streamfree matches:", err)
+      }
+    }
+    loadStreams()
+    return () => {
+      unmounted = true
+    }
+  }, [])
+
+  // Close player with Esc key
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setActiveStream(null)
+    }
+    if (activeStream) {
+      window.addEventListener("keydown", onKeyDown)
+      return () => window.removeEventListener("keydown", onKeyDown)
+    }
+  }, [activeStream])
 
   // Before mount there is no clock, so nothing can be bucketed yet.
   const { live, soon, upcoming } = splitFixtures(matches, now ?? 0)
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-8 relative">
+      {/* Active StreamFree Video Player Modal */}
+      {activeStream && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={`StreamFree player: ${activeStream.title}`}
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md animate-fade-in"
+          onClick={() => setActiveStream(null)}
+        >
+          <div
+            className="w-full max-w-4xl max-h-[92vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <StreamFreePlayer
+              stream={activeStream}
+              onClose={() => setActiveStream(null)}
+            />
+          </div>
+        </div>
+      )}
+
       {gateways.length > 0 && (
         <aside
           aria-label="External streaming gateways"
@@ -159,7 +287,10 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
             </span>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-bold uppercase tracking-wider text-foreground" style={{ fontFamily: "var(--font-condensed)" }}>
+                <span
+                  className="text-sm font-bold uppercase tracking-wider text-foreground"
+                  style={{ fontFamily: "var(--font-condensed)" }}
+                >
                   External Streaming Gateways
                 </span>
                 <span className="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20">
@@ -182,7 +313,10 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
                 className="card-lift surface bg-card hover:bg-accent/40 border border-border px-3.5 py-2 rounded-xl flex items-center gap-2 text-xs font-semibold transition-colors group"
               >
                 <span>{source.name}</span>
-                <ExternalLinkIcon className="size-3 text-muted-foreground group-hover:text-foreground transition-colors" aria-hidden />
+                <ExternalLinkIcon
+                  className="size-3 text-muted-foreground group-hover:text-foreground transition-colors"
+                  aria-hidden
+                />
               </a>
             ))}
           </div>
@@ -195,18 +329,24 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
         now={now ?? 0}
         live
         empty="No matches in play."
+        streamMap={streamMap}
+        onWatch={setActiveStream}
       />
       <Section
         title="Starting Soon"
         rows={now == null ? [] : soon}
         now={now ?? 0}
         empty="Nothing kicking off in the next three hours."
+        streamMap={streamMap}
+        onWatch={setActiveStream}
       />
       <Section
         title="Upcoming Matches"
         rows={now == null ? [] : upcoming}
         now={now ?? 0}
         empty="No upcoming fixtures."
+        streamMap={streamMap}
+        onWatch={setActiveStream}
       />
     </div>
   )

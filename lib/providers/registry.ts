@@ -10,12 +10,14 @@
  * stream, so there is nothing to call.
  */
 import { manualAdapter } from "./manual"
+import { streamfreeAdapter } from "./streamfree"
 import { youtubeAdapter } from "./youtube"
 import type { ProviderEntry } from "./types"
 
 /** Every provider, in display and preference order. */
 export function registry(): ProviderEntry[] {
   return [
+    { adapter: streamfreeAdapter, supported: true, configured: true },
     { adapter: manualAdapter, supported: true, configured: true },
     {
       adapter: youtubeAdapter,
@@ -83,6 +85,13 @@ export const DIRECTORY: DirectoryEntry[] = [
     domain: "streamcorner.st",
     url: "https://streamcorner.st/",
     category: "gateway",
+    enabled: true,
+  },
+  {
+    name: "StreamFree",
+    domain: "streamfree.top",
+    url: "https://streamfree.top",
+    category: "platform",
     enabled: true,
   },
   {

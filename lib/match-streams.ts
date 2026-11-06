@@ -12,7 +12,8 @@
  * populate it. Move it to `matches.stream_url` if that stops being true.
  */
 export const MATCH_STREAMS: Record<number, string> = {
-  // Barça at Atlético Madrid, 8 Nov — the next fixture, which is the one
-  // /squad/stream reads.
-  16421101: "https://www.youtube.com/live/BHtpYK0tV6U?si=d_g0CZiPMPx58GBL",
+  // Empty on purpose. A video id pinned here keeps playing whatever that id
+  // points at later, so a stale entry silently serves an unrelated stream
+  // rather than failing — 16421101 ended up on someone else's broadcast.
+  // Only add an id you have just checked, and expect to re-check it.
 }

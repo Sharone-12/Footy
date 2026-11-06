@@ -435,19 +435,21 @@
     );
 }
 
-/* Compact Blaugrana stripes for pills, buttons and nav items.
-   Cycles every 20px (10px FCB blue #004D98, 10px FCB claret #A50044) so
-   both iconic colors alternate visibly multiple times across the capsule. */
-.barca-stripes-pill {
-  background-color: #004D98;
+/* The same banner for elements too narrow to fit its 180px stripe cycle.
+   Identical palette and identical dimming — only the lengths are quartered,
+   so a ~130px nav pill shows the whole pattern instead of one slice of it.
+   background-size cannot do this: the stops are absolute px, so scaling the
+   tile clips the pattern rather than compressing it. */
+.barca-stripes-tight {
   background-image:
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(0, 0, 0, 0.35)),
+    linear-gradient(oklch(0.15 0 0 / 70%), oklch(0.15 0 0 / 78%)),
     repeating-linear-gradient(
-      120deg,
-      #004D98 0px,
-      #004D98 10px,
-      #A50044 10px,
-      #A50044 20px
+      90deg,
+      oklch(0.44 0.24 265) 0 10.5px,
+      oklch(0.22 0.10 265) 10.5px 17.5px,
+      oklch(0.32 0.18 10)  17.5px 27.5px,
+      oklch(0.55 0.22 25)  27.5px 37.5px,
+      oklch(0.32 0.18 10)  37.5px 45px
     );
 }
 
