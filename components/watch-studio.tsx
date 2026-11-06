@@ -24,6 +24,8 @@ import {
   CheckCircle2Icon,
   BarChart3Icon,
   ArrowRightIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
 } from "lucide-react"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { LEAGUE_TOURNAMENT_ID, BARCA_ID } from "@/lib/teams"
@@ -110,6 +112,8 @@ export function WatchStudio({
 
   const [isFrameLoading, setIsFrameLoading] = useState(true)
   const [hasFrameError, setHasFrameError] = useState(false)
+  const [expandedProviders, setExpandedProviders] = useState<Record<string, boolean>>({})
+  const [expandedDirectory, setExpandedDirectory] = useState(false)
 
   // Current wall clock for live match minutes and countdowns
   const [now, setNow] = useState<number>(Date.now())
@@ -973,7 +977,7 @@ export function WatchStudio({
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-                      {genericChannels.map((ch) => {
+                      {(expandedDirectory ? genericChannels : genericChannels.slice(0, 12)).map((ch) => {
                         const isCurrent = currentSource?.key === `zlive:${ch.id}`
                         return (
                           <button
@@ -1007,6 +1011,28 @@ export function WatchStudio({
                         )
                       })}
                     </div>
+
+                    {genericChannels.length > 12 && (
+                      <div className="mt-3 flex justify-center">
+                        <button
+                          type="button"
+                          onClick={() => setExpandedDirectory((prev) => !prev)}
+                          className="px-4 py-2 rounded-xl bg-card hover:bg-accent border border-border text-xs font-bold text-[var(--pitch)] inline-flex items-center gap-1.5 transition-all hover:scale-[1.02]"
+                        >
+                          {expandedDirectory ? (
+                            <>
+                              <span>Show Less</span>
+                              <ChevronUpIcon className="size-3.5" />
+                            </>
+                          ) : (
+                            <>
+                              <span>View All {genericChannels.length} Channels</span>
+                              <ChevronDownIcon className="size-3.5" />
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -1131,26 +1157,76 @@ export function WatchStudio({
                         )}
 
                         {/* Individual Sources Pills */}
-                        <div className="flex flex-wrap gap-1.5 pt-1">
-                          {p.sources.map((src) => {
-                            const isCurrent = currentSource?.key === src.key
-                            return (
-                              <button
-                                key={src.key}
-                                type="button"
-                                onClick={() => selectSource(p.id, src.key)}
-                                className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
-                                  isCurrent
-                                    ? "bg-[var(--pitch)] text-black font-bold shadow-sm"
-                                    : "bg-card hover:bg-accent text-muted-foreground hover:text-foreground border border-border/70"
+                        {(() => {
+                          const isExpanded = Boolean(expandedProviders[p.id])
+                          const MAX_SIDEBAR_SOURCES = 5
+                          let visibleSources = p.sources
+                          if (!isExpanded && p.sources.length > MAX_SIDEBAR_SOURCES) {
+                            const activeIdx = p.sources.findIndex((s) => s.key === currentSource?.key)
+                            if (activeIdx >= MAX_SIDEBAR_SOURCES) {
+                              visibleSources = [
+                                p.sources[activeIdx],
+                                ...p.sources.slice(0, MAX_SIDEBAR_SOURCES - 1).filter((s) => s.key !== currentSource?.key),
+                              ]
+                            } else {
+                              visibleSources = p.sources.slice(0, MAX_SIDEBAR_SOURCES)
+                            }
+                          }
+
+                          return (
+                            <div>
+                              <div
+                                className={`flex flex-wrap gap-1.5 pt-1 ${
+                                  isExpanded ? "max-h-60 overflow-y-auto pr-1" : ""
                                 }`}
                               >
-                                {isCurrent && <CheckCircle2Icon className="size-3 stroke-[3]" />}
-                                <span>{src.label}</span>
-                              </button>
-                            )
-                          })}
-                        </div>
+                                {visibleSources.map((src) => {
+                                  const isCurrent = currentSource?.key === src.key
+                                  return (
+                                    <button
+                                      key={src.key}
+                                      type="button"
+                                      onClick={() => selectSource(p.id, src.key)}
+                                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
+                                        isCurrent
+                                          ? "bg-[var(--pitch)] text-black font-bold shadow-sm"
+                                          : "bg-card hover:bg-accent text-muted-foreground hover:text-foreground border border-border/70"
+                                      }`}
+                                    >
+                                      {isCurrent && <CheckCircle2Icon className="size-3 stroke-[3]" />}
+                                      <span>{src.label}</span>
+                                    </button>
+                                  )
+                                })}
+                              </div>
+
+                              {p.sources.length > MAX_SIDEBAR_SOURCES && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setExpandedProviders((prev) => ({
+                                      ...prev,
+                                      [p.id]: !prev[p.id],
+                                    }))
+                                  }
+                                  className="mt-2 text-[11px] font-bold text-[var(--pitch)] hover:underline inline-flex items-center gap-1 transition-colors"
+                                >
+                                  {isExpanded ? (
+                                    <>
+                                      <span>Show Less</span>
+                                      <ChevronUpIcon className="size-3" />
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span>+ View {p.sources.length - MAX_SIDEBAR_SOURCES} More Channels</span>
+                                      <ChevronDownIcon className="size-3" />
+                                    </>
+                                  )}
+                                </button>
+                              )}
+                            </div>
+                          )
+                        })()}
                       </div>
                     )
                   })}
