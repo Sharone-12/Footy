@@ -724,20 +724,11 @@ export function WatchStudio({
 
                 <button
                   type="button"
-                  onClick={() => setIsCinemaMode((prev) => !prev)}
-                  className="hidden lg:inline-flex p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
-                  title={isCinemaMode ? "Exit Cinema Mode" : "Cinema Mode"}
-                >
-                  {isCinemaMode ? <Minimize2Icon className="size-4" /> : <Maximize2Icon className="size-4" />}
-                </button>
-
-                <button
-                  type="button"
                   onClick={toggleFullscreen}
                   className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
                   title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
                 >
-                  <Maximize2Icon className="size-4" />
+                  {isFullscreen ? <Minimize2Icon className="size-4" /> : <Maximize2Icon className="size-4" />}
                 </button>
               </div>
             </div>
