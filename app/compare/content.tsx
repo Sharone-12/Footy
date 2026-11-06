@@ -141,20 +141,20 @@ export default function CompareContent() {
   )
 
   return (
-    <div className="relative mx-auto max-w-6xl px-4 py-10">
+    <div className="relative mx-auto max-w-6xl px-3 sm:px-4 py-6 sm:py-10">
       {hasYamal && <div className="yamal-bg" aria-hidden />}
       {hasPedri && !hasYamal && <div className="pedri-bg" aria-hidden />}
       <div className="relative z-10">
-      <div className="mb-10 animate-fade-in">
+      <div className="mb-8 sm:mb-10 animate-fade-in">
         <h1
-          className="text-5xl tracking-[-0.035em] leading-none mb-3"
+          className="text-3xl sm:text-5xl tracking-[-0.035em] leading-none mb-3"
           style={{ fontFamily: "var(--font-condensed)" }}
         >
           <span className="font-bold">Head</span>
           <span className="font-normal text-muted-foreground">-to-</span>
           <span className="font-bold">head.</span>
         </h1>
-        <p className="text-muted-foreground text-base">
+        <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
           Side-by-side {mode === "p90" ? "per-90" : "season total"} stats for up
           to 3 players
         </p>

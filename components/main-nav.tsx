@@ -27,13 +27,13 @@ function isActive(pathname: string, href: string) {
  */
 export function MainNavFallback() {
   return (
-    <div className="segment relative flex rounded-full p-1 gap-0.5">
+    <div className="segment relative flex rounded-full p-1 gap-0.5 overflow-x-auto no-scrollbar whitespace-nowrap max-w-full">
       {LINKS.map((l) => (
         <span
           key={l.href}
-          className={`relative z-10 px-3.5 sm:px-4 py-1.5 rounded-full text-sm font-medium ${
+          className={`relative z-10 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium shrink-0 ${
             l.href === "/squad"
-              ? "barca-stripes barca-stripes-tight overflow-hidden text-white font-bold min-w-[5.25rem] inline-flex items-center justify-center text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
+              ? "barca-stripes barca-stripes-tight overflow-hidden text-white font-bold min-w-[4.75rem] sm:min-w-[5.25rem] inline-flex items-center justify-center text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.35)]"
               : "text-muted-foreground"
           }`}
         >
@@ -67,8 +67,17 @@ export function MainNav() {
     }
     const cRect = container.getBoundingClientRect()
     const eRect = el.getBoundingClientRect()
-    setPill({ x: eRect.left - cRect.left, w: eRect.width })
-  }, [targetIdx, pathname])
+    setPill({ x: eRect.left - cRect.left + container.scrollLeft, w: eRect.width })
+
+    // On mobile, keep the active/selected tab comfortably visible
+    if (window.innerWidth < 768 && activeIdx >= 0 && itemRefs.current[activeIdx]) {
+      itemRefs.current[activeIdx]?.scrollIntoView({
+        behavior: "smooth",
+        inline: "center",
+        block: "nearest",
+      })
+    }
+  }, [targetIdx, pathname, activeIdx])
 
   useLayoutEffect(() => {
     function onResize() {
@@ -77,7 +86,7 @@ export function MainNav() {
       if (!container || !el) return
       const cRect = container.getBoundingClientRect()
       const eRect = el.getBoundingClientRect()
-      setPill({ x: eRect.left - cRect.left, w: eRect.width })
+      setPill({ x: eRect.left - cRect.left + container.scrollLeft, w: eRect.width })
     }
     window.addEventListener("resize", onResize)
     return () => window.removeEventListener("resize", onResize)
@@ -86,13 +95,13 @@ export function MainNav() {
   return (
     <div
       ref={containerRef}
-      className="segment relative flex rounded-full p-1 gap-0.5"
+      className="segment relative flex rounded-full p-1 gap-0.5 overflow-x-auto no-scrollbar whitespace-nowrap max-w-full"
       onMouseLeave={() => setHoveredIdx(null)}
     >
       {pill && (
         <span
           aria-hidden
-          className="absolute top-1 bottom-1 rounded-full bg-white/[0.08] shadow-[inset_0_1px_0_oklch(1_0_0_/_14%)] transition-[transform,width] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
+          className="absolute top-1 bottom-1 rounded-full bg-white/[0.08] shadow-[inset_0_1px_0_oklch(1_0_0_/_14%)] transition-[transform,width] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] pointer-events-none"
           style={{
             transform: `translateX(${pill.x - 4}px)`,
             width: pill.w,
@@ -115,9 +124,9 @@ export function MainNav() {
                   onFocus={() => setHoveredIdx(i)}
                   onBlur={() => setHoveredIdx(null)}
                   data-active={active || undefined}
-                  className={`relative z-10 px-3.5 sm:px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
+                  className={`relative z-10 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 shrink-0 ${
                     isBarca
-                      ? "barca-stripes barca-stripes-tight overflow-hidden text-white font-bold min-w-[5.25rem] inline-flex items-center justify-center text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_2px_6px_rgba(0,0,0,0.5)] hover:brightness-110"
+                      ? "barca-stripes barca-stripes-tight overflow-hidden text-white font-bold min-w-[4.75rem] sm:min-w-[5.25rem] inline-flex items-center justify-center text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_2px_6px_rgba(0,0,0,0.5)] hover:brightness-110"
                       : "text-muted-foreground hover:text-foreground data-[active]:text-foreground"
                   }`}
                 >

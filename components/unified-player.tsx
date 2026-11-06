@@ -233,7 +233,7 @@ export function UnifiedPlayer({
           {/* Provider selector pill: [ StreamFree ] [ ZLive ] [ DaddyLive ] [ DAMITV ] */}
           {(hasStreamFree || hasZLive || hasDaddyLive || hasDamiTv) && (
             <div
-              className="flex items-center bg-black/50 rounded-xl p-0.5 border border-border/60 text-xs shadow-inner overflow-x-auto"
+              className="flex items-center bg-black/50 rounded-xl p-0.5 border border-border/60 text-xs shadow-inner overflow-x-auto no-scrollbar max-w-full"
               role="tablist"
               aria-label="Streaming Provider"
             >

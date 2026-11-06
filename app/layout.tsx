@@ -100,41 +100,55 @@ export default function RootLayout({
             aria-hidden
             className="nav-fade absolute inset-x-0 top-0 h-24 -z-10 bg-gradient-to-b from-background via-background/85 to-transparent"
           />
-          <div className="mx-auto max-w-6xl flex items-center justify-between px-4 pt-4 pb-2">
-            <div className="flex items-center gap-2">
-            <Link
-              href="/"
-              className="pointer-events-auto nav-pill flex items-center gap-2 pl-3 pr-4 py-2 group"
-            >
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="var(--pitch)"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="transition-transform duration-500 group-hover:rotate-180"
-                aria-hidden
-              >
-                <circle cx="12" cy="12" r="9.5" />
-                <path d="M12 7.5 8.6 10l1.3 4h4.2l1.3-4z" fill="var(--pitch)" stroke="none" />
-                <path d="M12 3v4.5M4.2 9.6 8.6 10M19.8 9.6 15.4 10M7.1 19.3 9.9 14M16.9 19.3 14.1 14" />
-              </svg>
-              <span
-                className="text-[1.4rem] font-bold tracking-[-0.03em] leading-none"
-                style={{ fontFamily: "var(--font-condensed)" }}
-              >
-                FOOTYY
-              </span>
-            </Link>
-            <NextBarcaGame />
+          <div className="mx-auto max-w-6xl px-3 sm:px-4 pt-2.5 sm:pt-4 pb-2">
+            {/* Top row: Brand + Next Barça Countdown + Season Toggle */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                <Link
+                  href="/"
+                  className="pointer-events-auto nav-pill flex items-center gap-1.5 sm:gap-2 px-2.5 sm:pl-3 sm:pr-4 py-1.5 sm:py-2 group shrink-0"
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="var(--pitch)"
+                    strokeWidth="1.8"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="transition-transform duration-500 group-hover:rotate-180 sm:w-[22px] sm:h-[22px]"
+                    aria-hidden
+                  >
+                    <circle cx="12" cy="12" r="9.5" />
+                    <path d="M12 7.5 8.6 10l1.3 4h4.2l1.3-4z" fill="var(--pitch)" stroke="none" />
+                    <path d="M12 3v4.5M4.2 9.6 8.6 10M19.8 9.6 15.4 10M7.1 19.3 9.9 14M16.9 19.3 14.1 14" />
+                  </svg>
+                  <span
+                    className="text-[1.2rem] sm:text-[1.4rem] font-bold tracking-[-0.03em] leading-none"
+                    style={{ fontFamily: "var(--font-condensed)" }}
+                  >
+                    FOOTYY
+                  </span>
+                </Link>
+                <NextBarcaGame />
+              </div>
+
+              <div className="pointer-events-auto flex items-center gap-2 shrink-0">
+                <Suspense fallback={null}>
+                  <SeasonToggle />
+                </Suspense>
+                {/* On desktop (md: and up), MainNav sits inline right here */}
+                <div className="hidden md:block">
+                  <Suspense fallback={<MainNavFallback />}>
+                    <MainNav />
+                  </Suspense>
+                </div>
+              </div>
             </div>
-            <div className="pointer-events-auto flex items-center gap-2">
-              <Suspense fallback={null}>
-                <SeasonToggle />
-              </Suspense>
+
+            {/* Mobile Navigation bar: horizontal touch swipeable row */}
+            <div className="pointer-events-auto md:hidden mt-2 pt-1 pb-0.5 overflow-x-auto no-scrollbar -mx-3 px-3 flex items-center">
               <Suspense fallback={<MainNavFallback />}>
                 <MainNav />
               </Suspense>

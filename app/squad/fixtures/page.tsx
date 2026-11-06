@@ -283,17 +283,17 @@ export default function BarcaFixturesPage({
   searchParams: Promise<{ comp?: string }>
 }) {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-14">
+    <div className="mx-auto max-w-6xl px-3 sm:px-4 py-6 sm:py-14">
       <div className="mb-6 flex items-center gap-3 animate-fade-in">
-        <TeamCrest teamId={BARCA_ID} name={BARCA} size={40} />
+        <TeamCrest teamId={BARCA_ID} name={BARCA} size={36} className="shrink-0" />
         <div>
           <h1
-            className="text-4xl sm:text-5xl font-bold tracking-[-0.035em] leading-none"
+            className="text-3xl sm:text-5xl font-bold tracking-[-0.035em] leading-none"
             style={{ fontFamily: "var(--font-condensed)" }}
           >
             FIXTURES
           </h1>
-          <p className="text-muted-foreground text-sm mt-1">
+          <p className="text-muted-foreground text-xs sm:text-sm mt-1 leading-snug">
             Every upcoming Barça match. Tap one for the prediction breakdown.
           </p>
         </div>

@@ -203,17 +203,17 @@ export default function TeamCompareContent() {
   const missing = selected.filter((name) => !table.some((t) => t.team === name))
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-14">
+    <div className="mx-auto max-w-6xl px-3 sm:px-4 py-6 sm:py-14">
       <div className="mb-8 animate-fade-in">
         <h1
-          className="text-5xl sm:text-6xl tracking-[-0.035em] leading-none mb-3"
+          className="text-3xl sm:text-5xl lg:text-6xl tracking-[-0.035em] leading-none mb-3"
           style={{ fontFamily: "var(--font-condensed)" }}
         >
           <span className="font-bold">Club</span>
           <span className="font-normal text-muted-foreground"> vs </span>
           <span className="font-bold">club.</span>
         </h1>
-        <p className="text-muted-foreground text-base">
+        <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
           Per-match averages across {season}
           {comp === "ucl" ? " in the Champions League" : " in league play"}. Add up
           to {MAX_TEAMS}.
@@ -239,11 +239,11 @@ export default function TeamCompareContent() {
       </div>
 
       {standings.length > 0 && (
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8 stagger">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 mb-8 stagger">
           {standings.map((t, i) => (
             <div
               key={t.team}
-              className="surface-raised rounded-2xl bg-card px-5 py-4"
+              className="surface-raised rounded-2xl bg-card px-4 py-3.5 sm:px-5 sm:py-4"
               style={{ borderTop: `2px solid ${TEAM_COLORS[i]}` }}
             >
               <div className="flex items-start justify-between gap-3 mb-3">

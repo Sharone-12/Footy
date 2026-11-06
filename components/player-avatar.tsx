@@ -89,10 +89,12 @@ export function LeagueCrest({
   tournamentId,
   name,
   size = 18,
+  className = "",
 }: {
   tournamentId: number | string
   name: string
   size?: number
+  className?: string
 }) {
   const { ref, src, exhausted, next } = useFallbackChain([
     leagueImage(tournamentId),
@@ -106,7 +108,7 @@ export function LeagueCrest({
   const inner = Math.round(size * 0.78)
   return (
     <span
-      className="inline-flex shrink-0 items-center justify-center rounded-md"
+      className={`inline-flex shrink-0 items-center justify-center rounded-md ${className}`}
       style={{ width: size, height: size, background: "oklch(0.96 0 0)" }}
       title={name}
     >
@@ -133,10 +135,12 @@ export function TeamCrest({
   teamId,
   name,
   size = 18,
+  className = "",
 }: {
   teamId: number | string
   name: string
   size?: number
+  className?: string
 }) {
   const { ref, src, exhausted, next } = useFallbackChain([
     teamImage(teamId),
@@ -158,7 +162,7 @@ export function TeamCrest({
       decoding="async"
       referrerPolicy="no-referrer"
       onError={next}
-      className="inline-block shrink-0 object-contain"
+      className={`inline-block shrink-0 object-contain ${className}`}
       style={{ width: size, height: size }}
     />
   )

@@ -67,7 +67,7 @@ function LeagueTable({
       </header>
 
       <div className="px-2 pb-3">
-        <div className="grid grid-cols-[1.5rem_1fr_2rem_2.5rem_2.25rem] sm:grid-cols-[1.5rem_1fr_2rem_4.5rem_2.5rem_2.25rem] gap-2 px-3 pb-2 border-b border-white/5">
+        <div className="grid grid-cols-[1.25rem_1fr_1.75rem_2.25rem_2.25rem] sm:grid-cols-[1.5rem_1fr_2rem_4.5rem_2.5rem_2.25rem] gap-1.5 sm:gap-2 px-2.5 sm:px-3 pb-2 border-b border-white/5">
           <span className="stat-label text-right">#</span>
           <span className="stat-label">Team</span>
           <span className="stat-label text-right">P</span>
@@ -80,7 +80,7 @@ function LeagueTable({
           <Link
             key={t.team}
             href={link(t.team)}
-            className={`group grid grid-cols-[1.5rem_1fr_2rem_2.5rem_2.25rem] sm:grid-cols-[1.5rem_1fr_2rem_4.5rem_2.5rem_2.25rem] gap-2 items-center px-3 py-2 rounded-xl hover:bg-white/[0.04] transition-colors duration-150 ${
+            className={`group grid grid-cols-[1.25rem_1fr_1.75rem_2.25rem_2.25rem] sm:grid-cols-[1.5rem_1fr_2rem_4.5rem_2.5rem_2.25rem] gap-1.5 sm:gap-2 items-center px-2.5 sm:px-3 py-2 rounded-xl hover:bg-white/[0.04] transition-colors duration-150 ${
               t.team === "FC Barcelona" ? "barca-stripes" : ""
             }`}
           >
@@ -461,10 +461,10 @@ export default function TeamsPage({
   searchParams: Promise<{ season?: string; comp?: string }>
 }) {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-14">
-      <div className="mb-10 animate-fade-in">
+    <div className="mx-auto max-w-6xl px-3 sm:px-4 py-6 sm:py-14">
+      <div className="mb-8 sm:mb-10 animate-fade-in">
         <h1
-          className="text-5xl sm:text-6xl tracking-[-0.035em] leading-[0.95] mb-4"
+          className="text-3xl sm:text-5xl lg:text-6xl tracking-[-0.035em] leading-[0.95] mb-3 sm:mb-4"
           style={{ fontFamily: "var(--font-condensed)" }}
         >
           <span className="font-bold">Every club.</span>{" "}
@@ -472,13 +472,13 @@ export default function TeamsPage({
             Every metric.
           </span>
         </h1>
-        <p className="text-muted-foreground text-base max-w-md mb-6">
+        <p className="text-muted-foreground text-sm sm:text-base max-w-md mb-5 sm:mb-6 leading-relaxed">
           League standings and per-match team profiles.
         </p>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-3">
         <Link
           href="/teams/compare"
-          className="surface-raised inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium transition-transform duration-200 hover:-translate-y-px"
+          className="surface-raised inline-flex items-center gap-2 rounded-full px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-transform duration-200 hover:-translate-y-px"
           style={{ background: "var(--primary)", color: "var(--primary-foreground)" }}
         >
           Compare teams

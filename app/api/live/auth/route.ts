@@ -96,3 +96,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Internal authentication error" }, { status: 500 })
   }
 }
+

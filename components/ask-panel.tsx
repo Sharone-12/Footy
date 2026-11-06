@@ -142,14 +142,14 @@ export function AskPanel() {
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="fixed bottom-5 right-5 z-50 rounded-full px-4 py-3 text-sm font-medium shadow-lg transition-transform hover:scale-105"
+        className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-50 rounded-full px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium shadow-lg transition-transform hover:scale-105 active:scale-95"
         style={{ background: "var(--brand)", color: "oklch(0.15 0 0)" }}
       >
         {open ? "Close" : "Ask"}
       </button>
 
       {open && (
-        <div className="fixed bottom-20 right-5 z-50 w-[min(26rem,calc(100vw-2.5rem))] max-h-[70vh] overflow-y-auto surface rounded-2xl bg-card p-4 shadow-2xl">
+        <div className="fixed bottom-16 right-3 sm:bottom-20 sm:right-5 z-50 w-[calc(100vw-1.5rem)] sm:w-[26rem] max-h-[75vh] overflow-y-auto surface rounded-2xl bg-card p-3.5 sm:p-4 shadow-2xl">
           <div className="stat-label mb-2">Ask about the stats</div>
 
           <form

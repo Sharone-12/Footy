@@ -561,7 +561,7 @@ export default function MatchDetailPage({
   searchParams: Promise<{ id?: string; season?: string }>
 }) {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-14">
+    <div className="mx-auto max-w-3xl px-3 sm:px-4 py-6 sm:py-14">
       <Suspense
         fallback={
           <div className="space-y-5">

@@ -129,20 +129,20 @@ async function PlayerContent({
   const isPedri = /\bpedri\b/i.test(nameStr) || slug === "pedri"
 
   return (
-    <div className="relative mx-auto max-w-6xl px-4 py-10">
+    <div className="relative mx-auto max-w-6xl px-3 sm:px-4 py-6 sm:py-10">
       {isYamal && <div className="yamal-bg" aria-hidden />}
       {isPedri && <div className="pedri-bg" aria-hidden />}
       <div className="relative z-10">
-      <div className="mb-10 animate-fade-in flex items-start gap-5">
+      <div className="mb-8 sm:mb-10 animate-fade-in flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-5">
         <PlayerAvatar
           playerId={player.player_id as number}
           name={name}
-          size={88}
+          size={76}
         />
         <div className="min-w-0">
-          <div className="flex items-center gap-3 mb-2 flex-wrap">
+          <div className="flex items-center justify-center sm:justify-start gap-2.5 sm:gap-3 mb-2 flex-wrap">
             <h1
-              className="text-5xl font-bold tracking-[-0.035em] leading-none"
+              className="text-3xl sm:text-5xl font-bold tracking-[-0.035em] leading-none"
               style={{ fontFamily: "var(--font-condensed)" }}
             >
               {name}

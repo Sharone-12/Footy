@@ -448,10 +448,10 @@ export default function PredictionsPage({
   searchParams: Promise<{ season?: string; league?: string }>
 }) {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-14">
-      <div className="mb-10 animate-fade-in">
+    <div className="mx-auto max-w-6xl px-3 sm:px-4 py-6 sm:py-14">
+      <div className="mb-8 sm:mb-10 animate-fade-in">
         <h1
-          className="text-5xl sm:text-6xl tracking-[-0.035em] leading-[0.95] mb-4"
+          className="text-3xl sm:text-5xl lg:text-6xl tracking-[-0.035em] leading-[0.95] mb-3 sm:mb-4"
           style={{ fontFamily: "var(--font-condensed)" }}
         >
           <span className="font-bold">Predictions.</span>{" "}
@@ -459,7 +459,7 @@ export default function PredictionsPage({
             Receipts kept.
           </span>
         </h1>
-        <p className="text-muted-foreground text-base max-w-md">
+        <p className="text-muted-foreground text-sm sm:text-base max-w-md leading-relaxed">
           Poisson model probabilities for every upcoming match — and a running
           accuracy tracker so you can see how we do.
         </p>

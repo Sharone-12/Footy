@@ -84,22 +84,22 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
   return (
     <Link
       href={`/predictions/match?id=${match.event_id}`}
-      className="pointer-events-auto nav-pill flex items-center gap-2 pl-2 pr-3 py-1.5"
+      className="pointer-events-auto nav-pill flex items-center gap-1.5 sm:gap-2 px-2 sm:pl-2 sm:pr-3 py-1 sm:py-1.5 shrink-0"
       title={`${match.league} — Barça ${match.home ? "vs" : "away at"} ${match.opponent}`}
     >
-      <span className="flex items-center gap-1">
-        <TeamCrest teamId={BARCA_ID} name="FC Barcelona" size={20} />
-        <span className="stat-label text-[0.6rem] leading-none">v</span>
+      <span className="flex items-center gap-0.5 sm:gap-1 shrink-0">
+        <TeamCrest teamId={BARCA_ID} name="FC Barcelona" size={18} />
+        <span className="stat-label text-[0.55rem] sm:text-[0.6rem] leading-none">v</span>
         {match.opponent_id != null && (
-          <TeamCrest teamId={match.opponent_id} name={match.opponent} size={20} />
+          <TeamCrest teamId={match.opponent_id} name={match.opponent} size={18} />
         )}
       </span>
       <span className="flex flex-col leading-none">
-        <span className="stat-label text-[0.55rem] leading-none">
+        <span className="hidden sm:inline stat-label text-[0.55rem] leading-none truncate max-w-[6.5rem]">
           {match.home ? "vs" : "at"} {match.opponent}
         </span>
         <span
-          className="stat-figure text-[0.95rem] mt-0.5"
+          className="stat-figure text-[0.85rem] sm:text-[0.95rem] mt-0.5"
           style={{ color: "var(--pitch)" }}
         >
           {!t ? (
@@ -115,7 +115,7 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
           )}
         </span>
       </span>
-      {tid && <LeagueCrest tournamentId={tid} name={match.league} size={18} />}
+      {tid && <LeagueCrest tournamentId={tid} name={match.league} size={16} className="hidden sm:block shrink-0" />}
     </Link>
   )
 }

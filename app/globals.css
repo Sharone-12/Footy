@@ -549,6 +549,16 @@
       #A50044 20px);
 }
 
+/* Touch-optimized horizontal scrolling without intrusive scrollbars */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
 /* The same banner for elements too narrow to fit its 180px stripe cycle.
    Identical palette and identical dimming — only the lengths are quartered,
    so a ~130px nav pill shows the whole pattern instead of one slice of it. */

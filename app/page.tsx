@@ -103,27 +103,27 @@ function Board({
 }) {
   return (
     <section className="surface rounded-2xl bg-card overflow-hidden">
-      <header className="flex items-baseline justify-between px-5 pt-5 pb-3">
+      <header className="flex items-baseline justify-between px-4 pt-4 pb-2.5 sm:px-5 sm:pt-5 sm:pb-3">
         <h2
-          className="text-lg font-semibold tracking-tight"
+          className="text-base sm:text-lg font-semibold tracking-tight"
           style={{ fontFamily: "var(--font-condensed)" }}
         >
           {title}
         </h2>
-        <span className="stat-label">{label}</span>
+        <span className="stat-label text-xs sm:text-sm">{label}</span>
       </header>
-      <div className="px-2 pb-2">
+      <div className="px-1.5 sm:px-2 pb-2">
         {rows.map((p, i) => (
           <Link
             key={`${p.slug}-${i}`}
             href={`/player/${p.slug}${scope}`}
-            className="row-item flex items-center gap-3 px-3 py-2.5 rounded-xl"
+            className="row-item flex items-center gap-2 sm:gap-3 px-2.5 py-2 sm:px-3 sm:py-2.5 rounded-xl"
           >
-            <span className="rank-badge" data-rank={i + 1}>
+            <span className="rank-badge shrink-0" data-rank={i + 1}>
               {i + 1}
             </span>
             <span className="flex-1 min-w-0">
-              <span className="block text-[0.9rem] font-medium leading-tight truncate">
+              <span className="block text-[0.85rem] sm:text-[0.9rem] font-medium leading-tight truncate">
                 {p.player}
               </span>
               <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -133,9 +133,11 @@ function Board({
                 <span className="truncate">{p.team}</span>
               </span>
             </span>
-            <LeagueTag league={p.league} />
+            <div className="shrink-0">
+              <LeagueTag league={p.league} />
+            </div>
             <span
-              className="stat-figure text-xl w-9 text-right"
+              className="stat-figure text-lg sm:text-xl w-8 sm:w-9 text-right shrink-0"
               style={{ color: i < 3 ? "var(--pitch)" : undefined }}
             >
               {p[statKey]}
@@ -230,19 +232,19 @@ async function Content({
 
   return (
     <>
-      <div className="grid sm:grid-cols-2 gap-3 mb-5 stagger">
+      <div className="grid sm:grid-cols-2 gap-2.5 sm:gap-3 mb-5 stagger">
         {headline.map((s) => (
           <Link
             key={s.label}
             href={s.slug ? `/player/${s.slug}${scope}` : "/"}
-            className={`card-lift surface-raised rounded-2xl px-5 py-4 flex items-center gap-4 ${
+            className={`card-lift surface-raised rounded-2xl px-4 py-3.5 sm:px-5 sm:py-4 flex items-center gap-3 sm:gap-4 ${
               s.team === "FC Barcelona" ? "barca-stripes" : "bg-card"
             }`}
           >
-            <span style={{ color: "var(--pitch)" }}>{s.icon}</span>
+            <span style={{ color: "var(--pitch)" }} className="shrink-0">{s.icon}</span>
             <span className="flex-1 min-w-0">
-              <span className="stat-label block">{s.label}</span>
-              <span className="block text-base font-semibold truncate leading-snug">
+              <span className="stat-label text-[0.65rem] sm:text-xs block">{s.label}</span>
+              <span className="block text-sm sm:text-base font-semibold truncate leading-snug">
                 {s.name}
               </span>
               <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -253,16 +255,16 @@ async function Content({
               </span>
             </span>
             <span className="text-right shrink-0">
-              <span className="stat-figure stat-pop shimmer-text block text-4xl">
+              <span className="stat-figure stat-pop shimmer-text block text-3xl sm:text-4xl">
                 {s.figure}
               </span>
-              <span className="stat-label block mt-0.5">{s.unit}</span>
+              <span className="stat-label text-[0.65rem] sm:text-xs block mt-0.5">{s.unit}</span>
             </span>
           </Link>
         ))}
       </div>
 
-      <div className="grid md:grid-cols-2 gap-5 stagger">
+      <div className="grid md:grid-cols-2 gap-4 sm:gap-5 stagger">
         <Board title="TOP SCORERS" rows={topScorers} statKey="goals" label={label} scope={scope} />
         <Board title="TOP ASSISTS" rows={topAssisters} statKey="assists" label={label} scope={scope} />
       </div>
@@ -276,11 +278,11 @@ export default function Home({
   searchParams: Promise<{ season?: string; comp?: string }>
 }) {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-14">
-      <div className="relative z-10 mb-10 grid gap-8 lg:grid-cols-[1fr_22rem] lg:items-start animate-fade-in">
+    <div className="mx-auto max-w-6xl px-3 sm:px-4 py-6 sm:py-14">
+      <div className="relative z-10 mb-8 sm:mb-10 grid gap-6 sm:gap-8 lg:grid-cols-[1fr_22rem] lg:items-start animate-fade-in">
         <div>
           <h1
-            className="text-5xl sm:text-6xl tracking-[-0.035em] leading-[0.95] mb-4"
+            className="text-3xl sm:text-5xl lg:text-6xl tracking-[-0.035em] leading-[0.95] mb-3 sm:mb-4"
             style={{ fontFamily: "var(--font-condensed)" }}
           >
             <span className="font-bold">Every touch.</span>{" "}
@@ -288,11 +290,11 @@ export default function Home({
               Every number.
             </span>
           </h1>
-          <p className="text-muted-foreground text-base max-w-md mb-7">
+          <p className="text-muted-foreground text-sm sm:text-base max-w-md mb-5 sm:mb-7 leading-relaxed">
             Per-90 stats and percentile ranks for every player in the Premier
             League, La Liga, and Champions League.
           </p>
-          <div className="max-w-md">
+          <div className="max-w-md w-full">
             <PlayerSearch linkToProfile placeholder="Search for a player..." />
           </div>
           <div className="mt-4">
@@ -301,7 +303,7 @@ export default function Home({
             </Suspense>
           </div>
         </div>
-        <Suspense fallback={<Skeleton className="h-[230px] rounded-2xl" />}>
+        <Suspense fallback={<Skeleton className="h-[200px] sm:h-[230px] rounded-2xl" />}>
           <Upcoming />
         </Suspense>
       </div>

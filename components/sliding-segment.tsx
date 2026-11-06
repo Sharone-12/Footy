@@ -73,7 +73,7 @@ export function SlidingSegment({
   return (
     <div
       ref={containerRef}
-      className="segment relative inline-flex rounded-full p-1 gap-0.5"
+      className="segment relative inline-flex rounded-full p-1 gap-0.5 max-w-full overflow-x-auto no-scrollbar whitespace-nowrap"
       role="group"
       aria-label={ariaLabel}
       onMouseLeave={() => setHoveredIdx(null)}

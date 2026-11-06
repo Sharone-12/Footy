@@ -330,10 +330,10 @@ export default function SignalsPage({
   searchParams: Promise<{ season?: string; comp?: string }>
 }) {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-14">
-      <div className="relative z-10 mb-8 animate-fade-in">
+    <div className="mx-auto max-w-6xl px-3 sm:px-4 py-6 sm:py-14">
+      <div className="relative z-10 mb-6 sm:mb-8 animate-fade-in">
         <h1
-          className="text-5xl sm:text-6xl tracking-[-0.035em] leading-[0.95] mb-4"
+          className="text-3xl sm:text-5xl lg:text-6xl tracking-[-0.035em] leading-[0.95] mb-3 sm:mb-4"
           style={{ fontFamily: "var(--font-condensed)" }}
         >
           <span className="font-bold">Signals.</span>{" "}
@@ -341,7 +341,7 @@ export default function SignalsPage({
             Metrics the raw stats don&apos;t show.
           </span>
         </h1>
-        <p className="text-muted-foreground text-base max-w-xl mb-5">
+        <p className="text-muted-foreground text-sm sm:text-base max-w-xl mb-4 sm:mb-5 leading-relaxed">
           Derived from per-90 production. Each board ranks the players who
           separate themselves on one dimension — finishing above xG, keeping the
           ball under pressure, breaking lines, creating chances, or winning

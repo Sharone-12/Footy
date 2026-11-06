@@ -62,15 +62,15 @@ async function LiveAuthGate() {
   // Once authenticated, render full Live section with Lock control
   return (
     <>
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 animate-fade-in">
+      <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 animate-fade-in">
         <div>
           <h1
-            className="text-4xl sm:text-5xl font-bold tracking-[-0.035em] leading-none"
+            className="text-3xl sm:text-5xl font-bold tracking-[-0.035em] leading-none"
             style={{ fontFamily: "var(--font-condensed)" }}
           >
             LIVE &amp; STREAMING
           </h1>
-          <p className="text-muted-foreground text-sm mt-2">
+          <p className="text-muted-foreground text-xs sm:text-sm mt-1.5 leading-snug">
             What&apos;s on now and next, from our own fixture data.
           </p>
         </div>
@@ -107,7 +107,7 @@ async function LiveAuthGate() {
 
 export default function LivePage() {
   return (
-    <div className="mx-auto max-w-5xl px-4 py-14">
+    <div className="mx-auto max-w-5xl px-3 sm:px-4 py-6 sm:py-14">
       <Suspense
         fallback={
           <div className="flex flex-col gap-4">

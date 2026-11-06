@@ -25,12 +25,12 @@ export function PlayerRadar({
     : domain ?? [0, 100]
 
   return (
-    <ResponsiveContainer width="100%" height={350}>
-      <RadarChart data={data} cx="50%" cy="50%" outerRadius="75%">
+    <ResponsiveContainer width="100%" height={320}>
+      <RadarChart data={data} cx="50%" cy="50%" outerRadius="68%">
         <PolarGrid stroke="oklch(1 0 0 / 8%)" />
         <PolarAngleAxis
           dataKey="stat"
-          tick={{ fill: "oklch(0.65 0 0)", fontSize: 12 }}
+          tick={{ fill: "oklch(0.65 0 0)", fontSize: 11 }}
         />
         <PolarRadiusAxis
           angle={90}
