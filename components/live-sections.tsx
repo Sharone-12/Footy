@@ -124,6 +124,16 @@ function Row({
         {isWatchable && (
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5">
+              {matchedDamiTv && (
+                <span
+                  title={`DAMITV (${matchedDamiTv.stream.sources.length} source${matchedDamiTv.stream.sources.length === 1 ? "" : "s"})`}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-semibold bg-violet-500/10 text-violet-400 border border-violet-500/25"
+                >
+                  <MonitorPlayIcon className="size-2.5" />
+                  DAMITV
+                </span>
+              )}
+
               {matchedStream && (
                 <span
                   title="StreamFree source available"
@@ -154,16 +164,6 @@ function Row({
                   {matchedDaddyLive.channels.length > 1 && (
                     <span className="text-[10px] opacity-75">({matchedDaddyLive.channels.length})</span>
                   )}
-                </span>
-              )}
-
-              {matchedDamiTv && (
-                <span
-                  title={`DAMITV (${matchedDamiTv.stream.sources.length} source${matchedDamiTv.stream.sources.length === 1 ? "" : "s"})`}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-semibold bg-violet-500/10 text-violet-400 border border-violet-500/25"
-                >
-                  <MonitorPlayIcon className="size-2.5" />
-                  DAMITV
                 </span>
               )}
             </div>

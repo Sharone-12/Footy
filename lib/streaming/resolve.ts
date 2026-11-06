@@ -60,8 +60,8 @@ export const PROVIDER_NAME: Record<StreamingProviderId, string> = {
   zlive: "ZLive",
 }
 
-/** Display order: the providers that carry quality variants come first. */
-const ORDER: StreamingProviderId[] = ["streamfree", "damitv", "daddylive", "zlive"]
+/** Display order: DAMITV is primary default, followed by StreamFree, DaddyLive, ZLive. */
+const ORDER: StreamingProviderId[] = ["damitv", "streamfree", "daddylive", "zlive"]
 
 const dedupe = (xs: (string | undefined)[]) =>
   Array.from(new Set(xs.filter((x): x is string => Boolean(x))))
@@ -202,8 +202,8 @@ function zLiveProvider(
  */
 export function buildProviders(bundle: StreamBundle): WatchProvider[] {
   const built: Partial<Record<StreamingProviderId, WatchProvider | null>> = {
-    streamfree: bundle.streamFree ? streamFreeProvider(bundle.streamFree) : null,
     damitv: bundle.damiTv ? damiTvProvider(bundle.damiTv) : null,
+    streamfree: bundle.streamFree ? streamFreeProvider(bundle.streamFree) : null,
     daddylive: bundle.daddyLive ? daddyLiveProvider(bundle.daddyLive) : null,
     zlive: zLiveProvider(bundle.zLive, bundle.genericChannel, bundle.genericChannels),
   }

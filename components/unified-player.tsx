@@ -56,18 +56,18 @@ export function UnifiedPlayer({
   const hasDaddyLive = Boolean(daddyLive && daddyLive.channels?.length > 0)
   const hasDamiTv = Boolean(damiTv && (damiTv.stream?.embedUrl || damiTv.stream?.sources?.length > 0))
 
-  // Initial provider selection
+  // Initial provider selection: DAMITV is primary default
   const defaultProvider: StreamingProviderId =
     initialProvider ??
-    (hasStreamFree
-      ? "streamfree"
-      : hasDamiTv
+    (hasDamiTv
       ? "damitv"
+      : hasStreamFree
+      ? "streamfree"
       : hasDaddyLive
       ? "daddylive"
       : hasZLive
       ? "zlive"
-      : "streamfree")
+      : "damitv")
 
   const [selectedProvider, setSelectedProvider] = useState<StreamingProviderId>(defaultProvider)
 
