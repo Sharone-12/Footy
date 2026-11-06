@@ -1097,14 +1097,6 @@ export function WatchStudio({
                       <ArrowRightIcon className="size-3.5 text-muted-foreground" />
                     </Link>
                   )}
-
-                  <Link
-                    href="/squad"
-                    className="px-3.5 py-2.5 rounded-xl bg-background/60 hover:bg-background border border-border/60 hover:border-border text-xs font-semibold text-foreground flex items-center justify-between transition-all"
-                  >
-                    <span>Squads & Analytics</span>
-                    <ArrowRightIcon className="size-3.5 text-muted-foreground" />
-                  </Link>
                 </div>
               </div>
             )}
@@ -1114,3 +1106,4 @@ export function WatchStudio({
     </div>
   )
 }
+
