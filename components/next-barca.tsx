@@ -80,12 +80,22 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
   const tid = LEAGUE_TOURNAMENT_ID[match.league]
   const left = now == null ? null : startOf(match) - now
   const t = left == null ? null : parts(Math.max(left, 0))
+  const isLive = left != null && left <= 0
+  const elapsedMin = isLive
+    ? Math.min(120, Math.max(1, Math.floor(Math.abs(left) / 60_000)))
+    : null
 
   return (
     <Link
-      href={`/predictions/match?id=${match.event_id}`}
-      className="pointer-events-auto nav-pill flex items-center gap-1.5 sm:gap-2 px-2 sm:pl-2 sm:pr-3 py-1 sm:py-1.5 shrink-0"
-      title={`${match.league} — Barça ${match.home ? "vs" : "away at"} ${match.opponent}`}
+      href={isLive ? `/live/watch?id=${match.event_id}` : `/predictions/match?id=${match.event_id}`}
+      className={`pointer-events-auto nav-pill flex items-center gap-1.5 sm:gap-2 px-2 sm:pl-2 sm:pr-3 py-1 sm:py-1.5 shrink-0 transition-all ${
+        isLive ? "border-[var(--pitch)]/60 shadow-[0_0_12px_-4px_var(--pitch)]" : ""
+      }`}
+      title={
+        isLive
+          ? `LIVE NOW: Barça ${match.home ? "vs" : "at"} ${match.opponent} (${elapsedMin}') — Click to Watch`
+          : `${match.league} — Barça ${match.home ? "vs" : "away at"} ${match.opponent}`
+      }
     >
       <span className="flex items-center gap-0.5 sm:gap-1 shrink-0">
         <TeamCrest teamId={BARCA_ID} name="FC Barcelona" size={18} />
@@ -104,8 +114,14 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
         >
           {!t ? (
             <span className="opacity-40">--:--:--</span>
-          ) : left! <= 0 ? (
-            "KICK OFF"
+          ) : isLive ? (
+            <span className="inline-flex items-center gap-1.5 font-bold">
+              <span className="relative flex size-2 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--pitch)] opacity-75 motion-reduce:hidden" />
+                <span className="relative inline-flex rounded-full size-2 bg-[var(--pitch)]" />
+              </span>
+              <span>LIVE {elapsedMin}&apos;</span>
+            </span>
           ) : !match.kickoff ? (
             `${t.d}d`
           ) : t.d > 0 ? (
