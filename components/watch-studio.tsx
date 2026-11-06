@@ -127,11 +127,6 @@ export function WatchStudio({
     return now < kickoffMs
   }, [kickoffMs, now])
 
-  const elapsedMinute = useMemo(() => {
-    if (!kickoffMs || now < kickoffMs) return null
-    return Math.min(120, Math.max(1, Math.floor((now - kickoffMs) / 60_000)))
-  }, [kickoffMs, now])
-
   // Fetch streams for fixture
   useEffect(() => {
     let unmounted = false
@@ -313,23 +308,33 @@ export function WatchStudio({
   // Fullscreen container handler: attempts direct iframe fullscreen for 100% pure video with no UI
   const toggleFullscreen = useCallback(async () => {
     try {
-      if (!document.fullscreenElement) {
+      const fsEl = document.fullscreenElement || (document as any).webkitFullscreenElement
+      if (!fsEl) {
         const iframe = playerContainerRef.current?.querySelector("iframe")
-        if (iframe && iframe.requestFullscreen) {
-          try {
-            await iframe.requestFullscreen()
-            setIsFullscreen(true)
-            return
-          } catch {
-            // If iframe direct fullscreen fails (e.g. cross-origin restrictions), fall through to container
+        if (iframe) {
+          const reqFs = iframe.requestFullscreen || (iframe as any).webkitRequestFullscreen
+          if (reqFs) {
+            try {
+              await reqFs.call(iframe)
+              setIsFullscreen(true)
+              return
+            } catch {
+              // If iframe direct fullscreen fails (e.g. cross-origin restrictions), fall through to container
+            }
           }
         }
         if (playerContainerRef.current) {
-          await playerContainerRef.current.requestFullscreen()
-          setIsFullscreen(true)
+          const reqFs = playerContainerRef.current.requestFullscreen || (playerContainerRef.current as any).webkitRequestFullscreen
+          if (reqFs) {
+            await reqFs.call(playerContainerRef.current)
+            setIsFullscreen(true)
+          }
         }
       } else {
-        await document.exitFullscreen()
+        const exitFs = document.exitFullscreen || (document as any).webkitExitFullscreen
+        if (exitFs) {
+          await exitFs.call(document)
+        }
         setIsFullscreen(false)
       }
     } catch (e) {
@@ -339,10 +344,15 @@ export function WatchStudio({
 
   useEffect(() => {
     function handleFsChange() {
-      setIsFullscreen(Boolean(document.fullscreenElement))
+      const isFs = Boolean(document.fullscreenElement || (document as any).webkitFullscreenElement)
+      setIsFullscreen(isFs)
     }
     document.addEventListener("fullscreenchange", handleFsChange)
-    return () => document.removeEventListener("fullscreenchange", handleFsChange)
+    document.addEventListener("webkitfullscreenchange", handleFsChange)
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFsChange)
+      document.removeEventListener("webkitfullscreenchange", handleFsChange)
+    }
   }, [])
 
   const reloadStream = useCallback(() => {
@@ -385,13 +395,13 @@ export function WatchStudio({
         </div>
 
         <div className="flex items-center gap-2.5 self-end sm:self-auto">
-          {isLiveNow && elapsedMinute && (
+          {isLiveNow && (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--pitch)]/10 text-[var(--pitch)] border border-[var(--pitch)]/30 text-xs font-bold tracking-wider">
               <span className="relative flex size-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--pitch)] opacity-75 motion-reduce:hidden" />
                 <span className="relative inline-flex rounded-full size-2 bg-[var(--pitch)]" />
               </span>
-              <span>LIVE {elapsedMinute}&apos;</span>
+              <span>LIVE</span>
             </span>
           )}
 
@@ -443,38 +453,22 @@ export function WatchStudio({
                 {/* Score Hub or VS Badge */}
                 <div className="flex flex-col items-center justify-center shrink-0 px-1 sm:px-3">
                   {hasScore ? (
-                    <div className="flex flex-col items-center">
-                      <div className="flex items-center gap-2 px-3.5 py-1 rounded-2xl bg-black/60 border border-white/10 shadow-inner">
-                        <span className="font-mono text-xl sm:text-2xl font-black text-white">
-                          {fixture.home_goals}
-                        </span>
-                        <span className="text-white/40 font-mono text-sm font-bold">:</span>
-                        <span className="font-mono text-xl sm:text-2xl font-black text-white">
-                          {fixture.away_goals}
-                        </span>
-                      </div>
-                      {isLiveNow && elapsedMinute && (
-                        <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-mono font-bold text-[var(--pitch)]">
-                          <span className="size-1.5 rounded-full bg-[var(--pitch)] animate-pulse" />
-                          {elapsedMinute}&apos;
-                        </span>
-                      )}
+                    <div className="flex items-center gap-2 px-3.5 py-1 rounded-2xl bg-black/60 border border-white/10 shadow-inner">
+                      <span className="font-mono text-xl sm:text-2xl font-black text-white">
+                        {fixture.home_goals}
+                      </span>
+                      <span className="text-white/40 font-mono text-sm font-bold">:</span>
+                      <span className="font-mono text-xl sm:text-2xl font-black text-white">
+                        {fixture.away_goals}
+                      </span>
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center">
-                      <span
-                        className="px-3 py-1 rounded-full text-[11px] sm:text-xs font-black tracking-widest bg-black/60 border border-white/10 text-muted-foreground"
-                        style={{ fontFamily: "var(--font-condensed)" }}
-                      >
-                        VS
-                      </span>
-                      {isLiveNow && elapsedMinute && (
-                        <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-mono font-bold text-[var(--pitch)]">
-                          <span className="size-1.5 rounded-full bg-[var(--pitch)] animate-pulse" />
-                          {elapsedMinute}&apos;
-                        </span>
-                      )}
-                    </div>
+                    <span
+                      className="px-3 py-1 rounded-full text-[11px] sm:text-xs font-black tracking-widest bg-black/60 border border-white/10 text-muted-foreground"
+                      style={{ fontFamily: "var(--font-condensed)" }}
+                    >
+                      VS
+                    </span>
                   )}
                 </div>
 
@@ -533,14 +527,7 @@ export function WatchStudio({
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--pitch)] opacity-75 motion-reduce:hidden" />
                         <span className="relative inline-flex rounded-full size-2 bg-[var(--pitch)]" />
                       </span>
-                      <div className="flex flex-col leading-none">
-                        <span className="text-[11px] font-black uppercase tracking-wider">LIVE MATCH</span>
-                        {elapsedMinute && (
-                          <span className="text-[9px] font-mono font-bold opacity-80 mt-0.5">
-                            {elapsedMinute} MINS
-                          </span>
-                        )}
-                      </div>
+                      <span className="text-[11px] font-black uppercase tracking-wider">LIVE MATCH</span>
                     </div>
                   ) : isUpcoming && kickoffMs ? (
                     <div className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/[0.04] border border-white/10">

@@ -81,9 +81,6 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
   const left = now == null ? null : startOf(match) - now
   const t = left == null ? null : parts(Math.max(left, 0))
   const isLive = left != null && left <= 0
-  const elapsedMin = isLive
-    ? Math.min(120, Math.max(1, Math.floor(Math.abs(left) / 60_000)))
-    : null
 
   return (
     <Link
@@ -93,7 +90,7 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
       }`}
       title={
         isLive
-          ? `LIVE NOW: Barça ${match.home ? "vs" : "at"} ${match.opponent} (${elapsedMin}') — Click to Watch`
+          ? `LIVE NOW: Barça ${match.home ? "vs" : "at"} ${match.opponent} — Click to Watch`
           : `${match.league} — Barça ${match.home ? "vs" : "away at"} ${match.opponent}`
       }
     >
@@ -120,7 +117,7 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--pitch)] opacity-75 motion-reduce:hidden" />
                 <span className="relative inline-flex rounded-full size-2 bg-[var(--pitch)]" />
               </span>
-              <span>LIVE {elapsedMin}&apos;</span>
+              <span>LIVE</span>
             </span>
           ) : !match.kickoff ? (
             `${t.d}d`

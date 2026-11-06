@@ -34,10 +34,6 @@ function formatKickoff(m: LiveFixture) {
   return formatKickoffIST(m.kickoff, m.date)
 }
 
-function elapsed(m: LiveFixture, now: number) {
-  return Math.max(1, Math.floor((now - startOf(m)) / 60_000))
-}
-
 type ActivePlayerState = {
   fixtureTitle: string
   league?: string
@@ -93,7 +89,7 @@ function Row({
                 <span className="relative inline-flex rounded-full size-2 bg-[var(--pitch)]" />
               </span>
               <span className="stat-label text-[0.65rem] font-bold" style={{ color: "var(--pitch)" }}>
-                LIVE {elapsed(m, now)}&apos;
+                LIVE
               </span>
             </span>
           ) : isUnderAnHour ? (
