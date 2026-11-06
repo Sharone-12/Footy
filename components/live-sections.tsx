@@ -72,7 +72,7 @@ function Row({
   matchedZLive?: MatchedZLive
   matchedDaddyLive?: MatchedDaddyLive
   matchedDamiTv?: MatchedDamiTv
-  onWatch: (state: ActivePlayerState) => void
+  onWatch?: (state: ActivePlayerState) => void
 }) {
   const tid = LEAGUE_TOURNAMENT_ID[m.league]
   const hasStream = Boolean(matchedStream || matchedZLive || matchedDaddyLive || matchedDamiTv)
@@ -205,7 +205,7 @@ function Section({
   zliveMap: Record<number, MatchedZLive>
   daddyliveMap: Record<number, MatchedDaddyLive>
   damitvMap: Record<number, MatchedDamiTv>
-  onWatch: (state: ActivePlayerState) => void
+  onWatch?: (state: ActivePlayerState) => void
 }) {
   return (
     <section>
@@ -390,8 +390,88 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
 
   return (
     <div className="flex flex-col gap-8 relative">
+      {/* 1. Matches: Live Now */}
+      <Section
+        title="Live Now"
+        rows={now == null ? [] : live}
+        now={now ?? 0}
+        live
+        empty="No matches in play."
+        streamMap={streamMap}
+        zliveMap={zliveMap}
+        daddyliveMap={daddyliveMap}
+        damitvMap={damitvMap}
+      />
 
-      {/* External Gateways (RoxieStreams, StreamCorner) */}
+      {/* 2. Matches: Starting Soon */}
+      <Section
+        title="Starting Soon"
+        rows={now == null ? [] : soon}
+        now={now ?? 0}
+        empty="Nothing kicking off in the next three hours."
+        streamMap={streamMap}
+        zliveMap={zliveMap}
+        daddyliveMap={daddyliveMap}
+        damitvMap={damitvMap}
+      />
+
+      {/* 3. Matches: Upcoming Fixtures */}
+      <Section
+        title="Upcoming Matches"
+        rows={now == null ? [] : upcoming}
+        now={now ?? 0}
+        empty="No upcoming fixtures."
+        streamMap={streamMap}
+        zliveMap={zliveMap}
+        daddyliveMap={daddyliveMap}
+        damitvMap={damitvMap}
+      />
+
+      {/* 4. 24/7 Football TV Channels (ZLive) - Pushed below matches */}
+      {genericChannels.length > 0 && (
+        <section aria-label="Football TV Channels" className="pt-4 border-t border-border/40">
+          <div className="flex items-center justify-between mb-2.5">
+            <div className="flex items-center gap-2">
+              <TvIcon className="size-4 text-emerald-400" />
+              <h2
+                className="text-lg font-semibold tracking-tight uppercase"
+                style={{ fontFamily: "var(--font-condensed)" }}
+              >
+                Football TV Channels (ZLive)
+              </h2>
+            </div>
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {genericChannels.length} 24/7 channels
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground mb-3">
+            Direct 24/7 football broadcasters available for manual selection alongside match streams.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {genericChannels.slice(0, 12).map((ch) => (
+              <Link
+                key={ch.id}
+                href={`/live/watch?channel=${ch.id}&provider=zlive`}
+                className="card-lift surface bg-card hover:bg-accent/40 border border-border/70 hover:border-emerald-500/50 px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs transition-all group"
+              >
+                <span className="relative flex size-1.5 shrink-0">
+                  <span className="relative inline-flex rounded-full size-1.5 bg-emerald-400" />
+                </span>
+                <span className="font-semibold text-foreground group-hover:text-emerald-300 transition-colors">
+                  {ch.name}
+                </span>
+                {ch.quality && (
+                  <span className="text-[10px] px-1 rounded bg-black/40 text-muted-foreground font-mono">
+                    {ch.quality}
+                  </span>
+                )}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 5. External Gateways (RoxieStreams, StreamCorner) - Pushed below matches */}
       {gateways.length > 0 && (
         <aside
           aria-label="External streaming gateways"
@@ -439,85 +519,6 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
           </div>
         </aside>
       )}
-
-      {/* Generic 24/7 Football TV Channels (ZLive) */}
-      {genericChannels.length > 0 && (
-        <section aria-label="Football TV Channels">
-          <div className="flex items-center justify-between mb-2.5">
-            <div className="flex items-center gap-2">
-              <TvIcon className="size-4 text-emerald-400" />
-              <h2
-                className="text-lg font-semibold tracking-tight uppercase"
-                style={{ fontFamily: "var(--font-condensed)" }}
-              >
-                Football TV Channels (ZLive)
-              </h2>
-            </div>
-            <span className="text-xs text-muted-foreground tabular-nums">
-              {genericChannels.length} 24/7 channels
-            </span>
-          </div>
-          <p className="text-xs text-muted-foreground mb-3">
-            Direct 24/7 football broadcasters available for manual selection alongside match streams.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {genericChannels.slice(0, 12).map((ch) => (
-              <Link
-                key={ch.id}
-                href={`/live/watch?channel=${ch.id}&provider=zlive`}
-                className="card-lift surface bg-card hover:bg-accent/40 border border-border/70 hover:border-emerald-500/50 px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs transition-all group"
-              >
-                <span className="relative flex size-1.5 shrink-0">
-                  <span className="relative inline-flex rounded-full size-1.5 bg-emerald-400" />
-                </span>
-                <span className="font-semibold text-foreground group-hover:text-emerald-300 transition-colors">
-                  {ch.name}
-                </span>
-                {ch.quality && (
-                  <span className="text-[10px] px-1 rounded bg-black/40 text-muted-foreground font-mono">
-                    {ch.quality}
-                  </span>
-                )}
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <Section
-        title="Live Now"
-        rows={now == null ? [] : live}
-        now={now ?? 0}
-        live
-        empty="No matches in play."
-        streamMap={streamMap}
-        zliveMap={zliveMap}
-        daddyliveMap={daddyliveMap}
-        damitvMap={damitvMap}
-        onWatch={setActivePlayer}
-      />
-      <Section
-        title="Starting Soon"
-        rows={now == null ? [] : soon}
-        now={now ?? 0}
-        empty="Nothing kicking off in the next three hours."
-        streamMap={streamMap}
-        zliveMap={zliveMap}
-        daddyliveMap={daddyliveMap}
-        damitvMap={damitvMap}
-        onWatch={setActivePlayer}
-      />
-      <Section
-        title="Upcoming Matches"
-        rows={now == null ? [] : upcoming}
-        now={now ?? 0}
-        empty="No upcoming fixtures."
-        streamMap={streamMap}
-        zliveMap={zliveMap}
-        daddyliveMap={daddyliveMap}
-        damitvMap={damitvMap}
-        onWatch={setActivePlayer}
-      />
     </div>
   )
 }
