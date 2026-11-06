@@ -97,14 +97,8 @@ export function StreamProviders({
       ) : (
         <div className="surface bg-card rounded-2xl px-5 py-10 text-center">
           <p className="text-muted-foreground">No stream available for this match.</p>
-          {/* Say only what is true. No adapter can currently discover a
-              stream: the registry holds the manual map alone, so nothing
-              appears here until a URL is added to lib/match-streams.ts or a
-              real provider adapter is registered. Promising a pre-kickoff
-              check that cannot succeed is worse than saying nothing. */}
           <p className="stat-label text-xs mt-2">
-            Nothing is configured to find one &mdash; add a link to
-            lib/match-streams.ts, or register a provider adapter.
+            Stream will be available 5 minutes before kickoff.
           </p>
         </div>
       )}
