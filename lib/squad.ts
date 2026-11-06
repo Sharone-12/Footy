@@ -8,10 +8,10 @@ import { UCL } from "@/lib/competition"
  */
 export const SQUAD_POSITIONS = [
   { key: "all", label: "All", bucket: null },
-  { key: "gk", label: "Goalkeepers", bucket: "Goalkeeper" },
-  { key: "def", label: "Defenders", bucket: "Defender" },
-  { key: "mid", label: "Midfielders", bucket: "Midfielder" },
   { key: "fwd", label: "Forwards", bucket: "Forward" },
+  { key: "mid", label: "Midfielders", bucket: "Midfielder" },
+  { key: "def", label: "Defenders", bucket: "Defender" },
+  { key: "gk", label: "Goalkeepers", bucket: "Goalkeeper" },
 ] as const
 
 export const DEFAULT_POSITION = "all"

@@ -136,7 +136,7 @@ async function Squad({
   const bucket = bucketFor(pos)
   const shown = bucket ? squad.filter((p) => p.position === bucket) : squad
 
-  // Keepers first, then out from the back, as a team sheet reads.
+  // Attackers first, then midfielders, defenders, and goalkeepers.
   const order = SQUAD_POSITIONS.map((p) => p.bucket).filter(Boolean) as string[]
   shown.sort(
     (a, b) =>
