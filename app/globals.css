@@ -436,19 +436,18 @@
 }
 
 /* Compact Blaugrana stripes for pills, buttons and nav items.
-   Cycles every 26px so alternating royal blue and crimson stripes repeat
-   multiple times even within small 60–90px capsules. */
+   Cycles every 20px (10px FCB blue #004D98, 10px FCB claret #A50044) so
+   both iconic colors alternate visibly multiple times across the capsule. */
 .barca-stripes-pill {
-  background-color: var(--card);
+  background-color: #004D98;
   background-image:
-    linear-gradient(oklch(0.15 0 0 / 64%), oklch(0.15 0 0 / 72%)),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(0, 0, 0, 0.35)),
     repeating-linear-gradient(
-      115deg,
-      oklch(0.44 0.24 265) 0 6px,
-      oklch(0.22 0.10 265) 6px 10px,
-      oklch(0.32 0.18 10)  10px 16px,
-      oklch(0.55 0.22 25)  16px 22px,
-      oklch(0.32 0.18 10)  22px 26px
+      120deg,
+      #004D98 0px,
+      #004D98 10px,
+      #A50044 10px,
+      #A50044 20px
     );
 }
 
