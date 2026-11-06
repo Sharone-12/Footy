@@ -44,7 +44,7 @@ function formatDate(iso: string, kickoff?: string | null) {
 }
 
 function formatTime(kickoff: string) {
-  return formatTimeIST(kickoff, { withSuffix: true })
+  return formatTimeIST(kickoff)
 }
 
 function FixtureRow({ m, banner }: { m: Row; banner: boolean }) {

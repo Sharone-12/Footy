@@ -1248,7 +1248,7 @@ export function WatchStudio({
                     <div className="flex items-center justify-between text-muted-foreground">
                       <span>Kickoff:</span>
                       <span className="text-foreground font-semibold font-mono">
-                        {formatTimeIST(fixture.kickoff, { withSuffix: true })}
+                        {formatTimeIST(fixture.kickoff)}
                       </span>
                     </div>
                   )}

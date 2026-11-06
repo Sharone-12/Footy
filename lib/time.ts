@@ -6,12 +6,12 @@
 export const IST_TIMEZONE = "Asia/Kolkata"
 
 /**
- * Formats a timestamp into a 24-hour IST time string with optional "IST" suffix.
- * e.g. "01:30 IST" or "21:00 IST"
+ * Formats a timestamp into a 24-hour IST time string.
+ * e.g. "01:30" or "21:00"
  */
 export function formatTimeIST(
   dateOrIso: string | number | Date,
-  options?: { withSuffix?: boolean; hour12?: boolean }
+  options?: { hour12?: boolean }
 ): string {
   const d =
     typeof dateOrIso === "string" || typeof dateOrIso === "number"
@@ -20,14 +20,12 @@ export function formatTimeIST(
   if (Number.isNaN(d.getTime())) return "TBC"
 
   const hour12 = options?.hour12 ?? false
-  const timeStr = d.toLocaleTimeString("en-IN", {
+  return d.toLocaleTimeString("en-IN", {
     hour: "2-digit",
     minute: "2-digit",
     timeZone: IST_TIMEZONE,
     hour12,
   })
-
-  return options?.withSuffix === false ? timeStr : `${timeStr} IST`
 }
 
 /**
@@ -60,7 +58,7 @@ export function formatDateIST(
 
 /**
  * Formats a fixture kickoff timestamp with fallback date into user-friendly IST string.
- * e.g., "Today, 01:30 IST" or "Sun, 9 Nov, 01:30 IST"
+ * e.g., "Today, 01:30" or "Sun, 9 Nov, 01:30"
  */
 export function formatKickoffIST(
   kickoff: string | null | undefined,
@@ -78,7 +76,7 @@ export function formatKickoffIST(
   const todayStr = new Date().toLocaleDateString("en-IN", { timeZone: IST_TIMEZONE })
   const matchDayStr = d.toLocaleDateString("en-IN", { timeZone: IST_TIMEZONE })
 
-  const timePart = formatTimeIST(d, { withSuffix: true, hour12: false })
+  const timePart = formatTimeIST(d, { hour12: false })
 
   if (todayStr === matchDayStr) {
     return `Today, ${timePart}`

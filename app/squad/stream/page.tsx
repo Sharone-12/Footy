@@ -62,7 +62,7 @@ async function Stream() {
             <span className="block font-semibold truncate">{opponent}</span>
             <span className="stat-label block text-xs">
               {formatDate(m.date, m.kickoff)}
-              {m.kickoff && ` · ${formatTimeIST(m.kickoff, { withSuffix: true })}`}
+              {m.kickoff && ` · ${formatTimeIST(m.kickoff)}`}
             </span>
           </span>
         </span>
