@@ -13,7 +13,11 @@ const TABS = [
 export function BarcaNav() {
   const pathname = usePathname()
   const active =
-    TABS.slice(1).find((t) => pathname.startsWith(t.href))?.key ?? "squad"
+    pathname.startsWith("/squad/fixtures")
+      ? "fixtures"
+      : pathname.startsWith("/squad/stream")
+      ? "stream"
+      : "squad"
 
   return <SlidingSegment ariaLabel="Barça section" activeKey={active} items={TABS} />
 }

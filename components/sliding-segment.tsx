@@ -81,8 +81,8 @@ export function SlidingSegment({
       {pill && (
         <span
           aria-hidden
-          className="absolute top-1 bottom-1 rounded-full bg-white/[0.08] shadow-[inset_0_1px_0_oklch(1_0_0_/_14%)] transition-[transform,width] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)]"
-          style={{ transform: `translateX(${pill.x - 4}px)`, width: pill.w }}
+          className="absolute top-1 bottom-1 left-0 rounded-full bg-white/[0.08] shadow-[inset_0_1px_0_oklch(1_0_0_/_14%)] transition-[transform,width] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] motion-reduce:transition-none"
+          style={{ transform: `translateX(${pill.x}px)`, width: pill.w }}
         />
       )}
       {items.map((it, i) => {
@@ -95,7 +95,9 @@ export function SlidingSegment({
           onFocus: () => setHoveredIdx(i),
           onBlur: () => setHoveredIdx(null),
           onClick: () => {
-            setOptimisticKey(it.key)
+            if (!it.href) {
+              setOptimisticKey(it.key)
+            }
             it.onPick?.()
           },
           "data-active": active || undefined,
