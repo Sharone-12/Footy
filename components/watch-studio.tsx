@@ -444,9 +444,13 @@ export function WatchStudio({
                   </span>
                 ) : isUpcoming && kickoffMs ? (
                   <div className="flex flex-col items-end">
-                    <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Kickoff In</span>
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
+                      {kickoffMs - now <= 3600_000 ? "Kickoff In" : "Kickoff"}
+                    </span>
                     <span className="font-mono text-xs sm:text-sm font-bold text-[var(--pitch)]">
-                      {formatCountdown(kickoffMs, now)}
+                      {kickoffMs - now <= 3600_000
+                        ? formatCountdown(kickoffMs, now)
+                        : formatKickoffDate(fixture.kickoff, fixture.date)}
                     </span>
                   </div>
                 ) : (
@@ -1221,6 +1225,14 @@ export function WatchStudio({
                     <span>Competition:</span>
                     <span className="text-foreground font-semibold">{fixture.league}</span>
                   </div>
+                  {fixture.round != null && (
+                    <div className="flex items-center justify-between text-muted-foreground">
+                      <span>Matchday:</span>
+                      <span className="text-foreground font-semibold font-mono">
+                        {fixture.round}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between text-muted-foreground">
                     <span>Date:</span>
                     <span className="text-foreground font-semibold">{fixture.date}</span>

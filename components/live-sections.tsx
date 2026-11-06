@@ -14,6 +14,8 @@ import type { MatchedDamiTv } from "@/lib/damitv/types"
 import { UnifiedPlayer } from "@/components/unified-player"
 import { formatKickoffIST } from "@/lib/time"
 
+const pad = (n: number) => String(n).padStart(2, "0")
+
 export type LiveFixture = Timed & {
   event_id: number
   league: string
@@ -21,6 +23,8 @@ export type LiveFixture = Timed & {
   home_id: number | null
   away: string
   away_id: number | null
+  /** Matchday, as `matches.round`. Optional: only the pages that show it select it. */
+  round?: number | null
 }
 
 function formatKickoff(m: LiveFixture) {
@@ -65,6 +69,7 @@ function Row({
   const hasStream = Boolean(matchedStream || matchedZLive || matchedDaddyLive || matchedDamiTv)
   const start = startOf(m)
   const left = start - now
+  const isUnderAnHour = left > 0 && left <= 3600_000
 
   // Watch CTA & stream badges are only available when the match is LIVE or within 15 minutes of kickoff
   const isWatchable =
@@ -86,6 +91,13 @@ function Row({
               </span>
               <span className="stat-label text-[0.65rem] font-bold" style={{ color: "var(--pitch)" }}>
                 LIVE {elapsed(m, now)}&apos;
+              </span>
+            </span>
+          ) : isUnderAnHour ? (
+            <span className="inline-flex items-center gap-1 font-mono font-bold text-xs sm:text-sm text-amber-400">
+              <span className="size-1.5 rounded-full bg-amber-400 animate-pulse" />
+              <span>
+                {pad(Math.floor(left / 60_000))}:{pad(Math.floor((left % 60_000) / 1000))}
               </span>
             </span>
           ) : (
@@ -252,7 +264,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
   useEffect(() => {
     const tick = () => setNow(Date.now())
     tick()
-    const t = setInterval(tick, 60_000)
+    const t = setInterval(tick, 1000)
     return () => clearInterval(t)
   }, [])
 

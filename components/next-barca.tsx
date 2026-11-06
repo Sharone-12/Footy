@@ -125,9 +125,13 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
           ) : !match.kickoff ? (
             `${t.d}d`
           ) : t.d > 0 ? (
-            `${t.d}d ${pad(t.h)}:${pad(t.m)}:${pad(t.s)}`
+            `${t.d}d`
+          ) : t.h > 0 ? (
+            `${t.h}h`
           ) : (
-            `${pad(t.h)}:${pad(t.m)}:${pad(t.s)}`
+            <span className="font-mono font-bold tracking-tight">
+              {pad(t.m)}:{pad(t.s)}
+            </span>
           )}
         </span>
       </span>

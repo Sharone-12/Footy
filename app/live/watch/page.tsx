@@ -57,7 +57,7 @@ async function WatchContent({ searchParams }: PageProps) {
     if (!Number.isNaN(eventId) && eventId > 0) {
       const { data } = await supabase
         .from("matches")
-        .select("event_id, date, kickoff, league, home, home_id, away, away_id")
+        .select("event_id, date, kickoff, league, home, home_id, away, away_id, round")
         .eq("event_id", eventId)
         .maybeSingle()
 
