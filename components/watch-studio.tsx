@@ -310,10 +310,20 @@ export function WatchStudio({
     [genericChannels],
   )
 
-  // Fullscreen container handler
+  // Fullscreen container handler: attempts direct iframe fullscreen for 100% pure video with no UI
   const toggleFullscreen = useCallback(async () => {
     try {
       if (!document.fullscreenElement) {
+        const iframe = playerContainerRef.current?.querySelector("iframe")
+        if (iframe && iframe.requestFullscreen) {
+          try {
+            await iframe.requestFullscreen()
+            setIsFullscreen(true)
+            return
+          } catch {
+            // If iframe direct fullscreen fails (e.g. cross-origin restrictions), fall through to container
+          }
+        }
         if (playerContainerRef.current) {
           await playerContainerRef.current.requestFullscreen()
           setIsFullscreen(true)
@@ -512,8 +522,10 @@ export function WatchStudio({
               isFullscreen ? "fixed inset-0 z-50 rounded-none w-screen h-screen border-none" : "shadow-2xl"
             }`}
           >
-            {/* Top Video Header Overlay */}
-            <div className="flex items-center justify-between px-4 py-2.5 bg-neutral-950/95 border-b border-white/10 z-20 shrink-0">
+            {/* Top Video Header Overlay (hidden in fullscreen mode for clean, distraction-free playback) */}
+            <div className={`flex items-center justify-between px-4 py-2.5 bg-neutral-950/95 border-b border-white/10 z-20 shrink-0 ${
+              isFullscreen ? "hidden" : ""
+            }`}>
               <div className="flex items-center gap-2">
                 <span
                   className="font-black text-sm tracking-tighter text-foreground flex items-center gap-1.5"
@@ -550,8 +562,10 @@ export function WatchStudio({
               </div>
             </div>
 
-            {/* 16:9 Cinematic Video Display Area (Pure Pitch Black, Zero Color Bleed) */}
-            <div className="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden">
+            {/* Cinematic Video Display Area (Pure Pitch Black, expands to 100% full screen in fullscreen mode) */}
+            <div className={`relative w-full bg-black flex items-center justify-center overflow-hidden ${
+              isFullscreen ? "w-full h-full flex-1" : "aspect-video"
+            }`}>
 
               {/* 1. LOADING STATE */}
               {isBundleLoading && (
@@ -677,8 +691,12 @@ export function WatchStudio({
               )}
             </div>
 
-            {/* Bottom Controls Bar */}
-            <div className="flex items-center justify-between px-4 py-3 bg-neutral-900/90 border-t border-border/50 text-xs shrink-0">
+            {/* Bottom Controls Bar (floats and auto-hides in fullscreen mode) */}
+            <div className={
+              isFullscreen
+                ? "absolute bottom-0 inset-x-0 z-30 flex items-center justify-between px-4 py-3 bg-neutral-950/80 backdrop-blur-md border-t border-white/10 text-xs transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+                : "flex items-center justify-between px-4 py-3 bg-neutral-900/90 border-t border-border/50 text-xs shrink-0"
+            }>
               <div className="flex items-center gap-2.5">
                 {currentSource ? (
                   <>
