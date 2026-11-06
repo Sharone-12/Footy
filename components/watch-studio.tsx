@@ -366,13 +366,7 @@ export function WatchStudio({
       {/* 2. MATCH INFORMATION HEADER CARD (Hero Banner) */}
       {fixture && (
         <section
-          className={`surface rounded-3xl p-4 sm:p-6 transition-all relative overflow-hidden border border-border/60 ${isBarcaMatch ? "barca-stripes" : "bg-card"
-            }`}
-          style={{
-            boxShadow: isBarcaMatch
-              ? "0 10px 40px -15px rgba(0, 77, 152, 0.35)"
-              : "0 10px 30px -15px rgba(0, 0, 0, 0.7)",
-          }}
+          className="surface bg-card rounded-3xl p-4 sm:p-6 transition-all relative overflow-hidden border border-border/70 shadow-lg"
         >
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
             {/* Teams & VS */}
@@ -473,16 +467,12 @@ export function WatchStudio({
           {/* Video Container Card */}
           <div
             ref={playerContainerRef}
-            className={`group relative surface rounded-3xl overflow-hidden border border-border/80 bg-black flex flex-col transition-all ${isFullscreen ? "fixed inset-0 z-50 rounded-none w-screen h-screen border-none" : ""
-              }`}
-            style={{
-              boxShadow: isBarcaMatch
-                ? "0 20px 60px -20px rgba(0, 77, 152, 0.4), 0 0 40px -15px rgba(165, 0, 68, 0.3)"
-                : "0 25px 70px -20px rgba(0, 0, 0, 0.9), 0 0 50px -15px rgba(0, 230, 118, 0.15)",
-            }}
+            className={`group relative rounded-3xl overflow-hidden border border-white/10 bg-black flex flex-col transition-all ${
+              isFullscreen ? "fixed inset-0 z-50 rounded-none w-screen h-screen border-none" : "shadow-2xl"
+            }`}
           >
             {/* Top Video Header Overlay */}
-            <div className="flex items-center justify-between px-4 py-2.5 bg-gradient-to-b from-black/90 via-black/60 to-transparent z-20 shrink-0">
+            <div className="flex items-center justify-between px-4 py-2.5 bg-neutral-950/95 border-b border-white/10 z-20 shrink-0">
               <div className="flex items-center gap-2">
                 <span
                   className="font-black text-sm tracking-tighter text-foreground flex items-center gap-1.5"
@@ -519,17 +509,8 @@ export function WatchStudio({
               </div>
             </div>
 
-            {/* 16:9 Cinematic Video Display Area */}
-            <div className="relative w-full aspect-video bg-neutral-950 flex items-center justify-center overflow-hidden">
-              {/* Stadium Background Atmosphere */}
-              <div
-                className="absolute inset-0 pointer-events-none opacity-25"
-                style={{
-                  background: isBarcaMatch
-                    ? "radial-gradient(ellipse at 50% 50%, rgba(0, 77, 152, 0.3) 0%, rgba(165, 0, 68, 0.2) 60%, transparent 100%)"
-                    : "radial-gradient(ellipse at 50% 50%, rgba(0, 230, 118, 0.18) 0%, rgba(0, 0, 0, 0.8) 70%, transparent 100%)",
-                }}
-              />
+            {/* 16:9 Cinematic Video Display Area (Pure Pitch Black, Zero Color Bleed) */}
+            <div className="relative w-full aspect-video bg-black flex items-center justify-center overflow-hidden">
 
               {/* 1. LOADING STATE */}
               {isBundleLoading && (
@@ -639,7 +620,7 @@ export function WatchStudio({
                     key={`${currentSource.key}-${reloadKey}`}
                     src={currentSource.url}
                     title={`${fixture?.home ?? "Live"} vs ${fixture?.away ?? "Match"} — ${currentSource.label}`}
-                    className="w-full h-full border-0"
+                    className="w-full h-full border-0 bg-black block"
                     allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                     allowFullScreen
                     referrerPolicy="no-referrer"

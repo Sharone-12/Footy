@@ -55,9 +55,8 @@ function FixtureRow({ m, banner }: { m: Row; banner: boolean }) {
   return (
     <Link
       href={`/predictions/match?id=${m.event_id}`}
-      className={`card-lift fixture-row surface rounded-2xl px-4 py-3.5 flex items-center gap-4 ${
-        banner && m.league === UCL ? "ucl-row" : "bg-card"
-      }`}
+      className={`card-lift fixture-row surface rounded-2xl px-4 py-3.5 flex items-center gap-4 ${banner && m.league === UCL ? "ucl-row" : "bg-card"
+        }`}
     >
       <span className="flex flex-col leading-none w-24 shrink-0">
         <span className="stat-label text-xs">{formatDate(m.date, m.kickoff)}</span>
