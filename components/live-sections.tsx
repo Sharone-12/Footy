@@ -5,7 +5,7 @@ import Link from "next/link"
 import { ExternalLinkIcon, MonitorPlayIcon, PlayIcon, RadioIcon, SparklesIcon, TvIcon } from "lucide-react"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
-import { splitFixtures, startOf, type Timed } from "@/lib/live"
+import { splitFixtures, startOf, PLAYING_MS, type Timed } from "@/lib/live"
 import { gatewaySources } from "@/lib/providers/registry"
 import type { MatchedStream } from "@/lib/streamfree/types"
 import type { MatchedZLive, ZLiveChannel } from "@/lib/zlive/types"
@@ -63,6 +63,13 @@ function Row({
 }) {
   const tid = LEAGUE_TOURNAMENT_ID[m.league]
   const hasStream = Boolean(matchedStream || matchedZLive || matchedDaddyLive || matchedDamiTv)
+  const start = startOf(m)
+  const left = start - now
+
+  // Watch CTA & stream badges are only available when the match is LIVE or within 15 minutes of kickoff
+  const isWatchable =
+    hasStream &&
+    (live || (left <= 15 * 60_000 && now - start < PLAYING_MS))
 
   return (
     <div className="card-lift fixture-row surface bg-card rounded-2xl px-4 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 transition-all">
@@ -101,8 +108,8 @@ function Row({
       </Link>
 
       <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50">
-        {/* Available Streaming Providers & Watch CTA */}
-        {hasStream && (
+        {/* Available Streaming Providers & Watch CTA (only when live or within 15m of kickoff) */}
+        {isWatchable && (
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5">
               {matchedStream && (

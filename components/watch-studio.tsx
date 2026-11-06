@@ -177,11 +177,11 @@ export function WatchStudio({
         let dtData: { stream?: MatchedDamiTv } = {}
         let genData: { channels?: ZLiveChannel[] } = {}
 
-        if (sfRes.ok) try { sfData = await sfRes.json() } catch {}
-        if (zlRes.ok) try { zlData = await zlRes.json() } catch {}
-        if (dlRes.ok) try { dlData = await dlRes.json() } catch {}
-        if (dtRes.ok) try { dtData = await dtRes.json() } catch {}
-        if (genRes.ok) try { genData = await genRes.json() } catch {}
+        if (sfRes.ok) try { sfData = await sfRes.json() } catch { }
+        if (zlRes.ok) try { zlData = await zlRes.json() } catch { }
+        if (dlRes.ok) try { dlData = await dlRes.json() } catch { }
+        if (dtRes.ok) try { dtData = await dtRes.json() } catch { }
+        if (genRes.ok) try { genData = await genRes.json() } catch { }
 
         const generics = genData.channels ?? []
         setGenericChannels(generics)
@@ -351,11 +351,10 @@ export function WatchStudio({
           <button
             type="button"
             onClick={() => setIsCinemaMode((prev) => !prev)}
-            className={`hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${
-              isCinemaMode
+            className={`hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${isCinemaMode
                 ? "bg-[var(--pitch)] text-black border-[var(--pitch)] font-bold shadow-md"
                 : "nav-pill text-muted-foreground hover:text-foreground"
-            }`}
+              }`}
             title={isCinemaMode ? "Exit Cinema Mode" : "Expand to Cinema Mode"}
           >
             {isCinemaMode ? <Minimize2Icon className="size-3.5" /> : <Maximize2Icon className="size-3.5" />}
@@ -367,9 +366,8 @@ export function WatchStudio({
       {/* 2. MATCH INFORMATION HEADER CARD (Hero Banner) */}
       {fixture && (
         <section
-          className={`surface rounded-3xl p-4 sm:p-6 transition-all relative overflow-hidden border border-border/60 ${
-            isBarcaMatch ? "barca-stripes" : "bg-card"
-          }`}
+          className={`surface rounded-3xl p-4 sm:p-6 transition-all relative overflow-hidden border border-border/60 ${isBarcaMatch ? "barca-stripes" : "bg-card"
+            }`}
           style={{
             boxShadow: isBarcaMatch
               ? "0 10px 40px -15px rgba(0, 77, 152, 0.35)"
@@ -475,9 +473,8 @@ export function WatchStudio({
           {/* Video Container Card */}
           <div
             ref={playerContainerRef}
-            className={`group relative surface rounded-3xl overflow-hidden border border-border/80 bg-black flex flex-col transition-all ${
-              isFullscreen ? "fixed inset-0 z-50 rounded-none w-screen h-screen border-none" : ""
-            }`}
+            className={`group relative surface rounded-3xl overflow-hidden border border-border/80 bg-black flex flex-col transition-all ${isFullscreen ? "fixed inset-0 z-50 rounded-none w-screen h-screen border-none" : ""
+              }`}
             style={{
               boxShadow: isBarcaMatch
                 ? "0 20px 60px -20px rgba(0, 77, 152, 0.4), 0 0 40px -15px rgba(165, 0, 68, 0.3)"
@@ -729,11 +726,10 @@ export function WatchStudio({
               <button
                 type="button"
                 onClick={() => setActiveTab("about")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
-                  activeTab === "about"
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === "about"
                     ? "bg-card text-foreground border border-border/80 shadow-sm"
                     : "text-muted-foreground hover:text-foreground hover:bg-card/50"
-                }`}
+                  }`}
                 style={{ fontFamily: "var(--font-condensed)" }}
               >
                 <InfoIcon className="size-3.5 text-[var(--pitch)]" />
@@ -743,11 +739,10 @@ export function WatchStudio({
               <button
                 type="button"
                 onClick={() => setActiveTab("streams")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
-                  activeTab === "streams"
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === "streams"
                     ? "bg-card text-foreground border border-border/80 shadow-sm"
                     : "text-muted-foreground hover:text-foreground hover:bg-card/50"
-                }`}
+                  }`}
                 style={{ fontFamily: "var(--font-condensed)" }}
               >
                 <LayersIcon className="size-3.5 text-[var(--pitch)]" />
@@ -757,11 +752,10 @@ export function WatchStudio({
               <button
                 type="button"
                 onClick={() => setActiveTab("similar")}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
-                  activeTab === "similar"
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${activeTab === "similar"
                     ? "bg-card text-foreground border border-border/80 shadow-sm"
                     : "text-muted-foreground hover:text-foreground hover:bg-card/50"
-                }`}
+                  }`}
                 style={{ fontFamily: "var(--font-condensed)" }}
               >
                 <CalendarIcon className="size-3.5 text-[var(--pitch)]" />
@@ -918,11 +912,10 @@ export function WatchStudio({
                                 key={src.key}
                                 type="button"
                                 onClick={() => selectSource(p.id, src.key)}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                                  isCurrent
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all ${isCurrent
                                     ? "bg-[var(--pitch)] text-black font-bold shadow-md scale-[1.03]"
                                     : "bg-card hover:bg-accent border border-border/80 text-foreground"
-                                }`}
+                                  }`}
                               >
                                 {isCurrent ? (
                                   <span className="size-2 rounded-full bg-black animate-pulse" />
@@ -972,11 +965,10 @@ export function WatchStudio({
                             key={ch.id}
                             type="button"
                             onClick={() => selectSource("zlive", `zlive:${ch.id}`)}
-                            className={`p-2.5 rounded-xl border flex items-center justify-between text-left text-xs transition-all ${
-                              isCurrent
+                            className={`p-2.5 rounded-xl border flex items-center justify-between text-left text-xs transition-all ${isCurrent
                                 ? "bg-[var(--pitch)] text-black border-2 border-[var(--pitch)] font-bold shadow-[0_0_15px_-2px_var(--pitch)] scale-[1.02]"
                                 : "bg-background/40 hover:bg-accent/40 border-border/40 hover:border-emerald-500/50 text-foreground"
-                            }`}
+                              }`}
                           >
                             <div className="flex items-center gap-1.5 truncate mr-1">
                               {isCurrent && (
@@ -1047,6 +1039,11 @@ export function WatchStudio({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {similarMatches.slice(0, 6).map((m) => {
                       const matchTid = LEAGUE_TOURNAMENT_ID[m.league]
+                      const start = m.kickoff ? new Date(m.kickoff).getTime() : new Date(`${m.date}T23:59:59Z`).getTime()
+                      const isSimilarWatchable =
+                        (now >= start && now <= start + 115 * 60_000) ||
+                        (start - now <= 15 * 60_000 && now < start + 115 * 60_000)
+
                       return (
                         <div
                           key={m.event_id}
@@ -1065,10 +1062,14 @@ export function WatchStudio({
                           </div>
 
                           <Link
-                            href={`/live/watch?id=${m.event_id}`}
-                            className="px-3 py-1.5 rounded-lg bg-[var(--pitch)]/10 text-[var(--pitch)] hover:bg-[var(--pitch)] hover:text-black border border-[var(--pitch)]/30 font-bold text-xs shrink-0 transition-all"
+                            href={isSimilarWatchable ? `/live/watch?id=${m.event_id}` : `/predictions/match?id=${m.event_id}`}
+                            className={`px-3 py-1.5 rounded-lg font-bold text-xs shrink-0 transition-all ${
+                              isSimilarWatchable
+                                ? "bg-[var(--pitch)] text-black hover:brightness-110 shadow-sm"
+                                : "bg-card hover:bg-accent text-muted-foreground hover:text-foreground border border-border"
+                            }`}
                           >
-                            Watch
+                            {isSimilarWatchable ? "Watch" : "Preview"}
                           </Link>
                         </div>
                       )
@@ -1111,11 +1112,10 @@ export function WatchStudio({
                     return (
                       <div
                         key={p.id}
-                        className={`rounded-2xl p-3.5 border transition-all ${
-                          isProviderSelected
+                        className={`rounded-2xl p-3.5 border transition-all ${isProviderSelected
                             ? "bg-background/80 border-[var(--pitch)] shadow-[0_0_15px_-5px_var(--pitch)]"
                             : "bg-background/40 border-border/60 hover:border-border"
-                        }`}
+                          }`}
                       >
                         {/* Provider Header */}
                         <div className="flex items-center justify-between mb-2">
@@ -1164,9 +1164,8 @@ export function WatchStudio({
                           return (
                             <div>
                               <div
-                                className={`flex flex-wrap gap-1.5 pt-1 ${
-                                  isExpanded ? "max-h-60 overflow-y-auto pr-1" : ""
-                                }`}
+                                className={`flex flex-wrap gap-1.5 pt-1 ${isExpanded ? "max-h-60 overflow-y-auto pr-1" : ""
+                                  }`}
                               >
                                 {visibleSources.map((src) => {
                                   const isCurrent = currentSource?.key === src.key
@@ -1175,11 +1174,10 @@ export function WatchStudio({
                                       key={src.key}
                                       type="button"
                                       onClick={() => selectSource(p.id, src.key)}
-                                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
-                                        isCurrent
+                                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${isCurrent
                                           ? "bg-[var(--pitch)] text-black font-bold shadow-sm"
                                           : "bg-card hover:bg-accent text-muted-foreground hover:text-foreground border border-border/70"
-                                      }`}
+                                        }`}
                                     >
                                       {isCurrent && <CheckCircle2Icon className="size-3 stroke-[3]" />}
                                       <span>{src.label}</span>

@@ -68,7 +68,7 @@ export function matchFixtureToZLive(
 ): MatchedZLive | null {
   if (!channels || channels.length === 0) return null
 
-  // 1. First pass: look for confirmed match where both teams are mentioned
+  // Only match confirmed matches where both teams are specifically mentioned in the title
   let bestConfirmed: MatchedZLive | null = null
   let maxConfirmedScore = 0
 
@@ -85,41 +85,7 @@ export function matchFixtureToZLive(
     }
   }
 
-  if (bestConfirmed) {
-    return bestConfirmed
-  }
-
-  // 2. Second pass: look for league-specific generic broadcaster
-  for (const ch of channels) {
-    if (matchesLeagueBroadcaster(ch.name, fixture.league)) {
-      return {
-        channel: ch,
-        confidence: 0.65,
-        isConfirmedMatch: false,
-        isGenericBroadcaster: true,
-      }
-    }
-  }
-
-  // 3. Third pass: fallback to high-quality general football broadcaster (if live)
-  const generalFootballBroadcaster = channels.find((ch) => {
-    const n = ch.name.toLowerCase()
-    return (
-      ch.live &&
-      (n.includes("football") || n.includes("soccer") || n.includes("supersport") || n.includes("sky sports"))
-    )
-  })
-
-  if (generalFootballBroadcaster) {
-    return {
-      channel: generalFootballBroadcaster,
-      confidence: 0.50,
-      isConfirmedMatch: false,
-      isGenericBroadcaster: true,
-    }
-  }
-
-  return null
+  return bestConfirmed
 }
 
 /**
