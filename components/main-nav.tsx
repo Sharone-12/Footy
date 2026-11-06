@@ -33,7 +33,7 @@ export function MainNavFallback() {
           key={l.href}
           className={`relative z-10 px-3.5 sm:px-4 py-1.5 rounded-full text-sm font-medium ${
             l.href === "/squad"
-              ? "barca-stripes overflow-hidden text-foreground"
+              ? "barca-stripes-pill overflow-hidden text-foreground min-w-[4.75rem] inline-flex items-center justify-center text-center px-4"
               : "text-muted-foreground"
           }`}
         >
@@ -115,7 +115,7 @@ export function MainNav() {
                   data-active={active || undefined}
                   className={`relative z-10 px-3.5 sm:px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 ${
                     isBarca
-                      ? "barca-stripes overflow-hidden text-foreground hover:text-white data-[active]:text-white shadow-[inset_0_1px_0_oklch(1_0_0_/_16%)] hover:brightness-110"
+                      ? "barca-stripes-pill overflow-hidden text-foreground hover:text-white data-[active]:text-white shadow-[inset_0_1px_0_oklch(1_0_0_/_16%)] hover:brightness-110 min-w-[4.75rem] inline-flex items-center justify-center text-center px-4"
                       : "text-muted-foreground hover:text-foreground data-[active]:text-foreground"
                   }`}
                 >

@@ -84,7 +84,7 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
   return (
     <Link
       href={`/predictions/match?id=${match.event_id}`}
-      className="pointer-events-auto nav-pill flex items-center gap-2 pl-2 pr-3 py-1.5"
+      className="pointer-events-auto nav-pill barca-stripes-pill overflow-hidden flex items-center gap-2 pl-2 pr-3 py-1.5"
       title={`${match.league} — Barça ${match.home ? "vs" : "away at"} ${match.opponent}`}
     >
       <span className="flex items-center gap-1">

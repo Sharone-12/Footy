@@ -435,6 +435,23 @@
     );
 }
 
+/* Compact Blaugrana stripes for pills, buttons and nav items.
+   Cycles every 26px so alternating royal blue and crimson stripes repeat
+   multiple times even within small 60–90px capsules. */
+.barca-stripes-pill {
+  background-color: var(--card);
+  background-image:
+    linear-gradient(oklch(0.15 0 0 / 64%), oklch(0.15 0 0 / 72%)),
+    repeating-linear-gradient(
+      115deg,
+      oklch(0.44 0.24 265) 0 6px,
+      oklch(0.22 0.10 265) 6px 10px,
+      oklch(0.32 0.18 10)  10px 16px,
+      oklch(0.55 0.22 25)  16px 22px,
+      oklch(0.32 0.18 10)  22px 26px
+    );
+}
+
 /* Fullscreen: the card's 16:9 box would letterbox inside the viewport, so let
    the frame take the whole screen and drop the card's rounding. YouTube still
    pillarboxes the video itself to its own ratio, which is what we want. */
