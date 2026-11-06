@@ -162,31 +162,14 @@ function Row({
               )}
             </div>
 
-            <button
-              type="button"
-              onClick={() =>
-                onWatch({
-                  fixtureTitle: `${m.home} vs ${m.away}`,
-                  league: m.league,
-                  streamFree: matchedStream ?? null,
-                  zLive: matchedZLive ?? null,
-                  daddyLive: matchedDaddyLive ?? null,
-                  damiTv: matchedDamiTv ?? null,
-                  initialProvider: matchedStream
-                    ? "streamfree"
-                    : matchedDamiTv
-                    ? "damitv"
-                    : matchedDaddyLive
-                    ? "daddylive"
-                    : "zlive",
-                })
-              }
-              aria-label={`Watch streams for ${m.home} vs ${m.away}`}
+            <Link
+              href={`/live/watch?id=${m.event_id}`}
+              aria-label={`Watch stream for ${m.home} vs ${m.away}`}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--pitch)] text-black hover:brightness-110 font-bold text-xs shadow-md transition-all hover:scale-[1.03]"
             >
               <PlayIcon className="size-3 fill-current" />
               Watch
-            </button>
+            </Link>
           </div>
         )}
 
@@ -407,33 +390,6 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
 
   return (
     <div className="flex flex-col gap-8 relative">
-      {/* Active Unified Streaming Player Modal */}
-      {activePlayer && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label={`Live stream player: ${activePlayer.fixtureTitle}`}
-          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md animate-fade-in"
-          onClick={() => setActivePlayer(null)}
-        >
-          <div
-            className="w-full max-w-4xl max-h-[92vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <UnifiedPlayer
-              fixtureTitle={activePlayer.fixtureTitle}
-              league={activePlayer.league}
-              streamFree={activePlayer.streamFree}
-              zLive={activePlayer.zLive}
-              daddyLive={activePlayer.daddyLive}
-              damiTv={activePlayer.damiTv}
-              genericChannel={activePlayer.genericChannel}
-              initialProvider={activePlayer.initialProvider}
-              onClose={() => setActivePlayer(null)}
-            />
-          </div>
-        </div>
-      )}
 
       {/* External Gateways (RoxieStreams, StreamCorner) */}
       {gateways.length > 0 && (
@@ -506,17 +462,9 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
           </p>
           <div className="flex flex-wrap gap-2">
             {genericChannels.slice(0, 12).map((ch) => (
-              <button
+              <Link
                 key={ch.id}
-                type="button"
-                onClick={() =>
-                  setActivePlayer({
-                    fixtureTitle: ch.name,
-                    league: ch.sport || "Football",
-                    genericChannel: ch,
-                    initialProvider: "zlive",
-                  })
-                }
+                href={`/live/watch?channel=${ch.id}&provider=zlive`}
                 className="card-lift surface bg-card hover:bg-accent/40 border border-border/70 hover:border-emerald-500/50 px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs transition-all group"
               >
                 <span className="relative flex size-1.5 shrink-0">
@@ -530,7 +478,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
                     {ch.quality}
                   </span>
                 )}
-              </button>
+              </Link>
             ))}
           </div>
         </section>
