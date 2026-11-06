@@ -44,7 +44,7 @@ import {
   type WatchSource,
   type StreamBundle,
 } from "@/lib/streaming/resolve"
-import { formatKickoffIST, formatTimeIST } from "@/lib/time"
+import { formatKickoffIST, formatTimeIST, formatDateIST } from "@/lib/time"
 
 export type WatchStudioProps = {
   fixture: LiveFixture | null
@@ -410,152 +410,214 @@ export function WatchStudio({
         </div>
       </div>
 
-      {/* 2. MATCH INFORMATION HEADER CARD (Hero Banner) */}
-      {fixture && (
-        <section
-          className="surface bg-card rounded-3xl p-4 sm:p-6 transition-all relative overflow-hidden border border-border/70 shadow-lg"
-        >
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
-            {/* Teams & VS */}
-            <div className="flex items-center gap-3 sm:gap-6 min-w-0 flex-1">
-              {/* Home Team */}
-              <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
-                {fixture.home_id != null && (
-                  <TeamCrest
-                    teamId={fixture.home_id}
-                    name={fixture.home}
-                    size={38}
-                    className="shrink-0 drop-shadow-md"
-                  />
-                )}
-                <span
-                  className="font-bold text-base sm:text-2xl uppercase tracking-tight truncate"
-                  style={{ fontFamily: "var(--font-condensed)" }}
-                >
-                  {fixture.home}
-                </span>
-              </div>
-
-              {/* VS Badge */}
-              <div className="flex flex-col items-center justify-center shrink-0 px-1 sm:px-3">
-                <span
-                  className="px-2.5 py-1 rounded-full text-[11px] sm:text-xs font-black tracking-widest bg-black/60 border border-white/10 text-muted-foreground"
-                  style={{ fontFamily: "var(--font-condensed)" }}
-                >
-                  VS
-                </span>
-              </div>
-
-              {/* Away Team */}
-              <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0">
-                {fixture.away_id != null && (
-                  <TeamCrest
-                    teamId={fixture.away_id}
-                    name={fixture.away}
-                    size={38}
-                    className="shrink-0 drop-shadow-md"
-                  />
-                )}
-                <span
-                  className="font-bold text-base sm:text-2xl uppercase tracking-tight truncate"
-                  style={{ fontFamily: "var(--font-condensed)" }}
-                >
-                  {fixture.away}
-                </span>
-              </div>
-            </div>
-
-            {/* Competition Crest & Kickoff Meta */}
-            <div className="flex items-center gap-3 md:border-l md:border-white/10 md:pl-6 shrink-0 justify-between md:justify-end">
-              <div className="flex flex-col md:items-end leading-tight">
-                <div className="flex items-center gap-1.5">
-                  <span className="text-xs sm:text-sm font-semibold text-foreground">
-                    {fixture.league}
+      {/* 2. MATCH INFORMATION HEADER CARD (Hero Banner with High-Density Telemetry) */}
+      {fixture && (() => {
+        const hasScore = fixture.home_goals != null && fixture.away_goals != null
+        return (
+          <section
+            className={`surface bg-card rounded-3xl p-4 sm:p-5 transition-all relative overflow-hidden border border-border/70 shadow-lg ${
+              isBarcaMatch ? "barca-stripes" : ""
+            }`}
+          >
+            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 lg:gap-8">
+              {/* Teams & Score / VS Center */}
+              <div className="flex items-center gap-3 sm:gap-6 min-w-0 flex-1">
+                {/* Home Team */}
+                <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1 justify-end">
+                  <span
+                    className="font-bold text-base sm:text-xl md:text-2xl uppercase tracking-tight truncate text-right"
+                    style={{ fontFamily: "var(--font-condensed)" }}
+                  >
+                    {fixture.home}
                   </span>
-                  {tid && <LeagueCrest tournamentId={tid} name={fixture.league} size={18} variant="transparent" />}
+                  {fixture.home_id != null && (
+                    <TeamCrest
+                      teamId={fixture.home_id}
+                      name={fixture.home}
+                      size={40}
+                      className="shrink-0 drop-shadow-md"
+                    />
+                  )}
                 </div>
-                <span className="text-[11px] sm:text-xs text-muted-foreground mt-0.5">
-                  {formatKickoffDate(fixture.kickoff, fixture.date)}
-                </span>
+
+                {/* Score Hub or VS Badge */}
+                <div className="flex flex-col items-center justify-center shrink-0 px-1 sm:px-3">
+                  {hasScore ? (
+                    <div className="flex flex-col items-center">
+                      <div className="flex items-center gap-2 px-3.5 py-1 rounded-2xl bg-black/60 border border-white/10 shadow-inner">
+                        <span className="font-mono text-xl sm:text-2xl font-black text-white">
+                          {fixture.home_goals}
+                        </span>
+                        <span className="text-white/40 font-mono text-sm font-bold">:</span>
+                        <span className="font-mono text-xl sm:text-2xl font-black text-white">
+                          {fixture.away_goals}
+                        </span>
+                      </div>
+                      {isLiveNow && elapsedMinute && (
+                        <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-mono font-bold text-[var(--pitch)]">
+                          <span className="size-1.5 rounded-full bg-[var(--pitch)] animate-pulse" />
+                          {elapsedMinute}&apos;
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center">
+                      <span
+                        className="px-3 py-1 rounded-full text-[11px] sm:text-xs font-black tracking-widest bg-black/60 border border-white/10 text-muted-foreground"
+                        style={{ fontFamily: "var(--font-condensed)" }}
+                      >
+                        VS
+                      </span>
+                      {isLiveNow && elapsedMinute && (
+                        <span className="inline-flex items-center gap-1 mt-1 text-[10px] font-mono font-bold text-[var(--pitch)]">
+                          <span className="size-1.5 rounded-full bg-[var(--pitch)] animate-pulse" />
+                          {elapsedMinute}&apos;
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Away Team */}
+                <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
+                  {fixture.away_id != null && (
+                    <TeamCrest
+                      teamId={fixture.away_id}
+                      name={fixture.away}
+                      size={40}
+                      className="shrink-0 drop-shadow-md"
+                    />
+                  )}
+                  <span
+                    className="font-bold text-base sm:text-xl md:text-2xl uppercase tracking-tight truncate"
+                    style={{ fontFamily: "var(--font-condensed)" }}
+                  >
+                    {fixture.away}
+                  </span>
+                </div>
               </div>
 
-              {/* Live or Upcoming status badge */}
-              <div className="shrink-0">
-                {isLiveNow ? (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--pitch)] text-black font-extrabold text-xs shadow-lg uppercase tracking-wider">
-                    <span className="relative flex size-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-black opacity-60 motion-reduce:hidden" />
-                      <span className="relative inline-flex rounded-full size-2 bg-black" />
+              {/* Right: Telemetry Strip (Fills previously empty space with competition, kickoff & status) */}
+              <div className="flex items-center flex-wrap sm:flex-nowrap gap-2.5 sm:gap-3 lg:border-l lg:border-white/10 lg:pl-6 shrink-0 justify-between lg:justify-end">
+                {/* 1. Competition & Round */}
+                <div className="flex items-center gap-2.5 px-3 py-2 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
+                  {tid && <LeagueCrest tournamentId={tid} name={fixture.league} size={22} variant="transparent" />}
+                  <div className="flex flex-col leading-tight">
+                    <span className="text-xs font-bold text-foreground truncate max-w-[120px] sm:max-w-[150px]">
+                      {fixture.league}
                     </span>
-                    MATCH LIVE
-                  </span>
-                ) : isUpcoming && kickoffMs ? (
-                  <div className="flex flex-col items-end">
-                    <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">
-                      {kickoffMs - now <= 3600_000 ? "Kickoff In" : "Kickoff"}
-                    </span>
-                    <span className="font-mono text-xs sm:text-sm font-bold text-[var(--pitch)]">
-                      {kickoffMs - now <= 3600_000
-                        ? formatCountdown(kickoffMs, now)
-                        : formatKickoffDate(fixture.kickoff, fixture.date)}
+                    <span className="text-[10px] text-muted-foreground font-mono">
+                      {fixture.round ? `Round ${fixture.round}` : "League Match"}
                     </span>
                   </div>
-                ) : (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-card border border-border text-xs text-muted-foreground font-semibold">
-                    SCHEDULED
-                  </span>
-                )}
+                </div>
+
+                {/* 2. Kickoff Time & Date */}
+                <div className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
+                  <ClockIcon className="size-3.5 text-muted-foreground shrink-0" />
+                  <div className="flex flex-col leading-tight">
+                    <span className="text-xs font-semibold text-foreground">
+                      {fixture.kickoff ? formatTimeIST(fixture.kickoff) : formatKickoffDate(fixture.kickoff, fixture.date)}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {formatDateIST(fixture.kickoff || `${fixture.date}T12:00:00Z`)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* 3. Match Status Badge / Countdown */}
+                <div className="shrink-0">
+                  {isLiveNow ? (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-[var(--pitch)]/10 border border-[var(--pitch)]/30 text-[var(--pitch)] shadow-sm">
+                      <span className="relative flex size-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--pitch)] opacity-75 motion-reduce:hidden" />
+                        <span className="relative inline-flex rounded-full size-2 bg-[var(--pitch)]" />
+                      </span>
+                      <div className="flex flex-col leading-none">
+                        <span className="text-[11px] font-black uppercase tracking-wider">LIVE MATCH</span>
+                        {elapsedMinute && (
+                          <span className="text-[9px] font-mono font-bold opacity-80 mt-0.5">
+                            {elapsedMinute} MINS
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ) : isUpcoming && kickoffMs ? (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/[0.04] border border-white/10">
+                      <div className="flex flex-col items-end leading-tight">
+                        <span className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider">
+                          {kickoffMs - now <= 3600_000 ? "Kickoff In" : "Status"}
+                        </span>
+                        <span className="font-mono text-xs font-bold text-[var(--pitch)]">
+                          {kickoffMs - now <= 3600_000
+                            ? formatCountdown(kickoffMs, now)
+                            : "UPCOMING"}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-3 py-2 rounded-2xl bg-card border border-border text-xs text-muted-foreground font-semibold">
+                      SCHEDULED
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        </section>
-      )}
+          </section>
+        )
+      })()}
 
       {/* 3. MAIN BROADCAST SUITE: Two Column Layout */}
       <div className={`grid gap-6 transition-all ${isCinemaMode ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-12"}`}>
         {/* A. LEFT / MAIN VIDEO PLAYER COLUMN (approx 72% on desktop, 100% in cinema mode) */}
         <div className={`flex flex-col gap-6 ${isCinemaMode ? "w-full" : "lg:col-span-8 xl:col-span-9"}`}>
-          {/* Video Container Card */}
+          {/* Video Container Card with Ambient Depth Glow */}
           <div
             ref={playerContainerRef}
-            className={`group relative rounded-3xl overflow-hidden border border-white/10 bg-black flex flex-col transition-all ${
-              isFullscreen ? "fixed inset-0 z-50 rounded-none w-screen h-screen border-none" : "shadow-2xl"
+            className={`group relative rounded-3xl overflow-hidden border border-white/10 bg-[#060606] flex flex-col transition-all ${
+              isFullscreen
+                ? "fixed inset-0 z-50 rounded-none w-screen h-screen border-none"
+                : "shadow-[0_20px_60px_-15px_rgba(0,0,0,0.9),0_0_40px_-20px_rgba(0,255,135,0.06)] ring-1 ring-white/5"
             }`}
           >
-            {/* Top Video Header Overlay (hidden in fullscreen mode for clean, distraction-free playback) */}
-            <div className={`flex items-center justify-between px-4 py-2.5 bg-neutral-950/95 border-b border-white/10 z-20 shrink-0 ${
-              isFullscreen ? "hidden" : ""
-            }`}>
-              <div className="flex items-center gap-2">
-                <span
-                  className="font-black text-sm tracking-tighter text-foreground flex items-center gap-1.5"
-                  style={{ fontFamily: "var(--font-condensed)" }}
-                >
-                  <span className="size-2 rounded-full bg-[var(--pitch)] inline-block shadow-[0_0_8px_var(--pitch)]" />
-                  FOOTYY LIVE
-                </span>
-                <span className="text-white/30 text-xs">|</span>
-                <span className="text-xs text-muted-foreground truncate max-w-[200px] sm:max-w-xs font-medium">
+            {/* Top Video Header Overlay with subtle gradient */}
+            <div
+              className={`flex items-center justify-between px-4 sm:px-5 py-2.5 bg-gradient-to-b from-black/95 via-black/80 to-transparent backdrop-blur-md border-b border-white/[0.08] z-20 shrink-0 transition-all ${
+                isFullscreen ? "hidden" : ""
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/[0.06] border border-white/10">
+                  <span className="size-2 rounded-full bg-[var(--pitch)] inline-block shadow-[0_0_8px_var(--pitch)] animate-pulse" />
+                  <span
+                    className="font-black text-xs uppercase tracking-wider text-foreground"
+                    style={{ fontFamily: "var(--font-condensed)" }}
+                  >
+                    FOOTYY LIVE
+                  </span>
+                </div>
+                <span className="text-white/20 text-xs">/</span>
+                <span className="text-xs text-muted-foreground truncate max-w-[180px] sm:max-w-xs font-medium">
                   {fixture ? `${fixture.home} vs ${fixture.away}` : "Broadcast Feed"}
                 </span>
               </div>
 
               <div className="flex items-center gap-2">
                 {currentProvider && currentSource && (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/10 text-white/90 border border-white/15">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-white/[0.06] text-white/90 border border-white/10 shadow-sm">
                     <span className="size-1.5 rounded-full bg-[var(--pitch)] animate-pulse" />
-                    <span>{currentProvider.name}:</span>
+                    <span className="text-muted-foreground font-medium">{currentProvider.name}:</span>
                     <strong className="text-foreground">{currentSource.label}</strong>
                     {currentSource.quality && (
-                      <span className="text-[10px] text-[var(--pitch)] font-mono ml-0.5">
-                        ({currentSource.quality})
+                      <span className="text-[10px] text-[var(--pitch)] font-mono ml-0.5 px-1 py-0.2 bg-[var(--pitch)]/10 rounded">
+                        {currentSource.quality}
                       </span>
                     )}
-                  </span>
+                  </div>
                 )}
                 {isLiveNow && (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-black uppercase tracking-wider text-[var(--pitch)]">
-                    <span className="size-1.5 rounded-full bg-[var(--pitch)] animate-pulse" />
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[var(--pitch)] text-black text-[10px] font-black uppercase tracking-wider shadow-sm">
+                    <span className="size-1.5 rounded-full bg-black animate-ping motion-reduce:hidden" />
                     ON AIR
                   </span>
                 )}
@@ -1115,22 +1177,23 @@ export function WatchStudio({
         </div>
 
         {/* B. RIGHT SIDEBAR: Available Streams & Match Centre (approx 28% width, hidden in cinema mode) */}
+        {/* B. RIGHT SIDEBAR: Available Streams & Match Centre (Compacted for reduced vertical scroll) */}
         {!isCinemaMode && (
-          <aside className="lg:col-span-4 xl:col-span-3 flex flex-col gap-5">
+          <aside className="lg:col-span-4 xl:col-span-3 flex flex-col gap-4">
             {/* 1. AVAILABLE STREAMS PANEL */}
-            <div className="surface bg-card rounded-3xl p-5 border border-border/70 flex flex-col gap-4">
-              <div className="flex items-center justify-between border-b border-border/50 pb-3">
+            <div className="surface bg-card rounded-3xl p-4 sm:p-4.5 border border-border/70 flex flex-col gap-3">
+              <div className="flex items-center justify-between border-b border-border/50 pb-2.5">
                 <div className="flex items-center gap-2">
                   <TvMinimalPlayIcon className="size-4 text-[var(--pitch)]" />
                   <h3
-                    className="font-bold text-sm uppercase tracking-wider text-foreground"
+                    className="font-bold text-xs sm:text-sm uppercase tracking-wider text-foreground"
                     style={{ fontFamily: "var(--font-condensed)" }}
                   >
                     AVAILABLE BROADCASTS
                   </h3>
                 </div>
                 <span className="text-[11px] font-mono font-bold text-muted-foreground">
-                  {providers.length} {providers.length === 1 ? "provider" : "providers"}
+                  {providers.length} {providers.length === 1 ? "source" : "sources"}
                 </span>
               </div>
 
@@ -1139,48 +1202,45 @@ export function WatchStudio({
                   <p>Searching for live feeds...</p>
                 </div>
               ) : (
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2">
                   {providers.map((p) => {
                     const isProviderSelected = currentProvider?.id === p.id
                     return (
                       <div
                         key={p.id}
-                        className={`rounded-2xl p-3.5 border transition-all ${isProviderSelected
+                        className={`rounded-2xl p-3 border transition-all ${isProviderSelected
                             ? "bg-background/80 border-[var(--pitch)] shadow-[0_0_15px_-5px_var(--pitch)]"
                             : "bg-background/40 border-border/60 hover:border-border"
                           }`}
                       >
-                        {/* Provider Header */}
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            {p.id === "streamfree" && <SparklesIcon className="size-3.5 text-cyan-400" />}
-                            {p.id === "damitv" && <MonitorPlayIcon className="size-3.5 text-violet-400" />}
-                            {p.id === "daddylive" && <TvIcon className="size-3.5 text-amber-400" />}
-                            {p.id === "zlive" && <RadioIcon className="size-3.5 text-emerald-400" />}
-                            <span className="font-bold text-xs sm:text-sm text-foreground">{p.name}</span>
+                        {/* Provider Header: Name, Qualities & Status on a single compact row */}
+                        <div className="flex items-center justify-between mb-1.5">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            {p.id === "streamfree" && <SparklesIcon className="size-3.5 text-cyan-400 shrink-0" />}
+                            {p.id === "damitv" && <MonitorPlayIcon className="size-3.5 text-violet-400 shrink-0" />}
+                            {p.id === "daddylive" && <TvIcon className="size-3.5 text-amber-400 shrink-0" />}
+                            {p.id === "zlive" && <RadioIcon className="size-3.5 text-emerald-400 shrink-0" />}
+                            <span className="font-bold text-xs text-foreground truncate">{p.name}</span>
+                            {p.qualities.length > 0 && (
+                              <div className="flex items-center gap-1 shrink-0">
+                                {p.qualities.slice(0, 2).map((q) => (
+                                  <span key={q} className="text-[9px] font-mono font-bold px-1 rounded bg-white/10 text-muted-foreground">
+                                    {q}
+                                  </span>
+                                ))}
+                              </div>
+                            )}
                           </div>
 
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--pitch)]/10 text-[var(--pitch)]">
+                          <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-[var(--pitch)]/10 text-[var(--pitch)] shrink-0">
                             {p.status}
                           </span>
                         </div>
 
-                        {/* Qualities or Caveat */}
-                        {p.qualities.length > 0 && (
-                          <div className="flex items-center gap-1 mb-2.5">
-                            <span className="text-[10px] text-muted-foreground">Quality:</span>
-                            {p.qualities.map((q) => (
-                              <span key={q} className="text-[9px] font-mono px-1 rounded bg-black/40 text-muted-foreground">
-                                {q}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-
                         {/* Individual Sources Pills */}
                         {(() => {
                           const isExpanded = Boolean(expandedProviders[p.id])
-                          const MAX_SIDEBAR_SOURCES = 5
+                          const MAX_SIDEBAR_SOURCES = 4
                           let visibleSources = p.sources
                           if (!isExpanded && p.sources.length > MAX_SIDEBAR_SOURCES) {
                             const activeIdx = p.sources.findIndex((s) => s.key === currentSource?.key)
@@ -1197,7 +1257,7 @@ export function WatchStudio({
                           return (
                             <div>
                               <div
-                                className={`flex flex-wrap gap-1.5 pt-1 ${isExpanded ? "max-h-60 overflow-y-auto pr-1" : ""
+                                className={`flex flex-wrap gap-1.5 pt-0.5 ${isExpanded ? "max-h-52 overflow-y-auto pr-1" : ""
                                   }`}
                               >
                                 {visibleSources.map((src) => {
@@ -1207,12 +1267,12 @@ export function WatchStudio({
                                       key={src.key}
                                       type="button"
                                       onClick={() => selectSource(p.id, src.key)}
-                                      className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${isCurrent
+                                      className={`px-2 py-0.5 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all ${isCurrent
                                           ? "bg-[var(--pitch)] text-black font-bold shadow-sm"
                                           : "bg-card hover:bg-accent text-muted-foreground hover:text-foreground border border-border/70"
                                         }`}
                                     >
-                                      {isCurrent && <CheckCircle2Icon className="size-3 stroke-[3]" />}
+                                      {isCurrent && <CheckCircle2Icon className="size-2.5 stroke-[3]" />}
                                       <span>{src.label}</span>
                                     </button>
                                   )
@@ -1228,17 +1288,17 @@ export function WatchStudio({
                                       [p.id]: !prev[p.id],
                                     }))
                                   }
-                                  className="mt-2 text-[11px] font-bold text-[var(--pitch)] hover:underline inline-flex items-center gap-1 transition-colors"
+                                  className="mt-1.5 text-[10px] font-bold text-[var(--pitch)] hover:underline inline-flex items-center gap-1 transition-colors"
                                 >
                                   {isExpanded ? (
                                     <>
                                       <span>Show Less</span>
-                                      <ChevronUpIcon className="size-3" />
+                                      <ChevronUpIcon className="size-2.5" />
                                     </>
                                   ) : (
                                     <>
-                                      <span>+ View {p.sources.length - MAX_SIDEBAR_SOURCES} More Channels</span>
-                                      <ChevronDownIcon className="size-3" />
+                                      <span>+ View {p.sources.length - MAX_SIDEBAR_SOURCES} More</span>
+                                      <ChevronDownIcon className="size-2.5" />
                                     </>
                                   )}
                                 </button>
@@ -1253,64 +1313,52 @@ export function WatchStudio({
               )}
             </div>
 
-            {/* 2. MATCH CENTRE SHORTCUTS PANEL */}
+            {/* 2. MATCH CENTRE SHORTCUTS PANEL (Compacted) */}
             {fixture && (
-              <div className="surface bg-card rounded-3xl p-5 border border-border/70 flex flex-col gap-4">
-                <div className="flex items-center gap-2 border-b border-border/50 pb-3">
+              <div className="surface bg-card rounded-3xl p-4 sm:p-4.5 border border-border/70 flex flex-col gap-3">
+                <div className="flex items-center gap-2 border-b border-border/50 pb-2.5">
                   <BarChart3Icon className="size-4 text-[var(--pitch)]" />
                   <h3
-                    className="font-bold text-sm uppercase tracking-wider text-foreground"
+                    className="font-bold text-xs sm:text-sm uppercase tracking-wider text-foreground"
                     style={{ fontFamily: "var(--font-condensed)" }}
                   >
-                    MATCH CENTRE
+                    MATCH HUB
                   </h3>
                 </div>
 
-                <div className="flex flex-col gap-2.5 text-xs">
-                  <div className="flex items-center justify-between text-muted-foreground">
-                    <span>Competition:</span>
-                    <span className="text-foreground font-semibold">{fixture.league}</span>
-                  </div>
-                  {fixture.round != null && (
-                    <div className="flex items-center justify-between text-muted-foreground">
-                      <span>Matchday:</span>
-                      <span className="text-foreground font-semibold font-mono">
-                        {fixture.round}
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex items-center justify-between text-muted-foreground">
-                    <span>Date:</span>
-                    <span className="text-foreground font-semibold">{fixture.date}</span>
-                  </div>
-                  {fixture.kickoff && (
-                    <div className="flex items-center justify-between text-muted-foreground">
-                      <span>Kickoff:</span>
-                      <span className="text-foreground font-semibold font-mono">
-                        {formatTimeIST(fixture.kickoff)}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex flex-col gap-2 pt-2 border-t border-border/40">
+                <div className="flex flex-col gap-1.5">
                   <Link
                     href={`/predictions/match?id=${fixture.event_id}`}
-                    className="px-3.5 py-2.5 rounded-xl bg-background/60 hover:bg-background border border-border/60 hover:border-border text-xs font-semibold text-foreground flex items-center justify-between transition-all"
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-background/50 hover:bg-accent text-xs font-semibold text-foreground border border-border/50 transition-all hover:translate-x-1 group"
                   >
-                    <span>Match Preview & Predictions</span>
-                    <ArrowRightIcon className="size-3.5 text-muted-foreground" />
+                    <span className="flex items-center gap-2">
+                      <BarChart3Icon className="size-3.5 text-[var(--pitch)]" />
+                      <span>Predictions &amp; H2H</span>
+                    </span>
+                    <ArrowRightIcon className="size-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
                   </Link>
 
-                  {fixture.home_id && fixture.away_id && (
-                    <Link
-                      href={`/teams/compare?home=${fixture.home_id}&away=${fixture.away_id}`}
-                      className="px-3.5 py-2.5 rounded-xl bg-background/60 hover:bg-background border border-border/60 hover:border-border text-xs font-semibold text-foreground flex items-center justify-between transition-all"
-                    >
-                      <span>Head-to-Head Comparison</span>
-                      <ArrowRightIcon className="size-3.5 text-muted-foreground" />
-                    </Link>
-                  )}
+                  <Link
+                    href={`/teams/compare?team1=${fixture.home_id}&team2=${fixture.away_id}`}
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-background/50 hover:bg-accent text-xs font-semibold text-foreground border border-border/50 transition-all hover:translate-x-1 group"
+                  >
+                    <span className="flex items-center gap-2">
+                      <LayersIcon className="size-3.5 text-cyan-400" />
+                      <span>Team Comparison</span>
+                    </span>
+                    <ArrowRightIcon className="size-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  </Link>
+
+                  <Link
+                    href="/live"
+                    className="flex items-center justify-between p-2.5 rounded-xl bg-background/50 hover:bg-accent text-xs font-semibold text-foreground border border-border/50 transition-all hover:translate-x-1 group"
+                  >
+                    <span className="flex items-center gap-2">
+                      <TvMinimalPlayIcon className="size-3.5 text-emerald-400" />
+                      <span>All Live Fixtures</span>
+                    </span>
+                    <ArrowRightIcon className="size-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  </Link>
                 </div>
               </div>
             )}

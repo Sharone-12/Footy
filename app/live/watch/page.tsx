@@ -57,7 +57,7 @@ async function WatchContent({ searchParams }: PageProps) {
     if (!Number.isNaN(eventId) && eventId > 0) {
       const { data } = await supabase
         .from("matches")
-        .select("event_id, date, kickoff, league, home, home_id, away, away_id, round")
+        .select("event_id, date, kickoff, league, home, home_id, away, away_id, round, status, home_goals, away_goals")
         .eq("event_id", eventId)
         .maybeSingle()
 
@@ -73,7 +73,7 @@ async function WatchContent({ searchParams }: PageProps) {
   // 2. Fetch similar / related matches in current window
   const { data: similarData } = await supabase
     .from("matches")
-    .select("event_id, date, kickoff, league, home, home_id, away, away_id")
+    .select("event_id, date, kickoff, league, home, home_id, away, away_id, status, home_goals, away_goals")
     .neq("event_id", fixture?.event_id ?? 0)
     .gte("date", from)
     .lte("date", to)

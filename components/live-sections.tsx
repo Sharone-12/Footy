@@ -25,6 +25,9 @@ export type LiveFixture = Timed & {
   away_id: number | null
   /** Matchday, as `matches.round`. Optional: only the pages that show it select it. */
   round?: number | null
+  home_goals?: number | null
+  away_goals?: number | null
+  status?: string | null
 }
 
 function formatKickoff(m: LiveFixture) {
