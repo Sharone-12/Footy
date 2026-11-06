@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { ExternalLinkIcon, PlayIcon, TvMinimalPlayIcon } from "lucide-react"
+import { ExternalLinkIcon, PlayIcon, RadioIcon, SparklesIcon, TvIcon } from "lucide-react"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
 import { splitFixtures, startOf, type Timed } from "@/lib/live"
 import { gatewaySources } from "@/lib/providers/registry"
 import type { MatchedStream } from "@/lib/streamfree/types"
-import { StreamFreePlayer } from "@/components/streamfree-player"
+import type { MatchedZLive, ZLiveChannel } from "@/lib/zlive/types"
+import { UnifiedPlayer } from "@/components/unified-player"
 
 export type LiveFixture = Timed & {
   event_id: number
@@ -41,20 +42,32 @@ function elapsed(m: LiveFixture, now: number) {
   return Math.max(1, Math.floor((now - startOf(m)) / 60_000))
 }
 
+type ActivePlayerState = {
+  fixtureTitle: string
+  league?: string
+  streamFree?: MatchedStream | null
+  zLive?: MatchedZLive | null
+  genericChannel?: ZLiveChannel | null
+  initialProvider?: "streamfree" | "zlive"
+}
+
 function Row({
   m,
   now,
   live,
   matchedStream,
+  matchedZLive,
   onWatch,
 }: {
   m: LiveFixture
   now: number
   live: boolean
   matchedStream?: MatchedStream
-  onWatch?: (stream: MatchedStream) => void
+  matchedZLive?: MatchedZLive
+  onWatch: (state: ActivePlayerState) => void
 }) {
   const tid = LEAGUE_TOURNAMENT_ID[m.league]
+  const hasStream = Boolean(matchedStream || matchedZLive)
 
   return (
     <div className="card-lift fixture-row surface bg-card rounded-2xl px-4 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 transition-all">
@@ -93,42 +106,43 @@ function Row({
       </Link>
 
       <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50">
-        {/* StreamFree stream badge and watch button */}
-        {matchedStream && (
+        {/* Available Streaming Providers & Watch CTA */}
+        {hasStream && (
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1">
-              {matchedStream.isLive ? (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-bold bg-[var(--pitch)]/15 text-[var(--pitch)] border border-[var(--pitch)]/30">
-                  <span className="relative flex size-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--pitch)] opacity-75 motion-reduce:hidden" />
-                    <span className="relative inline-flex rounded-full size-1.5 bg-[var(--pitch)]" />
-                  </span>
-                  STREAM
-                </span>
-              ) : (
-                <span className="px-2 py-0.5 rounded-full text-[0.65rem] font-medium bg-white/5 text-muted-foreground border border-white/10">
-                  {matchedStream.status}
+            <div className="flex items-center gap-1.5">
+              {matchedStream && (
+                <span
+                  title="StreamFree source available"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/25"
+                >
+                  <SparklesIcon className="size-2.5" />
+                  StreamFree
                 </span>
               )}
 
-              {matchedStream.availableQualities.length > 0 && (
-                <div className="hidden md:flex items-center gap-0.5">
-                  {matchedStream.availableQualities.slice(0, 2).map((q) => (
-                    <span
-                      key={q}
-                      className="px-1.5 py-0.5 rounded bg-black/40 text-[0.65rem] font-mono text-muted-foreground border border-border/60"
-                    >
-                      {q}
-                    </span>
-                  ))}
-                </div>
+              {matchedZLive && (
+                <span
+                  title={matchedZLive.isConfirmedMatch ? "ZLive match confirmed" : "ZLive broadcast channel"}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25"
+                >
+                  <RadioIcon className="size-2.5" />
+                  ZLive
+                </span>
               )}
             </div>
 
             <button
               type="button"
-              onClick={() => onWatch?.(matchedStream)}
-              aria-label={`Watch stream for ${m.home} vs ${m.away}`}
+              onClick={() =>
+                onWatch({
+                  fixtureTitle: `${m.home} vs ${m.away}`,
+                  league: m.league,
+                  streamFree: matchedStream ?? null,
+                  zLive: matchedZLive ?? null,
+                  initialProvider: matchedStream ? "streamfree" : "zlive",
+                })
+              }
+              aria-label={`Watch streams for ${m.home} vs ${m.away}`}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--pitch)] text-black hover:brightness-110 font-bold text-xs shadow-md transition-all hover:scale-[1.03]"
             >
               <PlayIcon className="size-3 fill-current" />
@@ -155,6 +169,7 @@ function Section({
   live,
   empty,
   streamMap,
+  zliveMap,
   onWatch,
 }: {
   title: string
@@ -163,7 +178,8 @@ function Section({
   live?: boolean
   empty: string
   streamMap: Record<number, MatchedStream>
-  onWatch: (stream: MatchedStream) => void
+  zliveMap: Record<number, MatchedZLive>
+  onWatch: (state: ActivePlayerState) => void
 }) {
   return (
     <section>
@@ -191,6 +207,7 @@ function Section({
               now={now}
               live={Boolean(live)}
               matchedStream={streamMap[m.event_id]}
+              matchedZLive={zliveMap[m.event_id]}
               onWatch={onWatch}
             />
           ))}
@@ -203,7 +220,9 @@ function Section({
 export function LiveSections({ matches }: { matches: LiveFixture[] }) {
   const [now, setNow] = useState<number | null>(null)
   const [streamMap, setStreamMap] = useState<Record<number, MatchedStream>>({})
-  const [activeStream, setActiveStream] = useState<MatchedStream | null>(null)
+  const [zliveMap, setZliveMap] = useState<Record<number, MatchedZLive>>({})
+  const [genericChannels, setGenericChannels] = useState<ZLiveChannel[]>([])
+  const [activePlayer, setActivePlayer] = useState<ActivePlayerState | null>(null)
   const gateways = gatewaySources()
 
   useEffect(() => {
@@ -216,7 +235,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
   // Fetch StreamFree stream matches on mount
   useEffect(() => {
     let unmounted = false
-    async function loadStreams() {
+    async function loadStreamFree() {
       try {
         const res = await fetch("/api/streamfree")
         if (!res.ok) return
@@ -229,10 +248,47 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
           setStreamMap(map)
         }
       } catch (err) {
-        console.warn("[live] Could not load streamfree matches:", err)
+        console.warn("[live] Could not load StreamFree streams:", err)
       }
     }
-    loadStreams()
+    loadStreamFree()
+    return () => {
+      unmounted = true
+    }
+  }, [])
+
+  // Fetch ZLive stream matches and generic channels on mount
+  useEffect(() => {
+    let unmounted = false
+    async function loadZLive() {
+      try {
+        const [matchesRes, genericRes] = await Promise.allSettled([
+          fetch("/api/zlive"),
+          fetch("/api/zlive?generic=1"),
+        ])
+
+        if (matchesRes.status === "fulfilled" && matchesRes.value.ok) {
+          const data = await matchesRes.value.json()
+          if (data?.channels && Array.isArray(data.channels) && !unmounted) {
+            const map: Record<number, MatchedZLive> = {}
+            for (const item of data.channels) {
+              if (item.event_id) map[item.event_id] = item
+            }
+            setZliveMap(map)
+          }
+        }
+
+        if (genericRes.status === "fulfilled" && genericRes.value.ok) {
+          const data = await genericRes.value.json()
+          if (data?.channels && Array.isArray(data.channels) && !unmounted) {
+            setGenericChannels(data.channels)
+          }
+        }
+      } catch (err) {
+        console.warn("[live] Could not load ZLive data:", err)
+      }
+    }
+    loadZLive()
     return () => {
       unmounted = true
     }
@@ -241,40 +297,46 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
   // Close player with Esc key
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") setActiveStream(null)
+      if (e.key === "Escape") setActivePlayer(null)
     }
-    if (activeStream) {
+    if (activePlayer) {
       window.addEventListener("keydown", onKeyDown)
       return () => window.removeEventListener("keydown", onKeyDown)
     }
-  }, [activeStream])
+  }, [activePlayer])
 
   // Before mount there is no clock, so nothing can be bucketed yet.
   const { live, soon, upcoming } = splitFixtures(matches, now ?? 0)
 
   return (
     <div className="flex flex-col gap-8 relative">
-      {/* Active StreamFree Video Player Modal */}
-      {activeStream && (
+      {/* Active Unified Streaming Player Modal */}
+      {activePlayer && (
         <div
           role="dialog"
           aria-modal="true"
-          aria-label={`StreamFree player: ${activeStream.title}`}
+          aria-label={`Live stream player: ${activePlayer.fixtureTitle}`}
           className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-md animate-fade-in"
-          onClick={() => setActiveStream(null)}
+          onClick={() => setActivePlayer(null)}
         >
           <div
             className="w-full max-w-4xl max-h-[92vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <StreamFreePlayer
-              stream={activeStream}
-              onClose={() => setActiveStream(null)}
+            <UnifiedPlayer
+              fixtureTitle={activePlayer.fixtureTitle}
+              league={activePlayer.league}
+              streamFree={activePlayer.streamFree}
+              zLive={activePlayer.zLive}
+              genericChannel={activePlayer.genericChannel}
+              initialProvider={activePlayer.initialProvider}
+              onClose={() => setActivePlayer(null)}
             />
           </div>
         </div>
       )}
 
+      {/* External Gateways (RoxieStreams, StreamCorner) */}
       {gateways.length > 0 && (
         <aside
           aria-label="External streaming gateways"
@@ -323,6 +385,58 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
         </aside>
       )}
 
+      {/* Generic 24/7 Football TV Channels (ZLive) */}
+      {genericChannels.length > 0 && (
+        <section aria-label="Football TV Channels">
+          <div className="flex items-center justify-between mb-2.5">
+            <div className="flex items-center gap-2">
+              <TvIcon className="size-4 text-emerald-400" />
+              <h2
+                className="text-lg font-semibold tracking-tight uppercase"
+                style={{ fontFamily: "var(--font-condensed)" }}
+              >
+                Football TV Channels (ZLive)
+              </h2>
+            </div>
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {genericChannels.length} 24/7 channels
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground mb-3">
+            Direct 24/7 football broadcasters available for manual selection alongside match streams.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {genericChannels.slice(0, 12).map((ch) => (
+              <button
+                key={ch.id}
+                type="button"
+                onClick={() =>
+                  setActivePlayer({
+                    fixtureTitle: ch.name,
+                    league: ch.sport || "Football",
+                    genericChannel: ch,
+                    initialProvider: "zlive",
+                  })
+                }
+                className="card-lift surface bg-card hover:bg-accent/40 border border-border/70 hover:border-emerald-500/50 px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs transition-all group"
+              >
+                <span className="relative flex size-1.5 shrink-0">
+                  <span className="relative inline-flex rounded-full size-1.5 bg-emerald-400" />
+                </span>
+                <span className="font-semibold text-foreground group-hover:text-emerald-300 transition-colors">
+                  {ch.name}
+                </span>
+                {ch.quality && (
+                  <span className="text-[10px] px-1 rounded bg-black/40 text-muted-foreground font-mono">
+                    {ch.quality}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
       <Section
         title="Live Now"
         rows={now == null ? [] : live}
@@ -330,7 +444,8 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
         live
         empty="No matches in play."
         streamMap={streamMap}
-        onWatch={setActiveStream}
+        zliveMap={zliveMap}
+        onWatch={setActivePlayer}
       />
       <Section
         title="Starting Soon"
@@ -338,7 +453,8 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
         now={now ?? 0}
         empty="Nothing kicking off in the next three hours."
         streamMap={streamMap}
-        onWatch={setActiveStream}
+        zliveMap={zliveMap}
+        onWatch={setActivePlayer}
       />
       <Section
         title="Upcoming Matches"
@@ -346,7 +462,8 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
         now={now ?? 0}
         empty="No upcoming fixtures."
         streamMap={streamMap}
-        onWatch={setActiveStream}
+        zliveMap={zliveMap}
+        onWatch={setActivePlayer}
       />
     </div>
   )

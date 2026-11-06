@@ -12,12 +12,14 @@
 import { manualAdapter } from "./manual"
 import { streamfreeAdapter } from "./streamfree"
 import { youtubeAdapter } from "./youtube"
+import { zliveAdapter } from "./zlive"
 import type { ProviderEntry } from "./types"
 
 /** Every provider, in display and preference order. */
 export function registry(): ProviderEntry[] {
   return [
     { adapter: streamfreeAdapter, supported: true, configured: true },
+    { adapter: zliveAdapter, supported: true, configured: true },
     { adapter: manualAdapter, supported: true, configured: true },
     {
       adapter: youtubeAdapter,
@@ -91,6 +93,13 @@ export const DIRECTORY: DirectoryEntry[] = [
     name: "StreamFree",
     domain: "streamfree.top",
     url: "https://streamfree.top",
+    category: "platform",
+    enabled: true,
+  },
+  {
+    name: "ZLive",
+    domain: "zlive.st",
+    url: "https://zlive.st",
     category: "platform",
     enabled: true,
   },
