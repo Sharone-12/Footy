@@ -315,8 +315,8 @@ export default function Home({
             </span>
           </h1>
           <p className="text-muted-foreground text-sm sm:text-base max-w-md mb-5 sm:mb-7 leading-relaxed">
-            Per-90 stats and percentile ranks for every player in the Premier
-            League, La Liga, and Champions League.
+            Per-90 stats and percentile ranks for every player in Europe&apos;s
+            top five leagues and the Champions League.
           </p>
           <div className="max-w-md w-full">
             <PlayerSearch linkToProfile placeholder="Search for a player..." />

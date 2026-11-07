@@ -464,6 +464,7 @@ async function Tables({
         ))}
       </div>
 
+      {SINGLE_CLUBS.length > 0 && (
       <div className="grid lg:grid-cols-2 gap-5">
         {SINGLE_CLUBS.map((c) => (
           <ClubCard
@@ -477,6 +478,7 @@ async function Tables({
           />
         ))}
       </div>
+      )}
     </div>
   )
 }

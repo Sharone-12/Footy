@@ -44,15 +44,17 @@ PROCESSED = ROOT / "data" / "processed"
 
 SOFASCORE = "https://www.sofascore.com"
 
+# All five of Europe's top leagues in full, plus the Champions League.
+# Ligue 1 and Bundesliga were already scraped league-wide and then trimmed to
+# PSG and Bayern; dropping that filter costs no extra round or stat-page
+# requests, only the per-match stats and player roles for the clubs that used
+# to be discarded. A league may still set `teams` to be trimmed to a few clubs.
 LEAGUES = {
     "Premier League": {"tournament": 17, "slug": "premier_league"},
     "La Liga": {"tournament": 8, "slug": "la_liga"},
-    # Single-club leagues: scraped league-wide, then trimmed to `teams`. The
-    # full scrape is what makes the 10% minutes cutoff correct — it needs the
-    # league's season-minutes ceiling, not one squad's.
-    # Names must match Sofascore exactly: 'Paris FC' is a different Ligue 1 club.
-    "Ligue 1": {"tournament": 34, "slug": "ligue_1", "teams": {"Paris Saint-Germain"}},
-    "Bundesliga": {"tournament": 35, "slug": "bundesliga", "teams": {"FC Bayern München"}},
+    "Serie A": {"tournament": 23, "slug": "serie_a"},
+    "Ligue 1": {"tournament": 34, "slug": "ligue_1"},
+    "Bundesliga": {"tournament": 35, "slug": "bundesliga"},
     "Champions League": {"tournament": 7, "slug": "champions_league"},
 }
 

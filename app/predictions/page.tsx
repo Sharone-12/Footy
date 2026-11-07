@@ -8,8 +8,7 @@ import {
   LEAGUE_ABBR,
   LEAGUE_TOURNAMENT_ID,
   POWER_COLORS,
-  FULL_LEAGUES,
-  SINGLE_CLUBS,
+  LEAGUE_FILTERS,
 } from "@/lib/teams"
 import {
   predictMatches,
@@ -235,18 +234,6 @@ function UclRatings({ model, ids }: { model: UclModel; ids: Map<string, number> 
     </section>
   )
 }
-const trackedTeams = new Set([
-  ...FULL_LEAGUES,
-  ...SINGLE_CLUBS.map((c) => c.league),
-])
-
-const LEAGUE_FILTERS = [
-  { key: "all", label: "All", full: "" },
-  { key: "PL", label: "PL", full: "Premier League" },
-  { key: "LL", label: "La Liga", full: "La Liga" },
-  { key: "UCL", label: "UCL", full: "Champions League" },
-] as const
-
 type SeasonMatch = {
   event_id: number; league: string; season: string; round: number
   date: string; kickoff?: string | null; home: string; home_id: number | null; away: string; away_id: number | null; status: string

@@ -5,9 +5,10 @@ export const LEAGUE_CODES = [
   "Ligue 1",
   "Bundesliga",
   "Champions League",
+  "Serie A",
 ] as const
 
-export type LeagueCode = 0 | 1 | 2 | 3 | 4
+export type LeagueCode = 0 | 1 | 2 | 3 | 4 | 5
 
 export const LEAGUE_SHORT: Record<LeagueCode, string> = {
   0: "PL",
@@ -15,6 +16,7 @@ export const LEAGUE_SHORT: Record<LeagueCode, string> = {
   2: "L1",
   3: "BL",
   4: "UCL",
+  5: "SA",
 }
 
 export const LEAGUE_TOURNAMENT: Record<LeagueCode, number> = {
@@ -23,6 +25,7 @@ export const LEAGUE_TOURNAMENT: Record<LeagueCode, number> = {
   2: 34,  // Ligue 1
   3: 35,  // Bundesliga
   4: 7,   // Champions League
+  5: 23,  // Serie A — appended, because the index is the wire format
 }
 
 export function leagueCode(name: string): LeagueCode {

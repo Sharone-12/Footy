@@ -3,18 +3,25 @@ import { scopeLeague, type Competition } from "@/lib/competition"
 export const CURRENT_SEASON = "2026/27"
 
 /** Leagues ingested in full, so their `team_table` is a real standings table. */
-export const FULL_LEAGUES = ["Premier League", "La Liga", "Champions League"] as const
+export const FULL_LEAGUES = [
+  "Premier League",
+  "La Liga",
+  "Serie A",
+  "Ligue 1",
+  "Bundesliga",
+  "Champions League",
+] as const
 
 /**
  * Clubs tracked on their own, without the rest of their league. Only these
  * teams' fixtures are ingested, so `team_table` rows for their opponents are
  * fragments (two games, not 34) — never render those leagues as a table.
  * `team` must match Sofascore exactly; see LEAGUES in data_loader.py.
+ *
+ * Empty now that all five top leagues are ingested in full. Kept because it is
+ * the lever for adding one club from a league we do not otherwise carry.
  */
-export const SINGLE_CLUBS = [
-  { team: "Paris Saint-Germain", short: "PSG", league: "Ligue 1" },
-  { team: "FC Bayern München", short: "Bayern", league: "Bundesliga" },
-] as const
+export const SINGLE_CLUBS: { team: string; short: string; league: string }[] = []
 
 // `stat` values match the `stat` column in match_stats verbatim.
 // pct: read the parsed percentage column instead of the raw leading number
@@ -102,10 +109,21 @@ export const POWER_COLORS = [
 export const LEAGUE_ABBR: Record<string, string> = {
   "Premier League": "PL",
   "La Liga": "LL",
+  "Serie A": "SA",
   "Ligue 1": "L1",
   Bundesliga: "BL",
   "Champions League": "UCL",
 }
+
+/**
+ * The chips on /predictions. Derived from FULL_LEAGUES so a new league shows
+ * up by editing one list, and abbreviated throughout because seven spelled-out
+ * names do not fit a phone.
+ */
+export const LEAGUE_FILTERS: { key: string; label: string; full: string }[] = [
+  { key: "all", label: "All", full: "" },
+  ...FULL_LEAGUES.map((full) => ({ key: LEAGUE_ABBR[full], label: LEAGUE_ABBR[full], full })),
+]
 
 /** Sofascore tournament IDs, used for league crest images. */
 export const BARCA_ID = 2817
@@ -113,6 +131,7 @@ export const BARCA_ID = 2817
 export const LEAGUE_TOURNAMENT_ID: Record<string, number> = {
   "Premier League": 17,
   "La Liga": 8,
+  "Serie A": 23,
   "Ligue 1": 34,
   Bundesliga: 35,
   "Champions League": 7,
