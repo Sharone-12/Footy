@@ -166,3 +166,4 @@ export function TableStandings({ tableData, fixture, isLoading }: TableStandings
     </div>
   )
 }
+

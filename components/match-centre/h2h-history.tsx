@@ -149,3 +149,4 @@ export function H2HHistory({ h2hData, fixture, isLoading }: H2HHistoryProps) {
     </div>
   )
 }
+

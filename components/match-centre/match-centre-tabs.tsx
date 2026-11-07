@@ -176,3 +176,4 @@ export function MatchCentreTabs({ fixture, liveScore, initialTab = "stats" }: Ma
     </section>
   )
 }
+

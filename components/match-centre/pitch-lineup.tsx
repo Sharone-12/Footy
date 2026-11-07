@@ -92,6 +92,9 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
 
   const { homeFormation, awayFormation, homeStarting, awayStarting, homeSubs, awaySubs } = lineups
 
+  const homeMaxRow = Math.max(2, ...homeStarting.map((p) => p.row))
+  const awayMaxRow = Math.max(2, ...awayStarting.map((p) => p.row))
+
   return (
     <div className="flex flex-col gap-4">
       {/* Header Bar: Formations & View Toggle */}
@@ -152,7 +155,7 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
       </div>
 
       {/* The Football Pitch Graphic */}
-      <div className="relative w-full aspect-[4/5] sm:aspect-[3/4] max-h-[720px] rounded-2xl overflow-hidden border border-emerald-900/60 shadow-inner select-none bg-radial from-[#155e38] via-[#0d4a2b] to-[#08301c]">
+      <div className="relative w-full aspect-[4/5] sm:aspect-[3/4] min-h-[520px] sm:min-h-[580px] max-h-[760px] rounded-2xl overflow-hidden border border-emerald-900/60 shadow-inner select-none bg-radial from-[#155e38] via-[#0d4a2b] to-[#08301c]">
         {/* Grass Stripes Pattern */}
         <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,rgba(0,0,0,0.06)_0px,rgba(0,0,0,0.06)_32px,transparent_32px,transparent_64px)] pointer-events-none" />
 
@@ -182,13 +185,12 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
         {viewMode === "both" && (
           <>
             {/* Away Team (Top Half, facing down) */}
-            <div className="absolute inset-x-0 top-0 h-1/2 p-4">
+            <div className="absolute inset-x-0 top-0 h-1/2 p-3 sm:p-4">
               {awayStarting.map((player, idx) => {
-                // Row 1 (GK) = ~12% from top
-                // Row 2 (DEF) = ~32% from top
-                // Row 3 (MID) = ~58% from top
-                // Row 4 (FWD) = ~82% from top
-                const rowPercent = player.row === 1 ? 12 : player.row === 2 ? 34 : player.row === 3 ? 58 : 82
+                // Scale rows dynamically from Row 1 (GK at 8%) to furthest row (ST at 68%)
+                // In full pitch, 68% of half = 34% of total height, leaving a large 32% center gap
+                const fraction = awayMaxRow > 1 ? (player.row - 1) / (awayMaxRow - 1) : 0.5
+                const rowPercent = player.row === 1 ? 8 : 8 + fraction * 60
                 const totalInRow = player.totalInRow || 1
                 const colPercent = (player.col / (totalInRow + 1)) * 100
 
@@ -205,13 +207,10 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
             </div>
 
             {/* Home Team (Bottom Half, facing up) */}
-            <div className="absolute inset-x-0 bottom-0 h-1/2 p-4">
+            <div className="absolute inset-x-0 bottom-0 h-1/2 p-3 sm:p-4">
               {homeStarting.map((player, idx) => {
-                // Row 1 (GK) = ~12% from bottom
-                // Row 2 (DEF) = ~34% from bottom
-                // Row 3 (MID) = ~58% from bottom
-                // Row 4 (FWD) = ~82% from bottom
-                const rowPercent = player.row === 1 ? 12 : player.row === 2 ? 34 : player.row === 3 ? 58 : 82
+                const fraction = homeMaxRow > 1 ? (player.row - 1) / (homeMaxRow - 1) : 0.5
+                const rowPercent = player.row === 1 ? 8 : 8 + fraction * 60
                 const totalInRow = player.totalInRow || 1
                 const colPercent = (player.col / (totalInRow + 1)) * 100
 
@@ -233,7 +232,8 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
         {viewMode === "home" && (
           <div className="absolute inset-0 p-6">
             {homeStarting.map((player, idx) => {
-              const rowPercent = player.row === 1 ? 12 : player.row === 2 ? 36 : player.row === 3 ? 62 : 86
+              const fraction = homeMaxRow > 1 ? (player.row - 1) / (homeMaxRow - 1) : 0.5
+              const rowPercent = player.row === 1 ? 8 : 8 + fraction * 78
               const totalInRow = player.totalInRow || 1
               const colPercent = (player.col / (totalInRow + 1)) * 100
 
@@ -254,7 +254,8 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
         {viewMode === "away" && (
           <div className="absolute inset-0 p-6">
             {awayStarting.map((player, idx) => {
-              const rowPercent = player.row === 1 ? 12 : player.row === 2 ? 36 : player.row === 3 ? 62 : 86
+              const fraction = awayMaxRow > 1 ? (player.row - 1) / (awayMaxRow - 1) : 0.5
+              const rowPercent = player.row === 1 ? 8 : 8 + fraction * 78
               const totalInRow = player.totalInRow || 1
               const colPercent = (player.col / (totalInRow + 1)) * 100
 
@@ -331,3 +332,4 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
     </div>
   )
 }
+
