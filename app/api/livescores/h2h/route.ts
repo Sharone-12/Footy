@@ -18,11 +18,15 @@ export type H2HMatch = {
   homeScore: number
   awayScore: number
   winner: "home" | "away" | "draw"
+  homeCrest?: string
+  awayCrest?: string
 }
 
 export type H2HResponse = {
   homeTeam: string
   awayTeam: string
+  homeCrest?: string
+  awayCrest?: string
   homeForm: string[]
   awayForm: string[]
   matches: H2HMatch[]
@@ -33,6 +37,12 @@ function slugify(s: string): string {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
+}
+
+function resolveCrestUrl(slug?: string): string | undefined {
+  if (!slug) return undefined
+  if (slug.startsWith("http")) return slug
+  return `https://storage.lsmedia1.com/images/team/medium/${slug}`
 }
 
 export async function GET(request: Request) {
@@ -93,8 +103,15 @@ export async function GET(request: Request) {
     const nextJson = JSON.parse(nextDataMatch[1])
     const eventData = nextJson?.props?.pageProps?.initialEventData?.event
     const rawH2H = eventData?.headToHead?.h2h || []
-    const homeForm = Array.isArray(eventData?.homeScoreForm) ? eventData.homeScoreForm.map((f: string) => f.toUpperCase()) : []
-    const awayForm = Array.isArray(eventData?.awayScoreForm) ? eventData.awayScoreForm.map((f: string) => f.toUpperCase()) : []
+    const homeForm = Array.isArray(eventData?.homeScoreForm)
+      ? eventData.homeScoreForm.map((f: string) => f.toUpperCase())
+      : []
+    const awayForm = Array.isArray(eventData?.awayScoreForm)
+      ? eventData.awayScoreForm.map((f: string) => f.toUpperCase())
+      : []
+
+    const homeTeamCrest = resolveCrestUrl(eventData?.homeTeamImgSlug || eventData?.homeTeamBadge)
+    const awayTeamCrest = resolveCrestUrl(eventData?.awayTeamImgSlug || eventData?.awayTeamBadge)
 
     const matches: H2HMatch[] = []
     for (const stg of rawH2H) {
@@ -120,6 +137,8 @@ export async function GET(request: Request) {
           homeScore: hScore,
           awayScore: aScore,
           winner,
+          homeCrest: resolveCrestUrl(ev.homeSlug),
+          awayCrest: resolveCrestUrl(ev.awaySlug),
         })
       }
     }
@@ -127,6 +146,8 @@ export async function GET(request: Request) {
     const result: H2HResponse = {
       homeTeam: home,
       awayTeam: away,
+      homeCrest: homeTeamCrest,
+      awayCrest: awayTeamCrest,
       homeForm: homeForm.slice(-5), // last 5 matches
       awayForm: awayForm.slice(-5),
       matches: matches.slice(0, 10), // last 10 h2h encounters
@@ -138,8 +159,7 @@ export async function GET(request: Request) {
       headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" },
     })
   } catch (err) {
-    console.error("[livescores/h2h] Error fetching h2h:", err)
+    console.error("[livescores/h2h] Error fetching H2H:", err)
     return NextResponse.json({ error: "Failed to fetch H2H" }, { status: 500 })
   }
 }
-
