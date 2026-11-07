@@ -28,6 +28,8 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
   ClapperboardIcon,
+  EyeIcon,
+  EyeOffIcon,
 } from "lucide-react"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { LEAGUE_TOURNAMENT_ID, BARCA_ID } from "@/lib/teams"
@@ -212,6 +214,23 @@ export function WatchStudio({
   const playerContainerRef = useRef<HTMLDivElement>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isCinemaMode, setIsCinemaMode] = useState(false)
+  const [hideScore, setHideScore] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false
+    try {
+      return localStorage.getItem("footyy_spoiler_protection") === "true"
+    } catch {
+      return false
+    }
+  })
+  const toggleHideScore = useCallback(() => {
+    setHideScore((prev) => {
+      const next = !prev
+      try {
+        localStorage.setItem("footyy_spoiler_protection", String(next))
+      } catch {}
+      return next
+    })
+  }, [])
   const [isLeaving, setIsLeaving] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
   const [activeTab, setActiveTab] = useState<"about" | "streams" | "similar">("about")
@@ -686,14 +705,45 @@ export function WatchStudio({
                 <div className="flex flex-col items-center justify-center shrink-0 px-1 sm:px-2">
                   {hasScore ? (
                     <div className="inline-flex items-stretch rounded-xl bg-black/80 border border-white/15 shadow-md backdrop-blur-md overflow-hidden">
-                      <div className="flex items-center gap-2 sm:gap-3 px-3 py-1 sm:px-3.5">
-                        <span className="font-mono text-xl sm:text-2xl font-black text-white tabular-nums tracking-tight leading-none">
-                          {homeScore}
-                        </span>
-                        <span className="text-white/40 font-mono text-base sm:text-lg font-bold leading-none">:</span>
-                        <span className="font-mono text-xl sm:text-2xl font-black text-white tabular-nums tracking-tight leading-none">
-                          {awayScore}
-                        </span>
+                      <div className="flex items-center gap-1.5 sm:gap-2 pl-2 pr-2.5 py-1 sm:pl-2.5 sm:pr-3">
+                        <button
+                          type="button"
+                          onClick={toggleHideScore}
+                          className="p-1 rounded-md text-white/50 hover:text-white transition-colors hover:bg-white/10 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--pitch)]"
+                          title={hideScore ? "Reveal score (spoiler protection active)" : "Hide score for suspense (prevents stream delay spoilers)"}
+                          aria-label={hideScore ? "Reveal score" : "Hide score for suspense"}
+                        >
+                          {hideScore ? (
+                            <EyeOffIcon className="size-3.5 text-amber-400 shrink-0" />
+                          ) : (
+                            <EyeIcon className="size-3.5 text-white/40 hover:text-white/80 shrink-0" />
+                          )}
+                        </button>
+                        {hideScore ? (
+                          <button
+                            type="button"
+                            onClick={toggleHideScore}
+                            className="cursor-pointer font-mono text-sm sm:text-base font-black text-white/40 tracking-widest px-1 hover:text-white/70 transition-colors focus:outline-none"
+                            title="Click to reveal score"
+                            aria-label="Click to reveal score"
+                          >
+                            •• : ••
+                          </button>
+                        ) : (
+                          <div
+                            onClick={toggleHideScore}
+                            className="cursor-pointer flex items-center gap-2 sm:gap-2.5 select-none"
+                            title="Click to hide score"
+                          >
+                            <span className="font-mono text-xl sm:text-2xl font-black text-white tabular-nums tracking-tight leading-none">
+                              {homeScore}
+                            </span>
+                            <span className="text-white/40 font-mono text-base sm:text-lg font-bold leading-none">:</span>
+                            <span className="font-mono text-xl sm:text-2xl font-black text-white tabular-nums tracking-tight leading-none">
+                              {awayScore}
+                            </span>
+                          </div>
+                        )}
                       </div>
                       {liveClock && (
                         <div className="flex items-center gap-1 px-2.5 border-l border-white/10 bg-[var(--pitch)]/10">
