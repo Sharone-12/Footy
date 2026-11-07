@@ -445,12 +445,35 @@ def _round_needs_refetch(cache: Path, now: float | None = None) -> bool:
     if not events:
         return True
     kickoffs = [ev.get("startTimestamp") or 0 for ev in events]
+    # Deliberately "finished", not "settled": a round holding a postponed
+    # match must keep being refetched, because its replay turns up later as a
+    # new event id in the same round.
     if all(ev.get("status", {}).get("type") == "finished" for ev in events):
         return now - max(kickoffs) < SETTLED_AFTER_S
     if min(kickoffs) - now > FAR_FUTURE_S:
         # mtime is the last fetch, because _get only writes when it fetched.
         return now - cache.stat().st_mtime > FAR_FUTURE_EVERY_S
     return True
+
+
+# Sofascore's own status types, kept rather than collapsed.
+#
+# Everything that was not "finished" used to be written as "upcoming", which
+# is how a 16 September Levante UD v Athletic Club sat at the top of "Next up"
+# for seven weeks: the feed says `type: "postponed"`, and the replayed match
+# is a separate event id that finished 3-1 on 21 October. A fixture that will
+# never be played is neither finished nor upcoming.
+STATUS_MAP = {
+    "finished": "finished",
+    "postponed": "postponed",
+    "canceled": "canceled",
+    "cancelled": "canceled",
+}
+
+
+def _status_of(ev: dict) -> str:
+    """"finished" / "postponed" / "canceled", else "upcoming"."""
+    return STATUS_MAP.get(str((ev.get("status") or {}).get("type") or ""), "upcoming")
 
 
 def fetch_matches(start: int, leagues: dict | None = None, refresh: bool = False) -> pd.DataFrame:
@@ -481,7 +504,8 @@ def fetch_matches(start: int, leagues: dict | None = None, refresh: bool = False
             for ev in events:
                 hs = ev.get("homeScore", {})
                 aws = ev.get("awayScore", {})
-                finished = ev.get("status", {}).get("type") == "finished"
+                status = _status_of(ev)
+                finished = status == "finished"
                 row = {
                     "event_id": ev["id"],
                     "league": league,
@@ -492,7 +516,7 @@ def fetch_matches(start: int, leagues: dict | None = None, refresh: bool = False
                     "home_id": ev["homeTeam"]["id"],
                     "away": ev["awayTeam"]["name"],
                     "away_id": ev["awayTeam"]["id"],
-                    "status": "finished" if finished else "upcoming",
+                    "status": status,
                     "home_goals": hs.get("current") if finished else None,
                     "away_goals": aws.get("current") if finished else None,
                 }

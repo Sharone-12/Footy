@@ -177,6 +177,32 @@ def test_lock() -> None:
             refresh.LOCK = real
 
 
+def test_status_is_not_collapsed() -> None:
+    """A postponed fixture is neither finished nor upcoming.
+
+    Everything that was not "finished" used to be written as "upcoming", so a
+    16 September Levante UD v Athletic Club that Sofascore marks `postponed`
+    sat at the top of /predictions' "Next up" for seven weeks while the
+    replayed match — a separate event id — was finished. 15 such rows were in
+    the database when this was found.
+    """
+    cases = [
+        ("postponed", "postponed"),
+        ("canceled", "canceled"),
+        ("cancelled", "canceled"),   # spelling varies in the feed
+        ("finished", "finished"),
+        ("notstarted", "upcoming"),
+        ("inprogress", "upcoming"),
+        ("", "upcoming"),
+        ("something new", "upcoming"),
+    ]
+    for given, want in cases:
+        assert dl._status_of({"status": {"type": given}}) == want, given
+    # Malformed rows must not crash the whole round.
+    assert dl._status_of({}) == "upcoming"
+    assert dl._status_of({"status": None}) == "upcoming"
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_"):
