@@ -608,17 +608,6 @@ export function WatchStudio({
 
   return (
     <div className="flex flex-col gap-2.5 sm:gap-3 animate-fade-in w-full pb-12">
-      {/* Cinema Mode Lights Out Backdrop */}
-      {isCinemaMode && (
-        <div
-          role="button"
-          tabIndex={-1}
-          aria-label="Exit cinema mode"
-          onClick={() => setIsCinemaMode(false)}
-          className="fixed inset-0 z-30 bg-black/80 backdrop-blur-xs transition-opacity duration-300 animate-fade-in cursor-pointer"
-        />
-      )}
-
       {/* 1. TOP BAR: Back Navigation & League Breadcrumb (Ultra-compact) */}
       <div className="flex items-center justify-between gap-2 border-b border-border/30 pb-1.5">
         <div className="flex items-center gap-2">
@@ -654,10 +643,10 @@ export function WatchStudio({
               ? "bg-[var(--pitch)] text-black border-[var(--pitch)] font-bold shadow-sm"
               : "nav-pill text-muted-foreground hover:text-foreground border-border/40"
           }`}
-          title={isCinemaMode ? "Exit Cinema Mode (Esc)" : "Cinema Mode (Lights Out)"}
+          title={isCinemaMode ? "Exit Cinema Mode (Switch to 16:9)" : "Cinema Mode (21:9 Widescreen)"}
         >
           <ClapperboardIcon className="size-3.5" />
-          <span>{isCinemaMode ? "Exit Cinema" : "Cinema Mode"}</span>
+          <span>{isCinemaMode ? "Exit Cinema (16:9)" : "Cinema Mode (21:9)"}</span>
         </button>
       </div>
 
@@ -812,8 +801,10 @@ export function WatchStudio({
 
       {/* 3. MAIN BROADCAST SUITE: Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 items-start">
-        {/* A. LEFT / MAIN VIDEO PLAYER COLUMN */}
-        <div className="lg:col-span-8 xl:col-span-9 flex flex-col gap-2.5 sm:gap-3">
+        {/* A. LEFT / MAIN VIDEO PLAYER COLUMN (Expands to full width in Cinema Mode) */}
+        <div className={`flex flex-col gap-2.5 sm:gap-3 transition-all duration-300 ${
+          isCinemaMode ? "col-span-12 w-full" : "lg:col-span-8 xl:col-span-9"
+        }`}>
           {/* Video Container Card with Ambient Depth Glow */}
           <div
             ref={playerContainerRef}
@@ -821,7 +812,7 @@ export function WatchStudio({
               isFullscreen
                 ? "fixed inset-0 z-50 rounded-none w-screen h-screen border-none"
                 : isCinemaMode
-                ? "relative z-40 shadow-[0_0_90px_rgba(0,0,0,0.95),0_0_40px_rgba(0,255,135,0.14)] ring-1 ring-[var(--pitch)]/40"
+                ? "shadow-[0_25px_70px_-15px_rgba(0,0,0,0.95),0_0_50px_-20px_rgba(0,255,135,0.12)] ring-1 ring-[var(--pitch)]/30"
                 : "shadow-[0_20px_60px_-15px_rgba(0,0,0,0.9),0_0_40px_-20px_rgba(0,255,135,0.06)] ring-1 ring-white/5"
             }`}
           >
@@ -869,9 +860,13 @@ export function WatchStudio({
               </div>
             </div>
 
-            {/* Cinematic Video Display Area (Constrained to viewport to ensure zero scrolling needed) */}
-            <div className={`relative w-full bg-black flex items-center justify-center overflow-hidden ${
-              isFullscreen ? "w-full h-full flex-1" : "aspect-video max-h-[calc(100vh-230px)]"
+            {/* Cinematic Video Display Area (Aspect Ratio adjusts between 16:9 Broadcast & 21:9 CinemaScope) */}
+            <div className={`relative w-full bg-black flex items-center justify-center overflow-hidden transition-all duration-300 ${
+              isFullscreen
+                ? "w-full h-full flex-1"
+                : isCinemaMode
+                ? "aspect-[21/9] sm:aspect-[2.35/1] max-h-[calc(100vh-180px)]"
+                : "aspect-video max-h-[calc(100vh-230px)]"
             }`}>
 
               {/* 1. LOADING STATE */}
@@ -1061,7 +1056,7 @@ export function WatchStudio({
                       ? "text-[var(--pitch)] bg-[var(--pitch)]/15"
                       : "text-muted-foreground hover:text-foreground hover:bg-white/10"
                   }`}
-                  title={isCinemaMode ? "Exit Cinema Mode (Esc)" : "Cinema Mode"}
+                  title={isCinemaMode ? "Exit Cinema Mode (Switch to 16:9)" : "Cinema Mode (21:9 Widescreen)"}
                 >
                   <ClapperboardIcon className="size-4" />
                 </button>
@@ -1445,9 +1440,9 @@ export function WatchStudio({
           </div>
         </div>
 
-        {/* B. RIGHT SIDEBAR: Available Streams & Match Centre (Compacted for sleek fit) */}
-        <aside className={`lg:col-span-4 xl:col-span-3 flex flex-col gap-3 transition-all ${
-          isCinemaMode ? "relative z-40" : ""
+        {/* B. RIGHT SIDEBAR: Available Streams & Match Centre (Responsive to Cinema Mode) */}
+        <aside className={`flex flex-col gap-3 transition-all duration-300 ${
+          isCinemaMode ? "col-span-12 grid grid-cols-1 md:grid-cols-2 gap-3" : "lg:col-span-4 xl:col-span-3"
         }`}>
           {/* 1. AVAILABLE STREAMS PANEL */}
           <div className="surface bg-card rounded-2xl p-3.5 sm:p-4 border border-border/70 flex flex-col gap-2.5">
