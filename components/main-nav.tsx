@@ -15,6 +15,17 @@ const LINKS = [
   { href: "/live", label: "Live", hint: "Live & streaming" },
 ]
 
+/**
+ * One row on desktop, wrapped on a phone.
+ *
+ * Seven tabs need 468px and a phone gives 296-406px, so the strip used to
+ * scroll horizontally with no scrollbar. On /live — the last tab — it sat
+ * pinned at the far end, which left Players and Teams off the left edge with
+ * nothing on screen to say they were there. Wrapping shows all seven.
+ */
+const STRIP_CLASS =
+  "segment relative flex flex-wrap md:flex-nowrap justify-center gap-0.5 rounded-2xl md:rounded-full p-1 whitespace-nowrap max-w-full"
+
 function isActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/"
   return pathname === href || pathname.startsWith(`${href}/`)
@@ -27,7 +38,7 @@ function isActive(pathname: string, href: string) {
  */
 export function MainNavFallback() {
   return (
-    <div className="segment relative flex rounded-full p-1 gap-0.5 overflow-x-auto no-scrollbar whitespace-nowrap max-w-full">
+    <div className={STRIP_CLASS}>
       {LINKS.map((l) => (
         <span
           key={l.href}
@@ -46,11 +57,29 @@ export function MainNavFallback() {
   )
 }
 
+type Pill = { x: number; y: number; w: number; h: number }
+
+/** Where the hover/active pill sits, relative to the strip's border box. */
+function measure(
+  container: HTMLDivElement,
+  el: HTMLElement,
+  setPill: (p: Pill) => void,
+) {
+  const cRect = container.getBoundingClientRect()
+  const eRect = el.getBoundingClientRect()
+  setPill({
+    x: eRect.left - cRect.left,
+    y: eRect.top - cRect.top,
+    w: eRect.width,
+    h: eRect.height,
+  })
+}
+
 export function MainNav() {
   const pathname = usePathname()
   const containerRef = useRef<HTMLDivElement>(null)
   const itemRefs = useRef<Array<HTMLAnchorElement | null>>([])
-  const [pill, setPill] = useState<{ x: number; w: number } | null>(null)
+  const [pill, setPill] = useState<Pill | null>(null)
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
 
   const activeIdx = LINKS.findIndex((l) => isActive(pathname, l.href))
@@ -65,28 +94,14 @@ export function MainNav() {
       setPill(null)
       return
     }
-    const cRect = container.getBoundingClientRect()
-    const eRect = el.getBoundingClientRect()
-    setPill({ x: eRect.left - cRect.left + container.scrollLeft, w: eRect.width })
-
-    // On mobile, keep the active/selected tab comfortably visible
-    if (window.innerWidth < 768 && activeIdx >= 0 && itemRefs.current[activeIdx]) {
-      itemRefs.current[activeIdx]?.scrollIntoView({
-        behavior: "smooth",
-        inline: "center",
-        block: "nearest",
-      })
-    }
-  }, [targetIdx, pathname, activeIdx])
+    measure(container, el, setPill)
+  }, [targetIdx, pathname])
 
   useLayoutEffect(() => {
     function onResize() {
       const container = containerRef.current
       const el = itemRefs.current[targetIdx]
-      if (!container || !el) return
-      const cRect = container.getBoundingClientRect()
-      const eRect = el.getBoundingClientRect()
-      setPill({ x: eRect.left - cRect.left + container.scrollLeft, w: eRect.width })
+      if (container && el) measure(container, el, setPill)
     }
     window.addEventListener("resize", onResize)
     return () => window.removeEventListener("resize", onResize)
@@ -95,16 +110,17 @@ export function MainNav() {
   return (
     <div
       ref={containerRef}
-      className="segment relative flex rounded-full p-1 gap-0.5 overflow-x-auto no-scrollbar whitespace-nowrap max-w-full"
+      className={STRIP_CLASS}
       onMouseLeave={() => setHoveredIdx(null)}
     >
       {pill && (
         <span
           aria-hidden
-          className="absolute top-1 bottom-1 rounded-full bg-white/[0.08] shadow-[inset_0_1px_0_oklch(1_0_0_/_14%)] transition-[transform,width] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] pointer-events-none"
+          className="absolute top-0 left-0 rounded-full bg-white/[0.08] shadow-[inset_0_1px_0_oklch(1_0_0_/_14%)] transition-[transform,width,height] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] pointer-events-none"
           style={{
-            transform: `translateX(${pill.x - 4}px)`,
+            transform: `translate(${pill.x}px, ${pill.y}px)`,
             width: pill.w,
+            height: pill.h,
           }}
         />
       )}
