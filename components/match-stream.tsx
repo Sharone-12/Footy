@@ -1,6 +1,6 @@
 "use client"
 
-import { useSyncExternalStore, useRef, useEffect } from "react"
+import { useSyncExternalStore } from "react"
 import { ExternalLinkIcon, TvMinimalPlayIcon } from "lucide-react"
 import { embedFor } from "@/lib/stream-embed"
 import { YouTubePlayer } from "@/components/youtube-player"
@@ -27,17 +27,6 @@ export function MatchStream({
   title?: string
 }) {
   const host = useSyncExternalStore(subscribe, readHost, noHost)
-  const iframeRef = useRef<HTMLIFrameElement>(null)
-
-  useEffect(() => {
-    return () => {
-      if (iframeRef.current) {
-        try {
-          iframeRef.current.src = "about:blank"
-        } catch {}
-      }
-    }
-  }, [])
 
   const embed = embedFor(url, host)
   if (!embed) return null
@@ -73,7 +62,6 @@ export function MatchStream({
     <div className="surface bg-card rounded-2xl overflow-hidden">
       <div className="relative aspect-video">
         <iframe
-          ref={iframeRef}
           key={embed.src}
           src={embed.src}
           title={title}
