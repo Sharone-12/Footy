@@ -15,14 +15,16 @@ import { youtubeAdapter } from "./youtube"
 import { zliveAdapter } from "./zlive"
 import { daddyliveAdapter } from "./daddylive"
 import { damitvAdapter } from "./damitv"
+import { cinevidAdapter } from "./cinevid"
 import type { ProviderEntry } from "./types"
 
 /** Every provider, in display and preference order. */
 export function registry(): ProviderEntry[] {
   return [
+    { adapter: damitvAdapter, supported: true, configured: true },
+    { adapter: cinevidAdapter, supported: true, configured: true },
     { adapter: streamfreeAdapter, supported: true, configured: true },
     { adapter: zliveAdapter, supported: true, configured: true },
-    { adapter: damitvAdapter, supported: true, configured: true },
     {
       adapter: daddyliveAdapter,
       supported: true,
@@ -98,6 +100,18 @@ export const DIRECTORY: DirectoryEntry[] = [
     name: "StreamCorner",
     domain: "streamcorner.st",
     url: "https://streamcorner.st/",
+    category: "gateway",
+    enabled: true,
+  },
+  {
+    // Link-only on purpose. Cinevid publishes a documented events API, but no
+    // terms, DMCA or legal page exists (all 404) and the catalogue spans every
+    // major league plus films and TV, so redistribution rights could not be
+    // verified. Until they are, this stays a link out under GATEWAY_NOTE and
+    // gets no adapter and no embedded player.
+    name: "Cinevid",
+    domain: "cinevid.st",
+    url: "https://cinevid.st",
     category: "gateway",
     enabled: true,
   },

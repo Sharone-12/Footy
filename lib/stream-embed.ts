@@ -11,7 +11,7 @@
 export type StreamEmbed =
   /** `id` so the custom player can drive this through the YouTube JS API. */
   | { kind: "youtube"; src: string; id: string }
-  | { kind: "twitch" | "dailymotion" | "vimeo"; src: string }
+  | { kind: "twitch" | "dailymotion" | "vimeo" | "iframe"; src: string }
   | { kind: "link"; src: string; host: string }
 
 const YOUTUBE_HOSTS = ["youtube.com", "youtu.be", "youtube-nocookie.com"]
@@ -78,6 +78,19 @@ export function embedFor(url: string, parentHost?: string | null): StreamEmbed |
     const id = path[0]
     if (!id || !DIGITS.test(id)) return link
     return { kind: "vimeo", src: `https://player.vimeo.com/video/${id}` }
+  }
+
+  // Embeddable football streaming providers
+  if (host === "cinevid.st" && path[0] === "embed") {
+    return { kind: "iframe", src: u.toString() }
+  }
+
+  if (host === "damitv.st" && (path[0] === "embed" || path[0] === "player")) {
+    return { kind: "iframe", src: u.toString() }
+  }
+
+  if (host === "zlive.st" && path[0] === "embed") {
+    return { kind: "iframe", src: u.toString() }
   }
 
   return link
