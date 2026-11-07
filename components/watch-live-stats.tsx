@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import { BarChart2Icon, ActivityIcon, RefreshCwIcon } from "lucide-react"
+import { TeamCrest } from "@/components/player-avatar"
 import type { LiveFixture } from "@/components/live-sections"
 import type { LiveScore } from "@/lib/livescores"
 import type { LiveMatchStatsResponse } from "@/app/api/livescores/stats/route"
@@ -173,13 +174,35 @@ export function WatchLiveStatsCard({ fixture, liveScore }: WatchLiveStatsProps) 
         </div>
 
         <div className="flex items-center gap-3">
+          {/* Crests flank the "vs" the way the prediction cards do, so which
+              column belongs to which side reads at a glance. */}
           <div className="flex items-center gap-2 text-xs font-semibold max-w-[280px] sm:max-w-none">
-            <span className="text-white/90 truncate max-w-[90px] sm:max-w-[140px] text-right font-medium">
-              {fixture.home}
+            <span className="flex items-center justify-end gap-1.5 min-w-0">
+              <span className="text-white/90 truncate max-w-[72px] sm:max-w-[140px] text-right font-medium">
+                {fixture.home}
+              </span>
+              {fixture.home_id && (
+                <TeamCrest
+                  teamId={fixture.home_id}
+                  name={fixture.home}
+                  size={18}
+                  className="shrink-0"
+                />
+              )}
             </span>
             <span className="text-white/20 select-none text-[10px]">vs</span>
-            <span className="text-white/90 truncate max-w-[90px] sm:max-w-[140px] text-left font-medium">
-              {fixture.away}
+            <span className="flex items-center gap-1.5 min-w-0">
+              {fixture.away_id && (
+                <TeamCrest
+                  teamId={fixture.away_id}
+                  name={fixture.away}
+                  size={18}
+                  className="shrink-0"
+                />
+              )}
+              <span className="text-white/90 truncate max-w-[72px] sm:max-w-[140px] text-left font-medium">
+                {fixture.away}
+              </span>
             </span>
           </div>
 
