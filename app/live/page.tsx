@@ -3,7 +3,6 @@ import { connection } from "next/server"
 import { cookies } from "next/headers"
 import { supabase } from "@/lib/supabase"
 import { LiveSections, type LiveFixture } from "@/components/live-sections"
-import { ExternalSources } from "@/components/external-sources"
 import { Skeleton } from "@/components/ui/skeleton"
 import { LivePasswordLock } from "@/components/live-password-lock"
 import { LiveLockControl } from "@/components/live-lock-control"
@@ -88,19 +87,6 @@ async function LiveAuthGate() {
       >
         <Fixtures />
       </Suspense>
-
-      <section className="mt-12">
-        <h2
-          className="text-lg font-semibold tracking-tight uppercase mb-1"
-          style={{ fontFamily: "var(--font-condensed)" }}
-        >
-          Available External Sources
-        </h2>
-        <p className="text-muted-foreground text-sm mb-4">
-          Every link here opens in a new tab and leaves the app.
-        </p>
-        <ExternalSources />
-      </section>
     </>
   )
 }

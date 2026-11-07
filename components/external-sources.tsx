@@ -16,7 +16,7 @@ import {
  * come from the registry, so adding a destination is a config change.
  */
 
-const GROUPS: DirectoryCategory[] = ["gateway", "official", "platform", "unverified"]
+const GROUPS: DirectoryCategory[] = ["gateway", "unverified"]
 
 function SiteCard({ entry }: { entry: DirectoryEntry }) {
   return (
