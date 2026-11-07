@@ -162,80 +162,66 @@ export function WatchLiveStatsCard({ fixture, liveScore }: WatchLiveStatsProps) 
       aria-label="Live Match Detailed Stats"
       className="surface rounded-2xl bg-card p-3.5 sm:p-4 md:p-5 border border-border/70 shadow-sm transition-all animate-fade-in"
     >
-      <header className="flex items-center justify-between pb-2.5 mb-2 border-b border-border/40">
-        <div className="flex items-center gap-2">
-          <span className="relative flex size-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--pitch)] opacity-75 motion-reduce:hidden" />
-            <span className="relative inline-flex rounded-full size-2 bg-[var(--pitch)]" />
-          </span>
-          <h2
-            className="text-xs sm:text-[0.8rem] font-bold uppercase tracking-wider flex items-center gap-1.5"
-            style={{ color: "var(--pitch)", fontFamily: "var(--font-condensed)" }}
-          >
-            <span>LIVE MATCH STATS</span>
-          </h2>
-        </div>
-
-        <button
-          type="button"
-          onClick={() => fetchStats(true)}
-          disabled={isRefreshing}
-          className="p-1.5 rounded-lg text-white/50 hover:text-white transition-colors hover:bg-white/10 focus:outline-none"
-          title="Refresh live stats"
-          aria-label="Refresh live stats"
-        >
-          <RefreshCwIcon className={`size-3.5 ${isRefreshing ? "animate-spin text-[var(--pitch)]" : ""}`} />
-        </button>
-      </header>
-
-      {/* Prominent Match Header Banner: Proper Crests & Names */}
-      <div className="grid grid-cols-3 items-center py-3.5 px-3 mb-4 rounded-xl bg-neutral-900/60 border border-border/40 select-none">
-        {/* Home Team */}
-        <div className="flex flex-col items-center text-center gap-2 min-w-0">
+      {/* Big Team Crests directly over their side & numbers */}
+      <div className="grid grid-cols-3 items-center pt-2 pb-5 px-3 mb-3 border-b border-white/10 select-none">
+        {/* Home Team & Crest directly over left numbers */}
+        <div className="flex flex-col items-start sm:items-center text-left sm:text-center gap-2 min-w-0">
           {fixture.home_id ? (
             <TeamCrest
               teamId={fixture.home_id}
               name={fixture.home}
-              size={48}
-              className="drop-shadow-md"
+              size={56}
+              className="drop-shadow-lg"
             />
           ) : (
-            <div className="size-12 rounded-full bg-white/10 flex items-center justify-center font-bold text-sm text-white/60">
+            <div className="size-14 rounded-full bg-white/10 flex items-center justify-center font-bold text-base text-white/70">
               {fixture.home.slice(0, 2)}
             </div>
           )}
-          <span className="font-bold text-xs sm:text-sm text-white max-w-[120px] sm:max-w-[160px] truncate leading-tight">
+          <span className="font-bold text-xs sm:text-sm text-white max-w-[130px] sm:max-w-[180px] truncate leading-tight">
             {fixture.home}
           </span>
         </div>
 
         {/* Center: Live Scoreline & Time */}
         <div className="flex flex-col items-center justify-center text-center">
-          <div className="font-mono font-black text-2xl sm:text-3xl tracking-wider text-white tabular-nums drop-shadow-sm">
+          <div className="font-mono font-black text-2xl sm:text-3xl tracking-wider text-white tabular-nums drop-shadow-md">
             <span>{liveScore?.homeGoals ?? 0}</span>
             <span className="text-white/30 mx-2">-</span>
             <span>{liveScore?.awayGoals ?? 0}</span>
           </div>
-          <span className="mt-1 px-2.5 py-0.5 rounded-full text-xs font-bold font-mono text-[var(--pitch)] bg-[var(--pitch)]/10 border border-[var(--pitch)]/25 animate-pulse">
-            {liveClock?.display || liveScore?.status || "LIVE"}
-          </span>
+          <div className="mt-1 flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold font-mono text-[var(--pitch)] bg-[var(--pitch)]/10 border border-[var(--pitch)]/25 animate-pulse">
+              {liveClock?.display || liveScore?.status || "LIVE"}
+            </span>
+            <button
+              type="button"
+              onClick={() => fetchStats(true)}
+              disabled={isRefreshing}
+              className="p-1 rounded-md text-white/40 hover:text-white transition-colors hover:bg-white/10 focus:outline-none"
+              title="Refresh live stats"
+              aria-label="Refresh live stats"
+            >
+              <RefreshCwIcon className={`size-3 ${isRefreshing ? "animate-spin text-[var(--pitch)]" : ""}`} />
+            </button>
+          </div>
         </div>
 
-        {/* Away Team */}
-        <div className="flex flex-col items-center text-center gap-2 min-w-0">
+        {/* Away Team & Crest directly over right numbers */}
+        <div className="flex flex-col items-end sm:items-center text-right sm:text-center gap-2 min-w-0">
           {fixture.away_id ? (
             <TeamCrest
               teamId={fixture.away_id}
               name={fixture.away}
-              size={48}
-              className="drop-shadow-md"
+              size={56}
+              className="drop-shadow-lg"
             />
           ) : (
-            <div className="size-12 rounded-full bg-white/10 flex items-center justify-center font-bold text-sm text-white/60">
+            <div className="size-14 rounded-full bg-white/10 flex items-center justify-center font-bold text-base text-white/70">
               {fixture.away.slice(0, 2)}
             </div>
           )}
-          <span className="font-bold text-xs sm:text-sm text-white max-w-[120px] sm:max-w-[160px] truncate leading-tight">
+          <span className="font-bold text-xs sm:text-sm text-white max-w-[130px] sm:max-w-[180px] truncate leading-tight">
             {fixture.away}
           </span>
         </div>
