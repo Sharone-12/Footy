@@ -12,55 +12,67 @@ type PitchLineupProps = {
   isLoading?: boolean
 }
 
+/**
+ * Where a row sits, as a percentage of the box it is drawn in.
+ *
+ * Rows used to run a hardcoded 8% -> 68%. In the both-teams view each half is
+ * only half the pitch tall, so a 4-2-3-1 got five rows into ~156px — about
+ * 39px a gap — while a node stands ~62px tall. Every label landed on the next
+ * row's heads. Widening the span and shrinking the node is what fixes it.
+ */
+function rowPercent(row: number, maxRow: number, near: number, far: number): number {
+  if (row <= 1) return near
+  const fraction = maxRow > 1 ? (row - 1) / (maxRow - 1) : 0.5
+  return near + fraction * (far - near)
+}
+
 function PlayerNode({
   player,
   teamColor = "var(--pitch)",
   isAway = false,
+  size = 40,
 }: {
   player: LineupPlayer
   teamColor?: string
   isAway?: boolean
+  /** Avatar diameter. Smaller when both teams share the pitch. */
+  size?: number
 }) {
+  const ring = isAway ? "#38bdf8" : teamColor
   return (
-    <div className="flex flex-col items-center group cursor-pointer transition-transform hover:scale-110 z-10 -translate-x-1/2 -translate-y-1/2">
-      <div className="relative">
-        {player.playerId ? (
-          <PlayerAvatar
-            playerId={player.playerId}
-            name={player.name}
-            size={40}
-            ring={isAway ? "#38bdf8" : teamColor}
-          />
-        ) : (
-          <div
-            className="size-10 rounded-full flex items-center justify-center font-bold text-xs select-none shadow-md border-2"
-            style={{
-              backgroundColor: isAway ? "#0f172a" : "#022c22",
-              borderColor: isAway ? "#38bdf8" : teamColor,
-              color: "#ffffff",
-            }}
-          >
-            {player.jerseyNumber ?? player.name.slice(0, 2).toUpperCase()}
-          </div>
-        )}
+    // The coordinate is the avatar's centre, not the centre of avatar-plus-
+    // label: the box is exactly the avatar, and the name hangs off it
+    // absolutely so it can never shift the avatar or widen the node.
+    <div
+      className="relative -translate-x-1/2 -translate-y-1/2 group cursor-pointer z-10 transition-transform hover:scale-110 hover:z-30"
+      style={{ width: size, height: size }}
+    >
+      {player.playerId ? (
+        <PlayerAvatar playerId={player.playerId} name={player.name} size={size} ring={ring} />
+      ) : (
+        <div
+          className="rounded-full flex items-center justify-center font-bold text-[11px] select-none shadow-md border-2"
+          style={{
+            width: size,
+            height: size,
+            backgroundColor: isAway ? "#0f172a" : "#022c22",
+            borderColor: ring,
+            color: "#ffffff",
+          }}
+        >
+          {player.jerseyNumber ?? player.name.slice(0, 2).toUpperCase()}
+        </div>
+      )}
 
-        {/* Jersey number badge */}
+      {/* Number sits inside the label rather than as a badge over the avatar,
+          which is both cleaner and one less thing to collide. */}
+      <span className="absolute top-full left-1/2 -translate-x-1/2 mt-1 flex items-center gap-1 whitespace-nowrap max-w-[68px] sm:max-w-[94px] rounded bg-black/85 px-1 sm:px-1.5 py-0.5 text-[9px] sm:text-[10px] font-semibold text-white/95 shadow backdrop-blur-xs border border-white/10 group-hover:border-[var(--pitch)] transition-colors">
         {player.jerseyNumber !== null && (
-          <span
-            className="absolute -bottom-1 -right-1 size-4 rounded-full text-[9px] font-mono font-bold flex items-center justify-center border text-white shadow-sm"
-            style={{
-              backgroundColor: isAway ? "#0284c7" : "#059669",
-              borderColor: "#0f172a",
-            }}
-          >
+          <span className="font-mono tabular-nums" style={{ color: ring }}>
             {player.jerseyNumber}
           </span>
         )}
-      </div>
-
-      {/* Player short name label */}
-      <span className="mt-1 px-1.5 py-0.5 rounded bg-black/85 backdrop-blur-xs text-[10px] font-semibold text-white/95 max-w-[85px] truncate text-center shadow border border-white/10 group-hover:border-[var(--pitch)] transition-colors">
-        {player.shortName || player.name}
+        <span className="truncate">{player.shortName || player.name}</span>
       </span>
     </div>
   )
@@ -155,7 +167,7 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
       </div>
 
       {/* The Football Pitch Graphic */}
-      <div className="relative w-full aspect-[4/5] sm:aspect-[3/4] min-h-[520px] sm:min-h-[580px] max-h-[760px] rounded-2xl overflow-hidden border border-emerald-900/60 shadow-inner select-none bg-radial from-[#155e38] via-[#0d4a2b] to-[#08301c]">
+      <div className="relative w-full aspect-[4/5] sm:aspect-[3/4] min-h-[680px] sm:min-h-[740px] max-h-[860px] rounded-2xl overflow-hidden border border-emerald-900/60 shadow-inner select-none bg-radial from-[#155e38] via-[#0d4a2b] to-[#08301c]">
         {/* Grass Stripes Pattern */}
         <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,rgba(0,0,0,0.06)_0px,rgba(0,0,0,0.06)_32px,transparent_32px,transparent_64px)] pointer-events-none" />
 
@@ -187,10 +199,7 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
             {/* Away Team (Top Half, facing down) */}
             <div className="absolute inset-x-0 top-0 h-1/2 p-3 sm:p-4">
               {awayStarting.map((player, idx) => {
-                // Scale rows dynamically from Row 1 (GK at 8%) to furthest row (ST at 68%)
-                // In full pitch, 68% of half = 34% of total height, leaving a large 32% center gap
-                const fraction = awayMaxRow > 1 ? (player.row - 1) / (awayMaxRow - 1) : 0.5
-                const rowPercent = player.row === 1 ? 8 : 8 + fraction * 60
+                const top = rowPercent(player.row, awayMaxRow, 8, 84)
                 const totalInRow = player.totalInRow || 1
                 const colPercent = (player.col / (totalInRow + 1)) * 100
 
@@ -198,19 +207,18 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
                   <div
                     key={`away-${player.name}-${idx}`}
                     className="absolute"
-                    style={{ top: `${rowPercent}%`, left: `${colPercent}%` }}
+                    style={{ top: `${top}%`, left: `${colPercent}%` }}
                   >
-                    <PlayerNode player={player} isAway />
+                    <PlayerNode player={player} isAway size={awayMaxRow >= 6 ? 28 : 34} />
                   </div>
                 )
               })}
             </div>
 
             {/* Home Team (Bottom Half, facing up) */}
-            <div className="absolute inset-x-0 bottom-0 h-1/2 p-3 sm:p-4">
+            <div className="absolute inset-x-0 bottom-0 h-1/2 p-3 sm:p-4 pb-8">
               {homeStarting.map((player, idx) => {
-                const fraction = homeMaxRow > 1 ? (player.row - 1) / (homeMaxRow - 1) : 0.5
-                const rowPercent = player.row === 1 ? 8 : 8 + fraction * 60
+                const bottom = rowPercent(player.row, homeMaxRow, 10, 84)
                 const totalInRow = player.totalInRow || 1
                 const colPercent = (player.col / (totalInRow + 1)) * 100
 
@@ -218,9 +226,9 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
                   <div
                     key={`home-${player.name}-${idx}`}
                     className="absolute"
-                    style={{ bottom: `${rowPercent}%`, left: `${colPercent}%` }}
+                    style={{ bottom: `${bottom}%`, left: `${colPercent}%` }}
                   >
-                    <PlayerNode player={player} />
+                    <PlayerNode player={player} size={homeMaxRow >= 6 ? 28 : 34} />
                   </div>
                 )
               })}
@@ -230,10 +238,9 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
 
         {/* SINGLE TEAM: Home Team Only */}
         {viewMode === "home" && (
-          <div className="absolute inset-0 p-6">
+          <div className="absolute inset-0 p-6 pb-10">
             {homeStarting.map((player, idx) => {
-              const fraction = homeMaxRow > 1 ? (player.row - 1) / (homeMaxRow - 1) : 0.5
-              const rowPercent = player.row === 1 ? 8 : 8 + fraction * 78
+              const bottom = rowPercent(player.row, homeMaxRow, 9, 88)
               const totalInRow = player.totalInRow || 1
               const colPercent = (player.col / (totalInRow + 1)) * 100
 
@@ -241,7 +248,7 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
                 <div
                   key={`single-home-${player.name}-${idx}`}
                   className="absolute"
-                  style={{ bottom: `${rowPercent}%`, left: `${colPercent}%` }}
+                  style={{ bottom: `${bottom}%`, left: `${colPercent}%` }}
                 >
                   <PlayerNode player={player} />
                 </div>
@@ -252,10 +259,9 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
 
         {/* SINGLE TEAM: Away Team Only */}
         {viewMode === "away" && (
-          <div className="absolute inset-0 p-6">
+          <div className="absolute inset-0 p-6 pb-10">
             {awayStarting.map((player, idx) => {
-              const fraction = awayMaxRow > 1 ? (player.row - 1) / (awayMaxRow - 1) : 0.5
-              const rowPercent = player.row === 1 ? 8 : 8 + fraction * 78
+              const top = rowPercent(player.row, awayMaxRow, 9, 88)
               const totalInRow = player.totalInRow || 1
               const colPercent = (player.col / (totalInRow + 1)) * 100
 
@@ -263,7 +269,7 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
                 <div
                   key={`single-away-${player.name}-${idx}`}
                   className="absolute"
-                  style={{ top: `${rowPercent}%`, left: `${colPercent}%` }}
+                  style={{ top: `${top}%`, left: `${colPercent}%` }}
                 >
                   <PlayerNode player={player} isAway />
                 </div>
