@@ -113,15 +113,15 @@ async function WatchContent({ searchParams }: PageProps) {
 
 export default function WatchPage(props: PageProps) {
   return (
-    <main className="mx-auto max-w-7xl px-3 sm:px-6 py-4 sm:py-8 min-h-screen">
+    <main className="mx-auto max-w-[1560px] px-2 sm:px-4 lg:px-6 pt-1 sm:pt-1.5 pb-8 min-h-screen">
       <Suspense
         fallback={
-          <div className="flex flex-col gap-6 animate-pulse">
-            <Skeleton className="h-10 w-48 rounded-full" />
-            <Skeleton className="h-28 rounded-3xl" />
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-              <Skeleton className="lg:col-span-8 aspect-video rounded-3xl" />
-              <Skeleton className="lg:col-span-4 h-96 rounded-3xl" />
+          <div className="flex flex-col gap-4 animate-pulse">
+            <Skeleton className="h-7 w-36 rounded-full" />
+            <Skeleton className="h-16 rounded-2xl" />
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+              <Skeleton className="lg:col-span-8 aspect-video rounded-2xl" />
+              <Skeleton className="lg:col-span-4 h-96 rounded-2xl" />
             </div>
           </div>
         }

@@ -210,7 +210,6 @@ export function WatchStudio({
 
   const playerContainerRef = useRef<HTMLDivElement>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const [isCinemaMode, setIsCinemaMode] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
   const [activeTab, setActiveTab] = useState<"about" | "streams" | "similar">("about")
   const [prediction, setPrediction] = useState<MatchPrediction | null>(initialPrediction ?? null)
@@ -562,79 +561,52 @@ export function WatchStudio({
   const isBarcaMatch = fixture?.home_id === BARCA_ID || fixture?.away_id === BARCA_ID
 
   return (
-    <div className="flex flex-col gap-6 animate-fade-in w-full pb-16">
-      {/* 1. TOP BAR: Back Navigation, Breadcrumb, and Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/40 pb-4">
-        <div className="flex items-center gap-3">
+    <div className="flex flex-col gap-2.5 sm:gap-3 animate-fade-in w-full pb-12">
+      {/* 1. TOP BAR: Back Navigation & League Breadcrumb (Ultra-compact) */}
+      <div className="flex items-center justify-between gap-2 border-b border-border/30 pb-1.5">
+        <div className="flex items-center gap-2">
           <Link
             href="/live"
-            className="nav-pill inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition-all hover:scale-[1.02]"
+            className="nav-pill inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-muted-foreground hover:text-foreground transition-all hover:scale-[1.02]"
             title="Return to Live Fixtures"
           >
-            <ChevronLeftIcon className="size-4" />
+            <ChevronLeftIcon className="size-3.5" />
             <span>Back to Live</span>
           </Link>
 
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>/</span>
-            <span className="font-semibold text-foreground uppercase tracking-wider text-[11px]" style={{ fontFamily: "var(--font-condensed)" }}>
-              FOOTYY LIVE
-            </span>
-            {fixture?.league && (
-              <>
-                <span>/</span>
-                <span className="truncate max-w-[140px] sm:max-w-[200px] text-[11px] text-muted-foreground font-medium">
-                  {fixture.league}
-                </span>
-              </>
-            )}
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2.5 self-end sm:self-auto">
-          {isLiveNow && (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[var(--pitch)]/10 text-[var(--pitch)] border border-[var(--pitch)]/30 text-xs font-bold tracking-wider">
-              <span className="relative flex size-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--pitch)] opacity-75 motion-reduce:hidden" />
-                <span className="relative inline-flex rounded-full size-2 bg-[var(--pitch)]" />
+          <span className="text-white/20 text-xs">/</span>
+          <span className="font-semibold text-foreground uppercase tracking-wider text-[11px]" style={{ fontFamily: "var(--font-condensed)" }}>
+            FOOTYY LIVE
+          </span>
+          {fixture?.league && (
+            <>
+              <span className="text-white/20 text-xs">/</span>
+              <span className="truncate max-w-[140px] sm:max-w-[240px] text-[11px] text-muted-foreground font-medium">
+                {fixture.league}
               </span>
-              <span>LIVE</span>
-            </span>
+            </>
           )}
-
-          <button
-            type="button"
-            onClick={() => setIsCinemaMode((prev) => !prev)}
-            className={`hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all ${isCinemaMode
-                ? "bg-[var(--pitch)] text-black border-[var(--pitch)] font-bold shadow-md"
-                : "nav-pill text-muted-foreground hover:text-foreground"
-              }`}
-            title={isCinemaMode ? "Exit Cinema Mode" : "Expand to Cinema Mode"}
-          >
-            {isCinemaMode ? <Minimize2Icon className="size-3.5" /> : <Maximize2Icon className="size-3.5" />}
-            <span>{isCinemaMode ? "Exit Cinema" : "Cinema Mode"}</span>
-          </button>
         </div>
       </div>
 
-      {/* 2. MATCH INFORMATION HEADER CARD (Hero Banner with High-Density Telemetry) */}
+      {/* 2. MATCH INFORMATION HEADER CARD (Compacted Hero Header) */}
       {fixture && (() => {
         const homeScore = liveScore?.homeGoals ?? fixture.home_goals ?? null
         const awayScore = liveScore?.awayGoals ?? fixture.away_goals ?? null
         const hasScore = homeScore != null && awayScore != null
         return (
           <section
-            className={`surface bg-card rounded-3xl p-4 sm:p-5 transition-all relative overflow-hidden border border-border/70 shadow-lg ${
+            className={`surface bg-card rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 transition-all relative overflow-hidden border border-border/70 shadow-md ${
               isBarcaMatch ? "barca-stripes" : ""
             }`}
           >
-            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 lg:gap-8">
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-2.5 md:gap-4">
               {/* Teams & Score / VS Center */}
-              <div className="flex items-center gap-3 sm:gap-6 min-w-0 flex-1">
+              <div className="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
                 {/* Home Team */}
-                <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1 justify-end">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1 justify-end">
                   <span
-                    className="font-bold text-base sm:text-xl md:text-2xl uppercase tracking-tight truncate text-right"
+                    className="font-bold text-sm sm:text-base md:text-lg uppercase tracking-tight truncate text-right"
                     style={{ fontFamily: "var(--font-condensed)" }}
                   >
                     {fixture.home}
@@ -643,32 +615,32 @@ export function WatchStudio({
                     <TeamCrest
                       teamId={fixture.home_id}
                       name={fixture.home}
-                      size={40}
-                      className="shrink-0 drop-shadow-md"
+                      size={30}
+                      className="shrink-0 drop-shadow-sm"
                     />
                   )}
                 </div>
 
                 {/* Prominent Score Hub (or VS Badge pre-match) */}
-                <div className="flex flex-col items-center justify-center shrink-0 px-2 sm:px-4">
+                <div className="flex flex-col items-center justify-center shrink-0 px-1 sm:px-2">
                   {hasScore ? (
-                    <div className="inline-flex items-stretch rounded-2xl bg-black/80 border border-white/15 shadow-xl backdrop-blur-md overflow-hidden">
-                      <div className="flex items-center gap-2.5 sm:gap-3.5 px-4 py-2 sm:px-5">
-                        <span className="font-mono text-2xl sm:text-3xl font-black text-white tabular-nums tracking-tight leading-none">
+                    <div className="inline-flex items-stretch rounded-xl bg-black/80 border border-white/15 shadow-md backdrop-blur-md overflow-hidden">
+                      <div className="flex items-center gap-2 sm:gap-3 px-3 py-1 sm:px-3.5">
+                        <span className="font-mono text-xl sm:text-2xl font-black text-white tabular-nums tracking-tight leading-none">
                           {homeScore}
                         </span>
-                        <span className="text-white/40 font-mono text-lg sm:text-xl font-bold leading-none">:</span>
-                        <span className="font-mono text-2xl sm:text-3xl font-black text-white tabular-nums tracking-tight leading-none">
+                        <span className="text-white/40 font-mono text-base sm:text-lg font-bold leading-none">:</span>
+                        <span className="font-mono text-xl sm:text-2xl font-black text-white tabular-nums tracking-tight leading-none">
                           {awayScore}
                         </span>
                       </div>
                       {liveClock && (
-                        <div className="flex items-center gap-1.5 px-3 border-l border-white/10 bg-[var(--pitch)]/10">
+                        <div className="flex items-center gap-1 px-2.5 border-l border-white/10 bg-[var(--pitch)]/10">
                           <span className="relative flex size-1.5">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--pitch)] opacity-75 motion-reduce:hidden" />
                             <span className="relative inline-flex rounded-full size-1.5 bg-[var(--pitch)]" />
                           </span>
-                          <span className="font-mono font-bold text-[11px] sm:text-xs tabular-nums text-[var(--pitch)] leading-none">
+                          <span className="font-mono font-bold text-[10px] sm:text-[11px] tabular-nums text-[var(--pitch)] leading-none">
                             {liveClock.display}
                           </span>
                         </div>
@@ -676,7 +648,7 @@ export function WatchStudio({
                     </div>
                   ) : (
                     <span
-                      className="px-3.5 py-1.5 rounded-full text-xs font-black tracking-widest bg-black/60 border border-white/10 text-muted-foreground shadow-sm"
+                      className="px-2.5 py-1 rounded-full text-[11px] font-black tracking-widest bg-black/60 border border-white/10 text-muted-foreground shadow-sm"
                       style={{ fontFamily: "var(--font-condensed)" }}
                     >
                       VS
@@ -685,17 +657,17 @@ export function WatchStudio({
                 </div>
 
                 {/* Away Team */}
-                <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                   {fixture.away_id != null && (
                     <TeamCrest
                       teamId={fixture.away_id}
                       name={fixture.away}
-                      size={40}
-                      className="shrink-0 drop-shadow-md"
+                      size={30}
+                      className="shrink-0 drop-shadow-sm"
                     />
                   )}
                   <span
-                    className="font-bold text-base sm:text-xl md:text-2xl uppercase tracking-tight truncate"
+                    className="font-bold text-sm sm:text-base md:text-lg uppercase tracking-tight truncate"
                     style={{ fontFamily: "var(--font-condensed)" }}
                   >
                     {fixture.away}
@@ -703,29 +675,29 @@ export function WatchStudio({
                 </div>
               </div>
 
-              {/* Right: Telemetry Strip (Fills previously empty space with competition, kickoff & status) */}
-              <div className="flex items-center flex-wrap sm:flex-nowrap gap-2.5 sm:gap-3 lg:border-l lg:border-white/10 lg:pl-6 shrink-0 justify-between lg:justify-end">
+              {/* Right: Telemetry Strip */}
+              <div className="flex items-center flex-wrap sm:flex-nowrap gap-2 md:border-l md:border-white/10 md:pl-4 shrink-0 justify-between md:justify-end">
                 {/* 1. Competition & Round */}
-                <div className="flex items-center gap-2.5 px-3 py-2 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
-                  {tid && <LeagueCrest tournamentId={tid} name={fixture.league} size={22} variant="transparent" />}
+                <div className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                  {tid && <LeagueCrest tournamentId={tid} name={fixture.league} size={18} variant="transparent" />}
                   <div className="flex flex-col leading-tight">
-                    <span className="text-xs font-bold text-foreground truncate max-w-[120px] sm:max-w-[150px]">
+                    <span className="text-[11px] font-bold text-foreground truncate max-w-[120px] sm:max-w-[140px]">
                       {fixture.league}
                     </span>
-                    <span className="text-[10px] text-muted-foreground font-mono">
+                    <span className="text-[9px] text-muted-foreground font-mono">
                       {fixture.round ? `Round ${fixture.round}` : "League Match"}
                     </span>
                   </div>
                 </div>
 
                 {/* 2. Kickoff Time & Date */}
-                <div className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
-                  <ClockIcon className="size-3.5 text-muted-foreground shrink-0" />
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                  <ClockIcon className="size-3 text-muted-foreground shrink-0" />
                   <div className="flex flex-col leading-tight">
-                    <span className="text-xs font-semibold text-foreground">
+                    <span className="text-[11px] font-semibold text-foreground">
                       {fixture.kickoff ? formatTimeIST(fixture.kickoff) : formatKickoffDate(fixture.kickoff, fixture.date)}
                     </span>
-                    <span className="text-[10px] text-muted-foreground">
+                    <span className="text-[9px] text-muted-foreground">
                       {formatDateIST(fixture.kickoff || `${fixture.date}T12:00:00Z`)}
                     </span>
                   </div>
@@ -734,20 +706,20 @@ export function WatchStudio({
                 {/* 3. Match Status Badge / Countdown */}
                 <div className="shrink-0 flex items-center">
                   {isLiveNow ? (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-[var(--pitch)]/10 border border-[var(--pitch)]/30 text-[var(--pitch)] shadow-sm">
-                      <span className="relative flex size-2">
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-[var(--pitch)]/10 border border-[var(--pitch)]/30 text-[var(--pitch)] shadow-sm">
+                      <span className="relative flex size-1.5">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--pitch)] opacity-75 motion-reduce:hidden" />
-                        <span className="relative inline-flex rounded-full size-2 bg-[var(--pitch)]" />
+                        <span className="relative inline-flex rounded-full size-1.5 bg-[var(--pitch)]" />
                       </span>
-                      <span className="text-[11px] font-black uppercase tracking-wider">LIVE MATCH</span>
+                      <span className="text-[10px] font-black uppercase tracking-wider">LIVE MATCH</span>
                     </div>
                   ) : isUpcoming && kickoffMs ? (
-                    <div className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-white/[0.04] border border-white/10">
+                    <div className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-white/[0.04] border border-white/10">
                       <div className="flex flex-col items-end leading-tight">
-                        <span className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider">
+                        <span className="text-[8px] uppercase font-bold text-muted-foreground tracking-wider">
                           {kickoffMs - now <= 3600_000 ? "Kickoff In" : "Status"}
                         </span>
-                        <span className="font-mono text-xs font-bold text-[var(--pitch)]">
+                        <span className="font-mono text-[11px] font-bold text-[var(--pitch)]">
                           {kickoffMs - now <= 3600_000
                             ? formatCountdown(kickoffMs, now)
                             : "UPCOMING"}
@@ -755,7 +727,7 @@ export function WatchStudio({
                       </div>
                     </div>
                   ) : (
-                    <span className="inline-flex items-center gap-1 px-3 py-2 rounded-2xl bg-card border border-border text-xs text-muted-foreground font-semibold">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-card border border-border text-[10px] text-muted-foreground font-semibold">
                       SCHEDULED
                     </span>
                   )}
@@ -767,13 +739,13 @@ export function WatchStudio({
       })()}
 
       {/* 3. MAIN BROADCAST SUITE: Two Column Layout */}
-      <div className={`grid gap-6 transition-all ${isCinemaMode ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-12"}`}>
-        {/* A. LEFT / MAIN VIDEO PLAYER COLUMN (approx 72% on desktop, 100% in cinema mode) */}
-        <div className={`flex flex-col gap-6 ${isCinemaMode ? "w-full" : "lg:col-span-8 xl:col-span-9"}`}>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 sm:gap-4 items-start">
+        {/* A. LEFT / MAIN VIDEO PLAYER COLUMN */}
+        <div className="lg:col-span-8 xl:col-span-9 flex flex-col gap-2.5 sm:gap-3">
           {/* Video Container Card with Ambient Depth Glow */}
           <div
             ref={playerContainerRef}
-            className={`group relative rounded-3xl overflow-hidden border border-white/10 bg-[#060606] flex flex-col transition-all ${
+            className={`group relative rounded-2xl overflow-hidden border border-white/10 bg-[#060606] flex flex-col transition-all ${
               isFullscreen
                 ? "fixed inset-0 z-50 rounded-none w-screen h-screen border-none"
                 : "shadow-[0_20px_60px_-15px_rgba(0,0,0,0.9),0_0_40px_-20px_rgba(0,255,135,0.06)] ring-1 ring-white/5"
@@ -781,15 +753,15 @@ export function WatchStudio({
           >
             {/* Top Video Header Overlay with subtle gradient */}
             <div
-              className={`flex items-center justify-between px-4 sm:px-5 py-2.5 bg-gradient-to-b from-black/95 via-black/80 to-transparent backdrop-blur-md border-b border-white/[0.08] z-20 shrink-0 transition-all ${
+              className={`flex items-center justify-between px-3 sm:px-4 py-1.5 bg-gradient-to-b from-black/95 via-black/80 to-transparent backdrop-blur-md border-b border-white/[0.08] z-20 shrink-0 transition-all ${
                 isFullscreen ? "hidden" : ""
               }`}
             >
-              <div className="flex items-center gap-2.5">
-                <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/[0.06] border border-white/10">
-                  <span className="size-2 rounded-full bg-[var(--pitch)] inline-block shadow-[0_0_8px_var(--pitch)] animate-pulse" />
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/10">
+                  <span className="size-1.5 rounded-full bg-[var(--pitch)] inline-block shadow-[0_0_8px_var(--pitch)] animate-pulse" />
                   <span
-                    className="font-black text-xs uppercase tracking-wider text-foreground"
+                    className="font-black text-[11px] uppercase tracking-wider text-foreground"
                     style={{ fontFamily: "var(--font-condensed)" }}
                   >
                     FOOTYY LIVE
@@ -803,29 +775,29 @@ export function WatchStudio({
 
               <div className="flex items-center gap-2">
                 {currentProvider && currentSource && (
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-white/[0.06] text-white/90 border border-white/10 shadow-sm">
+                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/[0.06] text-white/90 border border-white/10 shadow-sm">
                     <span className="size-1.5 rounded-full bg-[var(--pitch)] animate-pulse" />
                     <span className="text-muted-foreground font-medium">{currentProvider.name}:</span>
                     <strong className="text-foreground">{currentSource.label}</strong>
                     {currentSource.quality && (
-                      <span className="text-[10px] text-[var(--pitch)] font-mono ml-0.5 px-1 py-0.2 bg-[var(--pitch)]/10 rounded">
+                      <span className="text-[9px] text-[var(--pitch)] font-mono ml-0.5 px-1 py-0.2 bg-[var(--pitch)]/10 rounded">
                         {currentSource.quality}
                       </span>
                     )}
                   </div>
                 )}
                 {isLiveNow && (
-                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[var(--pitch)] text-black text-[10px] font-black uppercase tracking-wider shadow-sm">
-                    <span className="size-1.5 rounded-full bg-black animate-ping motion-reduce:hidden" />
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-[var(--pitch)] text-black text-[9px] font-black uppercase tracking-wider shadow-sm">
+                    <span className="size-1 rounded-full bg-black animate-ping motion-reduce:hidden" />
                     ON AIR
                   </span>
                 )}
               </div>
             </div>
 
-            {/* Cinematic Video Display Area (Pure Pitch Black, expands to 100% full screen in fullscreen mode) */}
+            {/* Cinematic Video Display Area (Constrained to viewport to ensure zero scrolling needed) */}
             <div className={`relative w-full bg-black flex items-center justify-center overflow-hidden ${
-              isFullscreen ? "w-full h-full flex-1" : "aspect-video"
+              isFullscreen ? "w-full h-full flex-1" : "aspect-video max-h-[calc(100vh-230px)]"
             }`}>
 
               {/* 1. LOADING STATE */}
@@ -955,8 +927,8 @@ export function WatchStudio({
             {/* Bottom Controls Bar (floats and auto-hides in fullscreen mode) */}
             <div className={
               isFullscreen
-                ? "absolute bottom-0 inset-x-0 z-30 flex items-center justify-between px-4 py-3 bg-neutral-950/80 backdrop-blur-md border-t border-white/10 text-xs transition-opacity duration-300 opacity-0 group-hover:opacity-100"
-                : "flex items-center justify-between px-4 py-3 bg-neutral-900/90 border-t border-border/50 text-xs shrink-0"
+                ? "absolute bottom-0 inset-x-0 z-30 flex items-center justify-between px-3 sm:px-4 py-2 bg-neutral-950/80 backdrop-blur-md border-t border-white/10 text-xs transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+                : "flex items-center justify-between px-3 sm:px-4 py-1.5 sm:py-2 bg-neutral-900/90 border-t border-border/50 text-xs shrink-0"
             }>
               <div className="flex items-center gap-2.5">
                 {currentSource ? (
@@ -1380,26 +1352,24 @@ export function WatchStudio({
           </div>
         </div>
 
-        {/* B. RIGHT SIDEBAR: Available Streams & Match Centre (approx 28% width, hidden in cinema mode) */}
-        {/* B. RIGHT SIDEBAR: Available Streams & Match Centre (Compacted for reduced vertical scroll) */}
-        {!isCinemaMode && (
-          <aside className="lg:col-span-4 xl:col-span-3 flex flex-col gap-4">
-            {/* 1. AVAILABLE STREAMS PANEL */}
-            <div className="surface bg-card rounded-3xl p-4 sm:p-4.5 border border-border/70 flex flex-col gap-3">
-              <div className="flex items-center justify-between border-b border-border/50 pb-2.5">
-                <div className="flex items-center gap-2">
-                  <TvMinimalPlayIcon className="size-4 text-[var(--pitch)]" />
-                  <h3
-                    className="font-bold text-xs sm:text-sm uppercase tracking-wider text-foreground"
-                    style={{ fontFamily: "var(--font-condensed)" }}
-                  >
-                    AVAILABLE BROADCASTS
-                  </h3>
-                </div>
-                <span className="text-[11px] font-mono font-bold text-muted-foreground">
-                  {providers.length} {providers.length === 1 ? "source" : "sources"}
-                </span>
+        {/* B. RIGHT SIDEBAR: Available Streams & Match Centre (Compacted for sleek fit) */}
+        <aside className="lg:col-span-4 xl:col-span-3 flex flex-col gap-3">
+          {/* 1. AVAILABLE STREAMS PANEL */}
+          <div className="surface bg-card rounded-2xl p-3.5 sm:p-4 border border-border/70 flex flex-col gap-2.5">
+            <div className="flex items-center justify-between border-b border-border/50 pb-2">
+              <div className="flex items-center gap-2">
+                <TvMinimalPlayIcon className="size-4 text-[var(--pitch)]" />
+                <h3
+                  className="font-bold text-xs sm:text-sm uppercase tracking-wider text-foreground"
+                  style={{ fontFamily: "var(--font-condensed)" }}
+                >
+                  AVAILABLE BROADCASTS
+                </h3>
               </div>
+              <span className="text-[11px] font-mono font-bold text-muted-foreground">
+                {providers.length} {providers.length === 1 ? "source" : "sources"}
+              </span>
+            </div>
 
               {providers.length === 0 ? (
                 <div className="py-6 text-center text-xs text-muted-foreground">
@@ -1570,7 +1540,6 @@ export function WatchStudio({
               </div>
             )}
           </aside>
-        )}
       </div>
     </div>
   )
