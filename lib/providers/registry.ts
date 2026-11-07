@@ -21,16 +21,16 @@ import { matchoraAdapter } from "./matchora"
 import { isProviderEnabled } from "../streaming/config"
 import type { ProviderEntry } from "./types"
 
-/** Every provider, in display and preference order. */
+/** Every provider, in display and preference order (ranked by playback smoothness). */
 export function registry(): ProviderEntry[] {
   return [
-    { adapter: matchoraAdapter, supported: true, configured: isProviderEnabled("matchora") },
     { adapter: damitvAdapter, supported: true, configured: isProviderEnabled("damitv") },
-    { adapter: cinevidAdapter, supported: true, configured: isProviderEnabled("cinevid") },
     { adapter: live24Adapter, supported: true, configured: isProviderEnabled("live24") },
-    { adapter: streamfreeAdapter, supported: true, configured: isProviderEnabled("streamfree") },
+    { adapter: cinevidAdapter, supported: true, configured: isProviderEnabled("cinevid") },
+    { adapter: matchoraAdapter, supported: true, configured: isProviderEnabled("matchora") },
     { adapter: daddyliveAdapter, supported: true, configured: isProviderEnabled("daddylive") },
     { adapter: zliveAdapter, supported: true, configured: isProviderEnabled("zlive") },
+    { adapter: streamfreeAdapter, supported: true, configured: isProviderEnabled("streamfree") },
     { adapter: manualAdapter, supported: true, configured: true },
     {
       adapter: youtubeAdapter,

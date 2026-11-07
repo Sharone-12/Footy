@@ -70,24 +70,22 @@ export function UnifiedPlayer({
   const hasCinevid = isProviderEnabled("cinevid") && Boolean(cinevid && cinevid.event?.playerUrl)
   const hasLive24 = isProviderEnabled("live24") && Boolean(live24 && live24.event?.streams?.length > 0)
 
-  // Initial provider selection: Matchora & DAMITV are primary defaults, then Cinevid / Live24
+  // Initial provider selection: DAMITV is #1 (flawless, buffer-free), followed by Live24, Cinevid, Matchora, etc.
   const defaultProvider: StreamingProviderId =
     initialProvider ??
-    (hasMatchora
-      ? "matchora"
-      : hasDamiTv
+    (hasDamiTv
       ? "damitv"
       : hasLive24
       ? "live24"
       : hasCinevid
       ? "cinevid"
-      : hasStreamFree
-      ? "streamfree"
+      : hasMatchora
+      ? "matchora"
       : hasDaddyLive
       ? "daddylive"
       : hasZLive
       ? "zlive"
-      : "matchora")
+      : "streamfree")
 
   const [selectedProvider, setSelectedProvider] = useState<StreamingProviderId>(defaultProvider)
 
@@ -295,42 +293,7 @@ export function UnifiedPlayer({
               role="tablist"
               aria-label="Streaming Provider"
             >
-              <button
-                type="button"
-                role="tab"
-                aria-selected={selectedProvider === "matchora"}
-                disabled={!hasMatchora}
-                onClick={() => handleProviderSwitch("matchora")}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[0.7rem] font-bold transition-all ${
-                  selectedProvider === "matchora"
-                    ? "bg-white/20 text-white shadow-sm"
-                    : hasMatchora
-                    ? "text-muted-foreground hover:text-foreground"
-                    : "opacity-35 cursor-not-allowed text-muted-foreground"
-                }`}
-              >
-                <GlobeIcon className="size-3 text-blue-400" />
-                Matchora
-              </button>
-
-              <button
-                type="button"
-                role="tab"
-                aria-selected={selectedProvider === "streamfree"}
-                disabled={!hasStreamFree}
-                onClick={() => handleProviderSwitch("streamfree")}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[0.7rem] font-bold transition-all ${
-                  selectedProvider === "streamfree"
-                    ? "bg-white/20 text-white shadow-sm"
-                    : hasStreamFree
-                    ? "text-muted-foreground hover:text-foreground"
-                    : "opacity-35 cursor-not-allowed text-muted-foreground"
-                }`}
-              >
-                <SparklesIcon className="size-3 text-cyan-400" />
-                StreamFree
-              </button>
-
+              {/* Ranked by playback smoothness and buffer-free stability: DAMITV -> Live24 -> Cinevid -> Matchora -> DaddyLive -> ZLive -> StreamFree */}
               <button
                 type="button"
                 role="tab"
@@ -347,24 +310,6 @@ export function UnifiedPlayer({
               >
                 <MonitorPlayIcon className="size-3 text-violet-400" />
                 DAMITV
-              </button>
-
-              <button
-                type="button"
-                role="tab"
-                aria-selected={selectedProvider === "cinevid"}
-                disabled={!hasCinevid}
-                onClick={() => handleProviderSwitch("cinevid")}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[0.7rem] font-bold transition-all ${
-                  selectedProvider === "cinevid"
-                    ? "bg-white/20 text-white shadow-sm"
-                    : hasCinevid
-                    ? "text-muted-foreground hover:text-foreground"
-                    : "opacity-35 cursor-not-allowed text-muted-foreground"
-                }`}
-              >
-                <TvIcon className="size-3 text-rose-400" />
-                Cinevid
               </button>
 
               <button
@@ -388,19 +333,37 @@ export function UnifiedPlayer({
               <button
                 type="button"
                 role="tab"
-                aria-selected={selectedProvider === "zlive"}
-                disabled={!hasZLive}
-                onClick={() => handleProviderSwitch("zlive")}
+                aria-selected={selectedProvider === "cinevid"}
+                disabled={!hasCinevid}
+                onClick={() => handleProviderSwitch("cinevid")}
                 className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[0.7rem] font-bold transition-all ${
-                  selectedProvider === "zlive"
+                  selectedProvider === "cinevid"
                     ? "bg-white/20 text-white shadow-sm"
-                    : hasZLive
+                    : hasCinevid
                     ? "text-muted-foreground hover:text-foreground"
                     : "opacity-35 cursor-not-allowed text-muted-foreground"
                 }`}
               >
-                <RadioIcon className="size-3 text-emerald-400" />
-                ZLive
+                <TvIcon className="size-3 text-rose-400" />
+                Cinevid
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                aria-selected={selectedProvider === "matchora"}
+                disabled={!hasMatchora}
+                onClick={() => handleProviderSwitch("matchora")}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[0.7rem] font-bold transition-all ${
+                  selectedProvider === "matchora"
+                    ? "bg-white/20 text-white shadow-sm"
+                    : hasMatchora
+                    ? "text-muted-foreground hover:text-foreground"
+                    : "opacity-35 cursor-not-allowed text-muted-foreground"
+                }`}
+              >
+                <GlobeIcon className="size-3 text-blue-400" />
+                Matchora
               </button>
 
               <button
@@ -419,6 +382,42 @@ export function UnifiedPlayer({
               >
                 <TvIcon className="size-3 text-amber-400" />
                 DaddyLive
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                aria-selected={selectedProvider === "zlive"}
+                disabled={!hasZLive}
+                onClick={() => handleProviderSwitch("zlive")}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[0.7rem] font-bold transition-all ${
+                  selectedProvider === "zlive"
+                    ? "bg-white/20 text-white shadow-sm"
+                    : hasZLive
+                    ? "text-muted-foreground hover:text-foreground"
+                    : "opacity-35 cursor-not-allowed text-muted-foreground"
+                }`}
+              >
+                <RadioIcon className="size-3 text-emerald-400" />
+                ZLive
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                aria-selected={selectedProvider === "streamfree"}
+                disabled={!hasStreamFree}
+                onClick={() => handleProviderSwitch("streamfree")}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[0.7rem] font-bold transition-all ${
+                  selectedProvider === "streamfree"
+                    ? "bg-white/20 text-white shadow-sm"
+                    : hasStreamFree
+                    ? "text-muted-foreground hover:text-foreground"
+                    : "opacity-35 cursor-not-allowed text-muted-foreground"
+                }`}
+              >
+                <SparklesIcon className="size-3 text-cyan-400" />
+                StreamFree
               </button>
             </div>
           )}

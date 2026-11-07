@@ -58,3 +58,4 @@ export interface MatchedLive24 {
   isConfirmedMatch: boolean
   matchConfidence: number
 }
+

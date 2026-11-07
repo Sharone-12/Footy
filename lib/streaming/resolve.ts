@@ -70,8 +70,16 @@ export const PROVIDER_NAME: Record<StreamingProviderId, string> = {
   zlive: "ZLive",
 }
 
-/** Display order: Matchora & DAMITV are primary defaults, followed by Cinevid, Live24, StreamFree, DaddyLive, ZLive. */
-const ORDER: StreamingProviderId[] = ["matchora", "damitv", "cinevid", "live24", "streamfree", "daddylive", "zlive"]
+/** Display order: Ranked by playback smoothness and buffer-free stability:
+ * 1. DAMITV (Flawless, 0 buffer)
+ * 2. Live24 (High-speed LiteSpeed Falcon CDN)
+ * 3. Cinevid (Clean HD public event player)
+ * 4. Matchora (Official broadcaster feeds)
+ * 5. DaddyLive (Live sports channels)
+ * 6. ZLive (24/7 channels & fallback)
+ * 7. StreamFree (Alternative web streams)
+ */
+const ORDER: StreamingProviderId[] = ["damitv", "live24", "cinevid", "matchora", "daddylive", "zlive", "streamfree"]
 
 const dedupe = (xs: (string | undefined)[]) =>
   Array.from(new Set(xs.filter((x): x is string => Boolean(x))))
