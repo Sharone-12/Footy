@@ -201,3 +201,28 @@ assert.deepEqual(normalizeLive({ Stages: "nope" }), [])
 assert.deepEqual(normalizeLive({ Stages: [{ Cnm: "X" }] }), [])
 
 console.log("livescores: all assertions passed")
+
+/* ── club-type noise and founding years ─────────────────────────────────── */
+
+// One source prints the year and the prefix, the other does not.
+assert.equal(normalizeTeam("AJ Auxerre"), normalizeTeam("Auxerre"))
+assert.equal(normalizeTeam("SV 07 Elversberg"), normalizeTeam("Elversberg"))
+assert.equal(normalizeTeam("1. FSV Mainz 05"), normalizeTeam("Mainz 05"))
+assert.equal(normalizeTeam("Calcio Como 1907"), normalizeTeam("Como"))
+assert.equal(normalizeTeam("Bayer 04 Leverkusen"), normalizeTeam("Bayer Leverkusen"))
+
+// But a women's, reserve or youth side is a different team and must stay so,
+// which is the whole reason those markers are not treated as noise.
+for (const [a, b] of [
+  ["Chelsea", "Chelsea W"],
+  ["Celta Vigo", "Celta Vigo B"],
+  ["FC St. Pauli", "St.Pauli II"],
+  ["Atalanta", "Atalanta U23"],
+  ["Genoa", "Genoa U20"],
+  ["Inter", "Inter Miami CF"],
+]) {
+  assert.notEqual(normalizeTeam(a), normalizeTeam(b), `${a} must not equal ${b}`)
+}
+
+// A name that is nothing but noise still yields something to compare.
+assert.ok(normalizeTeam("FC 1907").length > 0)

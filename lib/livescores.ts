@@ -12,7 +12,9 @@
  * instead, which lets the UI tick every second and resync on each poll.
  */
 
-import { teamSimilarity } from "@/lib/streamfree/matcher"
+// Relative, with the extension: the "@/" alias cannot be resolved by plain
+// node, and it was the only thing stopping livescores.test.ts running.
+import { teamSimilarity } from "./streamfree/matcher.ts"
 
 const FEED = "https://prod-cdn-mev-api.livescore.com/v1/api/app/date/soccer"
 
@@ -58,7 +60,10 @@ export function parseEsd(esd: unknown): number | null {
 }
 
 /** Pull the in-play matches out of a feed payload. */
-export function normalizeLive(payload: unknown): LiveScore[] {
+function normalizeRows(
+  payload: unknown,
+  keep: (status: string) => boolean,
+): LiveScore[] {
   const stages = (payload as { Stages?: unknown[] })?.Stages
   if (!Array.isArray(stages)) return []
 
@@ -69,7 +74,7 @@ export function normalizeLive(payload: unknown): LiveScore[] {
     for (const raw of (Array.isArray(s.Events) ? s.Events : [])) {
       const e = raw as Record<string, unknown>
       const status = String(e.Eps ?? "")
-      if (NOT_IN_PLAY.has(status)) continue
+      if (!keep(status)) continue
 
       const etm = e.Etm as { ATm?: unknown; RTm?: unknown } | undefined
       const atMs = int(etm?.ATm)
@@ -92,6 +97,28 @@ export function normalizeLive(payload: unknown): LiveScore[] {
     }
   }
   return out
+}
+
+/** Pull the in-play matches out of a feed payload. */
+export function normalizeLive(payload: unknown): LiveScore[] {
+  return normalizeRows(payload, (status) => !NOT_IN_PLAY.has(status))
+}
+
+/**
+ * Statuses where the score on the row is the final one.
+ *
+ * "AP" is left out on purpose: after penalties, Tr1/Tr2 hold the score at the
+ * end of extra time and the shootout lives somewhere our schema cannot say,
+ * so those are left for the scraper to settle.
+ */
+export const FINAL_STATUSES = new Set(["FT", "AET"])
+
+/**
+ * The finished matches in the same payload — the half `normalizeLive` throws
+ * away. Nothing extra is fetched to get these: the feed is the whole day.
+ */
+export function normalizeFinal(payload: unknown): LiveScore[] {
+  return normalizeRows(payload, (status) => FINAL_STATUSES.has(status))
 }
 
 export type ClockReading = {
@@ -182,7 +209,19 @@ const NOISE_TOKENS = new Set([
   "fc", "cf", "afc", "sc", "ac", "as", "ss", "sv", "sk", "bk", "if", "ff",
   "vfl", "vfb", "bsc", "tsg", "rc", "ud", "cd", "sd", "ca", "club", "cp",
   "de", "fk", "nk", "hk", "ik", "aik", "us", "usl", "calcio", "futbol",
+  "aj", "fsv",
 ])
+
+/**
+ * Founding years and the leading ordinal some German clubs carry.
+ *
+ * "SV 07 Elversberg" vs "Elversberg", "1. FSV Mainz 05" vs "Mainz 05",
+ * "Calcio Como 1907" vs "Como" — one source prints the year, the other does
+ * not. Nothing we carry is told apart by a bare number, whereas "W", "B",
+ * "II", "U20" and "U23" are exactly how a women's, reserve or youth side is
+ * told apart from the first team, so those must survive.
+ */
+const YEAR_LIKE = /^\d{1,4}$/
 
 /**
  * Reduce a club name to comparable tokens.
@@ -198,7 +237,7 @@ export function normalizeTeam(name: string): string {
     .replace(/&/g, " and ")
     .replace(/[^a-z0-9\s]/g, " ")
     .split(/\s+/)
-    .filter((w) => w && !NOISE_TOKENS.has(w))
+    .filter((w) => w && !NOISE_TOKENS.has(w) && !YEAR_LIKE.test(w))
   const kept = words.length ? words : name.toLowerCase().split(/\s+/)
   return kept.sort().join(" ")
 }
@@ -261,11 +300,23 @@ export const feedUrl = (date: Date = new Date()) =>
  * whole day's fixtures (gzip brings it to ~80 KB) to yield roughly thirty
  * in-play rows, so it must never be fetched per request.
  */
-export async function fetchLiveScores(date?: Date): Promise<LiveScore[]> {
+async function fetchFeed(date?: Date): Promise<unknown> {
   const response = await fetch(feedUrl(date), {
     headers: { Accept: "application/json" },
     cache: "no-store",
   })
   if (!response.ok) throw new Error(`live feed ${response.status}`)
-  return normalizeLive(await response.json())
+  return response.json()
+}
+
+export async function fetchLiveScores(date?: Date): Promise<LiveScore[]> {
+  return normalizeLive(await fetchFeed(date))
+}
+
+/** Both halves of one payload, so settling full-time costs no extra request. */
+export async function fetchDaySnapshot(
+  date?: Date,
+): Promise<{ live: LiveScore[]; final: LiveScore[] }> {
+  const payload = await fetchFeed(date)
+  return { live: normalizeLive(payload), final: normalizeFinal(payload) }
 }
