@@ -50,6 +50,7 @@ export function PredictionMatchCard({ p }: { p: MatchPrediction }) {
     home: p.home,
     away: p.away,
     date: p.date,
+    kickoff: p.kickoff,
   })
   const now = useLiveNow()
   const clock = liveScore ? matchClock(liveScore, now) : null

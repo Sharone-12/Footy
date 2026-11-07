@@ -5,81 +5,133 @@ import { findLive, matchClock, type FixtureLike, type LiveScore } from "@/lib/li
 import { LiveSignal } from "@/components/live-signal"
 
 /**
- * In-play score and minute for a fixture row.
+ * In-play score, match clock, and live stream telemetry for fixture rows.
  *
- * One store for the whole page: every mark on screen shares a single poll and
- * a single one-second tick, so a list of thirty fixtures still makes one
- * request per window rather than thirty. Renders nothing when the fixture is
- * not currently in play, which is what lets it be dropped into a row that
- * already lays out fine without it.
+ * One shared store for the whole page:
+ * - Scores poll every 15 seconds independently (resolves in ~50ms).
+ * - Stream discovery polls every 30 seconds independently (cached, non-blocking).
+ * - A 1-second local tick extrapolates the running match clock smoothly.
+ * - Teardown is debounced so page transitions keep cached data and stay hot without flickering.
  */
 
-/** Matches the route's own window; a goal lands within one of these. */
-const POLL_MS = 15_000
-
-/** The clock is extrapolated locally, so it must repaint every second. */
+const POLL_SCORES_MS = 15_000
+const POLL_STREAMS_MS = 30_000
 const TICK_MS = 1_000
+const TEARDOWN_DELAY_MS = 10_000
 
-type Snapshot = { scores: LiveScore[]; activeStreamIds: Set<number>; now: number }
+type Snapshot = {
+  scores: LiveScore[]
+  activeStreamIds: Set<number>
+  now: number
+  hasLoadedScores: boolean
+  hasLoadedStreams: boolean
+}
 
-let snapshot: Snapshot = { scores: [], activeStreamIds: new Set(), now: 0 }
+let snapshot: Snapshot = {
+  scores: [],
+  activeStreamIds: new Set(),
+  now: Date.now(),
+  hasLoadedScores: false,
+  hasLoadedStreams: false,
+}
+
 const listeners = new Set<() => void>()
-let pollTimer: ReturnType<typeof setInterval> | null = null
+let scoresTimer: ReturnType<typeof setInterval> | null = null
+let streamsTimer: ReturnType<typeof setInterval> | null = null
 let tickTimer: ReturnType<typeof setInterval> | null = null
+let teardownTimer: ReturnType<typeof setTimeout> | null = null
 
 function publish(next: Partial<Snapshot>) {
-  // A fresh object each time: useSyncExternalStore compares by reference.
   snapshot = { ...snapshot, ...next }
   for (const listener of listeners) listener()
 }
 
-async function poll() {
+async function pollScores() {
   try {
-    const [scoresRes, streamsRes] = await Promise.allSettled([
-      fetch("/api/livescores"),
-      fetch("/api/streams/active"),
-    ])
-
-    const next: Partial<Snapshot> = { now: Date.now() }
-
-    if (scoresRes.status === "fulfilled" && scoresRes.value.ok) {
-      const body = (await scoresRes.value.json()) as { scores?: LiveScore[] }
-      if (Array.isArray(body.scores)) next.scores = body.scores
+    const res = await fetch("/api/livescores")
+    if (!res.ok) return
+    const body = (await res.json()) as { scores?: LiveScore[] }
+    if (Array.isArray(body.scores)) {
+      publish({ scores: body.scores, now: Date.now(), hasLoadedScores: true })
     }
-
-    if (streamsRes.status === "fulfilled" && streamsRes.value.ok) {
-      const body = (await streamsRes.value.json()) as { eventIds?: number[] }
-      if (Array.isArray(body.eventIds)) next.activeStreamIds = new Set(body.eventIds)
-    }
-
-    publish(next)
   } catch {
-    // Offline or a blip: the existing snapshot keeps ticking, and the clock's
-    // own staleness guard stops it drifting if this lasts.
+    // Offline or network blip: preserve existing snapshot
   }
+}
+
+async function pollStreams() {
+  try {
+    const res = await fetch("/api/streams/active")
+    if (!res.ok) return
+    const body = (await res.json()) as { eventIds?: number[] }
+    if (Array.isArray(body.eventIds)) {
+      publish({
+        activeStreamIds: new Set(body.eventIds),
+        now: Date.now(),
+        hasLoadedStreams: true,
+      })
+    }
+  } catch {
+    // Offline or network blip: preserve existing active streams
+  }
+}
+
+function startPolling() {
+  if (teardownTimer) {
+    clearTimeout(teardownTimer)
+    teardownTimer = null
+  }
+
+  if (!tickTimer) {
+    publish({ now: Date.now() })
+    tickTimer = setInterval(() => publish({ now: Date.now() }), TICK_MS)
+  }
+
+  if (!scoresTimer) {
+    void pollScores()
+    scoresTimer = setInterval(pollScores, POLL_SCORES_MS)
+  }
+
+  if (!streamsTimer) {
+    void pollStreams()
+    streamsTimer = setInterval(pollStreams, POLL_STREAMS_MS)
+  }
+}
+
+function stopPollingWithDelay() {
+  if (teardownTimer) clearTimeout(teardownTimer)
+  teardownTimer = setTimeout(() => {
+    if (listeners.size === 0) {
+      if (scoresTimer) clearInterval(scoresTimer)
+      if (streamsTimer) clearInterval(streamsTimer)
+      if (tickTimer) clearInterval(tickTimer)
+      scoresTimer = streamsTimer = tickTimer = null
+    }
+    teardownTimer = null
+  }, TEARDOWN_DELAY_MS)
 }
 
 function subscribe(listener: () => void) {
   listeners.add(listener)
   if (listeners.size === 1) {
-    publish({ now: Date.now() })
-    void poll()
-    pollTimer = setInterval(poll, POLL_MS)
-    tickTimer = setInterval(() => publish({ now: Date.now() }), TICK_MS)
+    startPolling()
   }
   return () => {
     listeners.delete(listener)
     if (listeners.size === 0) {
-      if (pollTimer) clearInterval(pollTimer)
-      if (tickTimer) clearInterval(tickTimer)
-      pollTimer = tickTimer = null
+      stopPollingWithDelay()
     }
   }
 }
 
 const getSnapshot = () => snapshot
-/** The server has no live data, so marks render absent and appear on hydration. */
-const getServerSnapshot = (): Snapshot => ({ scores: [], activeStreamIds: new Set(), now: 0 })
+const getServerSnapshot = (): Snapshot => ({
+  scores: [],
+  activeStreamIds: new Set(),
+  now: 0,
+  hasLoadedScores: false,
+  hasLoadedStreams: false,
+})
 
 export function useLiveScore(fixture: FixtureLike): LiveScore | null {
   const { scores } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
@@ -100,9 +152,6 @@ export function useLiveNow(): number {
 
 /**
  * Score and minute for a fixture, or nothing at all.
- *
- * `scoreFirst` puts the scoreline before the clock, which reads better at the
- * end of a row than above it.
  */
 export function LiveFixtureMark({
   fixture,

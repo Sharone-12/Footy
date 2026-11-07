@@ -7,6 +7,7 @@ export type MatchPrediction = {
   league: string
   round: number
   date: string
+  kickoff?: string | null
   home: string
   home_id: number | null
   away: string
@@ -347,6 +348,7 @@ export function predictMatches(
     league: string
     round: number
     date: string
+    kickoff?: string | null
     home: string
     home_id: number | null
     away: string
@@ -484,6 +486,7 @@ export function predictMatches(
       league: m.league,
       round: m.round,
       date: m.date,
+      kickoff: m.kickoff,
       home: m.home,
       home_id: m.home_id,
       away: m.away,

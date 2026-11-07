@@ -224,7 +224,8 @@ export function sameTeams(
 export type FixtureLike = { home: string; away: string; kickoff?: string | null; date: string }
 
 /** How far a feed kickoff may sit from ours and still be the same match. */
-const KICKOFF_SLACK_MS = 6 * 3600_000
+const KICKOFF_EXACT_SLACK_MS = 12 * 3600_000
+const KICKOFF_DATE_ONLY_SLACK_MS = 26 * 3600_000
 
 /**
  * Find the live row for a fixture, or null.
@@ -235,11 +236,13 @@ const KICKOFF_SLACK_MS = 6 * 3600_000
  * showing the wrong match is worse than showing none.
  */
 export function findLive(fixture: FixtureLike, scores: LiveScore[]): LiveScore | null {
+  const hasKickoff = Boolean(fixture.kickoff)
   const ourStart = Date.parse(fixture.kickoff ?? `${fixture.date}T12:00:00Z`)
+  const slack = hasKickoff ? KICKOFF_EXACT_SLACK_MS : KICKOFF_DATE_ONLY_SLACK_MS
   for (const score of scores) {
     if (!sameTeams(fixture, score)) continue
     if (score.kickoffMs !== null && Number.isFinite(ourStart)) {
-      if (Math.abs(score.kickoffMs - ourStart) > KICKOFF_SLACK_MS) continue
+      if (Math.abs(score.kickoffMs - ourStart) > slack) continue
     }
     return score
   }

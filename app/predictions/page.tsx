@@ -260,14 +260,14 @@ async function Content({
     fetchTeamData(supabase, season, WANTED_STATS),
     supabase
       .from("matches")
-      .select("event_id, league, season, round, date, home, home_id, away, away_id, status, home_goals, away_goals")
+      .select("event_id, league, season, round, date, kickoff, home, home_id, away, away_id, status, home_goals, away_goals")
       .eq("season", season)
       .limit(2000),
   ])
 
   const matches = (matchData || []) as {
     event_id: number; league: string; season: string; round: number
-    date: string; home: string; home_id: number | null; away: string; away_id: number | null; status: string
+    date: string; kickoff?: string | null; home: string; home_id: number | null; away: string; away_id: number | null; status: string
     home_goals: number | null; away_goals: number | null
   }[]
 
@@ -295,6 +295,7 @@ async function Content({
       league: m.league,
       round: m.round,
       date: m.date,
+      kickoff: m.kickoff,
       home: m.home,
       home_id: m.home_id,
       away: m.away,
