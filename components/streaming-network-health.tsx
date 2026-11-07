@@ -71,6 +71,14 @@ const DEFAULT_PROVIDERS: ProviderStatus[] = [
     latencyMs: isProviderEnabled("zlive") ? 160 : 0,
     message: isProviderEnabled("zlive") ? undefined : "Disabled via config",
   },
+  {
+    id: "live24",
+    name: "Live24",
+    status: isProviderEnabled("live24") ? "operational" : "degraded",
+    ok: isProviderEnabled("live24"),
+    latencyMs: isProviderEnabled("live24") ? 190 : 0,
+    message: isProviderEnabled("live24") ? undefined : "Disabled via config",
+  },
 ]
 
 export function StreamingNetworkHealth() {
@@ -171,7 +179,7 @@ export function StreamingNetworkHealth() {
       </div>
 
       {/* Provider Health Cards Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 sm:gap-2.5">
         {data.providers.map((p) => {
           const isConfigEnabled = isProviderEnabled(p.id as any)
           const isHealthy = isConfigEnabled && p.ok && p.status === "operational"

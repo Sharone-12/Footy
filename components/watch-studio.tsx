@@ -36,6 +36,7 @@ import type { MatchedZLive, ZLiveChannel } from "@/lib/zlive/types"
 import type { MatchedDaddyLive } from "@/lib/daddylive/types"
 import type { MatchedDamiTv } from "@/lib/damitv/types"
 import type { MatchedCinevid } from "@/lib/cinevid/types"
+import type { MatchedLive24 } from "@/lib/live24/types"
 import type { MatchedMatchora } from "@/lib/matchora/types"
 import type { StreamingProviderId } from "@/lib/streaming/types"
 import { isProviderEnabled } from "@/lib/streaming/config"
@@ -155,10 +156,11 @@ export function WatchStudio({
             fetch(`/api/streams/daddylive?fixture_id=${fixtureId}`).catch((e) => new Response(JSON.stringify({ error: String(e) }), { status: 500 })),
             fetch(`/api/streams/damitv?fixture_id=${fixtureId}`).catch((e) => new Response(JSON.stringify({ error: String(e) }), { status: 500 })),
             fetch(`/api/streams/cinevid?fixture_id=${fixtureId}`).catch((e) => new Response(JSON.stringify({ error: String(e) }), { status: 500 })),
+            fetch(`/api/streams/live24?fixture_id=${fixtureId}`).catch((e) => new Response(JSON.stringify({ error: String(e) }), { status: 500 })),
           )
         } else {
           // If no fixtureId, fill with dummy resolved promises
-          for (let i = 0; i < 6; i++) {
+          for (let i = 0; i < 7; i++) {
             promises.push(Promise.resolve(new Response(JSON.stringify({}), { status: 200 })))
           }
         }
@@ -168,7 +170,7 @@ export function WatchStudio({
           fetch(`/api/zlive?generic=1`).catch((e) => new Response(JSON.stringify({ channels: [] }), { status: 500 })),
         )
 
-        const [moRes, sfRes, zlRes, dlRes, dtRes, cvRes, genRes] = await Promise.all(promises)
+        const [moRes, sfRes, zlRes, dlRes, dtRes, cvRes, l24Res, genRes] = await Promise.all(promises)
 
         if (unmounted) return
 
@@ -178,6 +180,7 @@ export function WatchStudio({
         let dlData: { match?: MatchedDaddyLive; channels?: any[]; matched?: boolean } = {}
         let dtData: { stream?: any; match?: MatchedDamiTv; matched?: boolean } = {}
         let cvData: { event?: any; matched?: boolean; confidence?: number; isConfirmedMatch?: boolean } = {}
+        let l24Data: { event?: any; matched?: boolean; matchConfidence?: number; isConfirmedMatch?: boolean } = {}
         let genData: { channels?: ZLiveChannel[] } = {}
 
         if (moRes.ok) try { moData = await moRes.json() } catch { }
@@ -186,6 +189,7 @@ export function WatchStudio({
         if (dlRes.ok) try { dlData = await dlRes.json() } catch { }
         if (dtRes.ok) try { dtData = await dtRes.json() } catch { }
         if (cvRes.ok) try { cvData = await cvRes.json() } catch { }
+        if (l24Res.ok) try { l24Data = await l24Res.json() } catch { }
         if (genRes.ok) try { genData = await genRes.json() } catch { }
 
         const generics = genData.channels ?? []
@@ -253,6 +257,21 @@ export function WatchStudio({
               }
             : null
 
+        const l24Match: MatchedLive24 | null =
+          l24Data.matched && l24Data.event
+            ? {
+                event: l24Data.event,
+                matchConfidence: l24Data.matchConfidence ?? 85,
+                isConfirmedMatch: Boolean(l24Data.isConfirmedMatch ?? true),
+                event_id: Number(fixtureId || 0),
+                fixture: {
+                  home: fixture?.home || "",
+                  away: fixture?.away || "",
+                  league: fixture?.league || "",
+                },
+              }
+            : null
+
         const newBundle: StreamBundle = {
           matchora: isProviderEnabled("matchora") ? moMatch : null,
           streamFree: isProviderEnabled("streamfree") ? sfMatch : null,
@@ -260,6 +279,7 @@ export function WatchStudio({
           daddyLive: isProviderEnabled("daddylive") ? dlMatch : null,
           damiTv: isProviderEnabled("damitv") ? dtMatch : null,
           cinevid: isProviderEnabled("cinevid") ? cvMatch : null,
+          live24: isProviderEnabled("live24") ? l24Match : null,
           genericChannel: matchingGeneric,
           genericChannels: generics,
         }
@@ -1237,6 +1257,7 @@ export function WatchStudio({
                             {p.id === "matchora" && <GlobeIcon className="size-3.5 text-blue-400 shrink-0" />}
                             {p.id === "damitv" && <MonitorPlayIcon className="size-3.5 text-violet-400 shrink-0" />}
                             {p.id === "cinevid" && <TvMinimalPlayIcon className="size-3.5 text-rose-400 shrink-0" />}
+                            {p.id === "live24" && <TvIcon className="size-3.5 text-emerald-400 shrink-0" />}
                             {p.id === "streamfree" && <SparklesIcon className="size-3.5 text-cyan-400 shrink-0" />}
                             {p.id === "daddylive" && <TvIcon className="size-3.5 text-amber-400 shrink-0" />}
                             {p.id === "zlive" && <RadioIcon className="size-3.5 text-emerald-400 shrink-0" />}

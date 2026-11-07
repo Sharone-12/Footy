@@ -92,6 +92,13 @@ export function embedFor(url: string, parentHost?: string | null): StreamEmbed |
     return { kind: "iframe", src: u.toString() }
   }
 
+  if (
+    (host === "livelive24.st" || host === "livelive24.com" || host.includes("livelive24")) &&
+    (path[0] === "live24.html" || path[0] === "embed" || path[0] === "player" || path.length === 0)
+  ) {
+    return { kind: "iframe", src: u.toString() }
+  }
+
   if (host === "damitv.st" && (path[0] === "embed" || path[0] === "player")) {
     return { kind: "iframe", src: u.toString() }
   }

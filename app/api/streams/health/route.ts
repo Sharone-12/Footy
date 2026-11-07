@@ -5,6 +5,7 @@ import { checkCinevidHealth } from "@/lib/cinevid/client"
 import { checkDaddyLiveHealth } from "@/lib/daddylive/client"
 import { checkStreamFreeHealth } from "@/lib/streamfree/client"
 import { checkZLiveHealth } from "@/lib/zlive/client"
+import { checkLive24Health } from "@/lib/live24/client"
 import { requireLiveAuth } from "@/lib/live/auth"
 import { isProviderEnabled } from "@/lib/streaming/config"
 
@@ -23,13 +24,14 @@ export async function GET(request: Request) {
   if (authError) return authError
 
   // Only run health pings for providers that are actually enabled in config
-  const [moRes, dtRes, cvRes, dlRes, sfRes, zlRes] = await Promise.allSettled([
+  const [moRes, dtRes, cvRes, dlRes, sfRes, zlRes, l24Res] = await Promise.allSettled([
     isProviderEnabled("matchora") ? checkMatchoraHealth() : Promise.resolve(null),
     isProviderEnabled("damitv") ? checkDamiTvHealth() : Promise.resolve(null),
     isProviderEnabled("cinevid") ? checkCinevidHealth() : Promise.resolve(null),
     isProviderEnabled("daddylive") ? checkDaddyLiveHealth() : Promise.resolve(null),
     isProviderEnabled("streamfree") ? checkStreamFreeHealth() : Promise.resolve(null),
     isProviderEnabled("zlive") ? checkZLiveHealth() : Promise.resolve(null),
+    isProviderEnabled("live24") ? checkLive24Health() : Promise.resolve(null),
   ])
 
   const reports: ProviderHealthReport[] = [
@@ -110,6 +112,19 @@ export async function GET(request: Request) {
       latencyMs: isProviderEnabled("zlive") && zlRes.status === "fulfilled" && zlRes.value ? zlRes.value.latencyMs : 0,
       itemCount: isProviderEnabled("zlive") && zlRes.status === "fulfilled" && zlRes.value ? zlRes.value.count : 0,
       message: !isProviderEnabled("zlive") ? "Disabled via config" : undefined,
+    },
+    {
+      id: "live24",
+      name: "Live24",
+      ok: isProviderEnabled("live24") && l24Res.status === "fulfilled" && Boolean(l24Res.value?.ok),
+      status: !isProviderEnabled("live24")
+        ? "degraded"
+        : l24Res.status === "fulfilled" && l24Res.value?.ok
+        ? "operational"
+        : "degraded",
+      latencyMs: isProviderEnabled("live24") && l24Res.status === "fulfilled" && l24Res.value ? l24Res.value.latencyMs : 0,
+      itemCount: isProviderEnabled("live24") && l24Res.status === "fulfilled" && l24Res.value ? l24Res.value.count : 0,
+      message: !isProviderEnabled("live24") ? "Disabled via config" : undefined,
     },
   ]
 

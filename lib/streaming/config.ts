@@ -14,10 +14,11 @@ import type { StreamingProviderId } from "./types"
 export const STREAMING_PROVIDERS_CONFIG: Record<StreamingProviderId, boolean> = {
   matchora: true, // 🟢 Matchora (Fixtures + Broadcaster feeds)
   damitv: true, // 🟢 DAMITV (Multi-language streams)
-  cinevid: false, // ⚪ Cinevid (HD Public Events API - set to false to test unwiring)
-  streamfree: false, // ⚪ StreamFree (Unwired for testing - change to true to re-enable)
+  cinevid: true, // ⚪ Cinevid (HD Public Events API - set to false to test unwiring)
+  streamfree: true, // ⚪ StreamFree (Unwired for testing - change to true to re-enable)
   daddylive: true, // 🟢 DaddyLiveHD (Free public API)
   zlive: true, // 🟢 ZLive (Match streams + 24/7 channels)
+  live24: true, // 🟢 Live24 / StreamHive (Falcon HQ match streams)
 }
 
 /** Fast helper to check if a provider is currently wired and enabled */

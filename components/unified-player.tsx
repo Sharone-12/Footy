@@ -22,6 +22,7 @@ import type { MatchedZLive, ZLiveChannel } from "@/lib/zlive/types"
 import type { MatchedDaddyLive, DaddyLiveChannel } from "@/lib/daddylive/types"
 import type { MatchedDamiTv, DamiTvSource } from "@/lib/damitv/types"
 import type { MatchedCinevid } from "@/lib/cinevid/types"
+import type { MatchedLive24 } from "@/lib/live24/types"
 import type { MatchedMatchora, MatchoraParsedChannel } from "@/lib/matchora/types"
 import type { StreamingProviderId } from "@/lib/streaming/types"
 import { isProviderEnabled } from "@/lib/streaming/config"
@@ -35,6 +36,7 @@ export type UnifiedPlayerProps = {
   daddyLive?: MatchedDaddyLive | null
   damiTv?: MatchedDamiTv | null
   cinevid?: MatchedCinevid | null
+  live24?: MatchedLive24 | null
   genericChannel?: ZLiveChannel | null
   initialProvider?: StreamingProviderId
   onClose?: () => void
@@ -49,6 +51,7 @@ export function UnifiedPlayer({
   daddyLive,
   damiTv,
   cinevid,
+  live24,
   genericChannel,
   initialProvider,
   onClose,
@@ -65,14 +68,17 @@ export function UnifiedPlayer({
   const hasDaddyLive = isProviderEnabled("daddylive") && Boolean(daddyLive && daddyLive.channels?.length > 0)
   const hasDamiTv = isProviderEnabled("damitv") && Boolean(damiTv && (damiTv.stream?.embedUrl || damiTv.stream?.sources?.length > 0))
   const hasCinevid = isProviderEnabled("cinevid") && Boolean(cinevid && cinevid.event?.playerUrl)
+  const hasLive24 = isProviderEnabled("live24") && Boolean(live24 && live24.event?.streams?.length > 0)
 
-  // Initial provider selection: Matchora & DAMITV are primary defaults, then Cinevid
+  // Initial provider selection: Matchora & DAMITV are primary defaults, then Cinevid / Live24
   const defaultProvider: StreamingProviderId =
     initialProvider ??
     (hasMatchora
       ? "matchora"
       : hasDamiTv
       ? "damitv"
+      : hasLive24
+      ? "live24"
       : hasCinevid
       ? "cinevid"
       : hasStreamFree
@@ -215,6 +221,14 @@ export function UnifiedPlayer({
     providerDisplayName = cinevid?.event?.league
       ? `Cinevid · ${cinevid.event.league}`
       : "Cinevid"
+  } else if (selectedProvider === "live24") {
+    const stream = live24?.event?.streams?.[0]
+    currentUrl = stream?.url
+    isCurrentLive = Boolean(live24?.event?.isLive ?? true)
+    currentStatusLabel = isCurrentLive ? "LIVE" : "UPCOMING"
+    providerDisplayName = live24?.event?.competition
+      ? `Live24 · ${live24.event.competition}`
+      : "Live24"
   } else if (selectedProvider === "daddylive") {
     currentUrl = activeDaddyChannel?.player_url
     isCurrentLive = true
@@ -351,6 +365,24 @@ export function UnifiedPlayer({
               >
                 <TvIcon className="size-3 text-rose-400" />
                 Cinevid
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                aria-selected={selectedProvider === "live24"}
+                disabled={!hasLive24}
+                onClick={() => handleProviderSwitch("live24")}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[0.7rem] font-bold transition-all ${
+                  selectedProvider === "live24"
+                    ? "bg-white/20 text-white shadow-sm"
+                    : hasLive24
+                    ? "text-muted-foreground hover:text-foreground"
+                    : "opacity-35 cursor-not-allowed text-muted-foreground"
+                }`}
+              >
+                <TvIcon className="size-3 text-emerald-400" />
+                Live24
               </button>
 
               <button
@@ -555,6 +587,8 @@ export function UnifiedPlayer({
                   ? "DAMITV Stream Unavailable"
                   : selectedProvider === "cinevid"
                   ? "Cinevid Stream Unavailable"
+                  : selectedProvider === "live24"
+                  ? "Live24 Stream Unavailable"
                   : selectedProvider === "daddylive"
                   ? "DaddyLive Channel Unavailable"
                   : selectedProvider === "zlive"

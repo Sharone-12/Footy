@@ -12,6 +12,7 @@ import type { MatchedZLive, ZLiveChannel } from "@/lib/zlive/types"
 import type { MatchedDaddyLive } from "@/lib/daddylive/types"
 import type { MatchedDamiTv } from "@/lib/damitv/types"
 import type { MatchedCinevid } from "@/lib/cinevid/types"
+import type { MatchedLive24 } from "@/lib/live24/types"
 import type { MatchedMatchora } from "@/lib/matchora/types"
 import { isProviderEnabled } from "@/lib/streaming/config"
 import { UnifiedPlayer } from "@/components/unified-player"
@@ -46,8 +47,9 @@ type ActivePlayerState = {
   daddyLive?: MatchedDaddyLive | null
   damiTv?: MatchedDamiTv | null
   cinevid?: MatchedCinevid | null
+  live24?: MatchedLive24 | null
   genericChannel?: ZLiveChannel | null
-  initialProvider?: "matchora" | "streamfree" | "zlive" | "daddylive" | "damitv" | "cinevid"
+  initialProvider?: "matchora" | "streamfree" | "zlive" | "daddylive" | "damitv" | "cinevid" | "live24"
 }
 
 function Row({
@@ -60,6 +62,7 @@ function Row({
   matchedDaddyLive,
   matchedDamiTv,
   matchedCinevid,
+  matchedLive24,
   onWatch,
 }: {
   m: LiveFixture
@@ -71,6 +74,7 @@ function Row({
   matchedDaddyLive?: MatchedDaddyLive
   matchedDamiTv?: MatchedDamiTv
   matchedCinevid?: MatchedCinevid
+  matchedLive24?: MatchedLive24
   onWatch?: (state: ActivePlayerState) => void
 }) {
   const tid = LEAGUE_TOURNAMENT_ID[m.league]
@@ -80,7 +84,8 @@ function Row({
     (isProviderEnabled("zlive") && matchedZLive) ||
     (isProviderEnabled("daddylive") && matchedDaddyLive) ||
     (isProviderEnabled("damitv") && matchedDamiTv) ||
-    (isProviderEnabled("cinevid") && matchedCinevid)
+    (isProviderEnabled("cinevid") && matchedCinevid) ||
+    (isProviderEnabled("live24") && matchedLive24)
   )
   const start = startOf(m)
   const left = start - now
@@ -169,6 +174,16 @@ function Row({
                 </span>
               )}
 
+              {isProviderEnabled("live24") && matchedLive24 && (
+                <span
+                  title={`Live24 (${matchedLive24.event.streams.length} stream${matchedLive24.event.streams.length === 1 ? "" : "s"})`}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25"
+                >
+                  <TvIcon className="size-2.5" />
+                  Live24
+                </span>
+              )}
+
               {isProviderEnabled("streamfree") && matchedStream && (
                 <span
                   title="StreamFree source available"
@@ -237,6 +252,7 @@ function Section({
   daddyliveMap,
   damitvMap,
   cinevidMap,
+  live24Map,
   onWatch,
 }: {
   title: string
@@ -250,6 +266,7 @@ function Section({
   daddyliveMap: Record<number, MatchedDaddyLive>
   damitvMap: Record<number, MatchedDamiTv>
   cinevidMap: Record<number, MatchedCinevid>
+  live24Map: Record<number, MatchedLive24>
   onWatch?: (state: ActivePlayerState) => void
 }) {
   return (
@@ -283,6 +300,7 @@ function Section({
               matchedDaddyLive={daddyliveMap[m.event_id]}
               matchedDamiTv={damitvMap[m.event_id]}
               matchedCinevid={cinevidMap[m.event_id]}
+              matchedLive24={live24Map[m.event_id]}
               onWatch={onWatch}
             />
           ))}
@@ -300,6 +318,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
   const [daddyliveMap, setDaddyliveMap] = useState<Record<number, MatchedDaddyLive>>({})
   const [damitvMap, setDamitvMap] = useState<Record<number, MatchedDamiTv>>({})
   const [cinevidMap, setCinevidMap] = useState<Record<number, MatchedCinevid>>({})
+  const [live24Map, setLive24Map] = useState<Record<number, MatchedLive24>>({})
   const [genericChannels, setGenericChannels] = useState<ZLiveChannel[]>([])
   const [activePlayer, setActivePlayer] = useState<ActivePlayerState | null>(null)
 
@@ -426,6 +445,35 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
     }
   }, [])
 
+  // Fetch Live24 stream matches on mount
+  useEffect(() => {
+    if (!isProviderEnabled("live24")) {
+      setLive24Map({})
+      return
+    }
+    let unmounted = false
+    async function loadLive24() {
+      try {
+        const res = await fetch("/api/streams/live24")
+        if (!res.ok) return
+        const data = await res.json()
+        if (data?.streams && Array.isArray(data.streams) && !unmounted) {
+          const map: Record<number, MatchedLive24> = {}
+          for (const s of data.streams) {
+            if (s.event_id) map[s.event_id] = s
+          }
+          setLive24Map(map)
+        }
+      } catch (err) {
+        console.warn("[live] Could not load Live24 streams:", err)
+      }
+    }
+    loadLive24()
+    return () => {
+      unmounted = true
+    }
+  }, [])
+
   // Fetch DaddyLive stream matches on mount
   useEffect(() => {
     if (!isProviderEnabled("daddylive")) {
@@ -526,6 +574,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
         daddyliveMap={daddyliveMap}
         damitvMap={damitvMap}
         cinevidMap={cinevidMap}
+        live24Map={live24Map}
       />
 
       {/* 2. Matches: Starting Soon */}
@@ -540,6 +589,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
         daddyliveMap={daddyliveMap}
         damitvMap={damitvMap}
         cinevidMap={cinevidMap}
+        live24Map={live24Map}
       />
 
       {/* 3. Matches: Upcoming Fixtures */}
@@ -554,6 +604,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
         daddyliveMap={daddyliveMap}
         damitvMap={damitvMap}
         cinevidMap={cinevidMap}
+        live24Map={live24Map}
       />
 
       {/* 4. 24/7 Football TV Channels (ZLive) - Pushed below matches */}

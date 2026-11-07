@@ -3,7 +3,7 @@
  * Normalizes streams across StreamFree, ZLive, and future providers.
  */
 
-export type StreamingProviderId = "matchora" | "streamfree" | "zlive" | "daddylive" | "damitv" | "cinevid"
+export type StreamingProviderId = "matchora" | "streamfree" | "zlive" | "daddylive" | "damitv" | "cinevid" | "live24"
 
 export type NormalizedQualityVariant = {
   quality: string // "4K" | "FHD" | "HD" | "SD" | string

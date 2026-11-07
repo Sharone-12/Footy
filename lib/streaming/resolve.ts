@@ -13,6 +13,7 @@ import type { MatchedZLive, ZLiveChannel } from "@/lib/zlive/types"
 import type { MatchedDaddyLive } from "@/lib/daddylive/types"
 import type { MatchedDamiTv } from "@/lib/damitv/types"
 import type { MatchedCinevid } from "@/lib/cinevid/types"
+import type { MatchedLive24 } from "@/lib/live24/types"
 import type { MatchedMatchora } from "@/lib/matchora/types"
 import type { StreamingProviderId } from "@/lib/streaming/types"
 import { isProviderEnabled } from "./config"
@@ -52,6 +53,7 @@ export type StreamBundle = {
   daddyLive?: MatchedDaddyLive | null
   damiTv?: MatchedDamiTv | null
   cinevid?: MatchedCinevid | null
+  live24?: MatchedLive24 | null
   /** A 24/7 broadcaster picked by hand, with no fixture behind it. */
   genericChannel?: ZLiveChannel | null
   /** All available 24/7 football channels from the manifest. */
@@ -62,13 +64,14 @@ export const PROVIDER_NAME: Record<StreamingProviderId, string> = {
   matchora: "Matchora",
   damitv: "DAMITV",
   cinevid: "Cinevid",
+  live24: "Live24",
   streamfree: "StreamFree",
   daddylive: "DaddyLive",
   zlive: "ZLive",
 }
 
-/** Display order: Matchora & DAMITV are primary defaults, followed by Cinevid, StreamFree, DaddyLive, ZLive. */
-const ORDER: StreamingProviderId[] = ["matchora", "damitv", "cinevid", "streamfree", "daddylive", "zlive"]
+/** Display order: Matchora & DAMITV are primary defaults, followed by Cinevid, Live24, StreamFree, DaddyLive, ZLive. */
+const ORDER: StreamingProviderId[] = ["matchora", "damitv", "cinevid", "live24", "streamfree", "daddylive", "zlive"]
 
 const dedupe = (xs: (string | undefined)[]) =>
   Array.from(new Set(xs.filter((x): x is string => Boolean(x))))
@@ -168,6 +171,32 @@ function damiTvProvider(m: MatchedDamiTv | any): WatchProvider | null {
     status: stream.status ?? (stream.isLive ? "LIVE" : "OFFLINE"),
     sources,
     qualities: dedupe(sources.map((s) => s.quality)),
+  }
+}
+
+function live24Provider(m: MatchedLive24 | any): WatchProvider | null {
+  if (!m) return null
+  const event = m.event || (m.streams ? m : null)
+  if (!event || !Array.isArray(event.streams) || event.streams.length === 0) return null
+
+  const sources: WatchSource[] = event.streams.map((s: any, idx: number) => ({
+    provider: "live24" as const,
+    key: `live24:${event.id || "match"}:${idx}`,
+    label: s.name || (s.language ? `Stream ${idx + 1} [${s.language}]` : `Stream ${idx + 1}`),
+    quality: "HD",
+    url: s.url,
+    live: Boolean(event.isLive ?? true),
+  }))
+
+  if (!sources.length) return null
+
+  return {
+    id: "live24",
+    name: PROVIDER_NAME.live24,
+    status: event.isLive ? "LIVE" : "UPCOMING",
+    sources,
+    qualities: ["HD"],
+    caveat: m.isConfirmedMatch ? undefined : "Candidate match, verify fixture",
   }
 }
 
@@ -280,6 +309,7 @@ export function buildProviders(bundle: StreamBundle): WatchProvider[] {
     matchora: isProviderEnabled("matchora") && bundle.matchora ? matchoraProvider(bundle.matchora) : null,
     damitv: isProviderEnabled("damitv") && bundle.damiTv ? damiTvProvider(bundle.damiTv) : null,
     cinevid: isProviderEnabled("cinevid") && bundle.cinevid ? cinevidProvider(bundle.cinevid) : null,
+    live24: isProviderEnabled("live24") && bundle.live24 ? live24Provider(bundle.live24) : null,
     streamfree: isProviderEnabled("streamfree") && bundle.streamFree ? streamFreeProvider(bundle.streamFree) : null,
     daddylive: isProviderEnabled("daddylive") && bundle.daddyLive ? daddyLiveProvider(bundle.daddyLive) : null,
     zlive: isProviderEnabled("zlive") ? zLiveProvider(bundle.zLive, bundle.genericChannel, bundle.genericChannels) : null,
