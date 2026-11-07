@@ -27,6 +27,7 @@ import {
   ArrowRightIcon,
   ChevronDownIcon,
   ChevronUpIcon,
+  ClapperboardIcon,
 } from "lucide-react"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { LEAGUE_TOURNAMENT_ID, BARCA_ID } from "@/lib/teams"
@@ -210,6 +211,7 @@ export function WatchStudio({
 
   const playerContainerRef = useRef<HTMLDivElement>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isCinemaMode, setIsCinemaMode] = useState(false)
   const [isLeaving, setIsLeaving] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
   const [activeTab, setActiveTab] = useState<"about" | "streams" | "similar">("about")
@@ -553,6 +555,17 @@ export function WatchStudio({
     }
   }, [])
 
+  // Close cinema mode on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isCinemaMode) {
+        setIsCinemaMode(false)
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [isCinemaMode])
+
   // Safely stop stream and silence audio as soon as the user navigates away
   useEffect(() => {
     const handleNavigationClick = (e: MouseEvent) => {
@@ -595,6 +608,17 @@ export function WatchStudio({
 
   return (
     <div className="flex flex-col gap-2.5 sm:gap-3 animate-fade-in w-full pb-12">
+      {/* Cinema Mode Lights Out Backdrop */}
+      {isCinemaMode && (
+        <div
+          role="button"
+          tabIndex={-1}
+          aria-label="Exit cinema mode"
+          onClick={() => setIsCinemaMode(false)}
+          className="fixed inset-0 z-30 bg-black/80 backdrop-blur-xs transition-opacity duration-300 animate-fade-in cursor-pointer"
+        />
+      )}
+
       {/* 1. TOP BAR: Back Navigation & League Breadcrumb (Ultra-compact) */}
       <div className="flex items-center justify-between gap-2 border-b border-border/30 pb-1.5">
         <div className="flex items-center gap-2">
@@ -621,6 +645,20 @@ export function WatchStudio({
             </>
           )}
         </div>
+
+        <button
+          type="button"
+          onClick={() => setIsCinemaMode((prev) => !prev)}
+          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all ${
+            isCinemaMode
+              ? "bg-[var(--pitch)] text-black border-[var(--pitch)] font-bold shadow-sm"
+              : "nav-pill text-muted-foreground hover:text-foreground border-border/40"
+          }`}
+          title={isCinemaMode ? "Exit Cinema Mode (Esc)" : "Cinema Mode (Lights Out)"}
+        >
+          <ClapperboardIcon className="size-3.5" />
+          <span>{isCinemaMode ? "Exit Cinema" : "Cinema Mode"}</span>
+        </button>
       </div>
 
       {/* 2. MATCH INFORMATION HEADER CARD (Compacted Hero Header) */}
@@ -779,9 +817,11 @@ export function WatchStudio({
           {/* Video Container Card with Ambient Depth Glow */}
           <div
             ref={playerContainerRef}
-            className={`group relative rounded-2xl overflow-hidden border border-white/10 bg-[#060606] flex flex-col transition-all ${
+            className={`group relative rounded-2xl overflow-hidden border border-white/10 bg-[#060606] flex flex-col transition-all duration-300 ${
               isFullscreen
                 ? "fixed inset-0 z-50 rounded-none w-screen h-screen border-none"
+                : isCinemaMode
+                ? "relative z-40 shadow-[0_0_90px_rgba(0,0,0,0.95),0_0_40px_rgba(0,255,135,0.14)] ring-1 ring-[var(--pitch)]/40"
                 : "shadow-[0_20px_60px_-15px_rgba(0,0,0,0.9),0_0_40px_-20px_rgba(0,255,135,0.06)] ring-1 ring-white/5"
             }`}
           >
@@ -1011,6 +1051,19 @@ export function WatchStudio({
                   title="Reload Stream Feed"
                 >
                   <RefreshCwIcon className="size-4" />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setIsCinemaMode((prev) => !prev)}
+                  className={`p-1.5 rounded-lg transition-colors ${
+                    isCinemaMode
+                      ? "text-[var(--pitch)] bg-[var(--pitch)]/15"
+                      : "text-muted-foreground hover:text-foreground hover:bg-white/10"
+                  }`}
+                  title={isCinemaMode ? "Exit Cinema Mode (Esc)" : "Cinema Mode"}
+                >
+                  <ClapperboardIcon className="size-4" />
                 </button>
 
                 <button
@@ -1393,7 +1446,9 @@ export function WatchStudio({
         </div>
 
         {/* B. RIGHT SIDEBAR: Available Streams & Match Centre (Compacted for sleek fit) */}
-        <aside className="lg:col-span-4 xl:col-span-3 flex flex-col gap-3">
+        <aside className={`lg:col-span-4 xl:col-span-3 flex flex-col gap-3 transition-all ${
+          isCinemaMode ? "relative z-40" : ""
+        }`}>
           {/* 1. AVAILABLE STREAMS PANEL */}
           <div className="surface bg-card rounded-2xl p-3.5 sm:p-4 border border-border/70 flex flex-col gap-2.5">
             <div className="flex items-center justify-between border-b border-border/50 pb-2">
