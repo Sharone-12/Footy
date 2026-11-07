@@ -12,7 +12,7 @@ export const MATCHO_HOSTS = [
   "https://matchora.to",
 ] as const
 
-const DEFAULT_TIMEOUT_MS = 6000
+const DEFAULT_TIMEOUT_MS = 14_000
 const CACHE_TTL_MS = 60_000 // 60s cache
 
 interface CacheEntry {

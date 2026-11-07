@@ -47,7 +47,10 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: "Fixture not found" }, { status: 404 })
       }
 
-      const events = await fetchMatchoraSchedule({ date: fixtureRow.date })
+      let events = await fetchMatchoraSchedule({ date: fixtureRow.date })
+      if (!events || events.length === 0) {
+        events = await fetchMatchoraSchedule({ watchable: true })
+      }
       const matched = matchFixtureToMatchora(fixtureRow as Fixture, events)
 
       if (!matched) {

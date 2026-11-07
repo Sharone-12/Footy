@@ -1,8 +1,11 @@
 import type { StreamFreeItem, StreamFreeResponse, StreamFreeSource } from "./types"
 
 const BASE_URL = process.env.STREAMFREE_BASE_URL || "https://streamfree.top"
-const DEFAULT_TIMEOUT_MS = 7_000
+const DEFAULT_TIMEOUT_MS = 15_000
 const CACHE_TTL_MS = 60_000
+
+const DEFAULT_BROWSER_UA =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 
 // In-memory cache store
 let cachedStreams: StreamFreeItem[] | null = null
@@ -47,7 +50,7 @@ export async function fetchSoccerStreams(
         signal,
         headers: {
           Accept: "application/json",
-          "User-Agent": "footyy-streamfree-agent/1.0",
+          "User-Agent": DEFAULT_BROWSER_UA,
         },
       })
 
@@ -110,7 +113,7 @@ export async function fetchSingleStream(
         signal,
         headers: {
           Accept: "application/json",
-          "User-Agent": "footyy-streamfree-agent/1.0",
+          "User-Agent": DEFAULT_BROWSER_UA,
         },
       })
 
@@ -154,7 +157,7 @@ export async function fetchStreamSources(
       signal,
       headers: {
         Accept: "application/json",
-        "User-Agent": "footyy-streamfree-agent/1.0",
+        "User-Agent": DEFAULT_BROWSER_UA,
       },
     })
 

@@ -6,7 +6,10 @@ export const matchoraAdapter: ProviderAdapter = {
   name: "Matchora",
   baseUrl: "https://matchora.pro",
   async discover(fixture: Fixture, _signal: AbortSignal): Promise<DiscoveredEvent[]> {
-    const events = await fetchMatchoraSchedule({ date: fixture.date })
+    let events = await fetchMatchoraSchedule({ date: fixture.date })
+    if (!events || events.length === 0) {
+      events = await fetchMatchoraSchedule({ watchable: true })
+    }
     const matched = matchFixtureToMatchora(fixture, events)
 
     if (!matched) return []

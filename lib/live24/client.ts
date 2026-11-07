@@ -6,7 +6,7 @@
 import type { Live24EventItem, Live24ParsedEvent } from "./types"
 
 export const LIVE24_FEED_URL = "https://guidetv.live/buff/output/Football.json"
-const REQUEST_TIMEOUT_MS = 7_000
+const REQUEST_TIMEOUT_MS = 15_000
 const CACHE_TTL_MS = 60_000
 const HEALTH_CACHE_TTL_MS = 30_000
 

@@ -2,7 +2,10 @@ import type { ZLiveChannel, ZLiveManifest } from "./types"
 
 const MANIFEST_URL = "https://zlive.st/embed/manifest.json"
 const CACHE_TTL_MS = 60_000
-const TIMEOUT_MS = 7_000
+const TIMEOUT_MS = 15_000
+
+const DEFAULT_BROWSER_UA =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 
 // In-memory cache for the ZLive manifest
 let manifestCache: { timestamp: number; data: ZLiveManifest } | null = null
@@ -31,7 +34,7 @@ export async function fetchZLiveManifest(forceRefresh = false): Promise<ZLiveMan
         signal: controller.signal,
         headers: {
           Accept: "application/json",
-          "User-Agent": "footyy-app/1.0",
+          "User-Agent": DEFAULT_BROWSER_UA,
         },
       })
 

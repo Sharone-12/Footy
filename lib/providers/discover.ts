@@ -8,7 +8,7 @@
 import { callable, registry } from "./registry"
 import type { DiscoveryResult, Fixture, ProviderResult } from "./types"
 
-const TIMEOUT_MS = Number(process.env.PROVIDER_TIMEOUT_MS) || 6000
+const TIMEOUT_MS = Number(process.env.PROVIDER_TIMEOUT_MS) || 15_000
 const CACHE_TTL_MS = Number(process.env.PROVIDER_CACHE_TTL_MS) || 60_000
 
 // ponytail: per-instance maps, so two serverless instances can each run a

@@ -9,7 +9,10 @@ import type {
 import { getDaddyLivePlayerUrl, normalizeDaddyLiveLogo } from "./urls"
 
 const API_BASE = "https://thedaddy.li/daddyapi.php"
-const TIMEOUT_MS = 7_000
+const TIMEOUT_MS = 15_000
+
+const DEFAULT_BROWSER_UA =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 
 // Caching configuration
 const CHANNELS_CACHE_TTL_MS = 15 * 60_000 // 15 minutes
@@ -64,7 +67,7 @@ export async function fetchDaddyLiveChannels(forceRefresh = false): Promise<Dadd
         signal: controller.signal,
         headers: {
           Accept: "application/json",
-          "User-Agent": "footyy-app/1.0",
+          "User-Agent": DEFAULT_BROWSER_UA,
         },
       })
 
@@ -364,7 +367,7 @@ export async function fetchDaddyLiveSchedule(forceRefresh = false): Promise<Dadd
         signal: controller.signal,
         headers: {
           Accept: "application/json",
-          "User-Agent": "footyy-app/1.0",
+          "User-Agent": DEFAULT_BROWSER_UA,
         },
       })
 

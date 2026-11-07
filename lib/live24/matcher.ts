@@ -36,6 +36,23 @@ const ALIASES: Record<string, string[]> = {
   barcelona: ["barca", "fc barcelona", "barcelona fc", "fcb"],
   "real madrid": ["real madrid cf", "los blancos"],
   "atletico madrid": ["atleti", "atletico de madrid", "atlético madrid"],
+  "deportivo alaves": ["alaves", "deportivo alavés", "d alaves"],
+  sevilla: ["sevilla fc", "seville"],
+  "athletic club": ["athletic bilbao", "athletic"],
+  "real sociedad": ["sociedad", "la real"],
+  "real betis": ["betis", "real betis balompie"],
+  "celta vigo": ["celta", "rc celta", "rc celta de vigo"],
+  "rayo vallecano": ["rayo"],
+  valencia: ["valencia cf"],
+  villarreal: ["villarreal cf"],
+  girona: ["girona fc"],
+  espanyol: ["rcd espanyol"],
+  getafe: ["getafe cf"],
+  osasuna: ["ca osasuna"],
+  mallorca: ["rcd mallorca"],
+  "las palmas": ["ud las palmas"],
+  valladolid: ["real valladolid"],
+  leganes: ["cd leganes"],
   malaga: ["malaga cf", "málaga", "málaga cf"],
   "racing santander": ["real racing club", "racing de santander", "racing club", "real racing club de santander", "racing club de santander", "racing"],
   "real racing club": ["racing santander", "racing de santander", "racing club", "real racing club de santander", "racing club de santander", "racing"],
@@ -227,11 +244,46 @@ export function calculateConfidence(
   const homeScore = matchTeamNames(fixture.home, event.homeTeam)
   const awayScore = matchTeamNames(fixture.away, event.awayTeam)
 
-  if (homeScore < 60 || awayScore < 60) {
-    return { confidence: 0, isConfirmed: false }
+  const homeSwapped = matchTeamNames(fixture.home, event.awayTeam)
+  const awaySwapped = matchTeamNames(fixture.away, event.homeTeam)
+
+  const standardBoth = homeScore >= 60 && awayScore >= 60
+  const swappedBoth = homeSwapped >= 60 && awaySwapped >= 60
+
+  let effectiveHome = 0
+  let effectiveAway = 0
+
+  if (standardBoth && swappedBoth) {
+    if (homeScore + awayScore >= homeSwapped + awaySwapped) {
+      effectiveHome = homeScore
+      effectiveAway = awayScore
+    } else {
+      effectiveHome = homeSwapped
+      effectiveAway = awaySwapped
+    }
+  } else if (standardBoth) {
+    effectiveHome = homeScore
+    effectiveAway = awayScore
+  } else if (swappedBoth) {
+    effectiveHome = homeSwapped
+    effectiveAway = awaySwapped
+  } else {
+    // Check if event name contains both team names
+    const eventName = cleanTeamName(event.rawName || `${event.homeTeam} vs ${event.awayTeam}`)
+    const normHome = cleanTeamName(fixture.home)
+    const normAway = cleanTeamName(fixture.away)
+    const containsBoth =
+      (eventName.includes(normHome) || matchTeamNames(normHome, eventName) >= 60) &&
+      (eventName.includes(normAway) || matchTeamNames(normAway, eventName) >= 60)
+
+    if (!containsBoth) {
+      return { confidence: 0, isConfirmed: false }
+    }
+    effectiveHome = 80
+    effectiveAway = 80
   }
 
-  let total = (homeScore + awayScore) / 2
+  let total = (effectiveHome + effectiveAway) / 2
 
   // Slight boost if competition name matches
   if (event.competition && fixture.league) {

@@ -297,12 +297,47 @@ export function computeMatchScore(
   fixture: Fixture,
   event: MatchoraParsedEvent,
 ): { confidence: number; isConfirmed: boolean } {
+  // 1. Team similarities (support standard & inverted/swapped home-away)
   const homeSim = teamSimilarity(fixture.home, event.home)
   const awaySim = teamSimilarity(fixture.away, event.away)
 
-  // STRICT REQUIREMENT: Both teams must match! Never associate based on only one team.
-  if (homeSim < 0.65 || awaySim < 0.65) {
-    return { confidence: 0, isConfirmed: false }
+  const homeSwappedSim = teamSimilarity(fixture.home, event.away)
+  const awaySwappedSim = teamSimilarity(fixture.away, event.home)
+
+  const standardBoth = homeSim >= 0.65 && awaySim >= 0.65
+  const swappedBoth = homeSwappedSim >= 0.65 && awaySwappedSim >= 0.65
+
+  let effectiveHomeSim = 0
+  let effectiveAwaySim = 0
+
+  if (standardBoth && swappedBoth) {
+    if (homeSim + awaySim >= homeSwappedSim + awaySwappedSim) {
+      effectiveHomeSim = homeSim
+      effectiveAwaySim = awaySim
+    } else {
+      effectiveHomeSim = homeSwappedSim
+      effectiveAwaySim = awaySwappedSim
+    }
+  } else if (standardBoth) {
+    effectiveHomeSim = homeSim
+    effectiveAwaySim = awaySim
+  } else if (swappedBoth) {
+    effectiveHomeSim = homeSwappedSim
+    effectiveAwaySim = awaySwappedSim
+  } else {
+    // Also check event title containing both team names
+    const eventTitle = normalise(`${event.home} vs ${event.away}`)
+    const normHome = normalise(fixture.home)
+    const normAway = normalise(fixture.away)
+    const containsBoth =
+      (eventTitle.includes(normHome) || diceSimilarity(eventTitle, normHome) >= 0.65) &&
+      (eventTitle.includes(normAway) || diceSimilarity(eventTitle, normAway) >= 0.65)
+
+    if (!containsBoth) {
+      return { confidence: 0, isConfirmed: false }
+    }
+    effectiveHomeSim = 0.8
+    effectiveAwaySim = 0.8
   }
 
   const timeInfo = timeProximityScore(fixture.kickoff, fixture.date, event)
@@ -312,13 +347,13 @@ export function computeMatchScore(
 
   const lgSim = leagueSimilarity(fixture.league, event.league)
 
-  const teamBase = ((homeSim + awaySim) / 2) * 70
+  const teamBase = ((effectiveHomeSim + effectiveAwaySim) / 2) * 70
   const timeWeight = timeInfo.score * 20
   const leagueWeight = lgSim * 10
 
   let totalScore = Math.round(teamBase + timeWeight + leagueWeight)
 
-  if (homeSim >= 0.95 && awaySim >= 0.95 && timeInfo.score >= 0.8) {
+  if (effectiveHomeSim >= 0.95 && effectiveAwaySim >= 0.95 && timeInfo.score >= 0.8) {
     totalScore = Math.max(totalScore, 96)
   }
 

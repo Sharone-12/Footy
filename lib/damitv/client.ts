@@ -9,7 +9,7 @@ import type {
 const API_BASE = "https://ondemand.st/papi/api"
 const STREAMS_CACHE_TTL_MS = 60_000 // 60 seconds
 const HEALTH_CACHE_TTL_MS = 30_000 // 30 seconds
-const TIMEOUT_MS = 7_000
+const TIMEOUT_MS = 15_000
 
 const API_HEADERS = {
   "User-Agent":
