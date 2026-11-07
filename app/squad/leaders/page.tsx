@@ -1,4 +1,5 @@
 import { Suspense } from "react"
+import { cacheLife } from "next/cache"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
 import { resolveSeason } from "@/lib/seasons"
@@ -126,12 +127,16 @@ function RoleBoard({ board }: { board: Board }) {
 
 const pct = (n: number | undefined) => (n == null ? "—" : String(Math.round(n)))
 
-async function Leaders({
-  searchParams,
-}: {
-  searchParams: Promise<{ season?: string }>
-}) {
-  const season = resolveSeason((await searchParams).season)
+/**
+ * Season boards for one season.
+ *
+ * Cached: every role board queries every player in that role league-wide, so
+ * an uncached visit cost seconds of Supabase round trips for numbers that
+ * only move when a match finishes.
+ */
+async function loadBoards(season: string): Promise<Board[] | null> {
+  "use cache"
+  cacheLife("minutes")
 
   // `Scored` carries a slug but no id, and the avatar needs the id.
   const { data: squadRows } = await supabase
@@ -145,9 +150,7 @@ async function Leaders({
   const squad = combineCompetitions((squadRows || []) as unknown as Ranked[])
   const rowBySlug = new Map(squad.map((r) => [r.slug, r]))
 
-  if (squad.length === 0) {
-    return <p className="text-muted-foreground">No squad data for {season}.</p>
-  }
+  if (squad.length === 0) return null
 
   // Players whose ranking role is overridden are fetched once and spliced
   // into the cohort they actually belong to; the per-role query cannot find
@@ -230,6 +233,21 @@ async function Leaders({
       }
     }),
   )
+
+  return boards
+}
+
+async function Leaders({
+  searchParams,
+}: {
+  searchParams: Promise<{ season?: string }>
+}) {
+  const season = resolveSeason((await searchParams).season)
+  const boards = await loadBoards(season)
+
+  if (!boards) {
+    return <p className="text-muted-foreground">No squad data for {season}.</p>
+  }
 
   return (
     <>

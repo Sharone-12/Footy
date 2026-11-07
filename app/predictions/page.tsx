@@ -1,4 +1,5 @@
 import { Suspense } from "react"
+import { cacheLife } from "next/cache"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
 import { resolveSeason } from "@/lib/seasons"
@@ -246,15 +247,22 @@ const LEAGUE_FILTERS = [
   { key: "UCL", label: "UCL", full: "Champions League" },
 ] as const
 
-async function Content({
-  searchParams,
-}: {
-  searchParams: Promise<{ season?: string; league?: string }>
-}) {
-  const sp = await searchParams
-  const season = resolveSeason(sp.season)
-  const leagueFilter = sp.league || "all"
-  const leagueFullName = LEAGUE_FILTERS.find((f) => f.key === leagueFilter)?.full || null
+type SeasonMatch = {
+  event_id: number; league: string; season: string; round: number
+  date: string; kickoff?: string | null; home: string; home_id: number | null; away: string; away_id: number | null; status: string
+  home_goals: number | null; away_goals: number | null
+}
+
+/**
+ * Season table, stats and every match, for one season.
+ *
+ * Cached: this is two thousand rows plus the whole team-stats fetch, and it
+ * is identical for every visitor. The live scoreline on each card comes from
+ * the client poll, not from here, so a minute of staleness costs nothing.
+ */
+async function loadSeason(season: string) {
+  "use cache"
+  cacheLife("minutes")
 
   const [{ table, stats, xg }, { data: matchData }] = await Promise.all([
     fetchTeamData(supabase, season, WANTED_STATS),
@@ -265,11 +273,7 @@ async function Content({
       .limit(2000),
   ])
 
-  const matches = (matchData || []) as {
-    event_id: number; league: string; season: string; round: number
-    date: string; kickoff?: string | null; home: string; home_id: number | null; away: string; away_id: number | null; status: string
-    home_goals: number | null; away_goals: number | null
-  }[]
+  const matches = (matchData || []) as SeasonMatch[]
 
   const trackedLeagues = new Set(table.map((t) => t.league))
   const trackedTeamNames = new Set(table.map((t) => t.team))
@@ -306,17 +310,35 @@ async function Content({
     stats,
     xg,
   )
+
+  const uclIds: [string, number][] = []
+  const seenUcl = new Set<string>()
+  for (const m of matches) {
+    if (m.league !== UCL) continue
+    if (m.home_id && !seenUcl.has(m.home)) { seenUcl.add(m.home); uclIds.push([m.home, m.home_id]) }
+    if (m.away_id && !seenUcl.has(m.away)) { seenUcl.add(m.away); uclIds.push([m.away, m.away_id]) }
+  }
+
+  return { computed, finished, xg, uclIds }
+}
+
+async function Content({
+  searchParams,
+}: {
+  searchParams: Promise<{ season?: string; league?: string }>
+}) {
+  const sp = await searchParams
+  const season = resolveSeason(sp.season)
+  const leagueFilter = sp.league || "all"
+  const leagueFullName = LEAGUE_FILTERS.find((f) => f.key === leagueFilter)?.full || null
+
+  const { computed, finished, xg, uclIds: uclIdPairs } = await loadSeason(season)
   const withFrozen = await withFrozenPredictions(computed)
   // Settled matches without a frozen row have no honest kickoff prediction;
   // keep them out of the display and the accuracy count.
   const predictions = withFrozen.filter((p) => p.actual === null || p.frozen)
 
-  const uclIds = new Map<string, number>()
-  for (const m of matches) {
-    if (m.league !== UCL) continue
-    if (m.home_id) uclIds.set(m.home, m.home_id)
-    if (m.away_id) uclIds.set(m.away, m.away_id)
-  }
+  const uclIds = new Map<string, number>(uclIdPairs)
   const uclModel =
     leagueFullName === UCL ? uclStrengths(finished, xg, uclIds.keys()) : null
 

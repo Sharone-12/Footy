@@ -14,12 +14,21 @@ type FrozenRow = {
 async function fetchFrozen(eventIds: number[]): Promise<Map<number, FrozenRow>> {
   const out = new Map<number, FrozenRow>()
   if (eventIds.length === 0) return out
-  for (let i = 0; i < eventIds.length; i += 500) {
-    const chunk = eventIds.slice(i, i + 500)
-    const { data } = await supabase
-      .from("predictions")
-      .select("event_id, predicted, home_win, draw, away_win")
-      .in("event_id", chunk)
+
+  // A season is several chunks, and they were awaited one after another: four
+  // round trips end to end for queries that do not depend on each other.
+  const chunks: number[][] = []
+  for (let i = 0; i < eventIds.length; i += 500) chunks.push(eventIds.slice(i, i + 500))
+
+  const results = await Promise.all(
+    chunks.map((chunk) =>
+      supabase
+        .from("predictions")
+        .select("event_id, predicted, home_win, draw, away_win")
+        .in("event_id", chunk),
+    ),
+  )
+  for (const { data } of results) {
     for (const row of (data ?? []) as FrozenRow[]) out.set(row.event_id, row)
   }
   return out

@@ -192,5 +192,24 @@ assert.ok(matchedMap.has(101))
 assert.ok(matchedMap.has(102))
 assert.ok(!matchedMap.has(103), "Arsenal vs Chelsea has no stream and should not match")
 
+// The alias index is built once at module load rather than rebuilt per call,
+// and `normalise` is memoised. Both are hot-path rewrites of logic the rows
+// above exercise, so pin the behaviour they could quietly change: a club
+// reached through a "fc"/"cf" spelling, repeated calls staying stable, and
+// two clubs that share a word still not being treated as aliases.
+assert.ok(teamSimilarity("Barca FC", "FC Barcelona") >= 0.95, "fc-variant alias")
+assert.ok(teamSimilarity("PSG", "Paris Saint-Germain") >= 0.95, "alias is symmetric")
+assert.equal(
+  teamSimilarity("Atletico Madrid", "Real Madrid") >= 0.95,
+  false,
+  "a shared word is not an alias",
+)
+assert.equal(
+  teamSimilarity("Bayern Munich", "FC Bayern München"),
+  teamSimilarity("Bayern Munich", "FC Bayern München"),
+  "memoised normalise returns the same answer twice",
+)
+assert.equal(normalise("FC Bayern München"), "fc bayern munchen")
+
 console.log("streamfree matcher: all assertions passed")
 

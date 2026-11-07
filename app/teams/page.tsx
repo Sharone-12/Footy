@@ -1,4 +1,5 @@
 import { Suspense } from "react"
+import { cacheLife } from "next/cache"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -416,6 +417,23 @@ const WANTED_STATS = Array.from(
   ]),
 )
 
+/**
+ * League tables, club stats and the crest id map for a season.
+ *
+ * Cached: standings only move when a match finishes, and every visitor was
+ * paying for the same two queries.
+ */
+async function loadTables(season: string, comp: Competition) {
+  "use cache"
+  cacheLife("minutes")
+
+  const [{ table, stats }, teamIds] = await Promise.all([
+    fetchTeamData(supabase, season, WANTED_STATS, comp),
+    fetchTeamIdMap(supabase, season),
+  ])
+  return { table, stats, teamIds }
+}
+
 async function Tables({
   searchParams,
 }: {
@@ -424,10 +442,7 @@ async function Tables({
   const sp = await searchParams
   const season = resolveSeason(sp.season)
   const comp: Competition = resolveCompetition(sp.comp)
-  const [{ table: all, stats }, teamIds] = await Promise.all([
-    fetchTeamData(supabase, season, WANTED_STATS, comp),
-    fetchTeamIdMap(supabase, season),
-  ])
+  const { table: all, stats, teamIds } = await loadTables(season, comp)
   const clubStats = indexStats(stats)
   const ranked = computePowerRankings(primaryRows(all), stats)
   const link = (team: string) => `/teams/compare${scopeQuery(season, comp, { teams: team })}`

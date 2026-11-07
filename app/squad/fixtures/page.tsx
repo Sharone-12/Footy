@@ -1,10 +1,11 @@
 import { Suspense } from "react"
+import { cacheLife } from "next/cache"
 import Link from "next/link"
 import { HouseIcon, PlaneIcon } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 import { BARCA_ID, LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
 import { UCL } from "@/lib/competition"
-import { resolveFixtureScope, scopeFixtures } from "@/lib/squad"
+import { resolveFixtureScope, scopeFixtures, type FixtureScope } from "@/lib/squad"
 import { outcomeFor, summarise, type Played } from "@/lib/form"
 import { FixtureCompetitionFilter } from "@/components/fixture-competition-filter"
 import { FormStrip, OUTCOME_TONE, OUTCOME_LABEL } from "@/components/form-strip"
@@ -169,12 +170,16 @@ function ResultRow({ m, detail }: { m: Result; detail?: Record<string, [string, 
 }
 
 /** The last ten played matches, scoped by the same competition filter. */
-async function Results({
-  searchParams,
-}: {
-  searchParams: Promise<{ comp?: string }>
-}) {
-  const scope = resolveFixtureScope((await searchParams).comp)
+/**
+ * Recent results plus the per-match stat lines behind them.
+ *
+ * Cached per competition scope: finished matches do not change, and the two
+ * round trips here ran on every visit.
+ */
+async function loadResults(scope: FixtureScope) {
+  "use cache"
+  cacheLife("minutes")
+
   const base = supabase
     .from("matches")
     .select(RESULT_COLS)
@@ -188,9 +193,7 @@ async function Results({
     (m) => outcomeFor(m, BARCA_ID) != null,
   )
 
-  if (rows.length === 0) {
-    return <p className="text-muted-foreground">No results in this competition yet.</p>
-  }
+  if (rows.length === 0) return { rows, detail: new Map() as Detail }
 
   // One extra round trip for the whole list, not one per row.
   const { data: statRows } = await supabase
@@ -206,6 +209,21 @@ async function Results({
     detail.set(r.event_id, entry)
   }
 
+  return { rows, detail }
+}
+
+async function Results({
+  searchParams,
+}: {
+  searchParams: Promise<{ comp?: string }>
+}) {
+  const scope = resolveFixtureScope((await searchParams).comp)
+  const { rows, detail } = await loadResults(scope)
+
+  if (rows.length === 0) {
+    return <p className="text-muted-foreground">No results in this competition yet.</p>
+  }
+
   return (
     <div className="flex flex-col gap-2.5 stagger">
       {rows.map((m) => (
@@ -216,12 +234,10 @@ async function Results({
 }
 
 /** Last-five form from results already in the table — no new ingestion. */
-async function BarcaForm({
-  searchParams,
-}: {
-  searchParams: Promise<{ comp?: string }>
-}) {
-  const scope = resolveFixtureScope((await searchParams).comp)
+async function loadForm(scope: FixtureScope) {
+  "use cache"
+  cacheLife("minutes")
+
   // Ten rows to find five played ones: a postponed or voided fixture can sit
   // in `finished` with no score.
   const base = supabase
@@ -233,16 +249,23 @@ async function BarcaForm({
     .limit(10)
 
   const { data } = await scopeFixtures(base, scope)
-
-  return <FormStrip form={summarise((data || []) as unknown as Played[], BARCA_ID)} />
+  return summarise((data || []) as unknown as Played[], BARCA_ID)
 }
 
-async function Fixtures({
+/** Last-five form from results already in the table — no new ingestion. */
+async function BarcaForm({
   searchParams,
 }: {
   searchParams: Promise<{ comp?: string }>
 }) {
   const scope = resolveFixtureScope((await searchParams).comp)
+  return <FormStrip form={await loadForm(scope)} />
+}
+
+async function loadFixtures(scope: FixtureScope): Promise<Row[]> {
+  "use cache"
+  cacheLife("minutes")
+
   const q = (cols: string) => {
     const base = supabase
       .from("matches")
@@ -257,7 +280,16 @@ async function Fixtures({
   // database hasn't been migrated yet (same fallback as the nav pill).
   let { data } = await q(`${COLS}, kickoff`)
   if (!data) ({ data } = await q(COLS))
-  const rows = (data || []) as unknown as Row[]
+  return (data || []) as unknown as Row[]
+}
+
+async function Fixtures({
+  searchParams,
+}: {
+  searchParams: Promise<{ comp?: string }>
+}) {
+  const scope = resolveFixtureScope((await searchParams).comp)
+  const rows = await loadFixtures(scope)
 
   if (rows.length === 0) {
     return (

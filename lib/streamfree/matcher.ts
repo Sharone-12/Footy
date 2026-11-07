@@ -203,9 +203,27 @@ const COMPETITIONS: Record<string, string[]> = {
 
 /**
  * Clean and normalise a string: lowercased, unaccented, punctuation dropped.
+ *
+ * Memoised: matching a page of fixtures against the live feed normalises the
+ * same couple of hundred club names tens of thousands of times a pass, and
+ * the NFD + eight regex passes below are what that time was going into.
  */
+const normalised = new Map<string, string>()
+const NORMALISE_CACHE_MAX = 5_000
+
 export function normalise(s: string): string {
   if (!s || typeof s !== "string") return ""
+  const hit = normalised.get(s)
+  if (hit !== undefined) return hit
+  const out = normaliseUncached(s)
+  // Names come from feeds, so the key space is bounded in practice; the cap is
+  // only there so a pathological feed cannot grow this without limit.
+  if (normalised.size >= NORMALISE_CACHE_MAX) normalised.clear()
+  normalised.set(s, out)
+  return out
+}
+
+function normaliseUncached(s: string): string {
   return s
     .replace(/[øØ]/g, "o")
     .replace(/[æÆ]/g, "ae")
@@ -282,20 +300,48 @@ export function parseStreamTeams(stream: StreamFreeItem): { home: string; away: 
   return { home: stream.name.trim(), away: "" }
 }
 
+/**
+ * Every spelling that maps to a canonical club, built once.
+ *
+ * This used to be rebuilt inside `matchesAlias` on every call — 66 canonical
+ * names, each re-normalised along with its aliases and their "fc"/"cf"
+ * variants, for a single yes/no answer. A name can legitimately sit in more
+ * than one group, so the value is a set and a match means the two names share
+ * a group, exactly as the old loop decided it.
+ */
+const ALIAS_GROUPS: Map<string, Set<string>> = (() => {
+  const index = new Map<string, Set<string>>()
+  const add = (spelling: string, canon: string) => {
+    const existing = index.get(spelling)
+    if (existing) existing.add(canon)
+    else index.set(spelling, new Set([canon]))
+  }
+  for (const [canon, aliases] of Object.entries(ALIASES)) {
+    for (const name of [canon, ...aliases]) {
+      const n = normalise(name)
+      if (!n) continue
+      for (const variant of [n, `${n} fc`, `fc ${n}`, `${n} cf`, `cf ${n}`]) {
+        add(variant, canon)
+      }
+    }
+  }
+  return index
+})()
+
 /** Check if a canonical name and a query match via alias map. */
 function matchesAlias(nameA: string, nameB: string): boolean {
   const normA = normalise(nameA)
   const normB = normalise(nameB)
   if (normA === normB) return true
 
-  for (const [canon, aliases] of Object.entries(ALIASES)) {
-    const canonNorm = normalise(canon)
-    const all = [canonNorm, ...aliases.map(normalise)]
-    const hasA = all.some((a) => a === normA || normA === `${a} fc` || normA === `fc ${a}` || normA === `${a} cf` || normA === `cf ${a}`)
-    const hasB = all.some((b) => b === normB || normB === `${b} fc` || normB === `fc ${b}` || normB === `${b} cf` || normB === `cf ${b}`)
-    if (hasA && hasB) return true
-  }
+  const groupsA = ALIAS_GROUPS.get(normA)
+  if (!groupsA) return false
+  const groupsB = ALIAS_GROUPS.get(normB)
+  if (!groupsB) return false
 
+  for (const canon of groupsA) {
+    if (groupsB.has(canon)) return true
+  }
   return false
 }
 

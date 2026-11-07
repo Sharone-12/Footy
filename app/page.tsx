@@ -1,8 +1,9 @@
 import { Suspense } from "react"
 import { connection } from "next/server"
+import { cacheLife } from "next/cache"
 import { supabase } from "@/lib/supabase"
 import { resolveSeason } from "@/lib/seasons"
-import { resolveCompetition, scopeLeague, scopeQuery, COMPETITION_LABEL } from "@/lib/competition"
+import { resolveCompetition, scopeLeague, scopeQuery, COMPETITION_LABEL, type Competition } from "@/lib/competition"
 import { CompetitionToggle } from "@/components/competition-toggle"
 import { LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
 import { PlayerSearch } from "@/components/player-search"
@@ -149,6 +150,22 @@ function Board({
   )
 }
 
+/** The week's fixtures. Cached on the date pair, so it is fetched once a day. */
+async function loadUpcoming(from: string, to: string) {
+  "use cache"
+  cacheLife("minutes")
+
+  const { data } = await supabase
+    .from("matches")
+    .select("event_id, league, date, home, home_id, away, away_id")
+    .eq("status", "upcoming")
+    .gte("date", from)
+    .lte("date", to)
+    .order("date", { ascending: true })
+    .limit(50)
+  return (data || []) as unknown as UpcomingMatch[]
+}
+
 async function Upcoming() {
   // connection() opts this leaf into dynamic rendering so new Date() is
   // allowed under Cache Components. The parent Suspense boundary lets the
@@ -157,30 +174,20 @@ async function Upcoming() {
   const today = new Date()
   const in7 = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000)
   const iso = (d: Date) => d.toISOString().slice(0, 10)
-  const { data } = await supabase
-    .from("matches")
-    .select("event_id, league, date, home, home_id, away, away_id")
-    .eq("status", "upcoming")
-    .gte("date", iso(today))
-    .lte("date", iso(in7))
-    .order("date", { ascending: true })
-    .limit(50)
-  const rows = (data || []) as unknown as UpcomingMatch[]
-  return <UpcomingTicker matches={rows} />
+  return <UpcomingTicker matches={await loadUpcoming(iso(today), iso(in7))} />
 }
 
-async function Content({
-  searchParams,
-}: {
-  searchParams: Promise<{ season?: string; comp?: string }>
-}) {
-  // Awaited here, inside the Suspense boundary: cacheComponents won't let a
-  // prerendered route read request data at the top level.
-  const sp = await searchParams
-  const season = resolveSeason(sp.season)
-  const comp = resolveCompetition(sp.comp)
-  const scope = scopeQuery(season, comp)
-  const label = `${season} · ${COMPETITION_LABEL[comp]}`
+/**
+ * Season scoring and assist boards.
+ *
+ * Cached: a season total is the same for every visitor and only moves when a
+ * match is ingested, so the two queries ran on every single page view for
+ * nothing.
+ */
+async function loadBoards(season: string, comp: Competition) {
+  "use cache"
+  cacheLife("minutes")
+
   const [{ data: scorers }, { data: assisters }] = await Promise.all([
     scopeLeague(
       supabase
@@ -202,8 +209,25 @@ async function Content({
       .limit(12),
   ])
 
-  const topScorers = (scorers || []) as Row[]
-  const topAssisters = (assisters || []) as Row[]
+  return {
+    topScorers: (scorers || []) as Row[],
+    topAssisters: (assisters || []) as Row[],
+  }
+}
+
+async function Content({
+  searchParams,
+}: {
+  searchParams: Promise<{ season?: string; comp?: string }>
+}) {
+  // Awaited here, inside the Suspense boundary: cacheComponents won't let a
+  // prerendered route read request data at the top level.
+  const sp = await searchParams
+  const season = resolveSeason(sp.season)
+  const comp = resolveCompetition(sp.comp)
+  const scope = scopeQuery(season, comp)
+  const label = `${season} · ${COMPETITION_LABEL[comp]}`
+  const { topScorers, topAssisters } = await loadBoards(season, comp)
   const leader = topScorers[0]
   const creator = topAssisters[0]
 

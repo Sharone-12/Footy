@@ -1,4 +1,5 @@
 import { Suspense } from "react"
+import { cacheLife } from "next/cache"
 import Link from "next/link"
 import Image from "next/image"
 import { supabase } from "@/lib/supabase"
@@ -99,15 +100,10 @@ function PlayerCard({ p, scope }: { p: SquadRow; scope: string }) {
   )
 }
 
-async function Squad({
-  searchParams,
-}: {
-  searchParams: Promise<{ season?: string; pos?: string }>
-}) {
-  const sp = await searchParams
-  const season = resolveSeason(sp.season)
-  const pos = resolvePosition(sp.pos)
-  const scope = sp.season ? `?season=${encodeURIComponent(season)}` : ""
+/** The squad for a season, one row per player. Cached: it changes twice a year. */
+async function loadSquad(season: string) {
+  "use cache"
+  cacheLife("minutes")
 
   const { data } = await supabase
     .from("players")
@@ -129,10 +125,22 @@ async function Squad({
     }
   }
 
-  const squad = [...byPlayer.values()].map((p) => ({
+  return [...byPlayer.values()].map((p) => ({
     ...p,
     position: squadPosition(p.slug, p.position),
   }))
+}
+
+async function Squad({
+  searchParams,
+}: {
+  searchParams: Promise<{ season?: string; pos?: string }>
+}) {
+  const sp = await searchParams
+  const season = resolveSeason(sp.season)
+  const pos = resolvePosition(sp.pos)
+  const scope = sp.season ? `?season=${encodeURIComponent(season)}` : ""
+  const squad = await loadSquad(season)
   const bucket = bucketFor(pos)
   const shown = bucket ? squad.filter((p) => p.position === bucket) : squad
 

@@ -1,4 +1,5 @@
 import { Suspense } from "react"
+import { cacheLife } from "next/cache"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
 import { resolveSeason } from "@/lib/seasons"
@@ -7,6 +8,7 @@ import {
   scopeLeague,
   scopeQuery,
   COMPETITION_LABEL,
+  type Competition,
 } from "@/lib/competition"
 import { CompetitionToggle } from "@/components/competition-toggle"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
@@ -276,16 +278,15 @@ function SignalBoard({
   )
 }
 
-async function Content({
-  searchParams,
-}: {
-  searchParams: Promise<{ season?: string; comp?: string }>
-}) {
-  const sp = await searchParams
-  const season = resolveSeason(sp.season)
-  const comp = resolveCompetition(sp.comp)
-  const scope = scopeQuery(season, comp)
-  const label = `${season} · ${COMPETITION_LABEL[comp]}`
+/**
+ * Every tracked player's per-90 rates for a season and competition.
+ *
+ * Cached: two thousand rows of season aggregates, the same for everyone, and
+ * the boards below are pure maths over them.
+ */
+async function loadPlayers(season: string, comp: Competition): Promise<PlayerRow[]> {
+  "use cache"
+  cacheLife("minutes")
 
   const { data } = await scopeLeague(
     supabase
@@ -301,7 +302,21 @@ async function Content({
     comp,
   ).limit(2000)
 
-  const all = (data || []) as unknown as PlayerRow[]
+  return (data || []) as unknown as PlayerRow[]
+}
+
+async function Content({
+  searchParams,
+}: {
+  searchParams: Promise<{ season?: string; comp?: string }>
+}) {
+  const sp = await searchParams
+  const season = resolveSeason(sp.season)
+  const comp = resolveCompetition(sp.comp)
+  const scope = scopeQuery(season, comp)
+  const label = `${season} · ${COMPETITION_LABEL[comp]}`
+
+  const all = await loadPlayers(season, comp)
   // A floor, not the whole defence against noise: it keeps out players with
   // almost no season, and the shrinkage below handles everyone above it.
   const maxMin = Math.max(0, ...all.map((p) => Number(p.minutes) || 0))
