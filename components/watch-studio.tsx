@@ -232,6 +232,24 @@ export function WatchStudio({
       return next
     })
   }, [])
+  const [daddyLiveClean, setDaddyLiveClean] = useState<boolean>(() => {
+    if (typeof window === "undefined") return true
+    try {
+      const saved = localStorage.getItem("footyy_daddylive_clean")
+      return saved === null ? true : saved === "true"
+    } catch {
+      return true
+    }
+  })
+  const toggleDaddyLiveClean = useCallback(() => {
+    setDaddyLiveClean((prev) => {
+      const next = !prev
+      try {
+        localStorage.setItem("footyy_daddylive_clean", String(next))
+      } catch {}
+      return next
+    })
+  }, [])
   const [isLeaving, setIsLeaving] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
   const [activeTab, setActiveTab] = useState<"about" | "streams" | "similar">("about")
@@ -1030,8 +1048,12 @@ export function WatchStudio({
                     key={`${currentSource.key}-${reloadKey}`}
                     src={currentSource.url}
                     title={`${fixture?.home ?? "Live"} vs ${fixture?.away ?? "Match"} — ${currentSource.label}`}
-                    className={`w-full h-full border-0 bg-black block transition-transform ${
-                      currentProvider?.id === "zlive" ? "scale-[1.035] origin-center" : ""
+                    className={`border-0 bg-black block transition-all ${
+                      currentProvider?.id === "zlive"
+                        ? "w-full h-full scale-[1.035] origin-center"
+                        : currentProvider?.id === "daddylive" && daddyLiveClean
+                          ? "absolute top-0 inset-x-0 w-full h-[calc(100%+62px)] max-h-none"
+                          : "w-full h-full"
                     }`}
                     allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                     allowFullScreen
@@ -1062,6 +1084,25 @@ export function WatchStudio({
                     <span className="text-muted-foreground text-[11px]">
                       via {currentProvider?.name}
                     </span>
+                    {currentProvider?.id === "daddylive" && (
+                      <button
+                        type="button"
+                        onClick={toggleDaddyLiveClean}
+                        className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold tracking-tight transition-all border ${
+                          daddyLiveClean
+                            ? "bg-[var(--pitch)]/10 text-[var(--pitch)] border-[var(--pitch)]/30 hover:bg-[var(--pitch)]/20"
+                            : "bg-white/5 text-muted-foreground border-white/10 hover:text-foreground hover:bg-white/10"
+                        }`}
+                        title={
+                          daddyLiveClean
+                            ? "Clean Feed: Clashing third-party toolbar cropped. Click to reveal native player controls."
+                            : "Native Bar: Third-party toolbar shown. Click to hide and use clean FOOTYY UI."
+                        }
+                      >
+                        <SparklesIcon className="size-3 shrink-0" />
+                        <span>{daddyLiveClean ? "Clean View" : "Native Bar"}</span>
+                      </button>
+                    )}
                     {currentSource.quality && (
                       <span className="px-2 py-0.5 rounded-md bg-white/10 text-foreground font-mono text-[10px] font-bold">
                         {currentSource.quality}

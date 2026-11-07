@@ -89,6 +89,7 @@ export function UnifiedPlayer({
       : "streamfree")
 
   const [selectedProvider, setSelectedProvider] = useState<StreamingProviderId>(defaultProvider)
+  const [daddyLiveClean, setDaddyLiveClean] = useState(true)
 
   // 0. Matchora active channel selection
   const [selectedMatchoraChannelId, setSelectedMatchoraChannelId] = useState<string>(
@@ -637,7 +638,11 @@ export function UnifiedPlayer({
             allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
             allowFullScreen
             style={{ border: 0 }}
-            className="absolute inset-0 h-full w-full border-0"
+            className={`border-0 transition-all ${
+              selectedProvider === "daddylive" && daddyLiveClean
+                ? "absolute top-0 inset-x-0 w-full h-[calc(100%+62px)] max-h-none"
+                : "absolute inset-0 h-full w-full"
+            }`}
           />
         )}
       </div>
@@ -658,6 +663,25 @@ export function UnifiedPlayer({
             <TvMinimalPlayIcon className="size-3.5 text-muted-foreground" />
           )}
           <span>Active Provider: <strong className="text-foreground">{providerDisplayName}</strong></span>
+          {selectedProvider === "daddylive" && (
+            <button
+              type="button"
+              onClick={() => setDaddyLiveClean((prev) => !prev)}
+              className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border transition-colors ${
+                daddyLiveClean
+                  ? "bg-[var(--pitch)]/10 text-[var(--pitch)] border-[var(--pitch)]/30 hover:bg-[var(--pitch)]/20"
+                  : "bg-white/5 text-muted-foreground border-white/10 hover:text-foreground hover:bg-white/10"
+              }`}
+              title={
+                daddyLiveClean
+                  ? "Clean Feed: Clashing third-party toolbar cropped. Click to reveal native player controls."
+                  : "Native Bar: Third-party toolbar shown. Click to hide and use clean FOOTYY UI."
+              }
+            >
+              <SparklesIcon className="size-2.5" />
+              <span>{daddyLiveClean ? "Clean View" : "Native Bar"}</span>
+            </button>
+          )}
           {selectedProvider === "streamfree" && (
             <span className="hidden sm:inline">· Quality: {activeSfSource?.quality ?? sfQuality}</span>
           )}
