@@ -10,6 +10,15 @@ const STREAMS_CACHE_TTL_MS = 60_000 // 60 seconds
 const HEALTH_CACHE_TTL_MS = 30_000 // 30 seconds
 const TIMEOUT_MS = 7_000
 
+const API_HEADERS = {
+  "User-Agent":
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+  Accept: "application/json, text/plain, */*",
+  "Accept-Language": "en-US,en;q=0.9",
+  Referer: "https://damitv.st/",
+  Origin: "https://damitv.st",
+}
+
 let streamsCache: { timestamp: number; data: DamiTvParsedStream[] } | null = null
 let inflightStreams: Promise<DamiTvParsedStream[]> | null = null
 
@@ -37,7 +46,7 @@ export async function checkDamiTvHealth(): Promise<{ status: string; ok: boolean
     try {
       const res = await fetch(`${API_BASE}/ping`, {
         signal: controller.signal,
-        headers: { Accept: "application/json", "User-Agent": "footyy-app/1.0" },
+        headers: API_HEADERS,
       })
       const ok = res.ok
       const data = { status: ok ? "healthy" : `status_${res.status}`, ok }
@@ -123,10 +132,7 @@ export async function fetchDamiTvStreams(forceRefresh = false): Promise<DamiTvPa
     try {
       const res = await fetch(`${API_BASE}/streams`, {
         signal: controller.signal,
-        headers: {
-          Accept: "application/json",
-          "User-Agent": "footyy-app/1.0",
-        },
+        headers: API_HEADERS,
       })
 
       if (!res.ok) {
