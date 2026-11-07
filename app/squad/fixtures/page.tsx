@@ -12,6 +12,7 @@ import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { BarcaNav } from "@/components/barca-nav"
 import { Skeleton } from "@/components/ui/skeleton"
 import { formatDateIST, formatTimeIST } from "@/lib/time"
+import { LiveFixtureMark } from "@/components/live-score"
 
 const BARCA = "FC Barcelona"
 const COLS = "event_id, date, league, home, home_id, away, away_id"
@@ -83,6 +84,10 @@ function FixtureRow({ m, banner }: { m: Row; banner: boolean }) {
           <PlaneIcon className="size-4" aria-hidden />
         )}
       </span>
+      {/* Renders only while the match is actually in play: the scraper leaves a
+          kicked-off fixture on `upcoming` until its next refresh, so without
+          this the row shows a kickoff time for a match already under way. */}
+      <LiveFixtureMark fixture={m} />
       {tid && <LeagueCrest tournamentId={tid} name={m.league} size={20} />}
     </Link>
   )
