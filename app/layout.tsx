@@ -4,7 +4,6 @@ import Link from "next/link"
 import { Suspense } from "react"
 import { cacheLife } from "next/cache"
 import { supabase } from "@/lib/supabase"
-import { AskPanel } from "@/components/ask-panel"
 import { NextBarca, type NextBarcaMatch } from "@/components/next-barca"
 import { BARCA_ID } from "@/lib/teams"
 import { SeasonToggle } from "@/components/season-toggle"
@@ -156,11 +155,6 @@ export default function RootLayout({
           </div>
         </nav>
         <main className="flex-1">{children}</main>
-        {/* Reads ?season= to scope its questions, so it needs a boundary or it
-            blocks static prerendering of pages like /_not-found. */}
-        <Suspense fallback={null}>
-          <AskPanel />
-        </Suspense>
         </TooltipProvider>
       </body>
     </html>
