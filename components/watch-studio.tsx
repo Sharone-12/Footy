@@ -137,27 +137,54 @@ function WatchWinProbabilityCard({
       {/* 3 Outcome Columns matching prediction card */}
       <div className="grid grid-cols-3 gap-2 sm:gap-3 text-center">
         {([
-          { label: fixture.home, pct: prediction.homeWin, color: OUTCOME_COLORS.home, key: "home" },
-          { label: "DRAW", pct: prediction.draw, color: OUTCOME_COLORS.draw, key: "draw" },
-          { label: fixture.away, pct: prediction.awayWin, color: OUTCOME_COLORS.away, key: "away" },
+          {
+            label: fixture.home,
+            teamId: fixture.home_id,
+            pct: prediction.homeWin,
+            color: OUTCOME_COLORS.home,
+            key: "home",
+          },
+          {
+            label: "DRAW",
+            teamId: null,
+            pct: prediction.draw,
+            color: OUTCOME_COLORS.draw,
+            key: "draw",
+          },
+          {
+            label: fixture.away,
+            teamId: fixture.away_id,
+            pct: prediction.awayWin,
+            color: OUTCOME_COLORS.away,
+            key: "away",
+          },
         ] as const).map((o) => (
           <div
             key={o.key}
-            className="rounded-xl py-2 px-1.5 transition-all"
+            className="rounded-2xl py-2.5 px-1.5 transition-all flex flex-col items-center justify-center gap-1.5"
             style={{
               background: prediction.predicted === o.key ? `${o.color}15` : "transparent",
               border: prediction.predicted === o.key ? `1px solid ${o.color}40` : "1px solid transparent",
             }}
           >
-            <div className="font-mono font-black text-xl sm:text-2xl tabular-nums leading-tight" style={{ color: o.color }}>
+            {/* Team Crest or Draw Indicator */}
+            {o.teamId ? (
+              <TeamCrest teamId={o.teamId} name={o.label} size={26} className="shrink-0 drop-shadow-sm" />
+            ) : (
+              <div className="size-[26px] rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[11px] font-bold text-muted-foreground font-mono">
+                VS
+              </div>
+            )}
+
+            <div className="font-mono font-black text-lg sm:text-2xl tabular-nums leading-none" style={{ color: o.color }}>
               {o.pct}%
             </div>
-            <div className="stat-label text-[0.7rem] sm:text-xs mt-1 truncate font-semibold uppercase tracking-wider">
+            <div className="stat-label text-[0.68rem] sm:text-xs truncate font-semibold uppercase tracking-wider max-w-full px-1">
               {o.label}
             </div>
             {prediction.predicted === o.key && (
               <div
-                className="font-mono text-[0.58rem] sm:text-[0.62rem] mt-1.5 px-2 py-0.5 rounded-full inline-block font-bold tracking-wider uppercase shadow-sm"
+                className="font-mono text-[0.58rem] sm:text-[0.62rem] mt-0.5 px-2 py-0.5 rounded-full inline-block font-bold tracking-wider uppercase shadow-sm"
                 style={{ color: o.color, background: `${o.color}25` }}
               >
                 PREDICTED
