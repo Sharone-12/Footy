@@ -5,6 +5,8 @@ import { supabase } from "@/lib/supabase"
 import { verifySessionToken, LIVE_SESSION_COOKIE_NAME } from "@/lib/live/auth"
 import { LivePasswordLock } from "@/components/live-password-lock"
 import { WatchStudio } from "@/components/watch-studio"
+import { getMatchPrediction } from "@/app/api/predictions/match/route"
+import type { MatchPrediction } from "@/lib/predictions"
 import type { LiveFixture } from "@/components/live-sections"
 import type { StreamingProviderId } from "@/lib/streaming/types"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -87,6 +89,16 @@ async function WatchContent({ searchParams }: PageProps) {
     }))
   }
 
+  // 3. Pre-fetch prediction for this fixture
+  let initialPrediction: MatchPrediction | null = null
+  if (fixture?.event_id) {
+    try {
+      initialPrediction = await getMatchPrediction(fixture.event_id)
+    } catch {
+      // Non-blocking fallback; client will re-fetch
+    }
+  }
+
   return (
     <WatchStudio
       fixture={fixture}
@@ -94,6 +106,7 @@ async function WatchContent({ searchParams }: PageProps) {
       initialProvider={provider}
       initialSource={source}
       initialChannelId={channelId}
+      initialPrediction={initialPrediction}
     />
   )
 }
