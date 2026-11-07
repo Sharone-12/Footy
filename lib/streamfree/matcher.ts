@@ -60,6 +60,29 @@ const ALIASES: Record<string, string[]> = {
   "las palmas": ["ud las palmas"],
   leganes: ["cd leganes"],
   valladolid: ["real valladolid"],
+  malaga: ["malaga cf", "málaga", "málaga cf"],
+  "racing santander": ["real racing club", "racing de santander", "racing club", "real racing club de santander", "racing club de santander", "racing"],
+  "real racing club": ["racing santander", "racing de santander", "racing club", "real racing club de santander", "racing club de santander", "racing"],
+  "sporting gijon": ["sporting de gijon", "sporting gijón", "real sporting", "real sporting de gijon"],
+  "real oviedo": ["oviedo"],
+  "real zaragoza": ["zaragoza"],
+  "deportivo la coruna": ["deportivo de la coruna", "deportivo de a coruna", "deportivo a coruna", "deportivo", "depor", "rc deportivo"],
+  albacete: ["albacete bp", "albacete balompie"],
+  burgos: ["burgos cf"],
+  castellon: ["cd castellon", "castellón"],
+  cadiz: ["cádiz", "cadiz cf"],
+  granada: ["granada cf"],
+  almeria: ["almería", "ud almeria"],
+  levante: ["levante ud"],
+  elche: ["elche cf"],
+  cordoba: ["córdoba", "cordoba cf"],
+  eibar: ["sd eibar"],
+  huesca: ["sd huesca"],
+  mirandes: ["cd mirandes", "mirandés"],
+  ferrol: ["racing ferrol", "racing de ferrol"],
+  tenerife: ["cd tenerife"],
+  cartagena: ["fc cartagena"],
+  eldense: ["cd eldense"],
   // Premier League & England
   "manchester united": ["man united", "man utd", "manutd", "mufc"],
   "manchester city": ["man city", "mancity", "mcfc"],
@@ -135,6 +158,7 @@ const COMPETITIONS: Record<string, string[]> = {
  * Clean and normalise a string: lowercased, unaccented, punctuation dropped.
  */
 export function normalise(s: string): string {
+  if (!s || typeof s !== "string") return ""
   return s
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")

@@ -3,19 +3,10 @@ import type { MatchedZLive, ZLiveChannel } from "./types"
 import {
   normalise,
   diceSimilarity,
+  teamSimilarity,
 } from "@/lib/streamfree/matcher"
 
 export const CONFIDENCE_THRESHOLD = 0.75
-
-/** Known league/broadcaster correlations for generic channels */
-const LEAGUE_BROADCASTER_HINTS: Record<string, string[]> = {
-  "la liga": ["laliga", "movistar", "dazn", "espn", "supersport laliga", "bein"],
-  "premier league": ["premier", "epl", "sky sports premier", "supersport premier", "nbc", "peacock", "tnt sports"],
-  "champions league": ["champions", "ucl", "tnt sports", "cbs", "paramount", "bein", "supersport"],
-  bundesliga: ["bundesliga", "sky sport bundesliga", "sony sports"],
-  "serie a": ["serie a", "dazn", "cbs", "paramount", "tnt sports"],
-  "ligue 1": ["ligue 1", "bein", "dazn"],
-}
 
 /** Check if channel title specifically pairs both teams (e.g. "Arsenal vs Chelsea") */
 function matchesBothTeams(
@@ -27,9 +18,14 @@ function matchesBothTeams(
   const normAway = normalise(fixture.away)
 
   const hasHome =
-    normChannel.includes(normHome) || diceSimilarity(normChannel, normHome) >= 0.7
+    normChannel.includes(normHome) ||
+    diceSimilarity(normChannel, normHome) >= 0.7 ||
+    teamSimilarity(fixture.home, channelName) >= 0.75
+
   const hasAway =
-    normChannel.includes(normAway) || diceSimilarity(normChannel, normAway) >= 0.7
+    normChannel.includes(normAway) ||
+    diceSimilarity(normChannel, normAway) >= 0.7 ||
+    teamSimilarity(fixture.away, channelName) >= 0.75
 
   if (hasHome && hasAway) {
     const score = 0.85 + (diceSimilarity(normChannel, `${normHome} ${normAway}`) * 0.1)
@@ -39,28 +35,10 @@ function matchesBothTeams(
   return { matches: false, score: 0 }
 }
 
-/** Check if channel is a generic league-specific broadcaster */
-function matchesLeagueBroadcaster(
-  channelName: string,
-  leagueName: string,
-): boolean {
-  const normChannel = normalise(channelName)
-  const normLeague = normalise(leagueName)
-
-  for (const [leagueKey, hints] of Object.entries(LEAGUE_BROADCASTER_HINTS)) {
-    if (normLeague.includes(leagueKey) || leagueKey.includes(normLeague)) {
-      if (hints.some((h) => normChannel.includes(h))) {
-        return true
-      }
-    }
-  }
-
-  return false
-}
-
 /**
  * Match a single fixture against all available ZLive channels.
- * Prioritizes confirmed fixture matches, then league-specific channels, then generic football channels.
+ * Fixtures ONLY match confirmed matches where BOTH teams are explicitly paired.
+ * Generic 24/7 channels belong solely in the 24/7 channels shelf.
  */
 export function matchFixtureToZLive(
   fixture: Fixture,
@@ -68,7 +46,6 @@ export function matchFixtureToZLive(
 ): MatchedZLive | null {
   if (!channels || channels.length === 0) return null
 
-  // Only match confirmed matches where both teams are specifically mentioned in the title
   let bestConfirmed: MatchedZLive | null = null
   let maxConfirmedScore = 0
 
@@ -85,23 +62,7 @@ export function matchFixtureToZLive(
     }
   }
 
-  if (bestConfirmed) {
-    return bestConfirmed
-  }
-
-  // 2. Second pass: look for league-specific generic broadcaster
-  for (const ch of channels) {
-    if (matchesLeagueBroadcaster(ch.name, fixture.league)) {
-      return {
-        channel: ch,
-        confidence: 0.65,
-        isConfirmedMatch: false,
-        isGenericBroadcaster: true,
-      }
-    }
-  }
-
-  return null
+  return bestConfirmed
 }
 
 /**

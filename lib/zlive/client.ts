@@ -62,9 +62,9 @@ export async function fetchZLiveManifest(forceRefresh = false): Promise<ZLiveMan
   return inflightManifest
 }
 
-/** Non-football keywords to filter out (e.g. motorsports, kids, cricket) */
+/** Non-football keywords to filter out (e.g. motorsports, horse racing, kids, cricket) */
 const EXCLUDE_REGEX =
-  /\b(f1|formula\s*1|motogp|nascar|indycar|kids|cartoon|anime|cricket|golf|rugby|tennis|snooker|darts|ufc|wwe|boxing|fight|nba|nhl|baseball|mlb|nfl)\b/i
+  /\b(f1|formula\s*1|motogp|nascar|indycar|racing|horse|horses|equestrian|greyhound|kids|cartoon|anime|cricket|golf|rugby|tennis|snooker|darts|ufc|wwe|boxing|fight|nba|nhl|baseball|mlb|nfl)\b/i
 
 /** Football broadcaster keywords and leagues */
 const FOOTBALL_BROADCASTER_REGEX =

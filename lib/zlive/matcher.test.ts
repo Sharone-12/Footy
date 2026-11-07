@@ -55,7 +55,7 @@ async function runTests() {
   assert.ok(match1.isConfirmedMatch, "Should be confirmed match")
   assert.ok(match1.confidence >= 0.75, "Confidence should be >= 0.75")
 
-  // Test 2: Generic league channel association
+  // Test 2: Generic league channel should NOT falsely attach to a fixture
   const fixture2: Fixture = {
     event_id: 102,
     home: "Arsenal",
@@ -66,10 +66,7 @@ async function runTests() {
   }
 
   const match2 = matchFixtureToZLive(fixture2, channels)
-  assert.ok(match2, "Should find Premier League channel")
-  assert.equal(match2.channel.id, "supersport-premier")
-  assert.equal(match2.isConfirmedMatch, false, "Should not be confirmed as a specific fixture")
-  assert.equal(match2.isGenericBroadcaster, true, "Should be marked as generic broadcaster")
+  assert.equal(match2, null, "Should not attach generic 24/7 channels to a specific match fixture")
 
   // Test 3: Unrecognized league should return null
   const fixture3: Fixture = {
@@ -86,9 +83,9 @@ async function runTests() {
 
   // Test 4: Batch matching
   const batch = matchFixturesToZLive([fixture1, fixture2], channels)
-  assert.equal(batch.size, 2)
+  assert.equal(batch.size, 1, "Only confirmed fixture should be matched")
   assert.equal(batch.get(101)?.channel.id, "barca-atleti-live")
-  assert.equal(batch.get(102)?.channel.id, "supersport-premier")
+  assert.equal(batch.get(102), undefined)
 
   console.log("zlive matcher: all assertions passed")
 }

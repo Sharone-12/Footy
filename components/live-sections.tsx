@@ -111,8 +111,8 @@ function providerPills(m: {
     },
     streamfree: { on: Boolean(m.matchedStream), title: "StreamFree source available" },
     zlive: {
-      on: Boolean(m.matchedZLive),
-      title: m.matchedZLive?.isConfirmedMatch ? "ZLive match confirmed" : "ZLive broadcast channel",
+      on: Boolean(m.matchedZLive?.isConfirmedMatch),
+      title: "ZLive match confirmed",
     },
     daddylive: {
       on: Boolean(m.matchedDaddyLive),
@@ -168,7 +168,7 @@ function Row({
   const hasStream = Boolean(
     (isProviderEnabled("matchora") && matchedMatchora) ||
     (isProviderEnabled("streamfree") && matchedStream) ||
-    (isProviderEnabled("zlive") && matchedZLive) ||
+    (isProviderEnabled("zlive") && matchedZLive?.isConfirmedMatch) ||
     (isProviderEnabled("daddylive") && matchedDaddyLive) ||
     (isProviderEnabled("damitv") && matchedDamiTv) ||
     (isProviderEnabled("cinevid") && matchedCinevid) ||
