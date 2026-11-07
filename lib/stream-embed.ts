@@ -93,5 +93,12 @@ export function embedFor(url: string, parentHost?: string | null): StreamEmbed |
     return { kind: "iframe", src: u.toString() }
   }
 
+  if (
+    (host === "daddylive.mov" || host === "thedaddy.li" || host.includes("daddylive")) &&
+    (path[0] === "player" || path[0] === "embed" || path[0] === "stream" || path[0] === "cast")
+  ) {
+    return { kind: "iframe", src: u.toString() }
+  }
+
   return link
 }

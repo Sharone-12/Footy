@@ -1,3 +1,4 @@
+import https from "node:https"
 import type {
   DaddyLiveChannel,
   DaddyLiveChannelsResponse,
@@ -220,8 +221,52 @@ function mergeScheduleChannels(
 }
 
 /**
+ * Fetches live events from the free public DaddyLive JSON API:
+ * GET https://daddylive.mov/api/events
+ */
+function fetchPublicEventsJson(): Promise<{ categories?: Record<string, any[]>; total_events?: number } | null> {
+  return new Promise((resolve) => {
+    const req = https.get(
+      {
+        hostname: "daddylive.mov",
+        path: "/api/events",
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+          Accept: "application/json",
+          Referer: "https://daddylive.mov/",
+        },
+        servername: "daddylive.mov",
+        timeout: TIMEOUT_MS,
+      },
+      (res) => {
+        if (res.statusCode !== 200) {
+          resolve(null)
+          return
+        }
+        let data = ""
+        res.on("data", (chunk) => (data += chunk))
+        res.on("end", () => {
+          try {
+            resolve(JSON.parse(data))
+          } catch {
+            resolve(null)
+          }
+        })
+      },
+    )
+    req.on("error", () => resolve(null))
+    req.on("timeout", () => {
+      req.destroy()
+      resolve(null)
+    })
+  })
+}
+
+/**
  * Fetch and parse DaddyLive football schedule.
- * Dynamically iterates day keys and category keys, filtering for football.
+ * Prioritizes the free public https://daddylive.mov/api/events endpoint,
+ * and falls back to the legacy authenticated endpoint if an API key is present.
  * Cached for ~60s with in-flight deduplication.
  */
 export async function fetchDaddyLiveSchedule(forceRefresh = false): Promise<DaddyLiveParsedEvent[]> {
@@ -235,9 +280,78 @@ export async function fetchDaddyLiveSchedule(forceRefresh = false): Promise<Dadd
   }
 
   inflightSchedule = (async () => {
+    // 1. Try free public endpoint first (https://daddylive.mov/api/events)
+    try {
+      const publicData = await fetchPublicEventsJson()
+      if (publicData && publicData.categories && typeof publicData.categories === "object") {
+        const eventMap = new Map<string, DaddyLiveParsedEvent>()
+
+        for (const [catName, events] of Object.entries(publicData.categories)) {
+          if (!Array.isArray(events)) continue
+          const isSoccerCat = /soccer|football/i.test(catName)
+
+          for (const ev of events) {
+            if (!ev || !ev.event || !Array.isArray(ev.channels) || ev.channels.length === 0) continue
+
+            // Filter out non-football sports
+            if (!isSoccerCat) {
+              const evLower = ev.event.toLowerCase()
+              if (!evLower.includes("soccer") && !evLower.includes("football") && !evLower.includes("league")) {
+                if (/cricket|nba|nfl|ncaaf|golf|motogp|ufc|boxing|tennis|hockey|rugby/i.test(evLower)) {
+                  continue
+                }
+              }
+            }
+
+            const cleanTitle = ev.event.replace(/^[⚽🏎️🏏🥊\s]+/, "").trim()
+            const { home, away } = parseEventTeams(cleanTitle)
+            if (!home || !away) continue
+
+            const normKey = `${home.toLowerCase().replace(/[^a-z0-9]+/g, "")}_${away.toLowerCase().replace(/[^a-z0-9]+/g, "")}`
+            const newChannels: DaddyLiveChannel[] = ev.channels
+              .filter((c: any) => c && c.url)
+              .map((c: any, i: number) => ({
+                channel_id: c.url,
+                channel_name: c.channel_name || `Link - ${i + 1}`,
+                player_url: c.url,
+              }))
+
+            if (newChannels.length === 0) continue
+
+            if (eventMap.has(normKey)) {
+              const existing = eventMap.get(normKey)!
+              for (const nc of newChannels) {
+                if (!existing.channels.some((c) => c.player_url === nc.player_url)) {
+                  existing.channels.push(nc)
+                }
+              }
+            } else {
+              eventMap.set(normKey, {
+                id: `daddylive:${ev.source || "mov"}:${normKey}`,
+                rawTitle: cleanTitle,
+                home,
+                away,
+                timeStr: ev.time || "Live",
+                kickoffIso: new Date().toISOString(),
+                channels: newChannels,
+              })
+            }
+          }
+        }
+
+        const parsedPublic = Array.from(eventMap.values())
+        if (parsedPublic.length > 0) {
+          scheduleCache = { timestamp: Date.now(), data: parsedPublic }
+          return parsedPublic
+        }
+      }
+    } catch (pubErr) {
+      console.warn("[daddylive] Public api/events fetch failed, falling back to legacy api:", pubErr)
+    }
+
+    // 2. Fall back to legacy authenticated endpoint if an API key is configured
     const apiKey = getApiKey()
     if (!apiKey) {
-      console.warn("[daddylive] DADDYLIVE_API_KEY environment variable is not configured")
       return scheduleCache?.data ?? []
     }
 

@@ -24,16 +24,8 @@ export function registry(): ProviderEntry[] {
     { adapter: damitvAdapter, supported: true, configured: true },
     { adapter: cinevidAdapter, supported: true, configured: true },
     { adapter: streamfreeAdapter, supported: true, configured: true },
+    { adapter: daddyliveAdapter, supported: true, configured: true },
     { adapter: zliveAdapter, supported: true, configured: true },
-    {
-      adapter: daddyliveAdapter,
-      supported: true,
-      configured: Boolean(
-        process.env.DADDYLIVE_API_KEY ||
-          process.env.daddylive_api_key ||
-          process.env["daddylive-api-key"],
-      ),
-    },
     { adapter: manualAdapter, supported: true, configured: true },
     {
       adapter: youtubeAdapter,
