@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { resolveLiveScoreEvent } from "@/lib/livescores-resolver"
-import { normalizeTeam, sameTeams } from "@/lib/livescores"
+import { normalizeTeam } from "@/lib/livescores"
 
 const TABLE_API_BASE = "https://prod-public-api.livescore.com/v1/api/app/stage/soccer"
 const CACHE_TTL_MS = 60_000
@@ -27,6 +27,9 @@ export type TableRow = {
   crest?: string
   isHome: boolean
   isAway: boolean
+  isLive?: boolean
+  phr?: number[]
+  qualificationColor?: "blue" | "orange" | "green" | "red" | null
 }
 
 export type LeagueTableResponse = {
@@ -41,6 +44,26 @@ function matchTeamName(target: string, candidate: string): boolean {
   const normTarget = normalizeTeam(target)
   const normCand = normalizeTeam(candidate)
   return normTarget === normCand || normCand.includes(normTarget) || normTarget.includes(normCand)
+}
+
+function getQualificationColor(
+  phr?: number[],
+  rank?: number,
+  totalTeams?: number,
+): "blue" | "orange" | "green" | "red" | null {
+  if (phr && phr.length > 0) {
+    if (phr.includes(20) || phr.includes(1)) return "blue"
+    if (phr.includes(25) || phr.includes(2)) return "orange"
+    if (phr.includes(191) || phr.includes(3)) return "green"
+    if (phr.includes(15) || phr.includes(4)) return "red"
+  }
+  if (rank) {
+    if (rank <= 4) return "blue"
+    if (rank === 5) return "orange"
+    if (rank === 6) return "green"
+    if (totalTeams && rank > totalTeams - 3) return "red"
+  }
+  return null
 }
 
 export async function GET(request: Request) {
@@ -98,22 +121,38 @@ export async function GET(request: Request) {
     const stage = json?.Stages?.[0]
     const rawTable = stage?.LeagueTable?.L?.[0]?.Tables?.[0]?.team || []
 
-    const rows: TableRow[] = rawTable.map((t: any) => ({
-      rank: t.rnk || 0,
-      team: t.Tnm || "Team",
-      teamId: String(t.Tid || ""),
-      played: t.pld || 0,
-      won: t.win || 0,
-      drawn: t.drw || 0,
-      lost: t.lst || 0,
-      goalsFor: t.gf || 0,
-      goalsAgainst: t.ga || 0,
-      goalDiff: t.gd || 0,
-      points: t.pts || 0,
-      crest: t.Img ? `https://static.livescore.com/c/football/teams/${t.Img}` : undefined,
-      isHome: matchTeamName(home, t.Tnm),
-      isAway: matchTeamName(away, t.Tnm),
-    }))
+    const rows: TableRow[] = rawTable.map((t: any) => {
+      const img = t.Img
+      const crest = img
+        ? img.startsWith("http")
+          ? img
+          : `https://storage.lsmedia1.com/images/team/medium/${img}`
+        : undefined
+
+      const isLive = t.Ipr === 1
+      const phr = Array.isArray(t.phr) ? t.phr : undefined
+      const qualificationColor = getQualificationColor(phr, t.rnk, rawTable.length)
+
+      return {
+        rank: t.rnk || 0,
+        team: t.Tnm || "Team",
+        teamId: String(t.Tid || ""),
+        played: t.pld || 0,
+        won: t.win || 0,
+        drawn: t.drw || 0,
+        lost: t.lst || 0,
+        goalsFor: t.gf || 0,
+        goalsAgainst: t.ga || 0,
+        goalDiff: t.gd || 0,
+        points: t.pts || 0,
+        crest,
+        isLive,
+        phr,
+        qualificationColor,
+        isHome: matchTeamName(home, t.Tnm),
+        isAway: matchTeamName(away, t.Tnm),
+      }
+    })
 
     const result: LeagueTableResponse = {
       leagueName: stage?.Snm || stageName || "League Table",
@@ -132,4 +171,3 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Failed to fetch table" }, { status: 500 })
   }
 }
-
