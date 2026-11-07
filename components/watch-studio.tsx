@@ -209,7 +209,9 @@ export function WatchStudio({
   const searchParams = useSearchParams()
 
   const playerContainerRef = useRef<HTMLDivElement>(null)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isTornDown, setIsTornDown] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
   const [activeTab, setActiveTab] = useState<"about" | "streams" | "similar">("about")
   const [prediction, setPrediction] = useState<MatchPrediction | null>(initialPrediction ?? null)
@@ -473,6 +475,7 @@ export function WatchStudio({
   // Keep state and URL query params synchronized
   const selectSource = useCallback(
     (providerId: StreamingProviderId, sourceKey: string) => {
+      setIsTornDown(false)
       setSelectedProviderId(providerId)
       setSelectedSourceKey(sourceKey)
       setIsFrameLoading(true)
@@ -551,7 +554,72 @@ export function WatchStudio({
     }
   }, [])
 
+  // Instantly blanks and terminates the iframe audio/video process
+  const killIframe = useCallback(() => {
+    if (iframeRef.current) {
+      try {
+        iframeRef.current.src = "about:blank"
+        iframeRef.current.remove()
+      } catch {}
+    }
+    setIsTornDown(true)
+  }, [])
+
+  // Immediately kill audio on unmount or stream switch
+  useEffect(() => {
+    return () => {
+      if (iframeRef.current) {
+        try {
+          iframeRef.current.src = "about:blank"
+        } catch {}
+      }
+    }
+  }, [currentSource?.key, reloadKey])
+
+  // Intercept navigation events to instantly silence audio the millisecond the user navigates
+  useEffect(() => {
+    const handleDocumentClick = (e: MouseEvent) => {
+      const anchor = (e.target as HTMLElement)?.closest("a")
+      if (!anchor || !anchor.href) return
+      if (anchor.target === "_blank") return
+      if (anchor.getAttribute("download") != null) return
+
+      try {
+        const url = new URL(anchor.href, window.location.origin)
+        // If navigating to another internal page or fixture
+        if (url.origin === window.location.origin && url.href !== window.location.href) {
+          killIframe()
+        }
+      } catch {}
+    }
+
+    const handlePopState = () => {
+      killIframe()
+    }
+
+    const handleUnload = () => {
+      if (iframeRef.current) {
+        try {
+          iframeRef.current.src = "about:blank"
+        } catch {}
+      }
+    }
+
+    document.addEventListener("click", handleDocumentClick, { capture: true })
+    window.addEventListener("popstate", handlePopState)
+    window.addEventListener("pagehide", handleUnload)
+    window.addEventListener("beforeunload", handleUnload)
+
+    return () => {
+      document.removeEventListener("click", handleDocumentClick, { capture: true })
+      window.removeEventListener("popstate", handlePopState)
+      window.removeEventListener("pagehide", handleUnload)
+      window.removeEventListener("beforeunload", handleUnload)
+    }
+  }, [killIframe])
+
   const reloadStream = useCallback(() => {
+    setIsTornDown(false)
     setIsFrameLoading(true)
     setHasFrameError(false)
     setReloadKey((k) => k + 1)
@@ -875,7 +943,7 @@ export function WatchStudio({
               )}
 
               {/* 3. ACTIVE IFRAME STREAM PLAYER */}
-              {!isBundleLoading && currentSource && (
+              {!isTornDown && !isBundleLoading && currentSource && (
                 <>
                   {isFrameLoading && (
                     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/85 backdrop-blur-xs pointer-events-none transition-opacity duration-300">
@@ -905,6 +973,7 @@ export function WatchStudio({
                   )}
 
                   <iframe
+                    ref={iframeRef}
                     key={`${currentSource.key}-${reloadKey}`}
                     src={currentSource.url}
                     title={`${fixture?.home ?? "Live"} vs ${fixture?.away ?? "Match"} — ${currentSource.label}`}

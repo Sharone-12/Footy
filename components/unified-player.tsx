@@ -57,7 +57,9 @@ export function UnifiedPlayer({
   onClose,
 }: UnifiedPlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isTornDown, setIsTornDown] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
 
@@ -139,6 +141,55 @@ export function UnifiedPlayer({
     return () => document.removeEventListener("fullscreenchange", onFullscreenChange)
   }, [])
 
+  // Instantly blanks and terminates the iframe audio/video process
+  const killIframe = () => {
+    if (iframeRef.current) {
+      try {
+        iframeRef.current.src = "about:blank"
+        iframeRef.current.remove()
+      } catch {}
+    }
+    setIsTornDown(true)
+  }
+
+  // Intercept navigation events to instantly silence audio the millisecond the user navigates
+  useEffect(() => {
+    const handleDocumentClick = (e: MouseEvent) => {
+      const anchor = (e.target as HTMLElement)?.closest("a")
+      if (!anchor || !anchor.href) return
+      if (anchor.target === "_blank") return
+      if (anchor.getAttribute("download") != null) return
+
+      try {
+        const url = new URL(anchor.href, window.location.origin)
+        if (url.origin === window.location.origin && url.href !== window.location.href) {
+          killIframe()
+        }
+      } catch {}
+    }
+
+    const handlePopState = () => killIframe()
+    const handleUnload = () => {
+      if (iframeRef.current) {
+        try {
+          iframeRef.current.src = "about:blank"
+        } catch {}
+      }
+    }
+
+    document.addEventListener("click", handleDocumentClick, { capture: true })
+    window.addEventListener("popstate", handlePopState)
+    window.addEventListener("pagehide", handleUnload)
+    window.addEventListener("beforeunload", handleUnload)
+
+    return () => {
+      document.removeEventListener("click", handleDocumentClick, { capture: true })
+      window.removeEventListener("popstate", handlePopState)
+      window.removeEventListener("pagehide", handleUnload)
+      window.removeEventListener("beforeunload", handleUnload)
+    }
+  }, [])
+
   function toggleFullscreen() {
     if (!containerRef.current) return
     if (!document.fullscreenElement) {
@@ -150,6 +201,7 @@ export function UnifiedPlayer({
 
   function handleProviderSwitch(provider: StreamingProviderId) {
     if (provider === selectedProvider) return
+    setIsTornDown(false)
     setSelectedProvider(provider)
     setIsLoading(true)
     setHasError(false)
@@ -245,6 +297,17 @@ export function UnifiedPlayer({
       ? `ZLive · ${activeZLiveChannel.name}`
       : "ZLive"
   }
+
+  // Immediately kill audio on unmount or stream url switch
+  useEffect(() => {
+    return () => {
+      if (iframeRef.current) {
+        try {
+          iframeRef.current.src = "about:blank"
+        } catch {}
+      }
+    }
+  }, [currentUrl])
 
   return (
     <div
@@ -622,8 +685,9 @@ export function UnifiedPlayer({
               )}
             </div>
           </div>
-        ) : (
+        ) : !isTornDown ? (
           <iframe
+            ref={iframeRef}
             key={`${selectedProvider}:${currentUrl}`}
             src={currentUrl}
             title={`${fixtureTitle} (${providerDisplayName})`}
@@ -639,7 +703,7 @@ export function UnifiedPlayer({
             style={{ border: 0 }}
             className="absolute inset-0 h-full w-full border-0"
           />
-        )}
+        ) : null}
       </div>
 
       {/* Bottom Footer Info */}
