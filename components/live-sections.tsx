@@ -74,7 +74,14 @@ function Row({
   onWatch?: (state: ActivePlayerState) => void
 }) {
   const tid = LEAGUE_TOURNAMENT_ID[m.league]
-  const hasStream = Boolean(matchedMatchora || matchedStream || matchedZLive || matchedDaddyLive || matchedDamiTv || matchedCinevid)
+  const hasStream = Boolean(
+    (isProviderEnabled("matchora") && matchedMatchora) ||
+    (isProviderEnabled("streamfree") && matchedStream) ||
+    (isProviderEnabled("zlive") && matchedZLive) ||
+    (isProviderEnabled("daddylive") && matchedDaddyLive) ||
+    (isProviderEnabled("damitv") && matchedDamiTv) ||
+    (isProviderEnabled("cinevid") && matchedCinevid)
+  )
   const start = startOf(m)
   const left = start - now
   const isUnderAnHour = left > 0 && left <= 3600_000
@@ -132,7 +139,7 @@ function Row({
         {isWatchable && (
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5">
-              {matchedMatchora && (
+              {isProviderEnabled("matchora") && matchedMatchora && (
                 <span
                   title={`Matchora (${matchedMatchora.event.channelCount} channel${matchedMatchora.event.channelCount === 1 ? "" : "s"})`}
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/25"
@@ -142,7 +149,7 @@ function Row({
                 </span>
               )}
 
-              {matchedDamiTv && (
+              {isProviderEnabled("damitv") && matchedDamiTv && (
                 <span
                   title={`DAMITV (${matchedDamiTv.stream.sources.length} source${matchedDamiTv.stream.sources.length === 1 ? "" : "s"})`}
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-semibold bg-violet-500/10 text-violet-400 border border-violet-500/25"
@@ -152,7 +159,7 @@ function Row({
                 </span>
               )}
 
-              {matchedCinevid && (
+              {isProviderEnabled("cinevid") && matchedCinevid && (
                 <span
                   title={`Cinevid (${matchedCinevid.isConfirmedMatch ? "Confirmed" : "Candidate"})`}
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/25"
@@ -162,7 +169,7 @@ function Row({
                 </span>
               )}
 
-              {matchedStream && (
+              {isProviderEnabled("streamfree") && matchedStream && (
                 <span
                   title="StreamFree source available"
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/25"
@@ -172,7 +179,7 @@ function Row({
                 </span>
               )}
 
-              {matchedZLive && (
+              {isProviderEnabled("zlive") && matchedZLive && (
                 <span
                   title={matchedZLive.isConfirmedMatch ? "ZLive match confirmed" : "ZLive broadcast channel"}
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25"
@@ -182,7 +189,7 @@ function Row({
                 </span>
               )}
 
-              {matchedDaddyLive && (
+              {isProviderEnabled("daddylive") && matchedDaddyLive && (
                 <span
                   title={`DaddyLiveHD (${matchedDaddyLive.channels.length} channel${matchedDaddyLive.channels.length === 1 ? "" : "s"})`}
                   className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/25"
@@ -305,6 +312,10 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
 
   // Fetch Matchora stream matches on mount
   useEffect(() => {
+    if (!isProviderEnabled("matchora")) {
+      setMatchoraMap({})
+      return
+    }
     let unmounted = false
     async function loadMatchora() {
       try {
@@ -359,6 +370,10 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
 
   // Fetch DAMITV stream matches on mount
   useEffect(() => {
+    if (!isProviderEnabled("damitv")) {
+      setDamitvMap({})
+      return
+    }
     let unmounted = false
     async function loadDamiTv() {
       try {
@@ -384,6 +399,10 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
 
   // Fetch Cinevid stream matches on mount
   useEffect(() => {
+    if (!isProviderEnabled("cinevid")) {
+      setCinevidMap({})
+      return
+    }
     let unmounted = false
     async function loadCinevid() {
       try {
@@ -409,6 +428,10 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
 
   // Fetch DaddyLive stream matches on mount
   useEffect(() => {
+    if (!isProviderEnabled("daddylive")) {
+      setDaddyliveMap({})
+      return
+    }
     let unmounted = false
     async function loadDaddyLive() {
       try {
@@ -434,6 +457,11 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
 
   // Fetch ZLive stream matches and generic channels on mount
   useEffect(() => {
+    if (!isProviderEnabled("zlive")) {
+      setZliveMap({})
+      setGenericChannels([])
+      return
+    }
     let unmounted = false
     async function loadZLive() {
       try {

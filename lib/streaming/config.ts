@@ -14,7 +14,7 @@ import type { StreamingProviderId } from "./types"
 export const STREAMING_PROVIDERS_CONFIG: Record<StreamingProviderId, boolean> = {
   matchora: true, // 🟢 Matchora (Fixtures + Broadcaster feeds)
   damitv: true, // 🟢 DAMITV (Multi-language streams)
-  cinevid: true, // 🟢 Cinevid (HD Public Events API)
+  cinevid: false, // ⚪ Cinevid (HD Public Events API - set to false to test unwiring)
   streamfree: false, // ⚪ StreamFree (Unwired for testing - change to true to re-enable)
   daddylive: true, // 🟢 DaddyLiveHD (Free public API)
   zlive: true, // 🟢 ZLive (Match streams + 24/7 channels)
@@ -24,3 +24,4 @@ export const STREAMING_PROVIDERS_CONFIG: Record<StreamingProviderId, boolean> = 
 export function isProviderEnabled(provider: StreamingProviderId): boolean {
   return Boolean(STREAMING_PROVIDERS_CONFIG[provider])
 }
+

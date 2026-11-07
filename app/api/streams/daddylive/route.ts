@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { supabase } from "@/lib/supabase"
 import type { Fixture } from "@/lib/providers/types"
 import { requireLiveAuth } from "@/lib/live/auth"
+import { isProviderEnabled } from "@/lib/streaming/config"
 import { fetchDaddyLiveSchedule } from "@/lib/daddylive/client"
 import { matchFixtureToDaddyLive, matchFixturesToDaddyLive } from "@/lib/daddylive/matcher"
 
@@ -15,6 +16,14 @@ import { matchFixtureToDaddyLive, matchFixturesToDaddyLive } from "@/lib/daddyli
 export async function GET(request: Request) {
   const authError = requireLiveAuth(request)
   if (authError) return authError
+
+  if (!isProviderEnabled("daddylive")) {
+    return NextResponse.json({
+      matched: false,
+      streams: [],
+      message: "DaddyLive is disabled via config",
+    })
+  }
 
   try {
     const { searchParams } = new URL(request.url)

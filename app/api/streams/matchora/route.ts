@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { supabase } from "@/lib/supabase"
 import type { Fixture } from "@/lib/providers/types"
 import { requireLiveAuth } from "@/lib/live/auth"
+import { isProviderEnabled } from "@/lib/streaming/config"
 import { fetchMatchoraSchedule } from "@/lib/matchora/client"
 import { matchFixtureToMatchora, matchFixturesToMatchora } from "@/lib/matchora/matcher"
 
@@ -15,6 +16,15 @@ import { matchFixtureToMatchora, matchFixturesToMatchora } from "@/lib/matchora/
 export async function GET(request: Request) {
   const authError = requireLiveAuth(request)
   if (authError) return authError
+
+  if (!isProviderEnabled("matchora")) {
+    return NextResponse.json({
+      matched: false,
+      stream: null,
+      streams: [],
+      message: "Matchora is disabled via config",
+    })
+  }
 
   try {
     const { searchParams } = new URL(request.url)

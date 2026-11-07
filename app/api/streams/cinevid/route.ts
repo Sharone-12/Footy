@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { supabase } from "@/lib/supabase"
 import type { Fixture } from "@/lib/providers/types"
 import { requireLiveAuth } from "@/lib/live/auth"
+import { isProviderEnabled } from "@/lib/streaming/config"
 import { fetchCinevidEvents } from "@/lib/cinevid/client"
 import { matchFixtureToCinevid, matchFixturesToCinevid } from "@/lib/cinevid/matcher"
 
@@ -15,6 +16,15 @@ import { matchFixtureToCinevid, matchFixturesToCinevid } from "@/lib/cinevid/mat
 export async function GET(request: Request) {
   const authError = requireLiveAuth(request)
   if (authError) return authError
+
+  if (!isProviderEnabled("cinevid")) {
+    return NextResponse.json({
+      matched: false,
+      stream: null,
+      streams: [],
+      message: "Cinevid is disabled via config",
+    })
+  }
 
   try {
     const { searchParams } = new URL(request.url)

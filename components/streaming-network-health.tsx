@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useTransition } from "react"
 import { ActivityIcon, CheckCircle2Icon, RefreshCwIcon, ShieldCheckIcon } from "lucide-react"
+import { isProviderEnabled, STREAMING_PROVIDERS_CONFIG } from "@/lib/streaming/config"
 
 interface ProviderStatus {
   id: string
@@ -10,6 +11,7 @@ interface ProviderStatus {
   ok: boolean
   latencyMs: number
   itemCount?: number
+  message?: string
 }
 
 interface NetworkHealthData {
@@ -21,20 +23,62 @@ interface NetworkHealthData {
 }
 
 const DEFAULT_PROVIDERS: ProviderStatus[] = [
-  { id: "matchora", name: "Matchora", status: "operational", ok: true, latencyMs: 140 },
-  { id: "damitv", name: "DAMITV", status: "operational", ok: true, latencyMs: 220 },
-  { id: "cinevid", name: "Cinevid", status: "operational", ok: true, latencyMs: 180 },
-  { id: "daddylive", name: "DaddyLiveHD", status: "operational", ok: true, latencyMs: 250 },
-  { id: "streamfree", name: "StreamFree", status: "degraded", ok: false, latencyMs: 0 },
-  { id: "zlive", name: "ZLive", status: "operational", ok: true, latencyMs: 160 },
+  {
+    id: "matchora",
+    name: "Matchora",
+    status: isProviderEnabled("matchora") ? "operational" : "degraded",
+    ok: isProviderEnabled("matchora"),
+    latencyMs: isProviderEnabled("matchora") ? 140 : 0,
+    message: isProviderEnabled("matchora") ? undefined : "Disabled via config",
+  },
+  {
+    id: "damitv",
+    name: "DAMITV",
+    status: isProviderEnabled("damitv") ? "operational" : "degraded",
+    ok: isProviderEnabled("damitv"),
+    latencyMs: isProviderEnabled("damitv") ? 220 : 0,
+    message: isProviderEnabled("damitv") ? undefined : "Disabled via config",
+  },
+  {
+    id: "cinevid",
+    name: "Cinevid",
+    status: isProviderEnabled("cinevid") ? "operational" : "degraded",
+    ok: isProviderEnabled("cinevid"),
+    latencyMs: isProviderEnabled("cinevid") ? 180 : 0,
+    message: isProviderEnabled("cinevid") ? undefined : "Disabled via config",
+  },
+  {
+    id: "daddylive",
+    name: "DaddyLiveHD",
+    status: isProviderEnabled("daddylive") ? "operational" : "degraded",
+    ok: isProviderEnabled("daddylive"),
+    latencyMs: isProviderEnabled("daddylive") ? 250 : 0,
+    message: isProviderEnabled("daddylive") ? undefined : "Disabled via config",
+  },
+  {
+    id: "streamfree",
+    name: "StreamFree",
+    status: isProviderEnabled("streamfree") ? "operational" : "degraded",
+    ok: isProviderEnabled("streamfree"),
+    latencyMs: 0,
+    message: isProviderEnabled("streamfree") ? undefined : "Disabled via config",
+  },
+  {
+    id: "zlive",
+    name: "ZLive",
+    status: isProviderEnabled("zlive") ? "operational" : "degraded",
+    ok: isProviderEnabled("zlive"),
+    latencyMs: isProviderEnabled("zlive") ? 160 : 0,
+    message: isProviderEnabled("zlive") ? undefined : "Disabled via config",
+  },
 ]
 
 export function StreamingNetworkHealth() {
   const [data, setData] = useState<NetworkHealthData>({
     timestamp: Date.now(),
-    overall: "operational",
-    activeCount: 6,
-    totalCount: 6,
+    overall: DEFAULT_PROVIDERS.filter((p) => p.ok).length === DEFAULT_PROVIDERS.length ? "operational" : "degraded",
+    activeCount: DEFAULT_PROVIDERS.filter((p) => p.ok).length,
+    totalCount: DEFAULT_PROVIDERS.length,
     providers: DEFAULT_PROVIDERS,
   })
   const [isPending, startTransition] = useTransition()
@@ -129,17 +173,23 @@ export function StreamingNetworkHealth() {
       {/* Provider Health Cards Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-2.5">
         {data.providers.map((p) => {
-          const isHealthy = p.ok && p.status === "operational"
+          const isConfigEnabled = isProviderEnabled(p.id as any)
+          const isHealthy = isConfigEnabled && p.ok && p.status === "operational"
+          const isDisabled = !isConfigEnabled || p.message === "Disabled via config"
           return (
             <div
               key={p.id}
-              className="card-lift surface bg-background/50 hover:bg-background/80 border border-border/70 hover:border-border rounded-xl p-2.5 flex flex-col justify-between gap-2 transition-all"
+              className={`card-lift surface bg-background/50 hover:bg-background/80 border border-border/70 hover:border-border rounded-xl p-2.5 flex flex-col justify-between gap-2 transition-all ${
+                isDisabled ? "opacity-60" : ""
+              }`}
             >
               <div className="flex items-center justify-between gap-1.5">
                 <span className="font-bold text-xs text-foreground truncate">{p.name}</span>
                 <span className="relative flex size-2 shrink-0">
                   {isHealthy ? (
-                    <span className="relative inline-flex rounded-full size-2 bg-[var(--pitch)]" />
+                    <span className="relative inline-flex rounded-full size-2 bg-[var(--pitch)] shadow-[0_0_6px_var(--pitch)]" />
+                  ) : isDisabled ? (
+                    <span className="relative inline-flex rounded-full size-2 bg-zinc-600 border border-zinc-500/50" />
                   ) : (
                     <span className="relative inline-flex rounded-full size-2 bg-amber-400" />
                   )}
@@ -148,9 +198,15 @@ export function StreamingNetworkHealth() {
 
               <div className="flex items-center justify-between text-[10px] text-muted-foreground font-mono">
                 <span className="truncate">
-                  {p.itemCount ? `${p.itemCount} feeds` : isHealthy ? "Online" : "Standby"}
+                  {isDisabled
+                    ? "Disabled"
+                    : p.itemCount
+                    ? `${p.itemCount} feeds`
+                    : isHealthy
+                    ? "Online"
+                    : "Standby"}
                 </span>
-                {p.latencyMs > 0 && (
+                {!isDisabled && p.latencyMs > 0 && (
                   <span className="text-[9px] px-1 rounded bg-white/[0.06] text-muted-foreground shrink-0">
                     {p.latencyMs}ms
                   </span>
@@ -163,4 +219,3 @@ export function StreamingNetworkHealth() {
     </section>
   )
 }
-
