@@ -704,32 +704,28 @@ export function WatchStudio({
                 {/* Prominent Score Hub (or VS Badge pre-match) */}
                 <div className="flex flex-col items-center justify-center shrink-0 px-1 sm:px-2">
                   {hasScore ? (
-                    <div className="inline-flex items-stretch rounded-xl bg-black/80 border border-white/15 shadow-md backdrop-blur-md overflow-hidden">
-                      <div className="flex items-center gap-1.5 sm:gap-2 pl-2 pr-2.5 py-1 sm:pl-2.5 sm:pr-3">
+                    <div className="inline-flex items-stretch h-8 sm:h-9 rounded-xl bg-black/80 border border-white/15 shadow-md backdrop-blur-md overflow-hidden">
+                      {hideScore ? (
                         <button
                           type="button"
                           onClick={toggleHideScore}
-                          className="p-1 rounded-md text-white/50 hover:text-white transition-colors hover:bg-white/10 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--pitch)]"
-                          title={hideScore ? "Show scoreline" : "Hide scoreline"}
-                          aria-label={hideScore ? "Show scoreline" : "Hide scoreline"}
+                          className="flex items-center justify-center px-2.5 sm:px-3 text-amber-400 hover:text-amber-300 hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--pitch)]"
+                          title="Show scoreline"
+                          aria-label="Show scoreline"
                         >
-                          {hideScore ? (
-                            <EyeOffIcon className="size-3.5 text-amber-400 shrink-0" />
-                          ) : (
-                            <EyeIcon className="size-3.5 text-white/40 hover:text-white/80 shrink-0" />
-                          )}
+                          <EyeOffIcon className="size-3.5 shrink-0" />
                         </button>
-                        {hideScore ? (
+                      ) : (
+                        <div className="flex items-center gap-1.5 sm:gap-2 pl-2 pr-2.5 py-1 sm:pl-2.5 sm:pr-3">
                           <button
                             type="button"
                             onClick={toggleHideScore}
-                            className="cursor-pointer font-mono text-sm sm:text-base font-black text-white/40 tracking-widest px-1 hover:text-white/70 transition-colors focus:outline-none"
-                            title="Show scoreline"
-                            aria-label="Show scoreline"
+                            className="p-1 rounded-md text-white/40 hover:text-white transition-colors hover:bg-white/10 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--pitch)]"
+                            title="Hide scoreline"
+                            aria-label="Hide scoreline"
                           >
-                            •• : ••
+                            <EyeIcon className="size-3.5 shrink-0" />
                           </button>
-                        ) : (
                           <div
                             onClick={toggleHideScore}
                             className="cursor-pointer flex items-center gap-2 sm:gap-2.5 select-none"
@@ -743,8 +739,8 @@ export function WatchStudio({
                               {awayScore}
                             </span>
                           </div>
-                        )}
-                      </div>
+                        </div>
+                      )}
                       {liveClock && (
                         <div className="flex items-center gap-1 px-2.5 border-l border-white/10 bg-[var(--pitch)]/10">
                           <span className="relative flex size-1.5">
