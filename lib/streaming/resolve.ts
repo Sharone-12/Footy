@@ -279,7 +279,7 @@ export function buildProviders(bundle: StreamBundle): WatchProvider[] {
     matchora: bundle.matchora ? matchoraProvider(bundle.matchora) : null,
     damitv: bundle.damiTv ? damiTvProvider(bundle.damiTv) : null,
     cinevid: bundle.cinevid ? cinevidProvider(bundle.cinevid) : null,
-    streamfree: bundle.streamFree ? streamFreeProvider(bundle.streamFree) : null,
+    streamfree: null, // Unwired for testing
     daddylive: bundle.daddyLive ? daddyLiveProvider(bundle.daddyLive) : null,
     zlive: zLiveProvider(bundle.zLive, bundle.genericChannel, bundle.genericChannels),
   }

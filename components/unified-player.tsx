@@ -59,7 +59,7 @@ export function UnifiedPlayer({
 
   // Determine available providers
   const hasMatchora = Boolean(matchora && matchora.event?.embedUrl)
-  const hasStreamFree = Boolean(streamFree && streamFree.sources?.length > 0)
+  const hasStreamFree = false // Unwired for testing
   const hasZLive = Boolean(zLive?.channel || genericChannel)
   const hasDaddyLive = Boolean(daddyLive && daddyLive.channels?.length > 0)
   const hasDamiTv = Boolean(damiTv && (damiTv.stream?.embedUrl || damiTv.stream?.sources?.length > 0))

@@ -254,7 +254,7 @@ export function WatchStudio({
 
         const newBundle: StreamBundle = {
           matchora: moMatch,
-          streamFree: sfMatch,
+          streamFree: null, // Unwired for testing
           zLive: zlMatch,
           daddyLive: dlMatch,
           damiTv: dtMatch,

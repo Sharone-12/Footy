@@ -66,10 +66,11 @@ export async function GET(request: Request) {
     {
       id: "streamfree",
       name: "StreamFree",
-      ok: sfRes.status === "fulfilled" && sfRes.value.ok,
-      status: sfRes.status === "fulfilled" && sfRes.value.ok ? "operational" : "degraded",
-      latencyMs: sfRes.status === "fulfilled" ? sfRes.value.latencyMs : 0,
-      itemCount: sfRes.status === "fulfilled" ? sfRes.value.count : undefined,
+      ok: false,
+      status: "degraded",
+      latencyMs: 0,
+      itemCount: 0,
+      message: "Unwired for testing",
     },
     {
       id: "zlive",
@@ -99,3 +100,4 @@ export async function GET(request: Request) {
     },
   )
 }
+

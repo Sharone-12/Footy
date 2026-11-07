@@ -118,22 +118,20 @@ const zLive = {
   isGenericBroadcaster: true,
 } as MatchedZLive
 
-// ── Display order and per-provider source counts ──
+// ── Display order and per-provider source counts (streamfree unwired for testing) ──
 const all = buildProviders({ matchora, damiTv, cinevid, streamFree, daddyLive, zLive })
 assert.deepEqual(
   all.map((p) => p.id),
-  ["matchora", "damitv", "cinevid", "streamfree", "daddylive", "zlive"],
+  ["matchora", "damitv", "cinevid", "daddylive", "zlive"],
 )
 assert.equal(all[0].sources.length, 2) // matchora (main + c1)
 assert.deepEqual(all[0].sources.map((s) => s.url), ["https://matchora.pro/embed/match/m1", "https://matchora.pro/embed/channel/c1"])
 assert.equal(all[1].sources.length, 1) // damiTv
 assert.deepEqual(all[1].sources.map((s) => s.url), ["https://dami/a"])
 assert.deepEqual(all[2].sources.map((s) => s.url), ["https://cinevid.st/embed/live/cv1"]) // cinevid
-assert.equal(all[3].sources.length, 2) // streamFree
-assert.deepEqual(all[3].qualities, ["FHD", "HD"])
-assert.deepEqual(all[4].sources.map((s) => s.label), ["Sky Main"]) // daddyLive
-assert.equal(all[5].sources[0].url, "https://zlive.st/embed/z1") // zLive
-assert.equal(allSources(all).length, 8)
+assert.deepEqual(all[3].sources.map((s) => s.label), ["Sky Main"]) // daddyLive
+assert.equal(all[4].sources[0].url, "https://zlive.st/embed/z1") // zLive
+assert.equal(allSources(all).length, 6)
 
 // ── A provider with nothing playable is omitted, not shown dead ──
 const empty = buildProviders({
@@ -154,7 +152,7 @@ assert.deepEqual(fallback[0].sources.map((s) => s.url), ["https://dami/default"]
 
 // ── A stale selection resolves to something playable rather than nothing ──
 const gone = resolveSource(all, "streamfree", "streamfree:4K")
-assert.equal(gone?.source.url, "https://sf/fhd")
+assert.equal(gone?.source.url, "https://matchora.pro/embed/match/m1")
 const missingProvider = resolveSource(all, "daddylive", "daddylive:999")
 assert.equal(missingProvider?.source.url, "https://dl/1")
 assert.equal(resolveSource(all, null, null)?.provider.id, "matchora")

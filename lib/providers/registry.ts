@@ -25,7 +25,7 @@ export function registry(): ProviderEntry[] {
     { adapter: matchoraAdapter, supported: true, configured: true },
     { adapter: damitvAdapter, supported: true, configured: true },
     { adapter: cinevidAdapter, supported: true, configured: true },
-    { adapter: streamfreeAdapter, supported: true, configured: true },
+    { adapter: streamfreeAdapter, supported: false, configured: false }, // Unwired for testing
     { adapter: daddyliveAdapter, supported: true, configured: true },
     { adapter: zliveAdapter, supported: true, configured: true },
     { adapter: manualAdapter, supported: true, configured: true },

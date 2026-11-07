@@ -25,7 +25,7 @@ const DEFAULT_PROVIDERS: ProviderStatus[] = [
   { id: "damitv", name: "DAMITV", status: "operational", ok: true, latencyMs: 220 },
   { id: "cinevid", name: "Cinevid", status: "operational", ok: true, latencyMs: 180 },
   { id: "daddylive", name: "DaddyLiveHD", status: "operational", ok: true, latencyMs: 250 },
-  { id: "streamfree", name: "StreamFree", status: "operational", ok: true, latencyMs: 290 },
+  { id: "streamfree", name: "StreamFree", status: "degraded", ok: false, latencyMs: 0 },
   { id: "zlive", name: "ZLive", status: "operational", ok: true, latencyMs: 160 },
 ]
 
@@ -163,3 +163,4 @@ export function StreamingNetworkHealth() {
     </section>
   )
 }
+

@@ -327,29 +327,10 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
     }
   }, [])
 
-  // Fetch StreamFree stream matches on mount
+  // Fetch StreamFree stream matches on mount (unwired for testing)
   useEffect(() => {
-    let unmounted = false
-    async function loadStreamFree() {
-      try {
-        const res = await fetch("/api/streamfree")
-        if (!res.ok) return
-        const data = await res.json()
-        if (data?.streams && Array.isArray(data.streams) && !unmounted) {
-          const map: Record<number, MatchedStream> = {}
-          for (const s of data.streams) {
-            if (s.event_id) map[s.event_id] = s
-          }
-          setStreamMap(map)
-        }
-      } catch (err) {
-        console.warn("[live] Could not load StreamFree streams:", err)
-      }
-    }
-    loadStreamFree()
-    return () => {
-      unmounted = true
-    }
+    // Unwired for testing
+    setStreamMap({})
   }, [])
 
   // Fetch DAMITV stream matches on mount
