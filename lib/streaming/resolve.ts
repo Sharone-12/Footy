@@ -71,15 +71,15 @@ export const PROVIDER_NAME: Record<StreamingProviderId, string> = {
 }
 
 /** Display order: Ranked hierarchy:
- * 1. DAMITV (Flawless, 0 buffer)
- * 2. Cinevid (Clean HD public event player)
+ * 1. Cinevid (Clean HD public event player)
+ * 2. DAMITV (Flawless, 0 buffer)
  * 3. Matchora (Official broadcaster feeds)
  * 4. DaddyLive (Live sports channels)
  * 5. Live24 (High-speed LiteSpeed Falcon CDN)
  * 6. ZLive (24/7 channels & fallback)
  * 7. StreamFree (Alternative web streams)
  */
-const ORDER: StreamingProviderId[] = ["damitv", "cinevid", "matchora", "daddylive", "live24", "zlive", "streamfree"]
+const ORDER: StreamingProviderId[] = ["cinevid", "damitv", "matchora", "daddylive", "live24", "zlive", "streamfree"]
 
 const dedupe = (xs: (string | undefined)[]) =>
   Array.from(new Set(xs.filter((x): x is string => Boolean(x))))

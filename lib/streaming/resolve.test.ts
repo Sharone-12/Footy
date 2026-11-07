@@ -134,15 +134,15 @@ const live24 = {
   isConfirmedMatch: true,
 } as MatchedLive24
 
-// ── Display order and per-provider source counts (damitv ranked #1 buffer-free) ──
+// ── Display order and per-provider source counts (cinevid ranked #1 HD player) ──
 const all = buildProviders({ matchora, damiTv, cinevid, streamFree, daddyLive, zLive, live24 })
 assert.deepEqual(
   all.map((p) => p.id),
-  ["damitv", "cinevid", "matchora", "daddylive", "live24", "zlive", "streamfree"],
+  ["cinevid", "damitv", "matchora", "daddylive", "live24", "zlive", "streamfree"],
 )
-assert.equal(all[0].sources.length, 1) // damiTv
-assert.deepEqual(all[0].sources.map((s) => s.url), ["https://dami/a"])
-assert.deepEqual(all[1].sources.map((s) => s.url), ["https://cinevid.st/embed/live/cv1"]) // cinevid
+assert.deepEqual(all[0].sources.map((s) => s.url), ["https://cinevid.st/embed/live/cv1"]) // cinevid
+assert.equal(all[1].sources.length, 1) // damiTv
+assert.deepEqual(all[1].sources.map((s) => s.url), ["https://dami/a"])
 assert.equal(all[2].sources.length, 2) // matchora (main + c1)
 assert.deepEqual(all[2].sources.map((s) => s.url), ["https://matchora.pro/embed/match/m1", "https://matchora.pro/embed/channel/c1"])
 assert.deepEqual(all[3].sources.map((s) => s.label), ["Sky Main"]) // daddyLive
@@ -167,14 +167,14 @@ const fallback = buildProviders({
 })
 assert.deepEqual(fallback[0].sources.map((s) => s.url), ["https://dami/default"])
 
-// ── A stale selection resolves to something playable rather than nothing (falls back to default #1 damitv) ──
+// ── A stale selection resolves to something playable rather than nothing (falls back to default #1 cinevid) ──
 const gone = resolveSource(all, "streamfree", "streamfree:4K")
 assert.equal(gone?.source.url, "https://sf/fhd")
 const unknownProvider = resolveSource(all, "unknown" as any, "unknown:key")
-assert.equal(unknownProvider?.source.url, "https://dami/a")
+assert.equal(unknownProvider?.source.url, "https://cinevid.st/embed/live/cv1")
 const missingProvider = resolveSource(all, "daddylive", "daddylive:999")
 assert.equal(missingProvider?.source.url, "https://dl/1")
-assert.equal(resolveSource(all, null, null)?.provider.id, "damitv")
+assert.equal(resolveSource(all, null, null)?.provider.id, "cinevid")
 
 // ── A hand-picked 24/7 channel is a provider with one source ──
 const generic = buildProviders({

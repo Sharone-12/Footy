@@ -3,8 +3,8 @@ import type { StreamingProviderId } from "./types"
 /**
  * MASTER SWITCH FOR ALL STREAMING PROVIDERS
  * Ranked hierarchy:
- * 1. DAMITV (Flawless, buffer-free, multiple audio feeds)
- * 2. Cinevid (Clean HD public event player)
+ * 1. Cinevid (Clean HD public event player)
+ * 2. DAMITV (Flawless, buffer-free, multiple audio feeds)
  * 3. Matchora (Official broadcaster feeds: Sky/TNT/DAZN)
  * 4. DaddyLiveHD (Direct satellite sports channels)
  * 5. Live24 (High-speed LiteSpeed Falcon CDN)
@@ -20,8 +20,8 @@ import type { StreamingProviderId } from "./types"
  * Set back to `true` to re-enable.
  */
 export const STREAMING_PROVIDERS_CONFIG: Record<StreamingProviderId, boolean> = {
-  damitv: true, // 🟢 DAMITV (#1 Ranked - Flawless & Buffer-Free)
-  cinevid: true, // 🟢 Cinevid (#2 Ranked - Clean HD Public Event Player)
+  cinevid: true, // 🟢 Cinevid (#1 Ranked - Clean HD Public Event Player)
+  damitv: true, // 🟢 DAMITV (#2 Ranked - Flawless & Buffer-Free)
   matchora: true, // 🟢 Matchora (#3 Ranked - Fixtures + Broadcaster feeds)
   daddylive: true, // 🟢 DaddyLiveHD (#4 Ranked - Live sports channels)
   live24: true, // 🟢 Live24 / StreamHive (#5 Ranked - Falcon HQ match streams)

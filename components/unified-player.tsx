@@ -73,13 +73,13 @@ export function UnifiedPlayer({
   const hasLive24 = isProviderEnabled("live24") && Boolean(live24 && live24.event?.streams?.length > 0)
 
   // Initial provider selection hierarchy:
-  // 1. DAMITV -> 2. Cinevid -> 3. Matchora -> 4. DaddyLive -> 5. Live24 -> 6. ZLive -> 7. StreamFree
+  // 1. Cinevid -> 2. DAMITV -> 3. Matchora -> 4. DaddyLive -> 5. Live24 -> 6. ZLive -> 7. StreamFree
   const defaultProvider: StreamingProviderId =
     initialProvider ??
-    (hasDamiTv
-      ? "damitv"
-      : hasCinevid
+    (hasCinevid
       ? "cinevid"
+      : hasDamiTv
+      ? "damitv"
       : hasMatchora
       ? "matchora"
       : hasDaddyLive
@@ -357,25 +357,7 @@ export function UnifiedPlayer({
               role="tablist"
               aria-label="Streaming Provider"
             >
-              {/* Hierarchy: DAMITV -> Cinevid -> Matchora -> DaddyLive -> Live24 -> ZLive -> StreamFree */}
-              <button
-                type="button"
-                role="tab"
-                aria-selected={selectedProvider === "damitv"}
-                disabled={!hasDamiTv}
-                onClick={() => handleProviderSwitch("damitv")}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[0.7rem] font-bold transition-all ${
-                  selectedProvider === "damitv"
-                    ? "bg-white/20 text-white shadow-sm"
-                    : hasDamiTv
-                    ? "text-muted-foreground hover:text-foreground"
-                    : "opacity-35 cursor-not-allowed text-muted-foreground"
-                }`}
-              >
-                <MonitorPlayIcon className="size-3 text-violet-400" />
-                DAMITV
-              </button>
-
+              {/* Hierarchy: Cinevid -> DAMITV -> Matchora -> DaddyLive -> Live24 -> ZLive -> StreamFree */}
               <button
                 type="button"
                 role="tab"
@@ -392,6 +374,24 @@ export function UnifiedPlayer({
               >
                 <TvIcon className="size-3 text-rose-400" />
                 Cinevid
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                aria-selected={selectedProvider === "damitv"}
+                disabled={!hasDamiTv}
+                onClick={() => handleProviderSwitch("damitv")}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[0.7rem] font-bold transition-all ${
+                  selectedProvider === "damitv"
+                    ? "bg-white/20 text-white shadow-sm"
+                    : hasDamiTv
+                    ? "text-muted-foreground hover:text-foreground"
+                    : "opacity-35 cursor-not-allowed text-muted-foreground"
+                }`}
+              >
+                <MonitorPlayIcon className="size-3 text-violet-400" />
+                DAMITV
               </button>
 
               <button
