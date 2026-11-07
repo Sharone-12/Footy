@@ -6,7 +6,7 @@ import { ExternalLinkIcon, GlobeIcon, MonitorPlayIcon, PlayIcon, RadioIcon, Spar
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
 import { splitFixtures, startOf, PLAYING_MS, type Timed } from "@/lib/live"
-import { gatewaySources } from "@/lib/providers/registry"
+import { StreamingNetworkHealth } from "@/components/streaming-network-health"
 import type { MatchedStream } from "@/lib/streamfree/types"
 import type { MatchedZLive, ZLiveChannel } from "@/lib/zlive/types"
 import type { MatchedDaddyLive } from "@/lib/daddylive/types"
@@ -294,7 +294,6 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
   const [cinevidMap, setCinevidMap] = useState<Record<number, MatchedCinevid>>({})
   const [genericChannels, setGenericChannels] = useState<ZLiveChannel[]>([])
   const [activePlayer, setActivePlayer] = useState<ActivePlayerState | null>(null)
-  const gateways = gatewaySources()
 
   useEffect(() => {
     const tick = () => setNow(Date.now())
@@ -568,54 +567,8 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
         </section>
       )}
 
-      {/* 5. External Gateways (RoxieStreams, StreamCorner) - Pushed below matches */}
-      {gateways.length > 0 && (
-        <aside
-          aria-label="External streaming gateways"
-          className="surface bg-card/70 border border-border/80 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
-        >
-          <div className="flex items-start gap-3">
-            <span className="relative flex size-2.5 mt-1 shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75 motion-reduce:hidden" />
-              <span className="relative inline-flex rounded-full size-2.5 bg-amber-500" />
-            </span>
-            <div>
-              <div className="flex items-center gap-2">
-                <span
-                  className="text-sm font-bold uppercase tracking-wider text-foreground"
-                  style={{ fontFamily: "var(--font-condensed)" }}
-                >
-                  External Streaming Gateways
-                </span>
-                <span className="text-[10px] uppercase font-semibold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                  External
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Third-party stream indexes. Click to visit in a new tab (leaves app).
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
-            {gateways.map((source) => (
-              <a
-                key={source.name}
-                href={source.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`${source.name} external stream gateway, opens in a new tab`}
-                className="card-lift surface bg-card hover:bg-accent/40 border border-border px-3.5 py-2 rounded-xl flex items-center gap-2 text-xs font-semibold transition-colors group"
-              >
-                <span>{source.name}</span>
-                <ExternalLinkIcon
-                  className="size-3 text-muted-foreground group-hover:text-foreground transition-colors"
-                  aria-hidden
-                />
-              </a>
-            ))}
-          </div>
-        </aside>
-      )}
+      {/* 5. Streaming Network Health Monitor (Real-time latency & active provider pings) */}
+      <StreamingNetworkHealth />
     </div>
   )
 }

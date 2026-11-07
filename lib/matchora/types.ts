@@ -68,3 +68,4 @@ export interface MatchedMatchora {
   event: MatchoraParsedEvent
   channel?: MatchoraParsedChannel
 }
+

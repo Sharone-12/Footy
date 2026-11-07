@@ -130,3 +130,4 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Failed to process Matchora stream request" }, { status: 500 })
   }
 }
+

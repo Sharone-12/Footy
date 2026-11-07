@@ -171,3 +171,20 @@ export async function fetchStreamSources(
   return stream?.sources ?? []
 }
 
+export async function checkStreamFreeHealth(): Promise<{ ok: boolean; count?: number; latencyMs: number }> {
+  const start = Date.now()
+  try {
+    const streams = await fetchSoccerStreams()
+    return {
+      ok: true,
+      count: streams.length,
+      latencyMs: Date.now() - start,
+    }
+  } catch {
+    return {
+      ok: false,
+      latencyMs: Date.now() - start,
+    }
+  }
+}
+

@@ -18,8 +18,8 @@ const REQUEST_TIMEOUT_MS = 8_000 // 8 seconds
 let eventsCache: { timestamp: number; data: CinevidParsedEvent[] } | null = null
 let inflightEvents: Promise<CinevidParsedEvent[]> | null = null
 
-let healthCache: { timestamp: number; data: { status: string; ok: boolean } } | null = null
-let inflightHealth: Promise<{ status: string; ok: boolean }> | null = null
+let healthCache: { timestamp: number; data: { status: string; ok: boolean; count?: number; latencyMs: number } } | null = null
+let inflightHealth: Promise<{ status: string; ok: boolean; count?: number; latencyMs: number }> | null = null
 
 /**
  * Validates and normalizes relative or absolute URLs from Cinevid.
@@ -170,7 +170,7 @@ export function normalizeCinevidEvent(raw: CinevidRawEvent): CinevidParsedEvent 
  * Health check for Cinevid API.
  * GET https://cinevid.st/api/public/events (limited check)
  */
-export async function checkCinevidHealth(): Promise<{ status: string; ok: boolean }> {
+export async function checkCinevidHealth(): Promise<{ status: string; ok: boolean; count?: number; latencyMs: number }> {
   const now = Date.now()
   if (healthCache && now - healthCache.timestamp < HEALTH_CACHE_TTL_MS) {
     return healthCache.data
@@ -181,6 +181,7 @@ export async function checkCinevidHealth(): Promise<{ status: string; ok: boolea
   }
 
   inflightHealth = (async () => {
+    const start = Date.now()
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
 
@@ -190,11 +191,23 @@ export async function checkCinevidHealth(): Promise<{ status: string; ok: boolea
         headers: { Accept: "application/json", "User-Agent": "footyy-app/1.0" },
       })
       const ok = res.ok
-      const data = { status: ok ? "healthy" : `status_${res.status}`, ok }
+      let count = 0
+      if (ok) {
+        try {
+          const json = await res.json()
+          count = Array.isArray(json?.events) ? json.events.length : 0
+        } catch { }
+      }
+      const data = {
+        status: ok ? "healthy" : `status_${res.status}`,
+        ok,
+        count,
+        latencyMs: Date.now() - start,
+      }
       healthCache = { timestamp: Date.now(), data }
       return data
     } catch {
-      return { status: "unreachable", ok: false }
+      return { status: "unreachable", ok: false, latencyMs: Date.now() - start }
     } finally {
       clearTimeout(timer)
       inflightHealth = null

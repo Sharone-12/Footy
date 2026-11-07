@@ -1,3 +1,4 @@
+import https from "node:https"
 import type {
   DamiTvApiResponse,
   DamiTvParsedStream,
@@ -22,14 +23,47 @@ const API_HEADERS = {
 let streamsCache: { timestamp: number; data: DamiTvParsedStream[] } | null = null
 let inflightStreams: Promise<DamiTvParsedStream[]> | null = null
 
-let healthCache: { timestamp: number; data: { status: string; ok: boolean } } | null = null
-let inflightHealth: Promise<{ status: string; ok: boolean }> | null = null
+let healthCache: { timestamp: number; data: { status: string; ok: boolean; streamCount?: number; latencyMs?: number } } | null = null
+let inflightHealth: Promise<{ status: string; ok: boolean; streamCount?: number; latencyMs?: number }> | null = null
+
+function httpsGetDamiTv<T>(path: string): Promise<T | null> {
+  return new Promise((resolve) => {
+    const req = https.get(
+      {
+        hostname: "ondemand.st",
+        path: `/papi/api${path}`,
+        headers: API_HEADERS,
+        servername: "ondemand.st",
+        timeout: TIMEOUT_MS,
+      },
+      (res) => {
+        if (res.statusCode !== 200) {
+          resolve(null)
+          return
+        }
+        let data = ""
+        res.on("data", (chunk) => (data += chunk))
+        res.on("end", () => {
+          try {
+            resolve(JSON.parse(data))
+          } catch {
+            resolve(null)
+          }
+        })
+      },
+    )
+    req.on("error", () => resolve(null))
+    req.on("timeout", () => {
+      req.destroy()
+      resolve(null)
+    })
+  })
+}
 
 /**
  * Health check endpoint for DAMITV API.
- * GET https://ondemand.st/papi/api/ping
  */
-export async function checkDamiTvHealth(): Promise<{ status: string; ok: boolean }> {
+export async function checkDamiTvHealth(): Promise<{ status: string; ok: boolean; streamCount?: number; latencyMs?: number }> {
   const now = Date.now()
   if (healthCache && now - healthCache.timestamp < HEALTH_CACHE_TTL_MS) {
     return healthCache.data
@@ -40,22 +74,21 @@ export async function checkDamiTvHealth(): Promise<{ status: string; ok: boolean
   }
 
   inflightHealth = (async () => {
-    const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
-
+    const start = Date.now()
     try {
-      const res = await fetch(`${API_BASE}/ping`, {
-        signal: controller.signal,
-        headers: API_HEADERS,
-      })
-      const ok = res.ok
-      const data = { status: ok ? "healthy" : `status_${res.status}`, ok }
+      const streams = await fetchDamiTvStreams()
+      const ok = streams.length > 0
+      const data = {
+        status: ok ? "healthy" : "no_streams",
+        ok,
+        streamCount: streams.length,
+        latencyMs: Date.now() - start,
+      }
       healthCache = { timestamp: Date.now(), data }
       return data
     } catch {
-      return { status: "unreachable", ok: false }
+      return { status: "unreachable", ok: false, latencyMs: Date.now() - start }
     } finally {
-      clearTimeout(timer)
       inflightHealth = null
     }
   })()
@@ -130,17 +163,21 @@ export async function fetchDamiTvStreams(forceRefresh = false): Promise<DamiTvPa
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
 
     try {
-      const res = await fetch(`${API_BASE}/streams`, {
-        signal: controller.signal,
-        headers: API_HEADERS,
-      })
+      let json = await httpsGetDamiTv<DamiTvApiResponse>("/streams")
+      if (!json) {
+        const res = await fetch(`${API_BASE}/streams`, {
+          signal: controller.signal,
+          headers: API_HEADERS,
+        })
+        if (res.ok) {
+          json = (await res.json()) as DamiTvApiResponse
+        }
+      }
 
-      if (!res.ok) {
-        console.warn(`[damitv] Streams fetch failed with status ${res.status}`)
+      if (!json) {
         return streamsCache?.data ?? []
       }
 
-      const json = (await res.json()) as DamiTvApiResponse
       const categoryGroups = json?.streams || []
 
       if (!Array.isArray(categoryGroups)) {

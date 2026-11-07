@@ -471,6 +471,23 @@ export async function fetchDaddyLiveInfo(): Promise<Record<string, unknown> | nu
   return inflightInfo
 }
 
+export async function checkDaddyLiveHealth(): Promise<{ ok: boolean; count?: number; latencyMs: number }> {
+  const start = Date.now()
+  try {
+    const events = await fetchDaddyLiveSchedule()
+    return {
+      ok: true,
+      count: events.length,
+      latencyMs: Date.now() - start,
+    }
+  } catch {
+    return {
+      ok: false,
+      latencyMs: Date.now() - start,
+    }
+  }
+}
+
 /** Testing helper to clear cache */
 export function _clearDaddyLiveCache(): void {
   channelsCache = null

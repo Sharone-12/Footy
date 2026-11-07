@@ -127,6 +127,23 @@ export async function getGenericFootballChannels(): Promise<ZLiveChannel[]> {
   })
 }
 
+export async function checkZLiveHealth(): Promise<{ ok: boolean; count?: number; latencyMs: number }> {
+  const start = Date.now()
+  try {
+    const channels = await fetchFootballChannels()
+    return {
+      ok: true,
+      count: channels.length,
+      latencyMs: Date.now() - start,
+    }
+  } catch {
+    return {
+      ok: false,
+      latencyMs: Date.now() - start,
+    }
+  }
+}
+
 /** Testing helper to clear the cache */
 export function _clearZLiveCache(): void {
   manifestCache = null
