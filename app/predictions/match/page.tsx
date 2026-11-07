@@ -19,6 +19,11 @@ import { withFrozenPredictions } from "@/lib/predictions-freeze"
 import { percentileRank } from "@/lib/stats"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
+import {
+  MatchHeroScoreboard,
+  MatchLiveBadge,
+  MatchWatchStreamCTA,
+} from "@/components/prediction-match-card"
 import { formatDateIST } from "@/lib/time"
 
 const TEAM_COLORS = ["#4ade80", "#60a5fa"]
@@ -361,14 +366,14 @@ async function Content({
     fetchTeamData(supabase, season, ALL_STATS),
     supabase
       .from("matches")
-      .select("event_id, league, season, round, date, home, home_id, away, away_id, status, home_goals, away_goals")
+      .select("event_id, league, season, round, date, kickoff, home, home_id, away, away_id, status, home_goals, away_goals")
       .eq("season", season)
       .limit(2000),
   ])
 
   const allMatches = (allMatchData || []) as {
     event_id: number; league: string; season: string; round: number
-    date: string; home: string; home_id: number | null; away: string; away_id: number | null; status: string
+    date: string; kickoff?: string | null; home: string; home_id: number | null; away: string; away_id: number | null; status: string
     home_goals: number | null; away_goals: number | null
   }[]
 
@@ -440,7 +445,17 @@ async function Content({
           )}
           Round {match.round}
         </div>
-        <div className="stat-label mb-5">{dateStr}</div>
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-5">
+          <span className="stat-label">{dateStr}</span>
+          <MatchLiveBadge
+            fixture={{
+              home: match.home,
+              away: match.away,
+              date: match.date,
+              kickoff: match.kickoff,
+            }}
+          />
+        </div>
 
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4 max-w-lg mx-auto">
           <Link
@@ -457,13 +472,17 @@ async function Content({
               {match.home}
             </span>
           </Link>
-          {isSettled ? (
-            <div className="stat-figure text-3xl px-3">
-              {match.home_goals} – {match.away_goals}
-            </div>
-          ) : (
-            <div className="stat-label text-lg px-3">vs</div>
-          )}
+          <MatchHeroScoreboard
+            fixture={{
+              home: match.home,
+              away: match.away,
+              date: match.date,
+              kickoff: match.kickoff,
+            }}
+            isSettled={isSettled}
+            homeGoals={match.home_goals}
+            awayGoals={match.away_goals}
+          />
           <Link
             href={`/teams/compare?teams=${encodeURIComponent(match.away)}`}
             className="flex flex-col items-center gap-2 group"
@@ -479,6 +498,13 @@ async function Content({
             </span>
           </Link>
         </div>
+
+        {/* Watch Live Stream button if active stream is live */}
+        <MatchWatchStreamCTA
+          eventId={match.event_id}
+          home={match.home}
+          away={match.away}
+        />
 
         {isSettled && pred && pred.frozen && (
           <div className="mt-4">

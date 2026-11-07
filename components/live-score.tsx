@@ -20,9 +20,9 @@ const POLL_MS = 15_000
 /** The clock is extrapolated locally, so it must repaint every second. */
 const TICK_MS = 1_000
 
-type Snapshot = { scores: LiveScore[]; now: number }
+type Snapshot = { scores: LiveScore[]; activeStreamIds: Set<number>; now: number }
 
-let snapshot: Snapshot = { scores: [], now: 0 }
+let snapshot: Snapshot = { scores: [], activeStreamIds: new Set(), now: 0 }
 const listeners = new Set<() => void>()
 let pollTimer: ReturnType<typeof setInterval> | null = null
 let tickTimer: ReturnType<typeof setInterval> | null = null
@@ -35,10 +35,24 @@ function publish(next: Partial<Snapshot>) {
 
 async function poll() {
   try {
-    const response = await fetch("/api/livescores")
-    if (!response.ok) return // keep the last good snapshot rather than blanking
-    const body = (await response.json()) as { scores?: LiveScore[] }
-    if (Array.isArray(body.scores)) publish({ scores: body.scores, now: Date.now() })
+    const [scoresRes, streamsRes] = await Promise.allSettled([
+      fetch("/api/livescores"),
+      fetch("/api/streams/active"),
+    ])
+
+    const next: Partial<Snapshot> = { now: Date.now() }
+
+    if (scoresRes.status === "fulfilled" && scoresRes.value.ok) {
+      const body = (await scoresRes.value.json()) as { scores?: LiveScore[] }
+      if (Array.isArray(body.scores)) next.scores = body.scores
+    }
+
+    if (streamsRes.status === "fulfilled" && streamsRes.value.ok) {
+      const body = (await streamsRes.value.json()) as { eventIds?: number[] }
+      if (Array.isArray(body.eventIds)) next.activeStreamIds = new Set(body.eventIds)
+    }
+
+    publish(next)
   } catch {
     // Offline or a blip: the existing snapshot keeps ticking, and the clock's
     // own staleness guard stops it drifting if this lasts.
@@ -65,11 +79,18 @@ function subscribe(listener: () => void) {
 
 const getSnapshot = () => snapshot
 /** The server has no live data, so marks render absent and appear on hydration. */
-const getServerSnapshot = (): Snapshot => ({ scores: [], now: 0 })
+const getServerSnapshot = (): Snapshot => ({ scores: [], activeStreamIds: new Set(), now: 0 })
 
 export function useLiveScore(fixture: FixtureLike): LiveScore | null {
   const { scores } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
   return findLive(fixture, scores)
+}
+
+/** Check if a fixture currently has an active confirmed live stream. */
+export function useHasLiveStream(eventId?: number | null): boolean {
+  const { activeStreamIds } = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+  if (!eventId) return false
+  return activeStreamIds.has(eventId)
 }
 
 /** The shared one-second clock, for callers that already have a score. */

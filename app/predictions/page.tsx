@@ -26,6 +26,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { PredictionsLeagueToggle } from "@/components/predictions-league-toggle"
 import { TeamRankingsExpand } from "@/components/team-rankings-expand"
+import { PredictionMatchCard } from "@/components/prediction-match-card"
 import { formatDateIST } from "@/lib/time"
 
 const OUTCOME_COLORS = {
@@ -36,110 +37,7 @@ const OUTCOME_COLORS = {
 
 const OUTCOME_LABELS = { home: "Home", draw: "Draw", away: "Away" } as const
 
-function ProbBar({ homeWin, draw, awayWin }: { homeWin: number; draw: number; awayWin: number }) {
-  return (
-    <div className="flex h-2 rounded-full overflow-hidden gap-px">
-      <div
-        className="rounded-l-full transition-all"
-        style={{ width: `${homeWin}%`, background: OUTCOME_COLORS.home }}
-      />
-      <div
-        className="transition-all"
-        style={{ width: `${draw}%`, background: OUTCOME_COLORS.draw }}
-      />
-      <div
-        className="rounded-r-full transition-all"
-        style={{ width: `${awayWin}%`, background: OUTCOME_COLORS.away }}
-      />
-    </div>
-  )
-}
 
-function MatchCard({ p }: { p: MatchPrediction }) {
-  const isSettled = p.actual !== null
-  const isBarca = p.home === "FC Barcelona" || p.away === "FC Barcelona"
-  return (
-    <Link
-      href={`/predictions/match?id=${p.event_id}`}
-      className={`card-lift surface rounded-xl px-4 py-3.5 space-y-3 block ${
-        isBarca ? "barca-stripes" : "bg-card"
-      }`}
-    >
-      <div className="flex items-center justify-between gap-2">
-        <span className="shrink-0 flex items-center gap-1.5">
-          {LEAGUE_TOURNAMENT_ID[p.league] ? (
-            <LeagueCrest tournamentId={LEAGUE_TOURNAMENT_ID[p.league]} name={p.league} size={20} />
-          ) : (
-            <span className="stat-label">{LEAGUE_ABBR[p.league] ?? p.league}</span>
-          )}
-        </span>
-        <span className="stat-label">R{p.round}</span>
-        <span className="stat-label ml-auto">
-          {formatDateIST(`${p.date}T12:00:00Z`)}
-        </span>
-      </div>
-
-      <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-        <span className="flex items-center gap-2 justify-end">
-          <span className="text-[0.9rem] font-medium truncate">{p.home}</span>
-          {p.home_id && <TeamCrest teamId={p.home_id} name={p.home} size={22} />}
-        </span>
-        {isSettled ? (
-          <span className="stat-figure text-lg px-2">
-            {p.homeGoals} – {p.awayGoals}
-          </span>
-        ) : (
-          <span className="stat-label px-2">vs</span>
-        )}
-        <span className="flex items-center gap-2">
-          {p.away_id && <TeamCrest teamId={p.away_id} name={p.away} size={22} />}
-          <span className="text-[0.9rem] font-medium truncate">{p.away}</span>
-        </span>
-      </div>
-
-      <ProbBar homeWin={p.homeWin} draw={p.draw} awayWin={p.awayWin} />
-
-      <div className="flex justify-between text-xs">
-        {(["home", "draw", "away"] as const).map((k) => (
-          <span key={k} className="flex items-center gap-1.5">
-            <span
-              className="w-2 h-2 rounded-full"
-              style={{ background: OUTCOME_COLORS[k] }}
-            />
-            <span className="stat-label">
-              {OUTCOME_LABELS[k]}{" "}
-              <span className="text-foreground">
-                {k === "home" ? p.homeWin : k === "draw" ? p.draw : p.awayWin}%
-              </span>
-            </span>
-          </span>
-        ))}
-      </div>
-
-      <div className="flex items-center justify-between pt-1 border-t border-white/5">
-        <span className="stat-label">
-          Prediction:{" "}
-          <span style={{ color: OUTCOME_COLORS[p.predicted] }}>
-            {p.predicted === "home" ? p.home : p.predicted === "away" ? p.away : "Draw"}
-          </span>
-        </span>
-        {isSettled && (
-          <span
-            className="stat-label text-[0.6rem] px-2 py-0.5 rounded-full"
-            style={{
-              color: p.correct ? OUTCOME_COLORS.home : "oklch(0.65 0.14 25)",
-              background: p.correct
-                ? "oklch(0.80 0.19 150 / 13%)"
-                : "oklch(0.65 0.14 25 / 13%)",
-            }}
-          >
-            {p.correct ? "CORRECT" : "WRONG"}
-          </span>
-        )}
-      </div>
-    </Link>
-  )
-}
 
 function AccuracyCard({ acc }: { acc: AccuracyStats }) {
   if (acc.total === 0) return null
@@ -453,7 +351,7 @@ async function Content({
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 stagger">
             {nextRoundPredictions.map((p) => (
-              <MatchCard key={p.event_id} p={p} />
+              <PredictionMatchCard key={p.event_id} p={p} />
             ))}
           </div>
         </section>
@@ -469,7 +367,7 @@ async function Content({
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {laterPredictions.slice(0, 30).map((p) => (
-              <MatchCard key={p.event_id} p={p} />
+              <PredictionMatchCard key={p.event_id} p={p} />
             ))}
           </div>
         </section>
@@ -485,7 +383,7 @@ async function Content({
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {recentSettled.map((p) => (
-              <MatchCard key={p.event_id} p={p} />
+              <PredictionMatchCard key={p.event_id} p={p} />
             ))}
           </div>
         </section>
