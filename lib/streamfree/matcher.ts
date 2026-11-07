@@ -117,7 +117,15 @@ const ALIASES: Record<string, string[]> = {
   "borussia dortmund": ["dortmund", "bvb"],
   "bayer leverkusen": ["leverkusen", "bayer 04"],
   "rb leipzig": ["leipzig", "rasenballsport leipzig"],
-  "borussia monchengladbach": ["monchengladbach", "mönchengladbach", "gladbach", "bmg"],
+  "borussia monchengladbach": ["borussia m'gladbach", "borussia mgladbach", "monchengladbach", "mönchengladbach", "gladbach", "bmg"],
+  "borussia m'gladbach": ["borussia monchengladbach", "monchengladbach", "mönchengladbach", "gladbach", "bmg"],
+  "1. fsv mainz 05": ["mainz", "fsv mainz 05", "1 fsv mainz 05", "mainz 05"],
+  mainz: ["1. fsv mainz 05", "fsv mainz 05", "1 fsv mainz 05", "mainz 05"],
+  "1. fc koln": ["fc koln", "koln", "cologne", "1 fc cologne", "fc cologne"],
+  koln: ["1. fc koln", "1 fc koln", "fc koln", "cologne", "fc cologne"],
+  cologne: ["1. fc koln", "1 fc koln", "fc koln", "koln"],
+  "1. fc heidenheim": ["heidenheim", "1 fc heidenheim"],
+  "1. fc union berlin": ["union berlin", "1 fc union berlin"],
   "hamburg sv": ["hamburger sv", "hamburg", "hsv"],
   "eintracht frankfurt": ["frankfurt"],
   "vfb stuttgart": ["stuttgart"],
@@ -133,13 +141,52 @@ const ALIASES: Record<string, string[]> = {
   udinese: ["udinese calcio"],
   venezia: ["venezia fc"],
   // France
-  "paris saint germain": ["psg", "paris sg", "paris st germain"],
+  "paris saint germain": ["psg", "paris sg", "paris st germain", "paris saint-germain"],
   "olympique marseille": ["marseille", "om"],
-  "olympique lyon": ["lyon", "ol"],
+  "olympique lyon": ["lyon", "ol", "olympique lyonnais"],
   monaco: ["as monaco"],
   lille: ["losc lille", "losc"],
   strasbourg: ["rc strasbourg", "racing strasbourg"],
+  "rc lens": ["lens"],
+  "stade brestois": ["stade brestois 29", "brest", "stade brest"],
+  brest: ["stade brestois", "stade brestois 29", "stade brest"],
+  "stade rennais": ["rennes", "stade rennes", "srfc"],
+  rennes: ["stade rennais", "stade rennes", "srfc"],
+  nice: ["ogc nice"],
+  reims: ["stade de reims"],
+  "le havre": ["le havre ac"],
+  auxerre: ["aj auxerre"],
+  angers: ["angers sco"],
   toulouse: ["toulouse fc"],
+  // Portugal
+  "sporting cp": ["sporting lisbon", "sporting", "sporting clube de portugal"],
+  "sporting lisbon": ["sporting cp", "sporting", "sporting clube de portugal"],
+  benfica: ["sl benfica"],
+  porto: ["fc porto"],
+  braga: ["sc braga"],
+  // Denmark / Scandinavia
+  "fc kobenhavn": ["copenhagen", "fc copenhagen", "kobenhavn", "fck"],
+  copenhagen: ["fc kobenhavn", "fc copenhagen", "kobenhavn", "fck"],
+  "bodo/glimt": ["bodo glimt", "bodoe glimt"],
+  // Belgium
+  "royale union saint-gilloise": ["union sg", "union st gilloise", "union saint-gilloise", "rusg"],
+  "union sg": ["royale union saint-gilloise", "union st gilloise", "union saint-gilloise", "rusg"],
+  "club brugge": ["club brugge kv", "brugge"],
+  // Netherlands
+  ajax: ["afc ajax"],
+  psv: ["psv eindhoven"],
+  feyenoord: ["feyenoord rotterdam"],
+  // Scotland
+  celtic: ["celtic fc", "glasgow celtic"],
+  rangers: ["rangers fc", "glasgow rangers"],
+  // Turkey
+  galatasaray: ["galatasaray sk"],
+  fenerbahce: ["fenerbahce sk"],
+  besiktas: ["besiktas jk"],
+  // Czech Republic
+  "sk slavia praha": ["slavia prague", "slavia praha"],
+  "slavia prague": ["sk slavia praha", "slavia praha"],
+  "sparta praha": ["sparta prague", "sparta praha"],
 }
 
 /** Competition synonyms for bonus scoring. */
@@ -160,6 +207,12 @@ const COMPETITIONS: Record<string, string[]> = {
 export function normalise(s: string): string {
   if (!s || typeof s !== "string") return ""
   return s
+    .replace(/[øØ]/g, "o")
+    .replace(/[æÆ]/g, "ae")
+    .replace(/[œŒ]/g, "oe")
+    .replace(/[ß]/g, "ss")
+    .replace(/[łŁ]/g, "l")
+    .replace(/[đĐ]/g, "d")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
