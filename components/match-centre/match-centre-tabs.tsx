@@ -35,50 +35,51 @@ export function MatchCentreTabs({ fixture, liveScore, initialTab = "stats" }: Ma
   const eid = liveScore?.id || null
   const fixtureId = fixture.event_id
 
-  // Fetch lineups when line-ups tab is selected
+  /**
+   * Every panel's data is fetched once, in parallel, as soon as the match
+   * centre mounts — not when its tab is first clicked.
+   *
+   * Each of these routes resolves the fixture and then calls out to
+   * livescore.com, so a cold tab cost 1.5-4.3s. Fetching lazily meant paying
+   * that on the first click of every tab, which is why switching kept
+   * showing "loading". Firing them together means the work overlaps with the
+   * user reading the stats tab, and the server-side caches are warm by the
+   * time anything is clicked.
+   */
   useEffect(() => {
-    if (activeTab === "lineups" && !lineups && !isLoadingLineups) {
-      setIsLoadingLineups(true)
-      const param = eid ? `eid=${encodeURIComponent(eid)}` : `fixture_id=${encodeURIComponent(fixtureId)}`
-      fetch(`/api/livescores/lineups?${param}`)
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          if (data) setLineups(data)
-        })
-        .catch(() => {})
-        .finally(() => setIsLoadingLineups(false))
-    }
-  }, [activeTab, lineups, isLoadingLineups, eid, fixtureId])
+    const param = eid
+      ? `eid=${encodeURIComponent(eid)}`
+      : `fixture_id=${encodeURIComponent(fixtureId)}`
+    const ac = new AbortController()
 
-  // Fetch table when table tab is selected
-  useEffect(() => {
-    if (activeTab === "table" && !tableData && !isLoadingTable) {
-      setIsLoadingTable(true)
-      const param = eid ? `eid=${encodeURIComponent(eid)}` : `fixture_id=${encodeURIComponent(fixtureId)}`
-      fetch(`/api/livescores/table?${param}`)
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          if (data) setTableData(data)
-        })
-        .catch(() => {})
-        .finally(() => setIsLoadingTable(false))
+    const load = async <T,>(
+      path: string,
+      setData: (v: T) => void,
+      setLoading: (v: boolean) => void,
+    ) => {
+      setLoading(true)
+      try {
+        const res = await fetch(`/api/livescores/${path}?${param}`, { signal: ac.signal })
+        if (res.ok) {
+          const data = (await res.json()) as T
+          if (data) setData(data)
+        }
+      } catch {
+        // Aborted on unmount, or the provider is down; the panel shows its
+        // own empty state and a retry is one tab switch away.
+      } finally {
+        if (!ac.signal.aborted) setLoading(false)
+      }
     }
-  }, [activeTab, tableData, isLoadingTable, eid, fixtureId])
 
-  // Fetch H2H when h2h tab is selected
-  useEffect(() => {
-    if (activeTab === "h2h" && !h2hData && !isLoadingH2H) {
-      setIsLoadingH2H(true)
-      const param = eid ? `eid=${encodeURIComponent(eid)}` : `fixture_id=${encodeURIComponent(fixtureId)}`
-      fetch(`/api/livescores/h2h?${param}`)
-        .then((res) => (res.ok ? res.json() : null))
-        .then((data) => {
-          if (data) setH2HData(data)
-        })
-        .catch(() => {})
-        .finally(() => setIsLoadingH2H(false))
-    }
-  }, [activeTab, h2hData, isLoadingH2H, eid, fixtureId])
+    void Promise.all([
+      load<MatchLineupsResponse>("lineups", setLineups, setIsLoadingLineups),
+      load<LeagueTableResponse>("table", setTableData, setIsLoadingTable),
+      load<H2HResponse>("h2h", setH2HData, setIsLoadingH2H),
+    ])
+
+    return () => ac.abort()
+  }, [eid, fixtureId])
 
   return (
     <section aria-label="Match Centre Live Data" className="flex flex-col gap-3">
@@ -151,9 +152,13 @@ export function MatchCentreTabs({ fixture, liveScore, initialTab = "stats" }: Ma
 
       {/* Active Tab Content Panel */}
       <div className="pt-1">
-        {activeTab === "stats" && (
+        {/* Hidden rather than unmounted: this card owns its own fetch and
+            poll, so unmounting threw those away and every return to the tab
+            restarted from a spinner. The other panels take their data as
+            props, so remounting those costs nothing. */}
+        <div className={activeTab === "stats" ? undefined : "hidden"}>
           <WatchLiveStatsCard fixture={fixture} liveScore={liveScore} />
-        )}
+        </div>
 
         {activeTab === "lineups" && (
           <div className="surface rounded-2xl bg-card p-3.5 sm:p-4 md:p-5 border border-border/70 shadow-sm animate-fade-in">

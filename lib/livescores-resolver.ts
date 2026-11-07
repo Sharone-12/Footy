@@ -46,8 +46,44 @@ export async function fetchScoreboard(eid: string): Promise<any | null> {
 
 /**
  * Resolve fixture parameters to a LiveScore eid and match details.
+ *
+ * Memoised because every match-centre tab calls it: the lineups, table and
+ * h2h routes each paid a Supabase round trip plus a name match against the
+ * day feed for the same fixture, one after another, as you clicked through.
+ * Resolution is pure lookup, so one answer serves all of them.
  */
+const RESOLVE_TTL_MS = 60_000
+const resolved = new Map<string, { at: number; data: ResolvedMatchEvent | null }>()
+const resolveInflight = new Map<string, Promise<ResolvedMatchEvent | null>>()
+
 export async function resolveLiveScoreEvent(
+  eidParam?: string | null,
+  fixtureIdParam?: string | null,
+): Promise<ResolvedMatchEvent | null> {
+  const key = `${eidParam ?? ""}|${fixtureIdParam ?? ""}`
+
+  const hit = resolved.get(key)
+  if (hit && Date.now() - hit.at < RESOLVE_TTL_MS) return hit.data
+
+  const pending = resolveInflight.get(key)
+  if (pending) return pending
+
+  const task = (async () => {
+    try {
+      const data = await resolveUncached(eidParam, fixtureIdParam)
+      // Only a successful resolve is worth remembering: a miss is usually a
+      // fixture the feed has not published yet, and will resolve shortly.
+      if (data?.eid) resolved.set(key, { at: Date.now(), data })
+      return data
+    } finally {
+      resolveInflight.delete(key)
+    }
+  })()
+  resolveInflight.set(key, task)
+  return task
+}
+
+async function resolveUncached(
   eidParam?: string | null,
   fixtureIdParam?: string | null,
 ): Promise<ResolvedMatchEvent | null> {

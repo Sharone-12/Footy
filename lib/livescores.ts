@@ -319,13 +319,44 @@ export function normalizeAll(payload: unknown): LiveScore[] {
 }
 
 /** Both halves of one payload, so settling full-time costs no extra request. */
-export async function fetchDaySnapshot(
-  date?: Date,
-): Promise<{ live: LiveScore[]; final: LiveScore[]; all: LiveScore[] }> {
-  const payload = await fetchFeed(date)
-  return {
-    live: normalizeLive(payload),
-    final: normalizeFinal(payload),
-    all: normalizeAll(payload),
-  }
+export type DaySnapshot = { live: LiveScore[]; final: LiveScore[]; all: LiveScore[] }
+
+/**
+ * One upstream fetch per window, shared by every caller.
+ *
+ * The day feed is ~420 KB and the match-centre tabs each resolve their event
+ * through it, so opening lineups, table and h2h pulled the whole thing down
+ * three times over, on top of /api/livescores doing it for the scoreboard.
+ * Caching here rather than inside one route means every caller benefits, and
+ * the inflight map collapses a burst of tab clicks into a single request.
+ */
+const SNAPSHOT_TTL_MS = 15_000
+const snapshots = new Map<string, { at: number; data: DaySnapshot }>()
+const snapshotInflight = new Map<string, Promise<DaySnapshot>>()
+
+export async function fetchDaySnapshot(date?: Date): Promise<DaySnapshot> {
+  const key = feedUrl(date)
+
+  const hit = snapshots.get(key)
+  if (hit && Date.now() - hit.at < SNAPSHOT_TTL_MS) return hit.data
+
+  const pending = snapshotInflight.get(key)
+  if (pending) return pending
+
+  const task = (async () => {
+    try {
+      const payload = await fetchFeed(date)
+      const data: DaySnapshot = {
+        live: normalizeLive(payload),
+        final: normalizeFinal(payload),
+        all: normalizeAll(payload),
+      }
+      snapshots.set(key, { at: Date.now(), data })
+      return data
+    } finally {
+      snapshotInflight.delete(key)
+    }
+  })()
+  snapshotInflight.set(key, task)
+  return task
 }
