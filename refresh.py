@@ -19,6 +19,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 LOG = ROOT / "refresh.log"
+LOCK = ROOT / ".refresh.lock"
 OUTPUTS = ["data/processed"]
 
 # A laptop that wakes at 08:00 fires this before Wi-Fi is up: on 2026-10-08 both
@@ -56,6 +57,45 @@ def wait_for_network(timeout: int = NETWORK_WAIT) -> bool:
             time.sleep(15)
 
 
+def _running(pid: int) -> bool:
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True  # it exists, it just isn't ours to signal
+    except OSError:
+        return False
+    return True
+
+
+def acquire_lock() -> bool:
+    """One refresh at a time.
+
+    launchd fires on schedule whether or not the previous run finished, and a
+    run can overshoot: the network wait alone is up to 900s, and a blocked
+    fetch spends minutes in backoff. With two slots a day that overlap became
+    reachable, and two runs would share one botasaurus browser profile and
+    race each other on `git commit` and `git push`.
+    """
+    for _ in range(2):
+        try:
+            fd = os.open(LOCK, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
+        except FileExistsError:
+            try:
+                pid = int(LOCK.read_text(encoding="utf-8").strip() or 0)
+            except (OSError, ValueError):
+                pid = 0
+            if pid and pid != os.getpid() and _running(pid):
+                return False
+            LOCK.unlink(missing_ok=True)  # stale: the holder died, take it over
+            continue
+        with os.fdopen(fd, "w") as fh:
+            fh.write(str(os.getpid()))
+        return True
+    return False
+
+
 def sh(*args: str) -> str:
     done = subprocess.run(
         args, cwd=ROOT, capture_output=True, text=True, encoding="utf-8",
@@ -71,7 +111,16 @@ def py(*args: str) -> str:
 
 
 def main() -> None:
-    push = "--no-push" not in sys.argv
+    if not acquire_lock():
+        log("another refresh is still running, skipping this slot")
+        return
+    try:
+        _run(push="--no-push" not in sys.argv)
+    finally:
+        LOCK.unlink(missing_ok=True)
+
+
+def _run(push: bool) -> None:
     log("refresh started")
 
     # The wait existed but was only reached from with_retry, so an 08:00 wake
@@ -127,7 +176,8 @@ def main() -> None:
         return
 
     sh("git", "add", *OUTPUTS)
-    sh("git", "commit", "-m", f"refresh {datetime.now():%Y-%m-%d}", "--", *OUTPUTS)
+    # Two runs a day, so the time is part of the message.
+    sh("git", "commit", "-m", f"refresh {datetime.now():%Y-%m-%d %H:%M}", "--", *OUTPUTS)
     if push:
         sh("git", "push")
     log(f"committed {len(changed)} files" + (" and pushed" if push else ""))

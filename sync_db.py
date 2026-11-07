@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import argparse
 import csv
+import hashlib
+import json
 import os
 from pathlib import Path
 
@@ -10,6 +13,15 @@ import psycopg2
 from psycopg2.extras import execute_values
 
 PROCESSED = Path(__file__).resolve().parent / "data" / "processed"
+# Lives under data/raw/ because that path is gitignored; data/processed/ is
+# committed wholesale by refresh.py and this is machine-local bookkeeping.
+STATE = Path(__file__).resolve().parent / "data" / "raw" / ".sync_state.json"
+
+TABLES = [
+    ("players_*.csv", "players", ["player_id", "season", "league"]),
+    ("matches_*.csv", "matches", ["event_id"]),
+    ("match_stats_*.csv", "match_stats", ["event_id", "stat"]),
+]
 
 
 def _connect():
@@ -49,29 +61,64 @@ def _upsert_csv(cur, path: Path, table: str, conflict_cols: list[str]):
     return len(rows)
 
 
-def sync():
+def _digest(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def sync(force: bool = False):
+    """Upsert every processed CSV whose contents changed since the last sync.
+
+    Every row used to go up on every run — 64,822 of them for roughly 170 that
+    had actually changed, and over half of that a finished season that is
+    byte-identical day after day. Pass force=True (or `--force`) after a schema
+    change, a manual edit to the database, or a restore.
+    """
+    candidates = [
+        (f, table, keys)
+        for pattern, table, keys in TABLES
+        for f in sorted(PROCESSED.glob(pattern))
+    ]
+    digests = {f.name: _digest(f) for f, _, _ in candidates}
+    state = {} if force else _read_state()
+    pending = [c for c in candidates if state.get(c[0].name) != digests[c[0].name]]
+    skipped = len(candidates) - len(pending)
+
+    if not pending:
+        print(f"  nothing changed, {skipped} files already in sync", flush=True)
+        return
+
     conn = _connect()
     cur = conn.cursor()
     total = 0
-    for f in sorted(PROCESSED.glob("players_*.csv")):
-        n = _upsert_csv(cur, f, "players", ["player_id", "season", "league"])
-        conn.commit()
-        print(f"  players {f.stem}: {n} rows", flush=True)
-        total += n
-    for f in sorted(PROCESSED.glob("matches_*.csv")):
-        n = _upsert_csv(cur, f, "matches", ["event_id"])
-        conn.commit()
-        print(f"  matches {f.stem}: {n} rows", flush=True)
-        total += n
-    for f in sorted(PROCESSED.glob("match_stats_*.csv")):
-        n = _upsert_csv(cur, f, "match_stats", ["event_id", "stat"])
-        conn.commit()
-        print(f"  match_stats {f.stem}: {n} rows", flush=True)
-        total += n
-    cur.close()
-    conn.close()
-    print(f"  synced {total} total rows", flush=True)
+    done = dict(state)
+    try:
+        for f, table, keys in pending:
+            n = _upsert_csv(cur, f, table, keys)
+            conn.commit()
+            print(f"  {table} {f.stem}: {n} rows", flush=True)
+            total += n
+            # Recorded per file, so a crash halfway only re-syncs what is left.
+            done[f.name] = digests[f.name]
+            _write_state(done)
+    finally:
+        cur.close()
+        conn.close()
+    print(f"  synced {total} rows, skipped {skipped} unchanged files", flush=True)
+
+
+def _read_state() -> dict[str, str]:
+    try:
+        return json.loads(STATE.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def _write_state(state: dict[str, str]) -> None:
+    STATE.parent.mkdir(parents=True, exist_ok=True)
+    STATE.write_text(json.dumps(state, sort_keys=True, indent=1), encoding="utf-8")
 
 
 if __name__ == "__main__":
-    sync()
+    ap = argparse.ArgumentParser(description=sync.__doc__)
+    ap.add_argument("--force", action="store_true", help="re-upsert every CSV")
+    sync(force=ap.parse_args().force)

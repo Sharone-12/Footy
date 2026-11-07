@@ -25,6 +25,7 @@ from __future__ import annotations
 import argparse
 import builtins
 import json
+import random
 import time
 from datetime import date
 from pathlib import Path
@@ -176,7 +177,32 @@ def _close_browser():
     pass
 
 
+class Blocked(Exception):
+    """Sofascore is refusing us, so stop the run instead of grinding.
+
+    Deliberately not a RuntimeError: `fetch_match_stats` and `fetch_roles`
+    swallow those and move to the next item, so a real block would spend
+    225s of backoff *per item* — hours over a weekend's fixtures, days over
+    a backfill. This one propagates all the way out.
+    """
+
+
+# Consecutive refusals (403/429, or a URL we gave up on). Any success clears
+# it, so this only trips on something systemic. Eight is two URLs' worth of
+# the retry ladder below, about five minutes before the run bails.
+REFUSAL_LIMIT = 8
+_refusals = 0
+
+
+def _refused(what: str) -> None:
+    global _refusals
+    _refusals += 1
+    if _refusals >= REFUSAL_LIMIT:
+        raise Blocked(f"{_refusals} refusals in a row, last: {what}")
+
+
 def _get(url: str, cache_path: Path, refresh: bool = False) -> dict:
+    global _refusals
     if cache_path.exists() and not refresh:
         return json.loads(cache_path.read_text(encoding="utf-8"))
     for attempt in range(4):
@@ -194,6 +220,7 @@ def _get(url: str, cache_path: Path, refresh: bool = False) -> dict:
         if isinstance(result, dict) and "error" in result:
             code = result["error"].get("code")
             if code in (403, 429) or (isinstance(code, int) and code >= 500):
+                _refused(f"{code} from {url}")
                 wait = 15 * 2 ** attempt
                 print(f"  got {code}, waiting {wait}s...")
                 time.sleep(wait)
@@ -206,10 +233,14 @@ def _get(url: str, cache_path: Path, refresh: bool = False) -> dict:
             raise RuntimeError(f"non-json response for {url}: {text[:200] if text else 'empty'}")
         break
     else:
+        _refused(f"gave up on {url}")
         raise RuntimeError(f"gave up on {url}")
+    _refusals = 0
     cache_path.parent.mkdir(parents=True, exist_ok=True)
     cache_path.write_text(json.dumps(result), encoding="utf-8")
-    time.sleep(0.3)
+    # Jittered: a dead-constant 0.3s cadence is the most fingerprintable thing
+    # in this file, and the request count is low enough to afford the average.
+    time.sleep(random.uniform(0.25, 0.6))
     return result
 
 
@@ -228,18 +259,35 @@ def season_tag(start: int) -> str:
     return f"{start % 100}_{(start + 1) % 100}"
 
 
-def get_season_ids(tournament: int, refresh: bool = False) -> dict[int, int]:
-    data = _get(
-        f"{SOFASCORE}/api/v1/unique-tournament/{tournament}/seasons",
-        RAW / f"seasons_{tournament}.json",
-        refresh,
-    )
+def _season_map(data: dict) -> dict[int, int]:
     out = {}
-    for s in data["seasons"]:
+    for s in data.get("seasons", []):
         parts = s["year"].split("/")
         year = 2000 + int(parts[0]) if len(parts[0]) <= 2 else int(parts[0])
         out[year] = s["id"]
     return out
+
+
+def get_season_ids(
+    tournament: int, refresh: bool = False, want: int | None = None,
+) -> dict[int, int]:
+    """Season start year -> Sofascore season id.
+
+    A league gains one season a year, so `refresh` is honoured only when the
+    season being asked for is missing from the cached copy. The daily run was
+    otherwise spending one request per league re-reading a file that cannot
+    have changed since July.
+    """
+    cache = RAW / f"seasons_{tournament}.json"
+    if refresh and want is not None and cache.exists():
+        try:
+            if want in _season_map(json.loads(cache.read_text(encoding="utf-8"))):
+                refresh = False
+        except Exception:
+            pass  # unreadable cache: fall through and refetch it
+    return _season_map(
+        _get(f"{SOFASCORE}/api/v1/unique-tournament/{tournament}/seasons", cache, refresh)
+    )
 
 
 # ── 1. Season aggregate player stats ──
@@ -290,7 +338,7 @@ def fetch_player_stats(start: int, leagues: dict | None = None, refresh: bool = 
     for league, cfg in leagues.items():
         tournament = cfg["tournament"]
         try:
-            sid = get_season_ids(tournament, refresh).get(start)
+            sid = get_season_ids(tournament, refresh, want=start).get(start)
             if sid is None:
                 print(f"  no season {season_label(start)} for {league}")
                 continue
@@ -369,13 +417,47 @@ def add_roles(df: pd.DataFrame, refresh: bool = False, offline: bool = False) ->
 
 # ── 2. Match results and team stats ──
 
+# How long after its last kickoff a round counts as settled. Scores and stats
+# can still be corrected for a day or two; past that nothing moves again.
+SETTLED_AFTER_S = 3 * 86_400
+# A round this far out does still change — fixture times get confirmed — but
+# nothing like daily, and the site only shows a week of upcoming fixtures.
+FAR_FUTURE_S = 60 * 86_400
+FAR_FUTURE_EVERY_S = 7 * 86_400
+
+
+def _round_needs_refetch(cache: Path, now: float | None = None) -> bool:
+    """Whether a cached round is worth asking Sofascore about again.
+
+    Measured against the 2026/27 cache on 2026-11-07: of 152 rounds, 39 were
+    fully settled and 78 had their first kickoff over two months away, so 77%
+    of the daily round traffic was re-reading data that could not have moved.
+    """
+    now = time.time() if now is None else now
+    if not cache.exists():
+        return True
+    try:
+        events = json.loads(cache.read_text(encoding="utf-8")).get("events", [])
+    except Exception:
+        return True
+    if not events:
+        return True
+    kickoffs = [ev.get("startTimestamp") or 0 for ev in events]
+    if all(ev.get("status", {}).get("type") == "finished" for ev in events):
+        return now - max(kickoffs) < SETTLED_AFTER_S
+    if min(kickoffs) - now > FAR_FUTURE_S:
+        # mtime is the last fetch, because _get only writes when it fetched.
+        return now - cache.stat().st_mtime > FAR_FUTURE_EVERY_S
+    return True
+
+
 def fetch_matches(start: int, leagues: dict | None = None, refresh: bool = False) -> pd.DataFrame:
     leagues = leagues or LEAGUES
     rows = []
     for league, cfg in leagues.items():
         tournament = cfg["tournament"]
         try:
-            sid = get_season_ids(tournament, refresh).get(start)
+            sid = get_season_ids(tournament, refresh, want=start).get(start)
         except RuntimeError as e:
             print(f"  SKIPPED {league} matches {season_label(start)}: {e}")
             continue
@@ -386,8 +468,10 @@ def fetch_matches(start: int, leagues: dict | None = None, refresh: bool = False
             url = f"{SOFASCORE}/api/v1/unique-tournament/{tournament}/season/{sid}/events/round/{rnd}"
             cache = RAW / f"events_{tournament}_{sid}_r{rnd}.json"
             try:
-                data = _get(url, cache, refresh)
+                data = _get(url, cache, refresh and _round_needs_refetch(cache))
             except RuntimeError:
+                # The round past the last one 404s, which is how the end of a
+                # season is found — and how a new knockout round shows up.
                 break
             events = data.get("events", [])
             if not events:
