@@ -15,6 +15,7 @@ import type { MatchedDamiTv } from "@/lib/damitv/types"
 import type { MatchedCinevid } from "@/lib/cinevid/types"
 import type { MatchedMatchora } from "@/lib/matchora/types"
 import type { StreamingProviderId } from "@/lib/streaming/types"
+import { isProviderEnabled } from "./config"
 
 export type SourceStatus = "LIVE" | "UPCOMING" | "OFFLINE"
 
@@ -276,14 +277,14 @@ function zLiveProvider(
  */
 export function buildProviders(bundle: StreamBundle): WatchProvider[] {
   const built: Partial<Record<StreamingProviderId, WatchProvider | null>> = {
-    matchora: bundle.matchora ? matchoraProvider(bundle.matchora) : null,
-    damitv: bundle.damiTv ? damiTvProvider(bundle.damiTv) : null,
-    cinevid: bundle.cinevid ? cinevidProvider(bundle.cinevid) : null,
-    streamfree: null, // Unwired for testing
-    daddylive: bundle.daddyLive ? daddyLiveProvider(bundle.daddyLive) : null,
-    zlive: zLiveProvider(bundle.zLive, bundle.genericChannel, bundle.genericChannels),
+    matchora: isProviderEnabled("matchora") && bundle.matchora ? matchoraProvider(bundle.matchora) : null,
+    damitv: isProviderEnabled("damitv") && bundle.damiTv ? damiTvProvider(bundle.damiTv) : null,
+    cinevid: isProviderEnabled("cinevid") && bundle.cinevid ? cinevidProvider(bundle.cinevid) : null,
+    streamfree: isProviderEnabled("streamfree") && bundle.streamFree ? streamFreeProvider(bundle.streamFree) : null,
+    daddylive: isProviderEnabled("daddylive") && bundle.daddyLive ? daddyLiveProvider(bundle.daddyLive) : null,
+    zlive: isProviderEnabled("zlive") ? zLiveProvider(bundle.zLive, bundle.genericChannel, bundle.genericChannels) : null,
   }
-  return ORDER.map((id) => built[id]).filter((p): p is WatchProvider => Boolean(p))
+  return ORDER.filter(isProviderEnabled).map((id) => built[id]).filter((p): p is WatchProvider => Boolean(p))
 }
 
 /** Flat list across providers, for the STREAMS tab. */

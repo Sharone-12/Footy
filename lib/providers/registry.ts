@@ -17,17 +17,18 @@ import { daddyliveAdapter } from "./daddylive"
 import { damitvAdapter } from "./damitv"
 import { cinevidAdapter } from "./cinevid"
 import { matchoraAdapter } from "./matchora"
+import { isProviderEnabled } from "../streaming/config"
 import type { ProviderEntry } from "./types"
 
 /** Every provider, in display and preference order. */
 export function registry(): ProviderEntry[] {
   return [
-    { adapter: matchoraAdapter, supported: true, configured: true },
-    { adapter: damitvAdapter, supported: true, configured: true },
-    { adapter: cinevidAdapter, supported: true, configured: true },
-    { adapter: streamfreeAdapter, supported: false, configured: false }, // Unwired for testing
-    { adapter: daddyliveAdapter, supported: true, configured: true },
-    { adapter: zliveAdapter, supported: true, configured: true },
+    { adapter: matchoraAdapter, supported: true, configured: isProviderEnabled("matchora") },
+    { adapter: damitvAdapter, supported: true, configured: isProviderEnabled("damitv") },
+    { adapter: cinevidAdapter, supported: true, configured: isProviderEnabled("cinevid") },
+    { adapter: streamfreeAdapter, supported: true, configured: isProviderEnabled("streamfree") },
+    { adapter: daddyliveAdapter, supported: true, configured: isProviderEnabled("daddylive") },
+    { adapter: zliveAdapter, supported: true, configured: isProviderEnabled("zlive") },
     { adapter: manualAdapter, supported: true, configured: true },
     {
       adapter: youtubeAdapter,

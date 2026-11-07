@@ -6,6 +6,7 @@ import { checkDaddyLiveHealth } from "@/lib/daddylive/client"
 import { checkStreamFreeHealth } from "@/lib/streamfree/client"
 import { checkZLiveHealth } from "@/lib/zlive/client"
 import { requireLiveAuth } from "@/lib/live/auth"
+import { isProviderEnabled } from "@/lib/streaming/config"
 
 export interface ProviderHealthReport {
   id: string
@@ -66,11 +67,15 @@ export async function GET(request: Request) {
     {
       id: "streamfree",
       name: "StreamFree",
-      ok: false,
-      status: "degraded",
-      latencyMs: 0,
-      itemCount: 0,
-      message: "Unwired for testing",
+      ok: isProviderEnabled("streamfree") && sfRes.status === "fulfilled" && sfRes.value.ok,
+      status: !isProviderEnabled("streamfree")
+        ? "degraded"
+        : sfRes.status === "fulfilled" && sfRes.value.ok
+        ? "operational"
+        : "degraded",
+      latencyMs: isProviderEnabled("streamfree") && sfRes.status === "fulfilled" ? sfRes.value.latencyMs : 0,
+      itemCount: isProviderEnabled("streamfree") && sfRes.status === "fulfilled" ? sfRes.value.count : 0,
+      message: !isProviderEnabled("streamfree") ? "Disabled via config" : undefined,
     },
     {
       id: "zlive",

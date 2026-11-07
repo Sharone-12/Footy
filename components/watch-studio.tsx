@@ -38,6 +38,7 @@ import type { MatchedDamiTv } from "@/lib/damitv/types"
 import type { MatchedCinevid } from "@/lib/cinevid/types"
 import type { MatchedMatchora } from "@/lib/matchora/types"
 import type { StreamingProviderId } from "@/lib/streaming/types"
+import { isProviderEnabled } from "@/lib/streaming/config"
 import {
   buildProviders,
   resolveSource,
@@ -253,12 +254,12 @@ export function WatchStudio({
             : null
 
         const newBundle: StreamBundle = {
-          matchora: moMatch,
-          streamFree: null, // Unwired for testing
-          zLive: zlMatch,
-          daddyLive: dlMatch,
-          damiTv: dtMatch,
-          cinevid: cvMatch,
+          matchora: isProviderEnabled("matchora") ? moMatch : null,
+          streamFree: isProviderEnabled("streamfree") ? sfMatch : null,
+          zLive: isProviderEnabled("zlive") ? zlMatch : null,
+          daddyLive: isProviderEnabled("daddylive") ? dlMatch : null,
+          damiTv: isProviderEnabled("damitv") ? dtMatch : null,
+          cinevid: isProviderEnabled("cinevid") ? cvMatch : null,
           genericChannel: matchingGeneric,
           genericChannels: generics,
         }

@@ -24,6 +24,7 @@ import type { MatchedDamiTv, DamiTvSource } from "@/lib/damitv/types"
 import type { MatchedCinevid } from "@/lib/cinevid/types"
 import type { MatchedMatchora, MatchoraParsedChannel } from "@/lib/matchora/types"
 import type { StreamingProviderId } from "@/lib/streaming/types"
+import { isProviderEnabled } from "@/lib/streaming/config"
 
 export type UnifiedPlayerProps = {
   fixtureTitle: string
@@ -58,12 +59,12 @@ export function UnifiedPlayer({
   const [hasError, setHasError] = useState(false)
 
   // Determine available providers
-  const hasMatchora = Boolean(matchora && matchora.event?.embedUrl)
-  const hasStreamFree = false // Unwired for testing
-  const hasZLive = Boolean(zLive?.channel || genericChannel)
-  const hasDaddyLive = Boolean(daddyLive && daddyLive.channels?.length > 0)
-  const hasDamiTv = Boolean(damiTv && (damiTv.stream?.embedUrl || damiTv.stream?.sources?.length > 0))
-  const hasCinevid = Boolean(cinevid && cinevid.event?.playerUrl)
+  const hasMatchora = isProviderEnabled("matchora") && Boolean(matchora && matchora.event?.embedUrl)
+  const hasStreamFree = isProviderEnabled("streamfree") && Boolean(streamFree && streamFree.sources?.length > 0)
+  const hasZLive = isProviderEnabled("zlive") && Boolean(zLive?.channel || genericChannel)
+  const hasDaddyLive = isProviderEnabled("daddylive") && Boolean(daddyLive && daddyLive.channels?.length > 0)
+  const hasDamiTv = isProviderEnabled("damitv") && Boolean(damiTv && (damiTv.stream?.embedUrl || damiTv.stream?.sources?.length > 0))
+  const hasCinevid = isProviderEnabled("cinevid") && Boolean(cinevid && cinevid.event?.playerUrl)
 
   // Initial provider selection: Matchora & DAMITV are primary defaults, then Cinevid
   const defaultProvider: StreamingProviderId =
