@@ -4,6 +4,8 @@ import { useState } from "react"
 import type { LeagueTableResponse, TableRow } from "@/app/api/livescores/table/route"
 import type { LiveFixture } from "@/components/live-sections"
 import { TrophyIcon } from "lucide-react"
+import { LeagueCrest } from "@/components/player-avatar"
+import { LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
 
 type TableStandingsProps = {
   tableData: LeagueTableResponse | null
@@ -85,7 +87,19 @@ export function TableStandings({ tableData, fixture, isLoading }: TableStandings
       {/* Table Header / League Title */}
       <header className="flex items-center justify-between px-3.5 py-2.5 bg-neutral-900/80 rounded-xl border border-white/10 text-xs">
         <div className="flex items-center gap-2 font-bold text-white/90">
-          <TrophyIcon className="size-4 text-[var(--pitch)]" />
+          {/* The real competition crest, keyed off our own fixture.league
+              rather than the provider's label, which is not guaranteed to
+              match. The trophy stays as the fallback for a competition we do
+              not carry a tournament id for. */}
+          {LEAGUE_TOURNAMENT_ID[fixture.league] ? (
+            <LeagueCrest
+              tournamentId={LEAGUE_TOURNAMENT_ID[fixture.league]}
+              name={fixture.league}
+              size={18}
+            />
+          ) : (
+            <TrophyIcon className="size-4 text-[var(--pitch)]" />
+          )}
           <span>{tableData.leagueName}</span>
         </div>
         <div className="flex items-center gap-3 text-[11px] text-muted-foreground font-mono">
