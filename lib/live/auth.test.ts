@@ -9,7 +9,7 @@ import {
   parseCookieHeader,
   LIVE_SESSION_COOKIE_NAME,
   MAX_FAILED_ATTEMPTS,
-} from "./auth"
+} from "./auth.ts"
 
 async function runTests() {
   console.log("Starting auth.test.ts...")

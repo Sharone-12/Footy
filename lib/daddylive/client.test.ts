@@ -6,8 +6,8 @@ import {
   fetchDaddyLiveChannels,
   fetchDaddyLiveSchedule,
   _clearDaddyLiveCache,
-} from "./client"
-import { getDaddyLivePlayerUrl, normalizeDaddyLiveLogo } from "./urls"
+} from "./client.ts"
+import { getDaddyLivePlayerUrl, normalizeDaddyLiveLogo } from "./urls.ts"
 
 async function runTests() {
   _clearDaddyLiveCache()

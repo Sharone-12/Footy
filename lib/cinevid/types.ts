@@ -65,3 +65,4 @@ export type MatchedCinevid = {
   confidence: number // 0 - 100
   event: CinevidParsedEvent
 }
+

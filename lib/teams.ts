@@ -89,6 +89,15 @@ export const TEAM_RADAR_STATS: TeamStat[] = [
 
 export const TEAM_COLORS = ["#4ade80", "#60a5fa", "#fbbf24"]
 
+/** Podium tint for a top-five list, brightest first. Shared by every ranking. */
+export const POWER_COLORS = [
+  "oklch(0.85 0.18 145)",
+  "oklch(0.78 0.15 145)",
+  "oklch(0.72 0.12 145)",
+  "oklch(0.66 0.09 145)",
+  "oklch(0.60 0.06 145)",
+]
+
 /** Short league badges. Keep in sync with LEAGUE_SHORT in lib/search.ts. */
 export const LEAGUE_ABBR: Record<string, string> = {
   "Premier League": "PL",

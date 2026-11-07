@@ -29,3 +29,4 @@ export async function GET(request: Request) {
     return NextResponse.json({ status: "error", ok: false }, { status: 500 })
   }
 }
+

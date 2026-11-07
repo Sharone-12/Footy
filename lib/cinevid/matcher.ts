@@ -42,7 +42,7 @@ const FILLER_WORDS = new Set([
 /** Canonical club aliases across major European leagues */
 const ALIASES: Record<string, string[]> = {
   barcelona: ["barca", "fc barcelona", "barcelona fc", "fcb"],
-  "real madrid": ["real madrid cf", "los blancos", "madrid"],
+  "real madrid": ["real madrid cf", "los blancos"],
   "atletico madrid": ["atleti", "atletico de madrid", "atlético madrid", "club atletico de madrid"],
   "deportivo alaves": ["alaves", "deportivo alavés", "d alaves"],
   sevilla: ["sevilla fc", "seville"],
@@ -164,16 +164,23 @@ export function teamSimilarity(fixtureTeam: string, eventTeam: string): number {
   for (const [canon, aliases] of Object.entries(ALIASES)) {
     const canonNorm = normalise(canon)
     const all = [canonNorm, ...aliases.map(normalise)].filter((a) => a && a.length >= 3)
-    const matchesA = all.some((a) => a === normA || (a.length >= 4 && (normA.includes(a) || a.includes(normA))))
-    const matchesB = all.some((b) => b === normB || (b.length >= 4 && (normB.includes(b) || b.includes(normB))))
+    const matchesA = all.some((a) => a === normA || normA.startsWith(`${a} `) || normA.endsWith(` ${a}`))
+    const matchesB = all.some((b) => b === normB || normB.startsWith(`${b} `) || normB.endsWith(` ${b}`))
     if (matchesA && matchesB) {
       return 0.98
     }
   }
 
-  // 2. Token inclusion (e.g. "St Mirren" vs "St Mirren FC")
-  if (normA.length >= 4 && normB.length >= 4 && (normA.includes(normB) || normB.includes(normA))) {
-    return 0.90
+  // 2. Token inclusion (boundary-checked)
+  if (normA.length >= 4 && normB.length >= 4) {
+    if (
+      normA.startsWith(`${normB} `) ||
+      normA.endsWith(` ${normB}`) ||
+      normB.startsWith(`${normA} `) ||
+      normB.endsWith(` ${normA}`)
+    ) {
+      return 0.9
+    }
   }
 
   // 3. Fuzzy similarity

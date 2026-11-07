@@ -11,8 +11,8 @@ import {
   parseCinevidTeams,
   normalizeCinevidEvent,
   CINEVID_BASE_URL,
-} from "./client"
-import type { CinevidRawEvent } from "./types"
+} from "./client.ts"
+import type { CinevidRawEvent } from "./types.ts"
 
 async function runTests() {
   console.log("Running Cinevid client unit tests...")
@@ -160,3 +160,4 @@ runTests().catch((err) => {
   console.error("Cinevid client test failed:", err)
   process.exit(1)
 })
+

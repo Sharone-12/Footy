@@ -16,11 +16,13 @@ import { zliveAdapter } from "./zlive"
 import { daddyliveAdapter } from "./daddylive"
 import { damitvAdapter } from "./damitv"
 import { cinevidAdapter } from "./cinevid"
+import { matchoraAdapter } from "./matchora"
 import type { ProviderEntry } from "./types"
 
 /** Every provider, in display and preference order. */
 export function registry(): ProviderEntry[] {
   return [
+    { adapter: matchoraAdapter, supported: true, configured: true },
     { adapter: damitvAdapter, supported: true, configured: true },
     { adapter: cinevidAdapter, supported: true, configured: true },
     { adapter: streamfreeAdapter, supported: true, configured: true },

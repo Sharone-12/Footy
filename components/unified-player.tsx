@@ -7,6 +7,7 @@ import {
   Minimize2Icon,
   ExternalLinkIcon,
   XIcon,
+  GlobeIcon,
   TvMinimalPlayIcon,
   RefreshCwIcon,
   AlertCircleIcon,
@@ -21,11 +22,13 @@ import type { MatchedZLive, ZLiveChannel } from "@/lib/zlive/types"
 import type { MatchedDaddyLive, DaddyLiveChannel } from "@/lib/daddylive/types"
 import type { MatchedDamiTv, DamiTvSource } from "@/lib/damitv/types"
 import type { MatchedCinevid } from "@/lib/cinevid/types"
+import type { MatchedMatchora, MatchoraParsedChannel } from "@/lib/matchora/types"
 import type { StreamingProviderId } from "@/lib/streaming/types"
 
 export type UnifiedPlayerProps = {
   fixtureTitle: string
   league?: string
+  matchora?: MatchedMatchora | null
   streamFree?: MatchedStream | null
   zLive?: MatchedZLive | null
   daddyLive?: MatchedDaddyLive | null
@@ -39,6 +42,7 @@ export type UnifiedPlayerProps = {
 export function UnifiedPlayer({
   fixtureTitle,
   league,
+  matchora,
   streamFree,
   zLive,
   daddyLive,
@@ -54,16 +58,19 @@ export function UnifiedPlayer({
   const [hasError, setHasError] = useState(false)
 
   // Determine available providers
+  const hasMatchora = Boolean(matchora && matchora.event?.embedUrl)
   const hasStreamFree = Boolean(streamFree && streamFree.sources?.length > 0)
   const hasZLive = Boolean(zLive?.channel || genericChannel)
   const hasDaddyLive = Boolean(daddyLive && daddyLive.channels?.length > 0)
   const hasDamiTv = Boolean(damiTv && (damiTv.stream?.embedUrl || damiTv.stream?.sources?.length > 0))
   const hasCinevid = Boolean(cinevid && cinevid.event?.playerUrl)
 
-  // Initial provider selection: DAMITV is primary default, then Cinevid
+  // Initial provider selection: Matchora & DAMITV are primary defaults, then Cinevid
   const defaultProvider: StreamingProviderId =
     initialProvider ??
-    (hasDamiTv
+    (hasMatchora
+      ? "matchora"
+      : hasDamiTv
       ? "damitv"
       : hasCinevid
       ? "cinevid"
@@ -73,9 +80,18 @@ export function UnifiedPlayer({
       ? "daddylive"
       : hasZLive
       ? "zlive"
-      : "damitv")
+      : "matchora")
 
   const [selectedProvider, setSelectedProvider] = useState<StreamingProviderId>(defaultProvider)
+
+  // 0. Matchora active channel selection
+  const [selectedMatchoraChannelId, setSelectedMatchoraChannelId] = useState<string>(
+    matchora?.event?.channels?.[0]?.id || "",
+  )
+
+  const activeMatchoraChannel: MatchoraParsedChannel | undefined =
+    matchora?.event?.channels?.find((ch) => ch.id === selectedMatchoraChannelId) ||
+    matchora?.event?.channels?.[0]
 
   // 1. StreamFree quality selection
   const sfDefaultQuality =
@@ -140,6 +156,13 @@ export function UnifiedPlayer({
     setHasError(false)
   }
 
+  function handleMatchoraChannelSwitch(channelId: string) {
+    if (channelId === selectedMatchoraChannelId) return
+    setSelectedMatchoraChannelId(channelId)
+    setIsLoading(true)
+    setHasError(false)
+  }
+
   function handleDaddyChannelSwitch(channelId: string) {
     if (channelId === selectedDaddyChannelId) return
     setSelectedDaddyChannelId(channelId)
@@ -163,9 +186,16 @@ export function UnifiedPlayer({
   let currentUrl: string | undefined
   let isCurrentLive = false
   let currentStatusLabel = "LIVE"
-  let providerDisplayName = "StreamFree"
+  let providerDisplayName = "Matchora"
 
-  if (selectedProvider === "streamfree") {
+  if (selectedProvider === "matchora") {
+    currentUrl = activeMatchoraChannel?.embedUrl || matchora?.event?.embedUrl
+    isCurrentLive = Boolean(matchora?.event?.status === "live")
+    currentStatusLabel = matchora?.event?.status === "live" ? "LIVE" : matchora?.event?.status === "finished" ? "OFFLINE" : "UPCOMING"
+    providerDisplayName = activeMatchoraChannel?.name
+      ? `Matchora · ${activeMatchoraChannel.name}`
+      : "Matchora Main Player"
+  } else if (selectedProvider === "streamfree") {
     currentUrl = activeSfSource?.url
     isCurrentLive = Boolean(streamFree?.isLive || activeSfSource?.live)
     currentStatusLabel = streamFree?.status ?? (isCurrentLive ? "LIVE" : "OFFLINE")
@@ -243,13 +273,31 @@ export function UnifiedPlayer({
 
         {/* Controls: 4-provider toggle, sources, qualities, fullscreen, close */}
         <div className="flex items-center gap-2 shrink-0">
-          {/* Provider selector pill: [ StreamFree ] [ ZLive ] [ DaddyLive ] [ DAMITV ] */}
-          {(hasStreamFree || hasZLive || hasDaddyLive || hasDamiTv) && (
+          {/* Provider selector pill */}
+          {(hasMatchora || hasStreamFree || hasZLive || hasDaddyLive || hasDamiTv || hasCinevid) && (
             <div
               className="flex items-center bg-black/50 rounded-xl p-0.5 border border-border/60 text-xs shadow-inner overflow-x-auto no-scrollbar max-w-full"
               role="tablist"
               aria-label="Streaming Provider"
             >
+              <button
+                type="button"
+                role="tab"
+                aria-selected={selectedProvider === "matchora"}
+                disabled={!hasMatchora}
+                onClick={() => handleProviderSwitch("matchora")}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[0.7rem] font-bold transition-all ${
+                  selectedProvider === "matchora"
+                    ? "bg-white/20 text-white shadow-sm"
+                    : hasMatchora
+                    ? "text-muted-foreground hover:text-foreground"
+                    : "opacity-35 cursor-not-allowed text-muted-foreground"
+                }`}
+              >
+                <GlobeIcon className="size-3 text-blue-400" />
+                Matchora
+              </button>
+
               <button
                 type="button"
                 role="tab"
@@ -372,6 +420,35 @@ export function UnifiedPlayer({
             </div>
           )}
 
+          {/* Matchora Multi-channel selector */}
+          {selectedProvider === "matchora" && matchora?.event?.channels && matchora.event.channels.length > 1 && (
+            <div className="flex items-center bg-black/40 rounded-lg p-0.5 border border-border/50 text-xs overflow-x-auto max-w-[280px] sm:max-w-none">
+              {matchora.event.channels.map((ch) => {
+                const isSelected = ch.id === (activeMatchoraChannel?.id || "")
+                return (
+                  <button
+                    key={ch.id}
+                    type="button"
+                    onClick={() => handleMatchoraChannelSwitch(ch.id)}
+                    title={ch.name}
+                    className={`flex items-center gap-1 px-2 py-1 rounded-md text-[0.7rem] font-bold transition-all truncate shrink-0 ${
+                      isSelected
+                        ? "bg-blue-500/25 text-blue-300 shadow-sm border border-blue-500/40"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <span>{ch.country ? `${ch.country} ` : ""}{ch.name}</span>
+                    {ch.quality && (
+                      <span className="text-[9px] px-1 rounded bg-black/40 text-blue-300 font-mono">
+                        {ch.quality}
+                      </span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+
           {/* DaddyLive Multi-channel dropdown/pill selector */}
           {selectedProvider === "daddylive" && daddyLive && daddyLive.channels.length > 1 && (
             <div className="flex items-center bg-black/40 rounded-lg p-0.5 border border-border/50 text-xs">
@@ -471,7 +548,9 @@ export function UnifiedPlayer({
             <AlertCircleIcon className="size-10 text-amber-500" />
             <div>
               <p className="font-semibold text-sm text-foreground">
-                {selectedProvider === "damitv"
+                {selectedProvider === "matchora"
+                  ? "Matchora Stream Unavailable"
+                  : selectedProvider === "damitv"
                   ? "DAMITV Stream Unavailable"
                   : selectedProvider === "cinevid"
                   ? "Cinevid Stream Unavailable"

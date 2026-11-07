@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { ExternalLinkIcon, MonitorPlayIcon, PlayIcon, RadioIcon, SparklesIcon, TvIcon } from "lucide-react"
+import { ExternalLinkIcon, GlobeIcon, MonitorPlayIcon, PlayIcon, RadioIcon, SparklesIcon, TvIcon } from "lucide-react"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
 import { splitFixtures, startOf, PLAYING_MS, type Timed } from "@/lib/live"
@@ -12,6 +12,7 @@ import type { MatchedZLive, ZLiveChannel } from "@/lib/zlive/types"
 import type { MatchedDaddyLive } from "@/lib/daddylive/types"
 import type { MatchedDamiTv } from "@/lib/damitv/types"
 import type { MatchedCinevid } from "@/lib/cinevid/types"
+import type { MatchedMatchora } from "@/lib/matchora/types"
 import { UnifiedPlayer } from "@/components/unified-player"
 import { formatKickoffIST } from "@/lib/time"
 
@@ -38,19 +39,21 @@ function formatKickoff(m: LiveFixture) {
 type ActivePlayerState = {
   fixtureTitle: string
   league?: string
+  matchora?: MatchedMatchora | null
   streamFree?: MatchedStream | null
   zLive?: MatchedZLive | null
   daddyLive?: MatchedDaddyLive | null
   damiTv?: MatchedDamiTv | null
   cinevid?: MatchedCinevid | null
   genericChannel?: ZLiveChannel | null
-  initialProvider?: "streamfree" | "zlive" | "daddylive" | "damitv" | "cinevid"
+  initialProvider?: "matchora" | "streamfree" | "zlive" | "daddylive" | "damitv" | "cinevid"
 }
 
 function Row({
   m,
   now,
   live,
+  matchedMatchora,
   matchedStream,
   matchedZLive,
   matchedDaddyLive,
@@ -61,6 +64,7 @@ function Row({
   m: LiveFixture
   now: number
   live: boolean
+  matchedMatchora?: MatchedMatchora
   matchedStream?: MatchedStream
   matchedZLive?: MatchedZLive
   matchedDaddyLive?: MatchedDaddyLive
@@ -69,7 +73,7 @@ function Row({
   onWatch?: (state: ActivePlayerState) => void
 }) {
   const tid = LEAGUE_TOURNAMENT_ID[m.league]
-  const hasStream = Boolean(matchedStream || matchedZLive || matchedDaddyLive || matchedDamiTv || matchedCinevid)
+  const hasStream = Boolean(matchedMatchora || matchedStream || matchedZLive || matchedDaddyLive || matchedDamiTv || matchedCinevid)
   const start = startOf(m)
   const left = start - now
   const isUnderAnHour = left > 0 && left <= 3600_000
@@ -127,6 +131,16 @@ function Row({
         {isWatchable && (
           <div className="flex items-center gap-2">
             <div className="flex items-center gap-1.5">
+              {matchedMatchora && (
+                <span
+                  title={`Matchora (${matchedMatchora.event.channelCount} channel${matchedMatchora.event.channelCount === 1 ? "" : "s"})`}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/25"
+                >
+                  <GlobeIcon className="size-2.5" />
+                  Matchora
+                </span>
+              )}
+
               {matchedDamiTv && (
                 <span
                   title={`DAMITV (${matchedDamiTv.stream.sources.length} source${matchedDamiTv.stream.sources.length === 1 ? "" : "s"})`}
@@ -209,6 +223,7 @@ function Section({
   now,
   live,
   empty,
+  matchoraMap,
   streamMap,
   zliveMap,
   daddyliveMap,
@@ -221,6 +236,7 @@ function Section({
   now: number
   live?: boolean
   empty: string
+  matchoraMap: Record<number, MatchedMatchora>
   streamMap: Record<number, MatchedStream>
   zliveMap: Record<number, MatchedZLive>
   daddyliveMap: Record<number, MatchedDaddyLive>
@@ -253,6 +269,7 @@ function Section({
               m={m}
               now={now}
               live={Boolean(live)}
+              matchedMatchora={matchoraMap[m.event_id]}
               matchedStream={streamMap[m.event_id]}
               matchedZLive={zliveMap[m.event_id]}
               matchedDaddyLive={daddyliveMap[m.event_id]}
@@ -269,6 +286,7 @@ function Section({
 
 export function LiveSections({ matches }: { matches: LiveFixture[] }) {
   const [now, setNow] = useState<number | null>(null)
+  const [matchoraMap, setMatchoraMap] = useState<Record<number, MatchedMatchora>>({})
   const [streamMap, setStreamMap] = useState<Record<number, MatchedStream>>({})
   const [zliveMap, setZliveMap] = useState<Record<number, MatchedZLive>>({})
   const [daddyliveMap, setDaddyliveMap] = useState<Record<number, MatchedDaddyLive>>({})
@@ -283,6 +301,31 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
     tick()
     const t = setInterval(tick, 1000)
     return () => clearInterval(t)
+  }, [])
+
+  // Fetch Matchora stream matches on mount
+  useEffect(() => {
+    let unmounted = false
+    async function loadMatchora() {
+      try {
+        const res = await fetch("/api/streams/matchora")
+        if (!res.ok) return
+        const data = await res.json()
+        if (data?.streams && Array.isArray(data.streams) && !unmounted) {
+          const map: Record<number, MatchedMatchora> = {}
+          for (const s of data.streams) {
+            if (s.event_id) map[s.event_id] = s
+          }
+          setMatchoraMap(map)
+        }
+      } catch (err) {
+        console.warn("[live] Could not load Matchora streams:", err)
+      }
+    }
+    loadMatchora()
+    return () => {
+      unmounted = true
+    }
   }, [])
 
   // Fetch StreamFree stream matches on mount
@@ -445,6 +488,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
         now={now ?? 0}
         live
         empty="No matches in play."
+        matchoraMap={matchoraMap}
         streamMap={streamMap}
         zliveMap={zliveMap}
         daddyliveMap={daddyliveMap}
@@ -458,6 +502,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
         rows={now == null ? [] : soon}
         now={now ?? 0}
         empty="Nothing kicking off in the next three hours."
+        matchoraMap={matchoraMap}
         streamMap={streamMap}
         zliveMap={zliveMap}
         daddyliveMap={daddyliveMap}
@@ -471,6 +516,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
         rows={now == null ? [] : upcoming}
         now={now ?? 0}
         empty="No upcoming fixtures."
+        matchoraMap={matchoraMap}
         streamMap={streamMap}
         zliveMap={zliveMap}
         daddyliveMap={daddyliveMap}

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
-import { matchFixtureToDamiTv, matchFixturesToDamiTv } from "./matcher"
-import type { DamiTvParsedStream } from "./types"
-import type { Fixture } from "@/lib/providers/types"
+import { matchFixtureToDamiTv, matchFixturesToDamiTv } from "./matcher.ts"
+import type { DamiTvParsedStream } from "./types.ts"
+import type { Fixture } from "../providers/types"
 
 async function runTests() {
   const streams: DamiTvParsedStream[] = [

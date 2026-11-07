@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
-import { matchFixtureToDaddyLive, matchFixturesToDaddyLive } from "./matcher"
-import type { DaddyLiveParsedEvent } from "./types"
-import type { Fixture } from "@/lib/providers/types"
+import { matchFixtureToDaddyLive, matchFixturesToDaddyLive } from "./matcher.ts"
+import type { DaddyLiveParsedEvent } from "./types.ts"
+import type { Fixture } from "../providers/types"
 
 async function runTests() {
   const events: DaddyLiveParsedEvent[] = [

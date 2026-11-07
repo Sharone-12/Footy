@@ -81,6 +81,13 @@ export function embedFor(url: string, parentHost?: string | null): StreamEmbed |
   }
 
   // Embeddable football streaming providers
+  if (
+    (host === "matchora.to" || host === "matchora.pro" || host === "es.matchora.pro" || host.includes("matchora")) &&
+    path[0] === "embed"
+  ) {
+    return { kind: "iframe", src: u.toString() }
+  }
+
   if (host === "cinevid.st" && path[0] === "embed") {
     return { kind: "iframe", src: u.toString() }
   }

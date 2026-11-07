@@ -11,6 +11,7 @@ import {
 import { CompetitionToggle } from "@/components/competition-toggle"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
+import { confidence, confidenceK, type Row } from "@/lib/rank"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SignalInfo } from "@/components/signal-info"
 import { SignalExpand, type SignalExpandRow, type SignalFmt } from "@/components/signal-expand"
@@ -21,6 +22,7 @@ type PlayerRow = {
   team: string
   team_id: number | null
   league: string
+  position: string | null
   minutes: number
   goals_p90: number | null
   xg_p90: number | null
@@ -52,7 +54,18 @@ type Signal = {
   /** Serializable formatter key for the client-side expand dialog. */
   fmtKey: SignalFmt
   higherIsBetter: boolean
+  /**
+   * Who this board is allowed to rank. Every board drops goalkeepers; a rate
+   * board also needs a volume floor, or players who never attempt the action
+   * win it by default. That is exactly how the old press-resistance board put
+   * four keepers and five centre-backs on a 100% tie at the top.
+   */
+  eligible?: (p: PlayerRow) => boolean
+  /** Printed under the heading when the pool is narrower than "outfielders". */
+  pool?: string
 }
+
+const isGk = (p: PlayerRow) => (p.position ?? "") === "Goalkeeper"
 
 const SIGNALS: Signal[] = [
   {
@@ -62,37 +75,40 @@ const SIGNALS: Signal[] = [
     formula: "goals − xG, per 90",
     what: "The gap between the goals a player actually scores and the xG of the chances they take, averaged over 90 minutes.",
     signifies: "A positive number means the player beats their chances — clinical. A negative one means they waste good positions.",
-    why: "xG rewards getting into shooting positions. This metric isolates the finishing on top of that: who's converting better than the average striker would from the same spots.",
+    why: "xG rewards getting into shooting positions. This metric isolates the finishing on top of that: who's converting better than the average striker would from the same spots. Thin samples are pulled toward the cohort average, so a hot cameo off the bench doesn't top the board.",
     compute: (p) => n(p.goals_p90) - n(p.xg_p90),
     fmt: (v) => (v > 0 ? `+${v.toFixed(2)}` : v.toFixed(2)),
     fmtKey: "signed2",
     higherIsBetter: true,
+    eligible: (p) => !isGk(p),
   },
   {
-    key: "press_resistance",
-    label: "Press Resistance",
-    hint: "Keeps the ball when pressed",
-    formula: "1 − (dispossessed ÷ touches)",
-    what: "The share of a player's touches where they don't get dispossessed — pure ball-retention rate.",
-    signifies: "High values = press-proof. The ball sticks to them in traffic. Low values = turnover-prone when squeezed.",
-    why: "Unlike raw touches-per-turnover, this normalizes by how often they get the ball, so a quiet #6 and a busy #10 are judged on the same per-touch standard. Elite retainers hit 97–99%; the most press-vulnerable sit at 85–90%.",
+    key: "ball_security",
+    label: "Ball Security",
+    hint: "Rarely loses it, and actually carries",
+    formula: "dispossessed ÷ touches × 100",
+    what: "How many times a player is dispossessed per 100 touches, among players who regularly take the ball past someone. Lower is better.",
+    signifies: "Low values = the ball sticks to them in traffic. High values = they cough it up when squeezed.",
+    why: "There is no \u201cpasses under pressure\u201d column in this data, so true press resistance isn't measurable — losses per touch is, but only if the board ranks players who actually carry. Without that gate the old press-resistance board was topped by four goalkeepers and five centre-backs on an exact 100% tie: they scored perfectly by never taking the ball into contact. Requiring a completed dribble per 90 keeps this to players who put themselves in trouble on purpose.",
     compute: (p) => {
       const t = n(p.touches_p90)
-      if (t <= 0) return 0
-      return (1 - n(p.dispossessed_p90) / t) * 100
+      if (t <= 0) return Number.POSITIVE_INFINITY
+      return (n(p.dispossessed_p90) / t) * 100
     },
-    fmt: (v) => `${v.toFixed(1)}%`,
-    fmtKey: "pct1",
-    higherIsBetter: true,
+    fmt: (v) => v.toFixed(1),
+    fmtKey: "fixed1",
+    higherIsBetter: false,
+    eligible: (p) => !isGk(p) && n(p.dribbles_p90) >= 1,
+    pool: "outfielders completing 1+ dribble per 90",
   },
   {
     key: "progressive_touch_rate",
     label: "Progressive Touch %",
     hint: "Share of touches that drive play forward",
     formula: "(dribbles + final-third passes) ÷ touches",
-    what: "What percentage of a player's touches are progressive — a successful dribble or a pass into the attacking third.",
-    signifies: "High values = every time they get the ball, something advances. Low values = lots of sideways/backwards recycling.",
-    why: "Raw progressive-action counts flatter players who simply get the ball more because of where they play (an advanced #8 vs. a deep #6). Dividing by touches removes that volume bias so a 97-touch Rodri and a 75-touch Kimmich are judged on the same per-touch standard.",
+    what: "What percentage of a player's touches are progressive — a successful dribble, or a pass played in the attacking third.",
+    signifies: "High values = every time they get the ball, something advances. Low values = lots of sideways recycling.",
+    why: "Raw progressive-action counts flatter players who simply get the ball more because of where they play. Dividing by touches removes that volume bias. Read it with position in mind: the underlying column counts passes played in the attacking third, not passes into it, so wingers start with an advantage from where they stand.",
     compute: (p) => {
       const t = n(p.touches_p90)
       if (t <= 0) return 0
@@ -101,22 +117,7 @@ const SIGNALS: Signal[] = [
     fmt: (v) => `${v.toFixed(1)}%`,
     fmtKey: "pct1",
     higherIsBetter: true,
-  },
-  {
-    key: "line_breaker",
-    label: "Line Breaker",
-    hint: "Share of passes that advance play",
-    formula: "final-third passes ÷ total passes",
-    what: "The percentage of a player's passes that reach the attacking third.",
-    signifies: "High share = vertical, progressive player. Low share = recycler who moves the ball sideways.",
-    why: "Pass completion % rewards short, safe passing. This rewards passes that actually move play forward — the ones that unlock defences.",
-    compute: (p) => {
-      const total = n(p.total_passes_p90)
-      return total > 0 ? (n(p.final_third_passes_p90) / total) * 100 : 0
-    },
-    fmt: (v) => `${v.toFixed(1)}%`,
-    fmtKey: "pct1",
-    higherIsBetter: true,
+    eligible: (p) => !isGk(p),
   },
   {
     key: "creator_index",
@@ -131,20 +132,41 @@ const SIGNALS: Signal[] = [
     fmt: (v) => v.toFixed(2),
     fmtKey: "fixed2",
     higherIsBetter: true,
+    eligible: (p) => !isGk(p),
   },
   {
-    key: "duel_dominance",
-    label: "Duel Dominance",
-    hint: "Composite ball-winner score",
-    formula: "tackles + aerials + interceptions, per 90",
-    what: "The sum of successful tackles, aerial duels won, and interceptions per 90 minutes.",
-    signifies: "How often the player ends an opposition attack, whether on the ground, in the air, or by reading passes.",
-    why: "Tackles alone miss readers of the game who intercept. Aerials alone miss ground-duel specialists. Combined, this surfaces complete defensive midfielders and centre-backs.",
+    key: "chance_quality",
+    label: "Chance Quality",
+    hint: "How big the chances they create are",
+    formula: "big chances created ÷ key passes",
+    what: "Of all the passes a player plays that lead to a shot, the share that set up a genuine big chance.",
+    signifies: "High values = when they find someone, it's a real opening. Low values = plenty of shots created, mostly from distance or bad angles.",
+    why: "Creator Index rewards volume, so a player who feeds twelve half-chances a game outranks one who carves out three clear ones. This is the other half: not how many chances, but how good. The two boards disagreeing about a player is the interesting part.",
+    compute: (p) => {
+      const kp = n(p.key_passes_p90)
+      if (kp <= 0) return 0
+      return Math.min(100, (n(p.big_chances_created_p90) / kp) * 100)
+    },
+    fmt: (v) => `${v.toFixed(1)}%`,
+    fmtKey: "pct1",
+    higherIsBetter: true,
+    eligible: (p) => !isGk(p) && n(p.key_passes_p90) >= 2,
+    pool: "outfielders creating 2+ key passes per 90",
+  },
+  {
+    key: "ball_winning_volume",
+    label: "Ball-Winning Volume",
+    hint: "Raw volume — reads position as much as skill",
+    formula: "tackles + interceptions + aerials won, per 90",
+    what: "How often a player ends an opposition attack: successful tackles, interceptions and aerial duels won, added up per 90 minutes.",
+    signifies: "Who physically wins the most ball back. Read it as workload, not as a ranking of defensive ability.",
+    why: "This is deliberately labelled volume rather than dominance. The honest version of this board is a win rate — duels won over duels contested — but the three attempt columns it needs (totalTackles, totalDribbles, aerialDuelsTotal in data_loader.py) come back empty from the feed, so every row stores zero. Until that is fixed, a count is all this data supports, and a count tracks position: centre-backs and full-backs are simply put in more duels than anyone else.",
     compute: (p) =>
-      n(p.tackles_won_p90) + n(p.aerials_won_p90) + n(p.interceptions_p90),
+      n(p.tackles_won_p90) + n(p.interceptions_p90) + n(p.aerials_won_p90),
     fmt: (v) => v.toFixed(1),
     fmtKey: "fixed1",
     higherIsBetter: true,
+    eligible: (p) => !isGk(p),
   },
 ]
 
@@ -175,11 +197,13 @@ function SignalBoard({
   rows,
   allRows,
   scope,
+  ranked,
 }: {
   signal: Signal
   rows: Array<PlayerRow & { value: number }>
   allRows: SignalExpandRow[]
   scope: string
+  ranked: number
 }) {
   return (
     <section className="surface rounded-2xl bg-card overflow-hidden">
@@ -209,7 +233,13 @@ function SignalBoard({
           </div>
           <span className="stat-label truncate">{signal.formula}</span>
         </div>
-        <p className="text-xs text-muted-foreground mt-1">{signal.hint}</p>
+        <p className="text-xs text-muted-foreground mt-1">
+          {signal.hint}
+          {!signal.higherIsBetter && " · lower is better"}
+        </p>
+        <p className="stat-label mt-1">
+          {ranked} {signal.pool ?? "outfielders"}
+        </p>
       </header>
       <div className="px-2 pb-2">
         {rows.map((p, i) => (
@@ -261,9 +291,10 @@ async function Content({
     supabase
       .from("players")
       .select(
-        "player, slug, team, team_id, league, minutes, " +
+        "player, slug, team, team_id, league, position, minutes, " +
           "goals_p90, xg_p90, xa_p90, key_passes_p90, big_chances_created_p90, " +
-          "touches_p90, dispossessed_p90, dribbles_p90, final_third_passes_p90, total_passes_p90, " +
+          "touches_p90, dispossessed_p90, dribbles_p90, " +
+          "final_third_passes_p90, total_passes_p90, " +
           "tackles_won_p90, aerials_won_p90, interceptions_p90",
       )
       .eq("season", season),
@@ -271,16 +302,28 @@ async function Content({
   ).limit(2000)
 
   const all = (data || []) as unknown as PlayerRow[]
-  // ponytail: hard sample-size filter at 30% of max minutes; upgrade to
-  // confidence-shrinkage from lib/rank.ts if the tails look noisy.
+  // A floor, not the whole defence against noise: it keeps out players with
+  // almost no season, and the shrinkage below handles everyone above it.
   const maxMin = Math.max(0, ...all.map((p) => Number(p.minutes) || 0))
   const minMin = Math.max(300, maxMin * 0.3)
   const eligible = all.filter((p) => Number(p.minutes) >= minMin)
+  // Half-trust point, from the same helper the player rankings use.
+  const k = confidenceK(eligible as unknown as Row[])
 
   const boards = SIGNALS.map((s) => {
-    const scored = eligible
-      .map((p) => ({ ...p, value: s.compute(p) }))
-      .filter((p) => Number.isFinite(p.value))
+    const pool = s.eligible ? eligible.filter(s.eligible) : eligible
+    const raw = pool
+      .map((p) => ({ ...p, raw: s.compute(p) }))
+      .filter((p) => Number.isFinite(p.raw))
+    // Shrink each board toward its own pool's mean, so a player with a third
+    // of a season behind a flashy rate lands near average rather than on top.
+    const mean = raw.length
+      ? raw.reduce((t, p) => t + p.raw, 0) / raw.length
+      : 0
+    const scored = raw.map((p) => ({
+      ...p,
+      value: mean + confidence(Number(p.minutes) || 0, k) * (p.raw - mean),
+    }))
     scored.sort((a, b) => (s.higherIsBetter ? b.value - a.value : a.value - b.value))
     // Slim shape sent to the client expand dialog — drops the raw p90 columns.
     const allRows: SignalExpandRow[] = scored.map((p) => ({
@@ -291,13 +334,14 @@ async function Content({
       league: p.league,
       value: p.value,
     }))
-    return { signal: s, rows: scored.slice(0, 10), allRows }
+    return { signal: s, rows: scored.slice(0, 10), allRows, ranked: scored.length }
   })
 
   return (
     <>
       <p className="stat-label mb-4">
-        {label} · min {Math.round(minMin)} minutes · {eligible.length} players ranked
+        {label} · min {Math.round(minMin)} minutes · {eligible.length} players ·
+        thin samples pulled toward each board&apos;s average
       </p>
       <div className="grid lg:grid-cols-2 gap-5 stagger">
         {boards.map((b) => (
@@ -305,6 +349,7 @@ async function Content({
             key={b.signal.key}
             signal={b.signal}
             rows={b.rows}
+            ranked={b.ranked}
             allRows={b.allRows}
             scope={scope}
           />

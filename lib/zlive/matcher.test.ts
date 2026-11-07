@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
-import { matchFixtureToZLive, matchFixturesToZLive } from "./matcher"
-import type { ZLiveChannel } from "./types"
-import type { Fixture } from "@/lib/providers/types"
+import { matchFixtureToZLive, matchFixturesToZLive } from "./matcher.ts"
+import type { ZLiveChannel } from "./types.ts"
+import type { Fixture } from "../providers/types"
 
 async function runTests() {
   const channels: ZLiveChannel[] = [

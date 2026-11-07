@@ -13,6 +13,7 @@ import type { MatchedZLive, ZLiveChannel } from "@/lib/zlive/types"
 import type { MatchedDaddyLive } from "@/lib/daddylive/types"
 import type { MatchedDamiTv } from "@/lib/damitv/types"
 import type { MatchedCinevid } from "@/lib/cinevid/types"
+import type { MatchedMatchora } from "@/lib/matchora/types"
 import type { StreamingProviderId } from "@/lib/streaming/types"
 
 export type SourceStatus = "LIVE" | "UPCOMING" | "OFFLINE"
@@ -44,6 +45,7 @@ export type WatchProvider = {
 
 /** Everything the five `?fixture_id=` endpoints return for one fixture. */
 export type StreamBundle = {
+  matchora?: MatchedMatchora | null
   streamFree?: MatchedStream | null
   zLive?: MatchedZLive | null
   daddyLive?: MatchedDaddyLive | null
@@ -56,6 +58,7 @@ export type StreamBundle = {
 }
 
 export const PROVIDER_NAME: Record<StreamingProviderId, string> = {
+  matchora: "Matchora",
   damitv: "DAMITV",
   cinevid: "Cinevid",
   streamfree: "StreamFree",
@@ -63,11 +66,53 @@ export const PROVIDER_NAME: Record<StreamingProviderId, string> = {
   zlive: "ZLive",
 }
 
-/** Display order: DAMITV is primary default, followed by Cinevid, StreamFree, DaddyLive, ZLive. */
-const ORDER: StreamingProviderId[] = ["damitv", "cinevid", "streamfree", "daddylive", "zlive"]
+/** Display order: Matchora & DAMITV are primary defaults, followed by Cinevid, StreamFree, DaddyLive, ZLive. */
+const ORDER: StreamingProviderId[] = ["matchora", "damitv", "cinevid", "streamfree", "daddylive", "zlive"]
 
 const dedupe = (xs: (string | undefined)[]) =>
   Array.from(new Set(xs.filter((x): x is string => Boolean(x))))
+
+function matchoraProvider(m: MatchedMatchora | any): WatchProvider | null {
+  if (!m) return null
+  const event = m.event || (m.embedUrl ? m : null)
+  if (!event || !event.embedUrl) return null
+
+  const sources: WatchSource[] = []
+
+  // 1. Primary match embed
+  sources.push({
+    provider: "matchora" as const,
+    key: `matchora:${event.id}`,
+    label: "Main Player",
+    quality: "HD",
+    url: event.embedUrl,
+    live: Boolean(event.status === "live"),
+  })
+
+  // 2. Specific broadcast channels if available
+  if (Array.isArray(event.channels)) {
+    for (const ch of event.channels) {
+      if (ch.embedUrl) {
+        sources.push({
+          provider: "matchora" as const,
+          key: `matchora:ch:${ch.id}`,
+          label: `${ch.name}${ch.lang ? ` (${ch.lang})` : ""}`,
+          quality: ch.quality || "HD",
+          url: ch.embedUrl,
+          live: Boolean(event.status === "live"),
+        })
+      }
+    }
+  }
+
+  return {
+    id: "matchora",
+    name: PROVIDER_NAME.matchora,
+    status: event.status === "live" ? "LIVE" : event.status === "finished" ? "OFFLINE" : "UPCOMING",
+    sources,
+    qualities: dedupe(sources.map((s) => s.quality)),
+  }
+}
 
 function streamFreeProvider(m: MatchedStream): WatchProvider | null {
   const sources = (m.sources || []).filter((s) => s.url)
@@ -231,6 +276,7 @@ function zLiveProvider(
  */
 export function buildProviders(bundle: StreamBundle): WatchProvider[] {
   const built: Partial<Record<StreamingProviderId, WatchProvider | null>> = {
+    matchora: bundle.matchora ? matchoraProvider(bundle.matchora) : null,
     damitv: bundle.damiTv ? damiTvProvider(bundle.damiTv) : null,
     cinevid: bundle.cinevid ? cinevidProvider(bundle.cinevid) : null,
     streamfree: bundle.streamFree ? streamFreeProvider(bundle.streamFree) : null,

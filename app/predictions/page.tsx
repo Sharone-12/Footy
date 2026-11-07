@@ -2,7 +2,14 @@ import { Suspense } from "react"
 import Link from "next/link"
 import { supabase } from "@/lib/supabase"
 import { resolveSeason } from "@/lib/seasons"
-import { fetchTeamData, LEAGUE_ABBR, LEAGUE_TOURNAMENT_ID, FULL_LEAGUES, SINGLE_CLUBS } from "@/lib/teams"
+import {
+  fetchTeamData,
+  LEAGUE_ABBR,
+  LEAGUE_TOURNAMENT_ID,
+  POWER_COLORS,
+  FULL_LEAGUES,
+  SINGLE_CLUBS,
+} from "@/lib/teams"
 import {
   predictMatches,
   computeAccuracy,
@@ -11,12 +18,14 @@ import {
   type MatchPrediction,
   type AccuracyStats,
   type UclModel,
+  type UclStrength,
 } from "@/lib/predictions"
 import { withFrozenPredictions } from "@/lib/predictions-freeze"
 import { UCL } from "@/lib/competition"
 import { Skeleton } from "@/components/ui/skeleton"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { PredictionsLeagueToggle } from "@/components/predictions-league-toggle"
+import { TeamRankingsExpand } from "@/components/team-rankings-expand"
 import { formatDateIST } from "@/lib/time"
 
 const OUTCOME_COLORS = {
@@ -205,72 +214,118 @@ function signed(n: number, digits = 2) {
 
 /**
  * Every Champions League club rated by the same model that sets the odds, so
- * a reader can see why a match is priced the way it is.
+ * a reader can see why a match is priced the way it is. Top five in the card
+ * and the rest behind the expander — the same shape as the teams tab's Power
+ * Rankings, because all 36 in one grid read as a wall rather than a ranking.
  */
 function UclRatings({ model, ids }: { model: UclModel; ids: Map<string, number> }) {
   const rows = [...model.teams.values()].sort((a, b) => b.rating - a.rating)
   if (rows.length === 0) return null
   const top = Math.max(...rows.map((r) => Math.abs(r.rating)), 0.01)
+  const five = rows.slice(0, 5)
+
+  /** What the rating rests on — a club rated on two games is worth less trust. */
+  const basis = (t: UclStrength) =>
+    `${t.uclPlayed} UCL${
+      t.domesticLeague
+        ? ` · ${t.domesticPlayed} ${LEAGUE_ABBR[t.domesticLeague] ?? t.domesticLeague}`
+        : ""
+    }`
+  // Podium tint down the top five, but never green on a negative margin.
+  const tone = (rating: number, i?: number) =>
+    rating < 0 ? OUTCOME_COLORS.away : i == null ? "var(--pitch)" : POWER_COLORS[i]
+
   return (
     <section className="surface rounded-2xl bg-card overflow-hidden">
-      <header className="px-5 pt-5 pb-3">
-        <h2
-          className="text-lg font-semibold tracking-tight uppercase"
-          style={{ fontFamily: "var(--font-condensed)" }}
-        >
-          UCL strength
-        </h2>
+      <header className="px-5 pt-5 pb-4">
+        <div className="flex items-center gap-2">
+          <h2
+            className="text-lg font-semibold tracking-tight uppercase"
+            style={{ fontFamily: "var(--font-condensed)" }}
+          >
+            UCL strength
+          </h2>
+          {rows.length > five.length && (
+            <TeamRankingsExpand
+              title="UCL strength"
+              subtitle={`${rows.length} clubs · expected goal margin vs an average side`}
+              teamIds={ids}
+              rows={rows.map((t) => ({
+                team: t.team,
+                league: UCL,
+                rating: signed(t.rating),
+                ratingTone: tone(t.rating),
+                meta: basis(t),
+                cols: [
+                  { value: (t.attack * model.avg).toFixed(2), label: "for" },
+                  { value: (t.defence * model.avg).toFixed(2), label: "against" },
+                ],
+              }))}
+            />
+          )}
+        </div>
         <p className="stat-label mt-1">
           Expected goal margin vs an average Champions League side · this
           season&apos;s UCL and league form, xG-weighted
         </p>
       </header>
-      <div className="px-2 pb-3">
-        <div className="grid grid-cols-[1.5rem_1fr_3.5rem_3rem] sm:grid-cols-[1.5rem_1fr_3.5rem_3.5rem_3.5rem_7rem] gap-2 px-3 pb-2 border-b border-white/5">
-          <span className="stat-label text-right">#</span>
-          <span className="stat-label">Team</span>
-          <span className="stat-label text-right">Rating</span>
-          <span className="stat-label text-right hidden sm:block">For</span>
-          <span className="stat-label text-right hidden sm:block">Against</span>
-          <span className="stat-label text-right">Based on</span>
-        </div>
-        {rows.map((t, i) => (
+
+      <div className="px-3 pb-4 space-y-1">
+        {five.map((t, i) => (
           <div
             key={t.team}
-            className="grid grid-cols-[1.5rem_1fr_3.5rem_3rem] sm:grid-cols-[1.5rem_1fr_3.5rem_3.5rem_3.5rem_7rem] gap-2 items-center px-3 py-2"
+            className={`flex items-center gap-4 px-4 py-3 rounded-xl ${
+              t.team === "FC Barcelona" ? "barca-stripes" : ""
+            }`}
           >
-            <span className="stat-figure text-sm text-right text-muted-foreground">{i + 1}</span>
-            <span className="min-w-0">
-              <span className="flex items-center gap-2 text-[0.9rem] font-medium truncate">
-                {ids.has(t.team) && <TeamCrest teamId={ids.get(t.team)!} name={t.team} size={18} />}
-                <span className="truncate">{t.team}</span>
-              </span>
-              <span className="flex h-[3px] mt-1.5 max-w-[7rem] rounded-full overflow-hidden bg-white/5">
-                <span
-                  style={{
-                    width: `${(Math.abs(t.rating) / top) * 100}%`,
-                    background: t.rating >= 0 ? OUTCOME_COLORS.home : OUTCOME_COLORS.away,
-                    opacity: 0.75,
-                  }}
-                />
-              </span>
-            </span>
             <span
-              className="stat-figure text-sm text-right"
-              style={{ color: t.rating >= 0 ? "var(--pitch)" : OUTCOME_COLORS.away }}
+              className="stat-figure text-2xl w-8 text-center shrink-0"
+              style={{ color: POWER_COLORS[i], fontFamily: "var(--font-condensed)" }}
             >
-              {signed(t.rating)}
+              {i + 1}
             </span>
-            <span className="stat-figure text-sm text-right text-muted-foreground hidden sm:block">
-              {(t.attack * model.avg).toFixed(2)}
-            </span>
-            <span className="stat-figure text-sm text-right text-muted-foreground hidden sm:block">
-              {(t.defence * model.avg).toFixed(2)}
-            </span>
-            <span className="stat-label text-right">
-              {t.uclPlayed} UCL
-              {t.domesticLeague ? ` · ${t.domesticPlayed} ${LEAGUE_ABBR[t.domesticLeague] ?? t.domesticLeague}` : ""}
-            </span>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                {ids.get(t.team) != null && (
+                  <TeamCrest teamId={ids.get(t.team)!} name={t.team} size={22} />
+                )}
+                <span className="font-semibold text-[0.95rem] truncate">{t.team}</span>
+              </div>
+              <div className="flex items-center gap-2.5 mt-1.5">
+                <span className="flex h-[5px] w-20 sm:w-24 rounded-full overflow-hidden bg-white/5 shrink-0">
+                  <span
+                    style={{
+                      width: `${(Math.abs(t.rating) / top) * 100}%`,
+                      background: POWER_COLORS[i],
+                      opacity: 0.8,
+                    }}
+                  />
+                </span>
+                <span className="stat-label truncate">{basis(t)}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-4 shrink-0">
+              <div className="text-right">
+                <div className="stat-figure text-lg" style={{ color: tone(t.rating, i) }}>
+                  {signed(t.rating)}
+                </div>
+                <div className="stat-label">rating</div>
+              </div>
+              <div className="text-right hidden sm:block">
+                <div className="stat-figure text-sm">
+                  {(t.attack * model.avg).toFixed(2)}
+                </div>
+                <div className="stat-label">for</div>
+              </div>
+              <div className="text-right hidden sm:block">
+                <div className="stat-figure text-sm">
+                  {(t.defence * model.avg).toFixed(2)}
+                </div>
+                <div className="stat-label">against</div>
+              </div>
+            </div>
           </div>
         ))}
       </div>

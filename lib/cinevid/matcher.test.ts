@@ -12,9 +12,9 @@ import {
   matchFixturesToCinevid,
   CONFIDENCE_REJECT_THRESHOLD,
   CONFIDENCE_CONFIRMED_THRESHOLD,
-} from "./matcher"
-import type { Fixture } from "@/lib/providers/types"
-import type { CinevidParsedEvent } from "./types"
+} from "./matcher.ts"
+import type { Fixture } from "../providers/types"
+import type { CinevidParsedEvent } from "./types.ts"
 
 async function runTests() {
   console.log("Running Cinevid Matcher unit tests...")
@@ -162,3 +162,4 @@ runTests().catch((err) => {
   console.error("Cinevid Matcher test failed:", err)
   process.exit(1)
 })
+

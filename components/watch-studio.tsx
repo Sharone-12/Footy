@@ -19,6 +19,7 @@ import {
   LayersIcon,
   CalendarIcon,
   ExternalLinkIcon,
+  GlobeIcon,
   TvMinimalPlayIcon,
   ClockIcon,
   CheckCircle2Icon,
@@ -35,6 +36,7 @@ import type { MatchedZLive, ZLiveChannel } from "@/lib/zlive/types"
 import type { MatchedDaddyLive } from "@/lib/daddylive/types"
 import type { MatchedDamiTv } from "@/lib/damitv/types"
 import type { MatchedCinevid } from "@/lib/cinevid/types"
+import type { MatchedMatchora } from "@/lib/matchora/types"
 import type { StreamingProviderId } from "@/lib/streaming/types"
 import {
   buildProviders,
@@ -146,6 +148,7 @@ export function WatchStudio({
 
         if (fixtureId) {
           promises.push(
+            fetch(`/api/streams/matchora?fixture_id=${fixtureId}`).catch((e) => new Response(JSON.stringify({ error: String(e) }), { status: 500 })),
             fetch(`/api/streamfree?fixture_id=${fixtureId}`).catch((e) => new Response(JSON.stringify({ error: String(e) }), { status: 500 })),
             fetch(`/api/zlive?fixture_id=${fixtureId}`).catch((e) => new Response(JSON.stringify({ error: String(e) }), { status: 500 })),
             fetch(`/api/streams/daddylive?fixture_id=${fixtureId}`).catch((e) => new Response(JSON.stringify({ error: String(e) }), { status: 500 })),
@@ -154,7 +157,7 @@ export function WatchStudio({
           )
         } else {
           // If no fixtureId, fill with dummy resolved promises
-          for (let i = 0; i < 5; i++) {
+          for (let i = 0; i < 6; i++) {
             promises.push(Promise.resolve(new Response(JSON.stringify({}), { status: 200 })))
           }
         }
@@ -164,10 +167,11 @@ export function WatchStudio({
           fetch(`/api/zlive?generic=1`).catch((e) => new Response(JSON.stringify({ channels: [] }), { status: 500 })),
         )
 
-        const [sfRes, zlRes, dlRes, dtRes, cvRes, genRes] = await Promise.all(promises)
+        const [moRes, sfRes, zlRes, dlRes, dtRes, cvRes, genRes] = await Promise.all(promises)
 
         if (unmounted) return
 
+        let moData: { event?: any; matched?: boolean; confidence?: number; channel?: any } = {}
         let sfData: { stream?: MatchedStream } = {}
         let zlData: { channel?: ZLiveChannel; match?: MatchedZLive; matched?: boolean } = {}
         let dlData: { match?: MatchedDaddyLive; channels?: any[]; matched?: boolean } = {}
@@ -175,6 +179,7 @@ export function WatchStudio({
         let cvData: { event?: any; matched?: boolean; confidence?: number; isConfirmedMatch?: boolean } = {}
         let genData: { channels?: ZLiveChannel[] } = {}
 
+        if (moRes.ok) try { moData = await moRes.json() } catch { }
         if (sfRes.ok) try { sfData = await sfRes.json() } catch { }
         if (zlRes.ok) try { zlData = await zlRes.json() } catch { }
         if (dlRes.ok) try { dlData = await dlRes.json() } catch { }
@@ -191,7 +196,16 @@ export function WatchStudio({
           matchingGeneric = generics.find((c) => c.id === initialChannelId) ?? null
         }
 
-        // Properly normalize matches for all 5 providers:
+        // Properly normalize matches for all 6 providers:
+        const moMatch: MatchedMatchora | null =
+          moData.matched && moData.event
+            ? {
+                event: moData.event,
+                confidence: moData.confidence ?? 95,
+                channel: moData.channel,
+              }
+            : null
+
         const sfMatch: MatchedStream | null = sfData.stream ?? null
 
         let zlMatch: MatchedZLive | null = null
@@ -239,6 +253,7 @@ export function WatchStudio({
             : null
 
         const newBundle: StreamBundle = {
+          matchora: moMatch,
           streamFree: sfMatch,
           zLive: zlMatch,
           daddyLive: dlMatch,
@@ -1218,6 +1233,7 @@ export function WatchStudio({
                         {/* Provider Header: Name, Qualities & Status on a single compact row */}
                         <div className="flex items-center justify-between mb-1.5">
                           <div className="flex items-center gap-1.5 min-w-0">
+                            {p.id === "matchora" && <GlobeIcon className="size-3.5 text-blue-400 shrink-0" />}
                             {p.id === "damitv" && <MonitorPlayIcon className="size-3.5 text-violet-400 shrink-0" />}
                             {p.id === "cinevid" && <TvMinimalPlayIcon className="size-3.5 text-rose-400 shrink-0" />}
                             {p.id === "streamfree" && <SparklesIcon className="size-3.5 text-cyan-400 shrink-0" />}

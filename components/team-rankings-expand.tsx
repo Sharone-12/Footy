@@ -14,26 +14,37 @@ import { Input } from "@/components/ui/input"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { LEAGUE_ABBR, LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
 
+/**
+ * One row of any ranked team list. Every figure arrives already formatted:
+ * this is a client component, so a server page cannot hand it a formatter.
+ */
 export type RankedTeamRow = {
   team: string
   league: string
-  score: number
-  ppg: number
-  gd: number
-  played: number
-  href: string
+  /** Omit for a club we hold no page for — the row renders unlinked. */
+  href?: string
+  /** The big right-hand figure, e.g. "92.4" or "+0.85". */
+  rating: string
+  /** Colour for that figure. Podium green for the top three when omitted. */
+  ratingTone?: string
+  /** Small right-aligned columns, each with a label beneath. */
+  cols?: { value: string; label: string; tone?: string }[]
+  /** Shown beneath the team name in place of the league line. */
+  meta?: string
 }
 
 export function TeamRankingsExpand({
   rows,
   teamIds,
+  title = "Power Rankings",
+  subtitle,
 }: {
   rows: RankedTeamRow[]
   teamIds: Map<string, number>
+  title?: string
+  subtitle?: string
 }) {
   const [q, setQ] = useState("")
-  const displayRating = (score: number) =>
-    Math.max(50, Math.min(99, 55 + score * 0.5))
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase()
@@ -48,7 +59,7 @@ export function TeamRankingsExpand({
   return (
     <Dialog>
       <DialogTrigger
-        aria-label="Expand Power Rankings"
+        aria-label={`Expand ${title}`}
         className="inline-flex items-center justify-center size-6 rounded-full text-muted-foreground hover:text-foreground hover:bg-white/[0.06] transition-colors"
       >
         <ExpandIcon className="size-4" />
@@ -59,10 +70,10 @@ export function TeamRankingsExpand({
             className="text-xl font-semibold tracking-tight uppercase leading-tight"
             style={{ fontFamily: "var(--font-condensed)" }}
           >
-            Power Rankings
+            {title}
           </DialogTitle>
           <span className="stat-label mt-1 block">
-            {rows.length} teams · ppg + goal diff + xG
+            {subtitle ?? `${rows.length} teams · ppg + goal diff + xG`}
           </span>
           <div className="relative mt-4">
             <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
@@ -94,14 +105,11 @@ export function TeamRankingsExpand({
             filtered.map((t) => {
               const absoluteRank = rows.indexOf(t) + 1
               const tid = LEAGUE_TOURNAMENT_ID[t.league]
-              return (
-                <Link
-                  key={`${t.team}-${t.league}`}
-                  href={t.href}
-                  className={`row-item flex items-center gap-3 px-3 py-2.5 rounded-xl ${
-                    t.team === "FC Barcelona" ? "barca-stripes" : ""
-                  }`}
-                >
+              const className = `row-item flex items-center gap-3 px-3 py-2.5 rounded-xl ${
+                t.team === "FC Barcelona" ? "barca-stripes" : ""
+              }`
+              const body = (
+                <>
                   <span className="rank-badge" data-rank={absoluteRank}>
                     {absoluteRank}
                   </span>
@@ -113,36 +121,49 @@ export function TeamRankingsExpand({
                       {t.team}
                     </span>
                     <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                      {tid ? (
-                        <LeagueCrest tournamentId={tid} name={t.league} size={14} />
-                      ) : null}
-                      <span className="truncate">{LEAGUE_ABBR[t.league] ?? t.league}</span>
+                      {t.meta ? (
+                        <span className="truncate">{t.meta}</span>
+                      ) : (
+                        <>
+                          {tid ? (
+                            <LeagueCrest tournamentId={tid} name={t.league} size={14} />
+                          ) : null}
+                          <span className="truncate">{LEAGUE_ABBR[t.league] ?? t.league}</span>
+                        </>
+                      )}
                     </span>
                   </span>
-                  <span className="text-right shrink-0 hidden sm:block">
-                    <span className="stat-figure text-sm block tabular-nums">
-                      {t.ppg.toFixed(2)}
+                  {(t.cols ?? []).map((c) => (
+                    <span key={c.label} className="text-right shrink-0 hidden sm:block w-10">
+                      <span
+                        className="stat-figure text-sm block tabular-nums"
+                        style={{ color: c.tone }}
+                      >
+                        {c.value}
+                      </span>
+                      <span className="stat-label">{c.label}</span>
                     </span>
-                    <span className="stat-label">ppg</span>
-                  </span>
-                  <span className="text-right shrink-0 hidden sm:block w-10">
-                    <span
-                      className="stat-figure text-sm block tabular-nums"
-                      style={{
-                        color: t.gd > 0 ? "var(--pitch)" : t.gd < 0 ? "oklch(0.65 0.14 25)" : undefined,
-                      }}
-                    >
-                      {t.gd > 0 ? "+" : ""}{t.gd}
-                    </span>
-                    <span className="stat-label">gd</span>
-                  </span>
+                  ))}
                   <span
                     className="stat-figure text-lg w-14 text-right shrink-0 tabular-nums"
-                    style={{ color: absoluteRank <= 3 ? "var(--pitch)" : undefined }}
+                    style={{
+                      color:
+                        t.ratingTone ?? (absoluteRank <= 3 ? "var(--pitch)" : undefined),
+                    }}
                   >
-                    {displayRating(t.score).toFixed(1)}
+                    {t.rating}
                   </span>
+                </>
+              )
+              const key = `${t.team}-${t.league}`
+              return t.href ? (
+                <Link key={key} href={t.href} className={className}>
+                  {body}
                 </Link>
+              ) : (
+                <div key={key} className={className}>
+                  {body}
+                </div>
               )
             })
           )}

@@ -41,6 +41,15 @@ assert.deepEqual(embedFor("https://vimeo.com/123456789"), {
   src: "https://player.vimeo.com/video/123456789",
 })
 
+assert.deepEqual(embedFor("https://matchora.pro/embed/match/2506279"), {
+  kind: "iframe",
+  src: "https://matchora.pro/embed/match/2506279",
+})
+assert.deepEqual(embedFor("https://es.matchora.pro/embed/channel/118458"), {
+  kind: "iframe",
+  src: "https://es.matchora.pro/embed/channel/118458",
+})
+
 // Anything else is a link, not a frame: it would render blank.
 assert.equal(embedFor("https://example.com/match/live")?.kind, "link")
 assert.equal(embedFor("https://www.youtube.com/results?q=barca")?.kind, "link")

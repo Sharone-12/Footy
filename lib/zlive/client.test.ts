@@ -4,7 +4,7 @@ import {
   fetchFootballChannels,
   getGenericFootballChannels,
   _clearZLiveCache,
-} from "./client"
+} from "./client.ts"
 
 async function runTests() {
   _clearZLiveCache()

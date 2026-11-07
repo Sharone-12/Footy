@@ -8,6 +8,7 @@ import {
   CLUB_CARD_STATS,
   LEAGUE_ABBR,
   LEAGUE_TOURNAMENT_ID,
+  POWER_COLORS,
   statValue,
   indexStats,
   fetchTeamData,
@@ -24,14 +25,6 @@ import { LeagueCrest, TeamCrest } from "@/components/player-avatar"
 import { TeamRankingsExpand } from "@/components/team-rankings-expand"
 
 const POWER_STAT = { stat: "Expected goals", label: "xG" } as TeamStat
-
-const POWER_COLORS = [
-  "oklch(0.85 0.18 145)",
-  "oklch(0.78 0.15 145)",
-  "oklch(0.72 0.12 145)",
-  "oklch(0.66 0.09 145)",
-  "oklch(0.60 0.06 145)",
-]
 
 function formBar({ won, drawn, lost, played }: TeamTableRow) {
   if (!played) return []
@@ -263,7 +256,25 @@ function PowerRankings({
           </h2>
           {ranked.length > top.length && (
             <TeamRankingsExpand
-              rows={ranked.map((r) => ({ ...r, href: link(r.team) }))}
+              rows={ranked.map((r) => ({
+                team: r.team,
+                league: r.league,
+                href: link(r.team),
+                rating: displayRating(r.score).toFixed(1),
+                cols: [
+                  { value: r.ppg.toFixed(2), label: "ppg" },
+                  {
+                    value: `${r.gd > 0 ? "+" : ""}${r.gd}`,
+                    label: "gd",
+                    tone:
+                      r.gd > 0
+                        ? "var(--pitch)"
+                        : r.gd < 0
+                          ? "oklch(0.65 0.14 25)"
+                          : undefined,
+                  },
+                ],
+              }))}
               teamIds={teamIds}
             />
           )}

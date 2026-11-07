@@ -4,7 +4,7 @@ import {
   fetchDamiTvStreamById,
   checkDamiTvHealth,
   _clearDamiTvCache,
-} from "./client"
+} from "./client.ts"
 
 async function runTests() {
   _clearDamiTvCache()
