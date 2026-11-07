@@ -50,7 +50,8 @@ import {
   type StreamBundle,
 } from "@/lib/streaming/resolve"
 import { formatKickoffIST, formatTimeIST, formatDateIST } from "@/lib/time"
-import { LiveFixtureMark } from "@/components/live-score"
+import { useLiveScore, useLiveNow } from "@/components/live-score"
+import { matchClock } from "@/lib/livescores"
 
 export type WatchStudioProps = {
   fixture: LiveFixture | null
@@ -115,6 +116,12 @@ export function WatchStudio({
     const t = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(t)
   }, [])
+
+  // Live match score & running clock from live feed
+  const dummyFixture = useMemo(() => ({ home: "", away: "", date: "" }), [])
+  const liveScore = useLiveScore(fixture ?? dummyFixture)
+  const liveNow = useLiveNow()
+  const liveClock = liveScore ? matchClock(liveScore, liveNow) : null
 
   // Kickoff timing
   const kickoffMs = useMemo(() => {
@@ -474,7 +481,9 @@ export function WatchStudio({
 
       {/* 2. MATCH INFORMATION HEADER CARD (Hero Banner with High-Density Telemetry) */}
       {fixture && (() => {
-        const hasScore = fixture.home_goals != null && fixture.away_goals != null
+        const homeScore = liveScore?.homeGoals ?? fixture.home_goals ?? null
+        const awayScore = liveScore?.awayGoals ?? fixture.away_goals ?? null
+        const hasScore = homeScore != null && awayScore != null
         return (
           <section
             className={`surface bg-card rounded-3xl p-4 sm:p-5 transition-all relative overflow-hidden border border-border/70 shadow-lg ${
@@ -502,21 +511,34 @@ export function WatchStudio({
                   )}
                 </div>
 
-                {/* Score Hub or VS Badge */}
-                <div className="flex flex-col items-center justify-center shrink-0 px-1 sm:px-3">
+                {/* Prominent Score Hub (or VS Badge pre-match) */}
+                <div className="flex flex-col items-center justify-center shrink-0 px-2 sm:px-4">
                   {hasScore ? (
-                    <div className="flex items-center gap-2 px-3.5 py-1 rounded-2xl bg-black/60 border border-white/10 shadow-inner">
-                      <span className="font-mono text-xl sm:text-2xl font-black text-white">
-                        {fixture.home_goals}
-                      </span>
-                      <span className="text-white/40 font-mono text-sm font-bold">:</span>
-                      <span className="font-mono text-xl sm:text-2xl font-black text-white">
-                        {fixture.away_goals}
-                      </span>
+                    <div className="flex flex-col items-center gap-1.5">
+                      <div className="flex items-center gap-2.5 sm:gap-3.5 px-4 py-1.5 sm:px-5 sm:py-2 rounded-2xl bg-black/80 border border-white/15 shadow-xl backdrop-blur-md">
+                        <span className="font-mono text-2xl sm:text-3xl font-black text-white tabular-nums tracking-tight">
+                          {homeScore}
+                        </span>
+                        <span className="text-white/40 font-mono text-base sm:text-lg font-bold">:</span>
+                        <span className="font-mono text-2xl sm:text-3xl font-black text-white tabular-nums tracking-tight">
+                          {awayScore}
+                        </span>
+                      </div>
+                      {liveClock && (
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--pitch)]/15 border border-[var(--pitch)]/30">
+                          <span className="relative flex size-1.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--pitch)] opacity-75 motion-reduce:hidden" />
+                            <span className="relative inline-flex rounded-full size-1.5 bg-[var(--pitch)]" />
+                          </span>
+                          <span className="font-mono font-bold text-[11px] sm:text-xs tabular-nums text-[var(--pitch)]">
+                            {liveClock.display}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <span
-                      className="px-3 py-1 rounded-full text-[11px] sm:text-xs font-black tracking-widest bg-black/60 border border-white/10 text-muted-foreground"
+                      className="px-3.5 py-1.5 rounded-full text-xs font-black tracking-widest bg-black/60 border border-white/10 text-muted-foreground shadow-sm"
                       style={{ fontFamily: "var(--font-condensed)" }}
                     >
                       VS
@@ -571,9 +593,8 @@ export function WatchStudio({
                   </div>
                 </div>
 
-                {/* 3. Match Status Badge & Live Score / Countdown */}
-                <div className="shrink-0 flex items-center gap-2.5">
-                  <LiveFixtureMark fixture={fixture} />
+                {/* 3. Match Status Badge / Countdown */}
+                <div className="shrink-0 flex items-center">
                   {isLiveNow ? (
                     <div className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-[var(--pitch)]/10 border border-[var(--pitch)]/30 text-[var(--pitch)] shadow-sm">
                       <span className="relative flex size-2">

@@ -97,14 +97,14 @@ export function LiveFixtureMark({
   const clock = matchClock(score, now)
   return (
     <span
-      className={`inline-flex items-center gap-2 shrink-0 ${className}`}
+      className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-xl bg-black/40 border border-white/10 shrink-0 shadow-sm ${className}`}
       title={`Live: ${score.home} ${score.homeGoals ?? "-"}-${score.awayGoals ?? "-"} ${score.away}, ${clock.display}`}
     >
-      <span className="stat-figure text-base tabular-nums">
+      <span className="font-mono font-bold text-xs sm:text-sm tabular-nums text-foreground">
         {score.homeGoals ?? "–"}&ndash;{score.awayGoals ?? "–"}
       </span>
-      <span className="inline-flex items-center gap-1">
-        <LiveSignal size={11} />
+      <span className="inline-flex items-center gap-1.5">
+        <LiveSignal size={8} />
         <span
           className="font-mono font-bold text-[0.7rem] tabular-nums"
           style={{ color: "var(--pitch)" }}
