@@ -7,6 +7,7 @@ import type { MatchedDaddyLive } from "../daddylive/types.ts"
 import type { MatchedZLive } from "../zlive/types.ts"
 import type { MatchedCinevid } from "../cinevid/types.ts"
 import type { MatchedMatchora } from "../matchora/types.ts"
+import type { MatchedLive24 } from "../live24/types.ts"
 
 const matchora = {
   confidence: 95,
@@ -118,11 +119,26 @@ const zLive = {
   isGenericBroadcaster: true,
 } as MatchedZLive
 
+const live24 = {
+  event: {
+    id: "l1",
+    home: "A",
+    away: "B",
+    sport: "football",
+    date: "2026-11-07",
+    time: "20:00",
+    streams: [{ name: "Stream 1", url: "https://live24/1" }],
+    isLive: true,
+  },
+  confidence: 1,
+  isConfirmedMatch: true,
+} as MatchedLive24
+
 // ── Display order and per-provider source counts (damitv ranked #1 buffer-free) ──
-const all = buildProviders({ matchora, damiTv, cinevid, streamFree, daddyLive, zLive })
+const all = buildProviders({ matchora, damiTv, cinevid, streamFree, daddyLive, zLive, live24 })
 assert.deepEqual(
   all.map((p) => p.id),
-  ["damitv", "cinevid", "matchora", "daddylive", "zlive", "streamfree"],
+  ["damitv", "cinevid", "matchora", "daddylive", "live24", "zlive", "streamfree"],
 )
 assert.equal(all[0].sources.length, 1) // damiTv
 assert.deepEqual(all[0].sources.map((s) => s.url), ["https://dami/a"])
@@ -130,8 +146,9 @@ assert.deepEqual(all[1].sources.map((s) => s.url), ["https://cinevid.st/embed/li
 assert.equal(all[2].sources.length, 2) // matchora (main + c1)
 assert.deepEqual(all[2].sources.map((s) => s.url), ["https://matchora.pro/embed/match/m1", "https://matchora.pro/embed/channel/c1"])
 assert.deepEqual(all[3].sources.map((s) => s.label), ["Sky Main"]) // daddyLive
-assert.equal(all[4].sources[0].url, "https://zlive.st/embed/z1") // zLive
-assert.equal(allSources(all).length, 8)
+assert.deepEqual(all[4].sources.map((s) => s.url), ["https://live24/1"]) // live24
+assert.equal(all[5].sources[0].url, "https://zlive.st/embed/z1") // zLive
+assert.equal(allSources(all).length, 9)
 
 // ── A provider with nothing playable is omitted, not shown dead ──
 const empty = buildProviders({

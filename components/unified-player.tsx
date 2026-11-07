@@ -70,19 +70,20 @@ export function UnifiedPlayer({
   const hasCinevid = isProviderEnabled("cinevid") && Boolean(cinevid && cinevid.event?.playerUrl)
   const hasLive24 = isProviderEnabled("live24") && Boolean(live24 && live24.event?.streams?.length > 0)
 
-  // Initial provider selection: DAMITV is #1 (flawless, buffer-free), followed by Live24, Cinevid, Matchora, etc.
+  // Initial provider selection hierarchy:
+  // 1. DAMITV -> 2. Cinevid -> 3. Matchora -> 4. DaddyLive -> 5. Live24 -> 6. ZLive -> 7. StreamFree
   const defaultProvider: StreamingProviderId =
     initialProvider ??
     (hasDamiTv
       ? "damitv"
-      : hasLive24
-      ? "live24"
       : hasCinevid
       ? "cinevid"
       : hasMatchora
       ? "matchora"
       : hasDaddyLive
       ? "daddylive"
+      : hasLive24
+      ? "live24"
       : hasZLive
       ? "zlive"
       : "streamfree")
@@ -293,7 +294,7 @@ export function UnifiedPlayer({
               role="tablist"
               aria-label="Streaming Provider"
             >
-              {/* Ranked by playback smoothness and buffer-free stability: DAMITV -> Live24 -> Cinevid -> Matchora -> DaddyLive -> ZLive -> StreamFree */}
+              {/* Hierarchy: DAMITV -> Cinevid -> Matchora -> DaddyLive -> Live24 -> ZLive -> StreamFree */}
               <button
                 type="button"
                 role="tab"
@@ -310,24 +311,6 @@ export function UnifiedPlayer({
               >
                 <MonitorPlayIcon className="size-3 text-violet-400" />
                 DAMITV
-              </button>
-
-              <button
-                type="button"
-                role="tab"
-                aria-selected={selectedProvider === "live24"}
-                disabled={!hasLive24}
-                onClick={() => handleProviderSwitch("live24")}
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[0.7rem] font-bold transition-all ${
-                  selectedProvider === "live24"
-                    ? "bg-white/20 text-white shadow-sm"
-                    : hasLive24
-                    ? "text-muted-foreground hover:text-foreground"
-                    : "opacity-35 cursor-not-allowed text-muted-foreground"
-                }`}
-              >
-                <TvIcon className="size-3 text-emerald-400" />
-                Live24
               </button>
 
               <button
@@ -382,6 +365,24 @@ export function UnifiedPlayer({
               >
                 <TvIcon className="size-3 text-amber-400" />
                 DaddyLive
+              </button>
+
+              <button
+                type="button"
+                role="tab"
+                aria-selected={selectedProvider === "live24"}
+                disabled={!hasLive24}
+                onClick={() => handleProviderSwitch("live24")}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[0.7rem] font-bold transition-all ${
+                  selectedProvider === "live24"
+                    ? "bg-white/20 text-white shadow-sm"
+                    : hasLive24
+                    ? "text-muted-foreground hover:text-foreground"
+                    : "opacity-35 cursor-not-allowed text-muted-foreground"
+                }`}
+              >
+                <TvIcon className="size-3 text-emerald-400" />
+                Live24
               </button>
 
               <button
