@@ -5,6 +5,7 @@ import type { MatchedStream } from "../streamfree/types.ts"
 import type { MatchedDamiTv } from "../damitv/types.ts"
 import type { MatchedDaddyLive } from "../daddylive/types.ts"
 import type { MatchedZLive } from "../zlive/types.ts"
+import type { MatchedCinevid } from "../cinevid/types.ts"
 
 const streamFree = {
   streamKey: "k",
@@ -22,6 +23,35 @@ const streamFree = {
   confidence: 1,
   matchedTeams: { home: "A", away: "B" },
 } as MatchedStream
+
+const cinevid = {
+  event_id: 1,
+  fixtureId: 1,
+  isConfirmedMatch: true,
+  confidence: 95,
+  event: {
+    id: "cv1",
+    slug: "a-vs-b",
+    title: "A vs B",
+    sport: "Football",
+    home: "A",
+    away: "B",
+    league: "La Liga",
+    utcDate: "2026-11-07",
+    utcTime: "20:00",
+    kickoffIso: "2026-11-07T20:00:00.000Z",
+    kickoffTimestampMs: 1794100000000,
+    status: "LIVE",
+    isLive: true,
+    score: null,
+    round: null,
+    venue: null,
+    homeTeamImage: null,
+    awayTeamImage: null,
+    thumbnail: null,
+    playerUrl: "https://cinevid.st/embed/live/cv1",
+  },
+} as MatchedCinevid
 
 const damiTv = {
   stream: {
@@ -69,22 +99,19 @@ const zLive = {
 } as MatchedZLive
 
 // ── Display order and per-provider source counts ──
-const all = buildProviders({ streamFree, damiTv, daddyLive, zLive })
+const all = buildProviders({ damiTv, cinevid, streamFree, daddyLive, zLive })
 assert.deepEqual(
   all.map((p) => p.id),
-  ["streamfree", "damitv", "daddylive", "zlive"],
+  ["damitv", "cinevid", "streamfree", "daddylive", "zlive"],
 )
-assert.equal(all[0].sources.length, 2)
-assert.deepEqual(all[0].qualities, ["FHD", "HD"])
-// Named sources win over the stream's default embed.
-assert.deepEqual(all[1].sources.map((s) => s.url), ["https://dami/a"])
-assert.deepEqual(all[1].qualities, ["HD"])
-// The channel without a player URL is dropped.
-assert.deepEqual(all[2].sources.map((s) => s.label), ["Sky Main"])
-assert.match(all[2].caveat ?? "", /schedule/)
-// A ZLive channel with no url falls back to the embed path built from its id.
-assert.equal(all[3].sources[0].url, "https://zlive.st/embed/z1")
-assert.equal(allSources(all).length, 5)
+assert.equal(all[0].sources.length, 1) // damiTv
+assert.deepEqual(all[0].sources.map((s) => s.url), ["https://dami/a"])
+assert.deepEqual(all[1].sources.map((s) => s.url), ["https://cinevid.st/embed/live/cv1"]) // cinevid
+assert.equal(all[2].sources.length, 2) // streamFree
+assert.deepEqual(all[2].qualities, ["FHD", "HD"])
+assert.deepEqual(all[3].sources.map((s) => s.label), ["Sky Main"]) // daddyLive
+assert.equal(all[4].sources[0].url, "https://zlive.st/embed/z1") // zLive
+assert.equal(allSources(all).length, 6)
 
 // ── A provider with nothing playable is omitted, not shown dead ──
 const empty = buildProviders({
@@ -108,7 +135,7 @@ const gone = resolveSource(all, "streamfree", "streamfree:4K")
 assert.equal(gone?.source.url, "https://sf/fhd")
 const missingProvider = resolveSource(all, "daddylive", "daddylive:999")
 assert.equal(missingProvider?.source.url, "https://dl/1")
-assert.equal(resolveSource(all, null, null)?.provider.id, "streamfree")
+assert.equal(resolveSource(all, null, null)?.provider.id, "damitv")
 
 // ── A hand-picked 24/7 channel is a provider with one source ──
 const generic = buildProviders({

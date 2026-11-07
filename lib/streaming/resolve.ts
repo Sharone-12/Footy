@@ -12,6 +12,7 @@ import type { MatchedStream } from "@/lib/streamfree/types"
 import type { MatchedZLive, ZLiveChannel } from "@/lib/zlive/types"
 import type { MatchedDaddyLive } from "@/lib/daddylive/types"
 import type { MatchedDamiTv } from "@/lib/damitv/types"
+import type { MatchedCinevid } from "@/lib/cinevid/types"
 import type { StreamingProviderId } from "@/lib/streaming/types"
 
 export type SourceStatus = "LIVE" | "UPCOMING" | "OFFLINE"
@@ -41,12 +42,13 @@ export type WatchProvider = {
   caveat?: string
 }
 
-/** Everything the four `?fixture_id=` endpoints return for one fixture. */
+/** Everything the five `?fixture_id=` endpoints return for one fixture. */
 export type StreamBundle = {
   streamFree?: MatchedStream | null
   zLive?: MatchedZLive | null
   daddyLive?: MatchedDaddyLive | null
   damiTv?: MatchedDamiTv | null
+  cinevid?: MatchedCinevid | null
   /** A 24/7 broadcaster picked by hand, with no fixture behind it. */
   genericChannel?: ZLiveChannel | null
   /** All available 24/7 football channels from the manifest. */
@@ -54,14 +56,15 @@ export type StreamBundle = {
 }
 
 export const PROVIDER_NAME: Record<StreamingProviderId, string> = {
-  streamfree: "StreamFree",
   damitv: "DAMITV",
+  cinevid: "Cinevid",
+  streamfree: "StreamFree",
   daddylive: "DaddyLive",
   zlive: "ZLive",
 }
 
-/** Display order: DAMITV is primary default, followed by StreamFree, DaddyLive, ZLive. */
-const ORDER: StreamingProviderId[] = ["damitv", "streamfree", "daddylive", "zlive"]
+/** Display order: DAMITV is primary default, followed by Cinevid, StreamFree, DaddyLive, ZLive. */
+const ORDER: StreamingProviderId[] = ["damitv", "cinevid", "streamfree", "daddylive", "zlive"]
 
 const dedupe = (xs: (string | undefined)[]) =>
   Array.from(new Set(xs.filter((x): x is string => Boolean(x))))
@@ -119,6 +122,32 @@ function damiTvProvider(m: MatchedDamiTv | any): WatchProvider | null {
     status: stream.status ?? (stream.isLive ? "LIVE" : "OFFLINE"),
     sources,
     qualities: dedupe(sources.map((s) => s.quality)),
+  }
+}
+
+function cinevidProvider(m: MatchedCinevid | any): WatchProvider | null {
+  if (!m) return null
+  const event = m.event || (m.playerUrl ? m : null)
+  if (!event || !event.playerUrl) return null
+
+  const sources: WatchSource[] = [
+    {
+      provider: "cinevid" as const,
+      key: `cinevid:${event.id}`,
+      label: event.league || "HD Live Player",
+      quality: "HD",
+      url: event.playerUrl,
+      live: Boolean(event.isLive || event.status === "LIVE"),
+    },
+  ]
+
+  return {
+    id: "cinevid",
+    name: PROVIDER_NAME.cinevid,
+    status: event.status === "LIVE" ? "LIVE" : event.status === "FINISHED" ? "OFFLINE" : "UPCOMING",
+    sources,
+    qualities: ["HD"],
+    caveat: m.isConfirmedMatch ? undefined : "Unconfirmed match, verify fixture",
   }
 }
 
@@ -203,6 +232,7 @@ function zLiveProvider(
 export function buildProviders(bundle: StreamBundle): WatchProvider[] {
   const built: Partial<Record<StreamingProviderId, WatchProvider | null>> = {
     damitv: bundle.damiTv ? damiTvProvider(bundle.damiTv) : null,
+    cinevid: bundle.cinevid ? cinevidProvider(bundle.cinevid) : null,
     streamfree: bundle.streamFree ? streamFreeProvider(bundle.streamFree) : null,
     daddylive: bundle.daddyLive ? daddyLiveProvider(bundle.daddyLive) : null,
     zlive: zLiveProvider(bundle.zLive, bundle.genericChannel, bundle.genericChannels),

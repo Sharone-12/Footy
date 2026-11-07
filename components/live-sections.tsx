@@ -11,6 +11,7 @@ import type { MatchedStream } from "@/lib/streamfree/types"
 import type { MatchedZLive, ZLiveChannel } from "@/lib/zlive/types"
 import type { MatchedDaddyLive } from "@/lib/daddylive/types"
 import type { MatchedDamiTv } from "@/lib/damitv/types"
+import type { MatchedCinevid } from "@/lib/cinevid/types"
 import { UnifiedPlayer } from "@/components/unified-player"
 import { formatKickoffIST } from "@/lib/time"
 
@@ -41,8 +42,9 @@ type ActivePlayerState = {
   zLive?: MatchedZLive | null
   daddyLive?: MatchedDaddyLive | null
   damiTv?: MatchedDamiTv | null
+  cinevid?: MatchedCinevid | null
   genericChannel?: ZLiveChannel | null
-  initialProvider?: "streamfree" | "zlive" | "daddylive" | "damitv"
+  initialProvider?: "streamfree" | "zlive" | "daddylive" | "damitv" | "cinevid"
 }
 
 function Row({
@@ -53,6 +55,7 @@ function Row({
   matchedZLive,
   matchedDaddyLive,
   matchedDamiTv,
+  matchedCinevid,
   onWatch,
 }: {
   m: LiveFixture
@@ -62,10 +65,11 @@ function Row({
   matchedZLive?: MatchedZLive
   matchedDaddyLive?: MatchedDaddyLive
   matchedDamiTv?: MatchedDamiTv
+  matchedCinevid?: MatchedCinevid
   onWatch?: (state: ActivePlayerState) => void
 }) {
   const tid = LEAGUE_TOURNAMENT_ID[m.league]
-  const hasStream = Boolean(matchedStream || matchedZLive || matchedDaddyLive || matchedDamiTv)
+  const hasStream = Boolean(matchedStream || matchedZLive || matchedDaddyLive || matchedDamiTv || matchedCinevid)
   const start = startOf(m)
   const left = start - now
   const isUnderAnHour = left > 0 && left <= 3600_000
@@ -130,6 +134,16 @@ function Row({
                 >
                   <MonitorPlayIcon className="size-2.5" />
                   DAMITV
+                </span>
+              )}
+
+              {matchedCinevid && (
+                <span
+                  title={`Cinevid (${matchedCinevid.isConfirmedMatch ? "Confirmed" : "Candidate"})`}
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.65rem] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/25"
+                >
+                  <TvIcon className="size-2.5" />
+                  Cinevid
                 </span>
               )}
 
@@ -199,6 +213,7 @@ function Section({
   zliveMap,
   daddyliveMap,
   damitvMap,
+  cinevidMap,
   onWatch,
 }: {
   title: string
@@ -210,6 +225,7 @@ function Section({
   zliveMap: Record<number, MatchedZLive>
   daddyliveMap: Record<number, MatchedDaddyLive>
   damitvMap: Record<number, MatchedDamiTv>
+  cinevidMap: Record<number, MatchedCinevid>
   onWatch?: (state: ActivePlayerState) => void
 }) {
   return (
@@ -241,6 +257,7 @@ function Section({
               matchedZLive={zliveMap[m.event_id]}
               matchedDaddyLive={daddyliveMap[m.event_id]}
               matchedDamiTv={damitvMap[m.event_id]}
+              matchedCinevid={cinevidMap[m.event_id]}
               onWatch={onWatch}
             />
           ))}
@@ -256,6 +273,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
   const [zliveMap, setZliveMap] = useState<Record<number, MatchedZLive>>({})
   const [daddyliveMap, setDaddyliveMap] = useState<Record<number, MatchedDaddyLive>>({})
   const [damitvMap, setDamitvMap] = useState<Record<number, MatchedDamiTv>>({})
+  const [cinevidMap, setCinevidMap] = useState<Record<number, MatchedCinevid>>({})
   const [genericChannels, setGenericChannels] = useState<ZLiveChannel[]>([])
   const [activePlayer, setActivePlayer] = useState<ActivePlayerState | null>(null)
   const gateways = gatewaySources()
@@ -312,6 +330,31 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
       }
     }
     loadDamiTv()
+    return () => {
+      unmounted = true
+    }
+  }, [])
+
+  // Fetch Cinevid stream matches on mount
+  useEffect(() => {
+    let unmounted = false
+    async function loadCinevid() {
+      try {
+        const res = await fetch("/api/streams/cinevid")
+        if (!res.ok) return
+        const data = await res.json()
+        if (data?.streams && Array.isArray(data.streams) && !unmounted) {
+          const map: Record<number, MatchedCinevid> = {}
+          for (const s of data.streams) {
+            if (s.event_id) map[s.event_id] = s
+          }
+          setCinevidMap(map)
+        }
+      } catch (err) {
+        console.warn("[live] Could not load Cinevid streams:", err)
+      }
+    }
+    loadCinevid()
     return () => {
       unmounted = true
     }
@@ -406,6 +449,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
         zliveMap={zliveMap}
         daddyliveMap={daddyliveMap}
         damitvMap={damitvMap}
+        cinevidMap={cinevidMap}
       />
 
       {/* 2. Matches: Starting Soon */}
@@ -418,6 +462,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
         zliveMap={zliveMap}
         daddyliveMap={daddyliveMap}
         damitvMap={damitvMap}
+        cinevidMap={cinevidMap}
       />
 
       {/* 3. Matches: Upcoming Fixtures */}
@@ -430,6 +475,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
         zliveMap={zliveMap}
         daddyliveMap={daddyliveMap}
         damitvMap={damitvMap}
+        cinevidMap={cinevidMap}
       />
 
       {/* 4. 24/7 Football TV Channels (ZLive) - Pushed below matches */}

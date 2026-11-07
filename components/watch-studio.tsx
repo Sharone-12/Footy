@@ -34,6 +34,7 @@ import type { MatchedStream } from "@/lib/streamfree/types"
 import type { MatchedZLive, ZLiveChannel } from "@/lib/zlive/types"
 import type { MatchedDaddyLive } from "@/lib/daddylive/types"
 import type { MatchedDamiTv } from "@/lib/damitv/types"
+import type { MatchedCinevid } from "@/lib/cinevid/types"
 import type { StreamingProviderId } from "@/lib/streaming/types"
 import {
   buildProviders,
@@ -149,10 +150,11 @@ export function WatchStudio({
             fetch(`/api/zlive?fixture_id=${fixtureId}`).catch((e) => new Response(JSON.stringify({ error: String(e) }), { status: 500 })),
             fetch(`/api/streams/daddylive?fixture_id=${fixtureId}`).catch((e) => new Response(JSON.stringify({ error: String(e) }), { status: 500 })),
             fetch(`/api/streams/damitv?fixture_id=${fixtureId}`).catch((e) => new Response(JSON.stringify({ error: String(e) }), { status: 500 })),
+            fetch(`/api/streams/cinevid?fixture_id=${fixtureId}`).catch((e) => new Response(JSON.stringify({ error: String(e) }), { status: 500 })),
           )
         } else {
           // If no fixtureId, fill with dummy resolved promises
-          for (let i = 0; i < 4; i++) {
+          for (let i = 0; i < 5; i++) {
             promises.push(Promise.resolve(new Response(JSON.stringify({}), { status: 200 })))
           }
         }
@@ -162,7 +164,7 @@ export function WatchStudio({
           fetch(`/api/zlive?generic=1`).catch((e) => new Response(JSON.stringify({ channels: [] }), { status: 500 })),
         )
 
-        const [sfRes, zlRes, dlRes, dtRes, genRes] = await Promise.all(promises)
+        const [sfRes, zlRes, dlRes, dtRes, cvRes, genRes] = await Promise.all(promises)
 
         if (unmounted) return
 
@@ -170,12 +172,14 @@ export function WatchStudio({
         let zlData: { channel?: ZLiveChannel; match?: MatchedZLive; matched?: boolean } = {}
         let dlData: { match?: MatchedDaddyLive; channels?: any[]; matched?: boolean } = {}
         let dtData: { stream?: any; match?: MatchedDamiTv; matched?: boolean } = {}
+        let cvData: { event?: any; matched?: boolean; confidence?: number; isConfirmedMatch?: boolean } = {}
         let genData: { channels?: ZLiveChannel[] } = {}
 
         if (sfRes.ok) try { sfData = await sfRes.json() } catch { }
         if (zlRes.ok) try { zlData = await zlRes.json() } catch { }
         if (dlRes.ok) try { dlData = await dlRes.json() } catch { }
         if (dtRes.ok) try { dtData = await dtRes.json() } catch { }
+        if (cvRes.ok) try { cvData = await cvRes.json() } catch { }
         if (genRes.ok) try { genData = await genRes.json() } catch { }
 
         const generics = genData.channels ?? []
@@ -187,7 +191,7 @@ export function WatchStudio({
           matchingGeneric = generics.find((c) => c.id === initialChannelId) ?? null
         }
 
-        // Properly normalize matches for all 4 providers:
+        // Properly normalize matches for all 5 providers:
         const sfMatch: MatchedStream | null = sfData.stream ?? null
 
         let zlMatch: MatchedZLive | null = null
@@ -224,11 +228,22 @@ export function WatchStudio({
           }
         }
 
+        const cvMatch: MatchedCinevid | null =
+          cvData.matched && cvData.event
+            ? {
+                event: cvData.event,
+                confidence: cvData.confidence ?? 85,
+                isConfirmedMatch: Boolean(cvData.isConfirmedMatch ?? true),
+                event_id: fixtureId ? Number(fixtureId) : undefined,
+              }
+            : null
+
         const newBundle: StreamBundle = {
           streamFree: sfMatch,
           zLive: zlMatch,
           daddyLive: dlMatch,
           damiTv: dtMatch,
+          cinevid: cvMatch,
           genericChannel: matchingGeneric,
           genericChannels: generics,
         }
@@ -1203,8 +1218,9 @@ export function WatchStudio({
                         {/* Provider Header: Name, Qualities & Status on a single compact row */}
                         <div className="flex items-center justify-between mb-1.5">
                           <div className="flex items-center gap-1.5 min-w-0">
-                            {p.id === "streamfree" && <SparklesIcon className="size-3.5 text-cyan-400 shrink-0" />}
                             {p.id === "damitv" && <MonitorPlayIcon className="size-3.5 text-violet-400 shrink-0" />}
+                            {p.id === "cinevid" && <TvMinimalPlayIcon className="size-3.5 text-rose-400 shrink-0" />}
+                            {p.id === "streamfree" && <SparklesIcon className="size-3.5 text-cyan-400 shrink-0" />}
                             {p.id === "daddylive" && <TvIcon className="size-3.5 text-amber-400 shrink-0" />}
                             {p.id === "zlive" && <RadioIcon className="size-3.5 text-emerald-400 shrink-0" />}
                             <span className="font-bold text-xs text-foreground truncate">{p.name}</span>
