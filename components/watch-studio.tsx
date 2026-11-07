@@ -56,6 +56,7 @@ import { formatKickoffIST, formatTimeIST, formatDateIST } from "@/lib/time"
 import { useLiveScore, useLiveNow } from "@/components/live-score"
 import { matchClock } from "@/lib/livescores"
 import type { MatchPrediction } from "@/lib/predictions"
+import { WatchLiveStatsCard } from "@/components/watch-live-stats"
 
 export type WatchStudioProps = {
   fixture: LiveFixture | null
@@ -1119,7 +1120,12 @@ export function WatchStudio({
             </div>
           </div>
 
-          {/* Win Probability Card Directly Below Video Player */}
+          {/* 1. Live Detailed Match Stats Directly Below Video Player */}
+          {fixture && (
+            <WatchLiveStatsCard fixture={fixture} liveScore={liveScore} />
+          )}
+
+          {/* 2. Win Probability Card Pushed Below Live Match Stats */}
           {prediction && fixture && (
             <WatchWinProbabilityCard fixture={fixture} prediction={prediction} />
           )}
