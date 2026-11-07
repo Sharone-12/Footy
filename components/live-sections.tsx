@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { PlayIcon, TvIcon } from "lucide-react"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
-import { LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
+import { LEAGUE_TOURNAMENT_ID, getLeagueTournamentId } from "@/lib/teams"
 import { splitFixtures, startOf, PLAYING_MS, type Timed } from "@/lib/live"
 import { StreamingNetworkHealth } from "@/components/streaming-network-health"
 import type { MatchedStream } from "@/lib/streamfree/types"
@@ -165,7 +165,7 @@ function Row({
   matchedLive24?: MatchedLive24
   onWatch?: (state: ActivePlayerState) => void
 }) {
-  const tid = LEAGUE_TOURNAMENT_ID[m.league]
+  const tid = getLeagueTournamentId(m.league)
   const hasStream = Boolean(
     (isProviderEnabled("matchora") && matchedMatchora) ||
     (isProviderEnabled("streamfree") && matchedStream) ||
@@ -219,12 +219,12 @@ function Row({
           </span>
         </Link>
 
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           <LiveFixtureMark fixture={m} />
-          <span className="hidden sm:inline text-xs text-muted-foreground truncate max-w-[130px]">
+          {tid && <LeagueCrest tournamentId={tid} name={m.league} size={22} />}
+          <span className="hidden sm:inline text-xs font-medium text-muted-foreground truncate max-w-[130px]">
             {m.league}
           </span>
-          {tid && <LeagueCrest tournamentId={tid} name={m.league} size={20} />}
         </div>
       </div>
 

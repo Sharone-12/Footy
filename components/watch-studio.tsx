@@ -32,7 +32,7 @@ import {
   EyeOffIcon,
 } from "lucide-react"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
-import { LEAGUE_TOURNAMENT_ID, BARCA_ID } from "@/lib/teams"
+import { LEAGUE_TOURNAMENT_ID, BARCA_ID, getLeagueTournamentId } from "@/lib/teams"
 import type { LiveFixture } from "@/components/live-sections"
 import type { MatchedStream } from "@/lib/streamfree/types"
 import type { MatchedZLive, ZLiveChannel } from "@/lib/zlive/types"
@@ -641,7 +641,7 @@ export function WatchStudio({
     setReloadKey((k) => k + 1)
   }, [])
 
-  const tid = fixture?.league ? LEAGUE_TOURNAMENT_ID[fixture.league] : undefined
+  const tid = fixture?.league ? getLeagueTournamentId(fixture.league) : undefined
   const isBarcaMatch = fixture?.home_id === BARCA_ID || fixture?.away_id === BARCA_ID
 
   return (
@@ -805,7 +805,7 @@ export function WatchStudio({
               <div className="flex items-center flex-wrap sm:flex-nowrap gap-2 md:border-l md:border-white/10 md:pl-4 shrink-0 justify-between md:justify-end">
                 {/* 1. Competition & Round */}
                 <div className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-white/[0.03] border border-white/[0.06]">
-                  {tid && <LeagueCrest tournamentId={tid} name={fixture.league} size={18} variant="transparent" />}
+                  {tid && <LeagueCrest tournamentId={tid} name={fixture.league} size={22} />}
                   <div className="flex flex-col leading-tight">
                     <span className="text-[11px] font-bold text-foreground truncate max-w-[120px] sm:max-w-[140px]">
                       {fixture.league}
@@ -1490,7 +1490,7 @@ export function WatchStudio({
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {similarMatches.slice(0, 6).map((m) => {
-                      const matchTid = LEAGUE_TOURNAMENT_ID[m.league]
+                      const matchTid = getLeagueTournamentId(m.league)
                       const start = m.kickoff ? new Date(m.kickoff).getTime() : new Date(`${m.date}T23:59:59Z`).getTime()
                       const isSimilarWatchable =
                         (now >= start && now <= start + 115 * 60_000) ||
@@ -1502,7 +1502,7 @@ export function WatchStudio({
                           className="p-3 rounded-xl bg-background/50 border border-border/60 flex items-center justify-between gap-3 hover:border-border transition-all"
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
-                            {matchTid && <LeagueCrest tournamentId={matchTid} name={m.league} size={18} variant="transparent" />}
+                            {matchTid && <LeagueCrest tournamentId={matchTid} name={m.league} size={22} />}
                             <div className="truncate">
                               <span className="block font-semibold text-xs text-foreground truncate">
                                 {m.home} vs {m.away}

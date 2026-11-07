@@ -88,15 +88,15 @@ export function PlayerAvatar({
 export function LeagueCrest({
   tournamentId,
   name,
-  size = 18,
+  size = 20,
   className = "",
-  variant = "tile",
+  variant = "circle",
 }: {
   tournamentId: number | string
   name: string
   size?: number
   className?: string
-  variant?: "tile" | "transparent"
+  variant?: "tile" | "transparent" | "circle"
 }) {
   const { ref, src, exhausted, next } = useFallbackChain([
     leagueImage(tournamentId),
@@ -125,20 +125,17 @@ export function LeagueCrest({
     )
   }
 
-  // The Premier League and Champions League marks are dark purple and navy,
-  // invisible on a dark card, so league crests sit on a light tile. Same outer
-  // size as before, so layouts don't shift.
-  const inner = Math.round(size * 0.78)
+  // Circular white badge container for high contrast and readability on dark themes
+  const isCircle = variant === "circle" || variant === "tile"
+  const inner = Math.round(size * 0.72)
   return (
     <span
-      className={`shrink-0 rounded-md overflow-hidden ${className}`}
+      className={`shrink-0 ${
+        isCircle ? "rounded-full" : "rounded-md"
+      } bg-white shadow-xs overflow-hidden inline-flex items-center justify-center border border-black/10 select-none ${className}`}
       style={{
         width: size,
         height: size,
-        background: "oklch(0.96 0 0)",
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
       }}
       title={name}
     >

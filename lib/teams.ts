@@ -130,11 +130,66 @@ export const BARCA_ID = 2817
 
 export const LEAGUE_TOURNAMENT_ID: Record<string, number> = {
   "Premier League": 17,
+  "premier-league": 17,
+  premierleague: 17,
+  epl: 17,
   "La Liga": 8,
+  LaLiga: 8,
+  laliga: 8,
+  "la-liga": 8,
   "Serie A": 23,
+  "serie-a": 23,
+  seriea: 23,
   "Ligue 1": 34,
+  "ligue-1": 34,
+  ligue1: 34,
   Bundesliga: 35,
+  bundesliga: 35,
   "Champions League": 7,
+  "champions-league": 7,
+  ucl: 7,
+  "UEFA Champions League": 7,
+  "Europa League": 679,
+  "europa-league": 679,
+  uel: 679,
+  "UEFA Europa League": 679,
+  "Conference League": 17015,
+  "conference-league": 17015,
+  uecl: 17015,
+  "UEFA Conference League": 17015,
+  "FA Cup": 19,
+  "Carabao Cup": 201,
+  "EFL Cup": 201,
+  "Copa del Rey": 327,
+  "Super Cup": 213,
+  "Supercopa de España": 213,
+  "Supercopa de Espana": 213,
+  "Coppa Italia": 326,
+  "DFB-Pokal": 209,
+  "Coupe de France": 328,
+}
+
+/** Robust resolver to match any league string (case-insensitive, normalized) to a tournament ID */
+export function getLeagueTournamentId(name?: string | null): number | undefined {
+  if (!name) return undefined
+  if (LEAGUE_TOURNAMENT_ID[name]) return LEAGUE_TOURNAMENT_ID[name]
+
+  const clean = name.toLowerCase().replace(/[^a-z0-9]/g, "")
+  if (clean.includes("premier") || clean.includes("epl")) return 17
+  if (clean.includes("laliga") || clean.includes("liga") || clean.includes("spain")) return 8
+  if (clean.includes("seriea") || clean.includes("italy")) return 23
+  if (clean.includes("bundesliga") || clean.includes("germany")) return 35
+  if (clean.includes("ligue1") || clean.includes("france")) return 34
+  if (clean.includes("champions") || clean.includes("ucl")) return 7
+  if (clean.includes("europa") || clean.includes("uel")) return 679
+  if (clean.includes("conference") || clean.includes("uecl")) return 17015
+  if (clean.includes("copadelrey")) return 327
+  if (clean.includes("facup")) return 19
+  if (clean.includes("carabao") || clean.includes("eflcup")) return 201
+  if (clean.includes("coppaitalia")) return 326
+  if (clean.includes("dfb")) return 209
+
+  return undefined
 }
 
 /** The three headline per-match numbers shown on a single-club card. */
