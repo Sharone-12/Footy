@@ -210,6 +210,7 @@ export function WatchStudio({
 
   const playerContainerRef = useRef<HTMLDivElement>(null)
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isLeaving, setIsLeaving] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
   const [activeTab, setActiveTab] = useState<"about" | "streams" | "similar">("about")
   const [prediction, setPrediction] = useState<MatchPrediction | null>(initialPrediction ?? null)
@@ -473,6 +474,7 @@ export function WatchStudio({
   // Keep state and URL query params synchronized
   const selectSource = useCallback(
     (providerId: StreamingProviderId, sourceKey: string) => {
+      setIsLeaving(false)
       setSelectedProviderId(providerId)
       setSelectedSourceKey(sourceKey)
       setIsFrameLoading(true)
@@ -551,7 +553,38 @@ export function WatchStudio({
     }
   }, [])
 
+  // Safely stop stream and silence audio as soon as the user navigates away
+  useEffect(() => {
+    const handleNavigationClick = (e: MouseEvent) => {
+      const anchor = (e.target as HTMLElement)?.closest("a")
+      if (!anchor || !anchor.href) return
+      if (anchor.target === "_blank") return
+      if (anchor.getAttribute("download") != null) return
+
+      try {
+        const targetUrl = new URL(anchor.href, window.location.origin)
+        // If navigating to a different page (e.g. /live, /predictions, /teams, etc.)
+        if (targetUrl.origin === window.location.origin && targetUrl.pathname !== window.location.pathname) {
+          setIsLeaving(true)
+        }
+      } catch {}
+    }
+
+    const handlePopState = () => {
+      setIsLeaving(true)
+    }
+
+    document.addEventListener("click", handleNavigationClick)
+    window.addEventListener("popstate", handlePopState)
+
+    return () => {
+      document.removeEventListener("click", handleNavigationClick)
+      window.removeEventListener("popstate", handlePopState)
+    }
+  }, [])
+
   const reloadStream = useCallback(() => {
+    setIsLeaving(false)
     setIsFrameLoading(true)
     setHasFrameError(false)
     setReloadKey((k) => k + 1)
@@ -567,6 +600,7 @@ export function WatchStudio({
         <div className="flex items-center gap-2">
           <Link
             href="/live"
+            onClick={() => setIsLeaving(true)}
             className="nav-pill inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-muted-foreground hover:text-foreground transition-all hover:scale-[1.02]"
             title="Return to Live Fixtures"
           >
@@ -875,7 +909,13 @@ export function WatchStudio({
               )}
 
               {/* 3. ACTIVE IFRAME STREAM PLAYER */}
-              {!isBundleLoading && currentSource && (
+              {isLeaving && (
+                <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black animate-fade-in">
+                  <div className="size-8 rounded-full border-2 border-white/10 border-t-[var(--pitch)] animate-spin" />
+                </div>
+              )}
+
+              {!isLeaving && !isBundleLoading && currentSource && (
                 <>
                   {isFrameLoading && (
                     <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/85 backdrop-blur-xs pointer-events-none transition-opacity duration-300">
