@@ -514,23 +514,23 @@ export function WatchStudio({
                 {/* Prominent Score Hub (or VS Badge pre-match) */}
                 <div className="flex flex-col items-center justify-center shrink-0 px-2 sm:px-4">
                   {hasScore ? (
-                    <div className="flex flex-col items-center gap-1.5">
-                      <div className="flex items-center gap-2.5 sm:gap-3.5 px-4 py-1.5 sm:px-5 sm:py-2 rounded-2xl bg-black/80 border border-white/15 shadow-xl backdrop-blur-md">
-                        <span className="font-mono text-2xl sm:text-3xl font-black text-white tabular-nums tracking-tight">
+                    <div className="inline-flex items-stretch rounded-2xl bg-black/80 border border-white/15 shadow-xl backdrop-blur-md overflow-hidden">
+                      <div className="flex items-center gap-2.5 sm:gap-3.5 px-4 py-2 sm:px-5">
+                        <span className="font-mono text-2xl sm:text-3xl font-black text-white tabular-nums tracking-tight leading-none">
                           {homeScore}
                         </span>
-                        <span className="text-white/40 font-mono text-base sm:text-lg font-bold">:</span>
-                        <span className="font-mono text-2xl sm:text-3xl font-black text-white tabular-nums tracking-tight">
+                        <span className="text-white/40 font-mono text-lg sm:text-xl font-bold leading-none">:</span>
+                        <span className="font-mono text-2xl sm:text-3xl font-black text-white tabular-nums tracking-tight leading-none">
                           {awayScore}
                         </span>
                       </div>
                       {liveClock && (
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[var(--pitch)]/15 border border-[var(--pitch)]/30">
+                        <div className="flex items-center gap-1.5 px-3 border-l border-white/10 bg-[var(--pitch)]/10">
                           <span className="relative flex size-1.5">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--pitch)] opacity-75 motion-reduce:hidden" />
                             <span className="relative inline-flex rounded-full size-1.5 bg-[var(--pitch)]" />
                           </span>
-                          <span className="font-mono font-bold text-[11px] sm:text-xs tabular-nums text-[var(--pitch)]">
+                          <span className="font-mono font-bold text-[11px] sm:text-xs tabular-nums text-[var(--pitch)] leading-none">
                             {liveClock.display}
                           </span>
                         </div>
