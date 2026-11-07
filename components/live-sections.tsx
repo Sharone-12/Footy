@@ -18,6 +18,7 @@ import { isProviderEnabled } from "@/lib/streaming/config"
 import { UnifiedPlayer } from "@/components/unified-player"
 import { formatKickoffIST } from "@/lib/time"
 import { LiveBadge, KickoffCountdown } from "@/components/live-signal"
+import { LiveFixtureMark } from "@/components/live-score"
 
 export type LiveFixture = Timed & {
   event_id: number
@@ -218,7 +219,8 @@ function Row({
           </span>
         </Link>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0">
+          <LiveFixtureMark fixture={m} />
           <span className="hidden sm:inline text-xs text-muted-foreground truncate max-w-[130px]">
             {m.league}
           </span>

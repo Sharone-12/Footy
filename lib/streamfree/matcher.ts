@@ -291,8 +291,8 @@ function matchesAlias(nameA: string, nameB: string): boolean {
   for (const [canon, aliases] of Object.entries(ALIASES)) {
     const canonNorm = normalise(canon)
     const all = [canonNorm, ...aliases.map(normalise)]
-    const hasA = all.some((a) => a === normA || normA.includes(a) || a.includes(normA))
-    const hasB = all.some((b) => b === normB || normB.includes(b) || b.includes(normB))
+    const hasA = all.some((a) => a === normA || normA === `${a} fc` || normA === `fc ${a}` || normA === `${a} cf` || normA === `cf ${a}`)
+    const hasB = all.some((b) => b === normB || normB === `${b} fc` || normB === `fc ${b}` || normB === `${b} cf` || normB === `cf ${b}`)
     if (hasA && hasB) return true
   }
 

@@ -50,6 +50,7 @@ import {
   type StreamBundle,
 } from "@/lib/streaming/resolve"
 import { formatKickoffIST, formatTimeIST, formatDateIST } from "@/lib/time"
+import { LiveFixtureMark } from "@/components/live-score"
 
 export type WatchStudioProps = {
   fixture: LiveFixture | null
@@ -570,8 +571,9 @@ export function WatchStudio({
                   </div>
                 </div>
 
-                {/* 3. Match Status Badge / Countdown */}
-                <div className="shrink-0">
+                {/* 3. Match Status Badge & Live Score / Countdown */}
+                <div className="shrink-0 flex items-center gap-2.5">
+                  <LiveFixtureMark fixture={fixture} />
                   {isLiveNow ? (
                     <div className="flex items-center gap-2 px-3 py-2 rounded-2xl bg-[var(--pitch)]/10 border border-[var(--pitch)]/30 text-[var(--pitch)] shadow-sm">
                       <span className="relative flex size-2">

@@ -12,6 +12,8 @@
  * instead, which lets the UI tick every second and resync on each poll.
  */
 
+import { teamSimilarity } from "@/lib/streamfree/matcher"
+
 const FEED = "https://prod-cdn-mev-api.livescore.com/v1/api/app/date/soccer"
 
 /** Statuses that are not a running match: no clock, nothing to extrapolate. */
@@ -206,10 +208,17 @@ export function sameTeams(
   a: { home: string; away: string },
   b: { home: string; away: string },
 ): boolean {
-  return (
+  if (
     normalizeTeam(a.home) === normalizeTeam(b.home) &&
     normalizeTeam(a.away) === normalizeTeam(b.away)
-  )
+  ) {
+    return true
+  }
+
+  // Alias and token similarity fallback (handles e.g. "Real Racing Club" <-> "Racing Santander")
+  const homeSim = teamSimilarity(a.home, b.home)
+  const awaySim = teamSimilarity(a.away, b.away)
+  return homeSim >= 0.75 && awaySim >= 0.75
 }
 
 export type FixtureLike = { home: string; away: string; kickoff?: string | null; date: string }
