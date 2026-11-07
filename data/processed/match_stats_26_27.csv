@@ -19721,6 +19721,52 @@ event_id,stat,home,away
 16311010,High claims,1,1
 16311010,Punches,0,1
 16311010,Goal kicks,9,4
+16311003,Ball possession,35%,65%
+16311003,Expected goals,0.71,0.92
+16311003,Big chances,1,1
+16311003,Total shots,7,10
+16311003,Goalkeeper saves,2,2
+16311003,Corner kicks,1,5
+16311003,Fouls,24,14
+16311003,Passes,393,724
+16311003,Tackles,11,13
+16311003,Free kicks,14,24
+16311003,Yellow cards,3,1
+16311003,Average rating,7.32,7.83
+16311003,Total shots,7,10
+16311003,Shots on target,2,3
+16311003,Expected goals,0.71,0.92
+16311003,Expected goals on target,0.30,1.76
+16311003,Shots off target,1,3
+16311003,Blocked shots,4,4
+16311003,Shots inside box,3,6
+16311003,Shots outside box,4,4
+16311003,Big chances scored,0,1
+16311003,Big chances missed,1,0
+16311003,Through balls,1,0
+16311003,Touches in penalty area,9,18
+16311003,Fouled in final third,2,3
+16311003,Offsides,1,0
+16311003,Accurate passes,325,656
+16311003,Throw-ins,12,11
+16311003,Final third entries,54,63
+16311003,Final third phase,94/129 (73%),77/107 (72%)
+16311003,Long balls,22/54 (41%),17/37 (46%)
+16311003,Crosses,4/9 (44%),3/18 (17%)
+16311003,Duels,51%,49%
+16311003,Dispossessed,6,7
+16311003,Ground duels,32/71 (45%),39/71 (55%)
+16311003,Aerial duels,17/26 (65%),9/26 (35%)
+16311003,Dribbles,7/14 (50%),5/9 (56%)
+16311003,Tackles won,64%,46%
+16311003,Total tackles,11,13
+16311003,Interceptions,9,10
+16311003,Recoveries,43,41
+16311003,Clearances,17,12
+16311003,Total saves,2,2
+16311003,Goals prevented,0.76,0.30
+16311003,Big saves,1,0
+16311003,Goal kicks,7,4
 16434087,Ball possession,59%,41%
 16434087,Distance covered,105.8 km,106.2 km
 16434087,Expected goals,4.06,0.79
