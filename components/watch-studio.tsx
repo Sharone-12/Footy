@@ -56,7 +56,7 @@ import { formatKickoffIST, formatTimeIST, formatDateIST } from "@/lib/time"
 import { useLiveScore, useLiveNow } from "@/components/live-score"
 import { matchClock } from "@/lib/livescores"
 import type { MatchPrediction } from "@/lib/predictions"
-import { WatchLiveStatsCard } from "@/components/watch-live-stats"
+import { MatchCentreTabs } from "@/components/match-centre/match-centre-tabs"
 
 export type WatchStudioProps = {
   fixture: LiveFixture | null
@@ -1161,9 +1161,9 @@ export function WatchStudio({
             </div>
           </div>
 
-          {/* 1. Live Detailed Match Stats Directly Below Video Player */}
+          {/* 1. Live Match Centre (Stats, Line-ups on Pitch with Player Faces, Table with Active Highlights, H2H History) */}
           {fixture && (
-            <WatchLiveStatsCard fixture={fixture} liveScore={liveScore} />
+            <MatchCentreTabs fixture={fixture} liveScore={liveScore} />
           )}
 
           {/* 2. Win Probability Card Pushed Below Live Match Stats */}

@@ -313,10 +313,19 @@ export async function fetchLiveScores(date?: Date): Promise<LiveScore[]> {
   return normalizeLive(await fetchFeed(date))
 }
 
+/** Pull all matches (live, upcoming, finished) out of a feed payload. */
+export function normalizeAll(payload: unknown): LiveScore[] {
+  return normalizeRows(payload, () => true)
+}
+
 /** Both halves of one payload, so settling full-time costs no extra request. */
 export async function fetchDaySnapshot(
   date?: Date,
-): Promise<{ live: LiveScore[]; final: LiveScore[] }> {
+): Promise<{ live: LiveScore[]; final: LiveScore[]; all: LiveScore[] }> {
   const payload = await fetchFeed(date)
-  return { live: normalizeLive(payload), final: normalizeFinal(payload) }
+  return {
+    live: normalizeLive(payload),
+    final: normalizeFinal(payload),
+    all: normalizeAll(payload),
+  }
 }
