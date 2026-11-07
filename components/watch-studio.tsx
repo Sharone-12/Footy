@@ -83,81 +83,90 @@ const OUTCOME_COLORS = {
   away: "oklch(0.72 0.14 40)",
 } as const
 
-function PredictionStreamPill({
+function WatchWinProbabilityCard({
   fixture,
   prediction,
 }: {
   fixture: LiveFixture
   prediction: MatchPrediction
 }) {
-  const predictedLabel =
-    prediction.predicted === "home"
-      ? fixture.home
-      : prediction.predicted === "away"
-        ? fixture.away
-        : "Draw"
-
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 rounded-2xl bg-card border border-border/70 shadow-sm transition-all animate-fade-in">
-      <div className="flex items-center gap-2.5 min-w-0">
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/[0.06] border border-white/10 text-muted-foreground font-semibold uppercase tracking-wider text-[11px] shrink-0">
-          <SparklesIcon className="size-3 text-[var(--pitch)]" />
-          Prediction
-        </span>
-        <span className="text-xs text-muted-foreground shrink-0">Called:</span>
-        <span
-          className="font-bold text-xs sm:text-sm truncate"
-          style={{ color: OUTCOME_COLORS[prediction.predicted] }}
+    <section
+      aria-label="Match win probability prediction"
+      className="spark surface rounded-3xl bg-card p-4 sm:p-5 border border-border/70 shadow-sm transition-all animate-fade-in"
+    >
+      <header className="flex items-center justify-between mb-3">
+        <h2
+          className="stat-label text-xs sm:text-[0.8rem] font-bold uppercase tracking-wider"
+          style={{ color: "var(--pitch)", fontFamily: "var(--font-condensed)" }}
         >
-          {predictedLabel}
-        </span>
-        {prediction.correct !== null && (
-          <span
-            className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0"
-            style={{
-              color: prediction.correct ? OUTCOME_COLORS.home : "oklch(0.65 0.14 25)",
-              background: prediction.correct
-                ? "oklch(0.80 0.19 150 / 15%)"
-                : "oklch(0.65 0.14 25 / 15%)",
-            }}
-          >
-            {prediction.correct ? "CORRECT" : "WRONG"}
-          </span>
-        )}
-      </div>
-
-      <div className="flex items-center gap-3 shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="w-20 sm:w-28 h-2 rounded-full overflow-hidden flex bg-white/10 gap-0.5">
-            <div style={{ width: `${prediction.homeWin}%`, background: OUTCOME_COLORS.home }} />
-            <div style={{ width: `${prediction.draw}%`, background: OUTCOME_COLORS.draw }} />
-            <div style={{ width: `${prediction.awayWin}%`, background: OUTCOME_COLORS.away }} />
-          </div>
-          <div className="flex items-center gap-1.5 font-mono text-[11px] tabular-nums">
-            <span style={{ color: OUTCOME_COLORS.home }} title={`${fixture.home} Win`}>
-              {prediction.homeWin}%
-            </span>
-            <span className="text-white/20">/</span>
-            <span style={{ color: OUTCOME_COLORS.draw }} title="Draw">
-              {prediction.draw}%
-            </span>
-            <span className="text-white/20">/</span>
-            <span style={{ color: OUTCOME_COLORS.away }} title={`${fixture.away} Win`}>
-              {prediction.awayWin}%
-            </span>
-          </div>
-        </div>
-
+          WIN PROBABILITY
+        </h2>
         <Link
           href={`/predictions/match?id=${fixture.event_id}`}
-          className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--pitch)] hover:underline ml-1"
-          title="View full Poisson model prediction and stats breakdown"
+          className="stat-label text-[11px] hover:text-foreground transition-colors flex items-center gap-1 font-medium group"
+          title="Open complete Poisson model prediction, head-to-head stats, and radar analysis"
         >
-          <span className="hidden sm:inline">Model</span>
-          <ArrowRightIcon className="size-3" />
+          <span>Model &amp; H2H</span>
+          <ArrowRightIcon className="size-3 transition-transform group-hover:translate-x-0.5" />
         </Link>
+      </header>
+
+      {/* Tri-color Win Probability Horizontal Bar */}
+      <div className="flex h-3 sm:h-3.5 rounded-full overflow-hidden gap-0.5 mb-3 bg-white/5">
+        <div
+          className="rounded-l-full flex items-center justify-center text-[0.62rem] font-bold text-black/90 transition-all"
+          style={{ width: `${prediction.homeWin}%`, background: OUTCOME_COLORS.home }}
+        >
+          {prediction.homeWin > 12 ? `${prediction.homeWin}%` : ""}
+        </div>
+        <div
+          className="flex items-center justify-center text-[0.62rem] font-bold text-white/90 transition-all"
+          style={{ width: `${prediction.draw}%`, background: OUTCOME_COLORS.draw }}
+        >
+          {prediction.draw > 12 ? `${prediction.draw}%` : ""}
+        </div>
+        <div
+          className="rounded-r-full flex items-center justify-center text-[0.62rem] font-bold text-black/90 transition-all"
+          style={{ width: `${prediction.awayWin}%`, background: OUTCOME_COLORS.away }}
+        >
+          {prediction.awayWin > 12 ? `${prediction.awayWin}%` : ""}
+        </div>
       </div>
-    </div>
+
+      {/* 3 Outcome Columns matching prediction card */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-3 text-center">
+        {([
+          { label: fixture.home, pct: prediction.homeWin, color: OUTCOME_COLORS.home, key: "home" },
+          { label: "DRAW", pct: prediction.draw, color: OUTCOME_COLORS.draw, key: "draw" },
+          { label: fixture.away, pct: prediction.awayWin, color: OUTCOME_COLORS.away, key: "away" },
+        ] as const).map((o) => (
+          <div
+            key={o.key}
+            className="rounded-xl py-2 px-1.5 transition-all"
+            style={{
+              background: prediction.predicted === o.key ? `${o.color}15` : "transparent",
+              border: prediction.predicted === o.key ? `1px solid ${o.color}40` : "1px solid transparent",
+            }}
+          >
+            <div className="font-mono font-black text-xl sm:text-2xl tabular-nums leading-tight" style={{ color: o.color }}>
+              {o.pct}%
+            </div>
+            <div className="stat-label text-[0.7rem] sm:text-xs mt-1 truncate font-semibold uppercase tracking-wider">
+              {o.label}
+            </div>
+            {prediction.predicted === o.key && (
+              <div
+                className="font-mono text-[0.58rem] sm:text-[0.62rem] mt-1.5 px-2 py-0.5 rounded-full inline-block font-bold tracking-wider uppercase shadow-sm"
+                style={{ color: o.color, background: `${o.color}25` }}
+              >
+                PREDICTED
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </section>
   )
 }
 
@@ -977,9 +986,9 @@ export function WatchStudio({
             </div>
           </div>
 
-          {/* Standalone Prediction Pill Below Video Player */}
+          {/* Win Probability Card Directly Below Video Player */}
           {prediction && fixture && (
-            <PredictionStreamPill fixture={fixture} prediction={prediction} />
+            <WatchWinProbabilityCard fixture={fixture} prediction={prediction} />
           )}
 
           {/* Three Tabbed Sections Below Main Player */}
