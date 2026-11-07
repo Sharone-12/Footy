@@ -7,6 +7,13 @@ import { BARCA_ID, LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
 // A kickoff stays "next" through the match, so the pill reads KICK OFF
 // instead of jumping to the following fixture at the whistle.
 import { PLAYING_MS, startOf } from "@/lib/live"
+import { LiveSignal } from "@/components/live-signal"
+import { TeamPicker } from "@/components/team-picker"
+import {
+  PREFERRED_TEAM_EVENT,
+  readPreferredTeam,
+  type PreferredTeam,
+} from "@/lib/preferred-team"
 
 export type NextBarcaMatch = {
   event_id: number
@@ -47,6 +54,17 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
   // fixture with, and rendering a different second would break hydration.
   const [now, setNow] = useState<number | null>(null)
 
+  // Same reason this starts null rather than reading storage during render:
+  // the server cannot see localStorage, so the first client render has to
+  // match the Barça markup it sent, then swap on the effect below.
+  const [pref, setPref] = useState<PreferredTeam | null>(null)
+  // Keyed by team id so a response that arrives after another switch is
+  // ignored, and so clearing needs no synchronous setState in the effect.
+  const [override, setOverride] = useState<{
+    id: number
+    matches: NextBarcaMatch[]
+  } | null>(null)
+
   useEffect(() => {
     const tick = () => setNow(Date.now())
     tick()
@@ -54,13 +72,57 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
     return () => clearInterval(t)
   }, [])
 
+  // Picking a club in the dialog fires the event, so the pill updates
+  // immediately instead of waiting for a navigation. `storage` covers the
+  // same choice made in another tab.
+  useEffect(() => {
+    const sync = () => setPref(readPreferredTeam())
+    sync()
+    window.addEventListener(PREFERRED_TEAM_EVENT, sync)
+    window.addEventListener("storage", sync)
+    return () => {
+      window.removeEventListener(PREFERRED_TEAM_EVENT, sync)
+      window.removeEventListener("storage", sync)
+    }
+  }, [])
+
+  // Barça needs no request: the layout already rendered those fixtures.
+  useEffect(() => {
+    if (!pref || pref.id === BARCA_ID) return
+    const id = pref.id
+    let alive = true
+    fetch(`/api/teams?team_id=${id}`)
+      .then((r) => (r.ok ? r.json() : { matches: [] }))
+      .then((j: { matches?: NextBarcaMatch[] }) => {
+        if (alive) setOverride({ id, matches: j.matches ?? [] })
+      })
+      .catch(() => {
+        // Resolve to empty rather than leaving it pending: a stuck spinner
+        // is worse than "no fixture", and the pencil stays reachable.
+        if (alive) setOverride({ id, matches: [] })
+      })
+    return () => {
+      alive = false
+    }
+  }, [pref])
+
+  const following = pref ?? { id: BARCA_ID, name: "FC Barcelona" }
+  const isBarca = following.id === BARCA_ID
+  // Only trust an override that belongs to the club now followed.
+  const source = isBarca
+    ? matches
+    : override?.id === following.id
+      ? override.matches
+      : null
+  const waiting = source == null
+
   // Keyed per fixture and per threshold so a reload or a second crossing
   // cannot re-fire one that already went out.
   const fired = useRef(new Set<string>())
 
   useEffect(() => {
-    if (now == null) return
-    const next = pick(matches, now)
+    if (now == null || !source) return
+    const next = pick(source, now)
     if (!next) return
     const left = startOf(next) - now
     for (const at of DISCOVER_AT_MS) {
@@ -72,51 +134,56 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
         fetch(`/api/streams?event_id=${next.event_id}`).catch(() => {})
       }
     }
-  }, [matches, now])
+  }, [source, now])
 
-  const match = pick(matches, now ?? 0) ?? matches[0]
-  if (!match) return null
+  const match = source ? (pick(source, now ?? 0) ?? source[0] ?? null) : null
 
-  const tid = LEAGUE_TOURNAMENT_ID[match.league]
-  const left = now == null ? null : startOf(match) - now
+  // Barça with no fixtures at all is the original "render nothing" case. For
+  // a chosen club the shell stays, or the pencil disappears with it and
+  // there is no way back to another team.
+  if (!match && isBarca && !waiting) return null
+
+  const tid = match ? LEAGUE_TOURNAMENT_ID[match.league] : undefined
+  const left = match && now != null ? startOf(match) - now : null
   const t = left == null ? null : parts(Math.max(left, 0))
   const isLive = left != null && left <= 0
 
-  return (
-    <Link
-      href={isLive ? `/live/watch?id=${match.event_id}` : `/predictions/match?id=${match.event_id}`}
-      className={`pointer-events-auto nav-pill flex items-center gap-1.5 sm:gap-2 px-2 sm:pl-2 sm:pr-3 py-1 sm:py-1.5 shrink-0 transition-all ${
-        isLive ? "border-[var(--pitch)]/60 shadow-[0_0_12px_-4px_var(--pitch)]" : ""
-      }`}
-      title={
-        isLive
-          ? `LIVE NOW: Barça ${match.home ? "vs" : "at"} ${match.opponent} — Click to Watch`
-          : `${match.league} — Barça ${match.home ? "vs" : "away at"} ${match.opponent}`
-      }
-    >
+  const label = match
+    ? isLive
+      ? `LIVE NOW: ${following.name} ${match.home ? "vs" : "at"} ${match.opponent} — Click to Watch`
+      : `${match.league} — ${following.name} ${match.home ? "vs" : "away at"} ${match.opponent}`
+    : `${following.name} — no upcoming fixture`
+
+  const body = (
+    <>
       <span className="flex items-center gap-0.5 sm:gap-1 shrink-0">
-        <TeamCrest teamId={BARCA_ID} name="FC Barcelona" size={18} />
-        <span className="stat-label text-[0.55rem] sm:text-[0.6rem] leading-none">v</span>
-        {match.opponent_id != null && (
-          <TeamCrest teamId={match.opponent_id} name={match.opponent} size={18} />
+        <TeamCrest teamId={following.id} name={following.name} size={18} />
+        {match && (
+          <>
+            <span className="stat-label text-[0.55rem] sm:text-[0.6rem] leading-none">v</span>
+            {match.opponent_id != null && (
+              <TeamCrest teamId={match.opponent_id} name={match.opponent} size={18} />
+            )}
+          </>
         )}
       </span>
-      <span className="flex flex-col leading-none">
+      <span className="flex flex-col leading-none min-w-0">
         <span className="hidden sm:inline stat-label text-[0.55rem] leading-none truncate max-w-[6.5rem]">
-          {match.home ? "vs" : "at"} {match.opponent}
+          {match ? `${match.home ? "vs" : "at"} ${match.opponent}` : following.name}
         </span>
         <span
           className="stat-figure text-[0.85rem] sm:text-[0.95rem] mt-0.5"
           style={{ color: "var(--pitch)" }}
         >
-          {!t ? (
+          {waiting ? (
+            <span className="opacity-40">--:--:--</span>
+          ) : !match ? (
+            <span className="opacity-40 text-[0.7rem]">No fixture</span>
+          ) : !t ? (
             <span className="opacity-40">--:--:--</span>
           ) : isLive ? (
             <span className="inline-flex items-center gap-1.5 font-bold">
-              <span className="relative flex size-2 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--pitch)] opacity-75 motion-reduce:hidden" />
-                <span className="relative inline-flex rounded-full size-2 bg-[var(--pitch)]" />
-              </span>
+              <LiveSignal size={12} />
               <span>LIVE</span>
             </span>
           ) : !match.kickoff ? (
@@ -128,7 +195,7 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
           )}
         </span>
       </span>
-      {tid && (
+      {tid && match && (
         <LeagueCrest
           tournamentId={tid}
           name={match.league}
@@ -137,6 +204,31 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
           className="hidden sm:inline-block shrink-0"
         />
       )}
-    </Link>
+    </>
+  )
+
+  return (
+    <span
+      className={`pointer-events-auto nav-pill flex items-center gap-1 sm:gap-1.5 pl-2 pr-1.5 sm:pr-2 py-1 sm:py-1.5 shrink-0 transition-all ${
+        isLive ? "border-[var(--pitch)]/60 shadow-[0_0_12px_-4px_var(--pitch)]" : ""
+      }`}
+      title={label}
+    >
+      {match ? (
+        <Link
+          href={
+            isLive
+              ? `/live/watch?id=${match.event_id}`
+              : `/predictions/match?id=${match.event_id}`
+          }
+          className="flex items-center gap-1.5 sm:gap-2 min-w-0"
+        >
+          {body}
+        </Link>
+      ) : (
+        <span className="flex items-center gap-1.5 sm:gap-2 min-w-0">{body}</span>
+      )}
+      <TeamPicker current={pref} />
+    </span>
   )
 }

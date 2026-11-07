@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react"
 import { ActivityIcon, CheckCircle2Icon, RefreshCwIcon, ShieldCheckIcon } from "lucide-react"
 import { isProviderEnabled, STREAMING_PROVIDERS_CONFIG } from "@/lib/streaming/config"
+import { LiveSignal, SignalBars, LatencyMeter } from "@/components/live-signal"
 
 interface ProviderStatus {
   id: string
@@ -126,18 +127,8 @@ export function StreamingNetworkHealth() {
       {/* Header Row */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/40 pb-3.5">
         <div className="flex items-start gap-3">
-          <div className="relative flex size-3 mt-1 shrink-0">
-            {isAllGood ? (
-              <>
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--pitch)] opacity-75 motion-reduce:hidden" />
-                <span className="relative inline-flex rounded-full size-3 bg-[var(--pitch)] shadow-[0_0_8px_var(--pitch)]" />
-              </>
-            ) : (
-              <>
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75 motion-reduce:hidden" />
-                <span className="relative inline-flex rounded-full size-3 bg-amber-400" />
-              </>
-            )}
+          <div className="flex mt-0.5 shrink-0">
+            {isAllGood ? <LiveSignal size={15} /> : <SignalBars state="degraded" />}
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -193,15 +184,9 @@ export function StreamingNetworkHealth() {
             >
               <div className="flex items-center justify-between gap-1.5">
                 <span className="font-bold text-xs text-foreground truncate">{p.name}</span>
-                <span className="relative flex size-2 shrink-0">
-                  {isHealthy ? (
-                    <span className="relative inline-flex rounded-full size-2 bg-[var(--pitch)] shadow-[0_0_6px_var(--pitch)]" />
-                  ) : isDisabled ? (
-                    <span className="relative inline-flex rounded-full size-2 bg-zinc-600 border border-zinc-500/50" />
-                  ) : (
-                    <span className="relative inline-flex rounded-full size-2 bg-amber-400" />
-                  )}
-                </span>
+                <SignalBars
+                  state={isHealthy ? "healthy" : isDisabled ? "offline" : "degraded"}
+                />
               </div>
 
               <div className="flex items-center justify-between text-[10px] text-muted-foreground font-mono">
@@ -214,11 +199,7 @@ export function StreamingNetworkHealth() {
                     ? "Online"
                     : "Standby"}
                 </span>
-                {!isDisabled && p.latencyMs > 0 && (
-                  <span className="text-[9px] px-1 rounded bg-white/[0.06] text-muted-foreground shrink-0">
-                    {p.latencyMs}ms
-                  </span>
-                )}
+                {!isDisabled && p.latencyMs > 0 && <LatencyMeter ms={p.latencyMs} />}
               </div>
             </div>
           )

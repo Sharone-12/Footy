@@ -628,6 +628,52 @@
   background-repeat: no-repeat;
 }
 
+/* Live broadcast mark (components/live-signal.tsx): arcs travel outward from
+   the core, the outer pair a beat behind the inner so it reads as one wave
+   rather than two rings blinking together. */
+@keyframes live-wave {
+  0%   { opacity: 0;   transform: scale(0.55); }
+  35%  { opacity: 0.9; }
+  100% { opacity: 0;   transform: scale(1.15); }
+}
+
+.live-wave {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: live-wave 2s cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+.live-wave-2 {
+  animation-delay: 0.45s;
+}
+
+/* The countdown core, only inside the final five minutes. */
+@keyframes countdown-core {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+
+.countdown-core {
+  animation: countdown-core 1s ease-in-out infinite;
+}
+
+/* Feed-strength bars on the network health card. Low amplitude and a long
+   cycle on purpose: seven of these sit side by side, and anything punchier
+   turns the row into a light show. */
+@keyframes feed-bar {
+  0%, 100% { transform: scaleY(1); }
+  50%      { transform: scaleY(0.72); }
+}
+
+.feed-bar {
+  transform-box: fill-box;
+  transform-origin: bottom;
+  animation: feed-bar 1.8s ease-in-out infinite;
+}
+
+.feed-bar-1 { animation-delay: 0.25s; }
+.feed-bar-2 { animation-delay: 0.5s; }
+
 @media (prefers-reduced-motion: reduce) {
 
   .stagger>*,
@@ -635,6 +681,9 @@
   .shimmer-text,
   .card-lift,
   .row-item,
+  .live-wave,
+  .countdown-core,
+  .feed-bar,
   .spark::before {
     animation: none !important;
     transition: none !important;
