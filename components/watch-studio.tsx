@@ -710,8 +710,8 @@ export function WatchStudio({
                           type="button"
                           onClick={toggleHideScore}
                           className="p-1 rounded-md text-white/50 hover:text-white transition-colors hover:bg-white/10 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--pitch)]"
-                          title={hideScore ? "Reveal score (spoiler protection active)" : "Hide score for suspense (prevents stream delay spoilers)"}
-                          aria-label={hideScore ? "Reveal score" : "Hide score for suspense"}
+                          title={hideScore ? "Show scoreline" : "Hide scoreline"}
+                          aria-label={hideScore ? "Show scoreline" : "Hide scoreline"}
                         >
                           {hideScore ? (
                             <EyeOffIcon className="size-3.5 text-amber-400 shrink-0" />
@@ -724,8 +724,8 @@ export function WatchStudio({
                             type="button"
                             onClick={toggleHideScore}
                             className="cursor-pointer font-mono text-sm sm:text-base font-black text-white/40 tracking-widest px-1 hover:text-white/70 transition-colors focus:outline-none"
-                            title="Click to reveal score"
-                            aria-label="Click to reveal score"
+                            title="Show scoreline"
+                            aria-label="Show scoreline"
                           >
                             •• : ••
                           </button>
@@ -733,7 +733,7 @@ export function WatchStudio({
                           <div
                             onClick={toggleHideScore}
                             className="cursor-pointer flex items-center gap-2 sm:gap-2.5 select-none"
-                            title="Click to hide score"
+                            title="Hide scoreline"
                           >
                             <span className="font-mono text-xl sm:text-2xl font-black text-white tabular-nums tracking-tight leading-none">
                               {homeScore}
