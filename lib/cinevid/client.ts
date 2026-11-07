@@ -13,7 +13,13 @@ import type {
 export const CINEVID_BASE_URL = "https://cinevid.st"
 const EVENTS_CACHE_TTL_MS = 60_000 // 60 seconds
 const HEALTH_CACHE_TTL_MS = 30_000 // 30 seconds
-const REQUEST_TIMEOUT_MS = 8_000 // 8 seconds
+const REQUEST_TIMEOUT_MS = 16_000 // 16 seconds (Cinevid API can take 8-12s under peak load)
+
+const DEFAULT_HEADERS = {
+  Accept: "application/json",
+  "User-Agent":
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+}
 
 let eventsCache: { timestamp: number; data: CinevidParsedEvent[] } | null = null
 let inflightEvents: Promise<CinevidParsedEvent[]> | null = null
@@ -188,7 +194,7 @@ export async function checkCinevidHealth(): Promise<{ status: string; ok: boolea
     try {
       const res = await fetch(`${CINEVID_BASE_URL}/api/public/events`, {
         signal: controller.signal,
-        headers: { Accept: "application/json", "User-Agent": "footyy-app/1.0" },
+        headers: DEFAULT_HEADERS,
       })
       const ok = res.ok
       let count = 0
@@ -238,7 +244,7 @@ export async function fetchCinevidEvents(): Promise<CinevidParsedEvent[]> {
     try {
       const res = await fetch(`${CINEVID_BASE_URL}/api/public/events`, {
         signal: controller.signal,
-        headers: { Accept: "application/json", "User-Agent": "footyy-app/1.0" },
+        headers: DEFAULT_HEADERS,
       })
 
       if (!res.ok) {
