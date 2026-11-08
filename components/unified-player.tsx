@@ -637,7 +637,6 @@ export function UnifiedPlayer({
             referrerPolicy="no-referrer"
             allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
             allowFullScreen
-            sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
             style={{ border: 0 }}
             className={`border-0 transition-all ${
               selectedProvider === "daddylive" && daddyLiveClean

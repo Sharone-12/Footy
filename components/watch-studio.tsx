@@ -250,24 +250,6 @@ export function WatchStudio({
       return next
     })
   }, [])
-  const [adShield, setAdShield] = useState<boolean>(() => {
-    if (typeof window === "undefined") return true
-    try {
-      const saved = localStorage.getItem("footyy_ad_shield")
-      return saved === null ? true : saved === "true"
-    } catch {
-      return true
-    }
-  })
-  const toggleAdShield = useCallback(() => {
-    setAdShield((prev) => {
-      const next = !prev
-      try {
-        localStorage.setItem("footyy_ad_shield", String(next))
-      } catch {}
-      return next
-    })
-  }, [])
   const [isLeaving, setIsLeaving] = useState(false)
   const [reloadKey, setReloadKey] = useState(0)
   const [activeTab, setActiveTab] = useState<"about" | "streams" | "similar">("about")
@@ -1105,11 +1087,6 @@ export function WatchStudio({
                     allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                     allowFullScreen
                     referrerPolicy="no-referrer"
-                    sandbox={
-                      adShield
-                        ? "allow-scripts allow-same-origin allow-presentation allow-forms"
-                        : undefined
-                    }
                     onLoad={() => setIsFrameLoading(false)}
                     onError={() => {
                       setIsFrameLoading(false)
@@ -1155,23 +1132,6 @@ export function WatchStudio({
                         <span>{daddyLiveClean ? "Clean View" : "Native Bar"}</span>
                       </button>
                     )}
-                    <button
-                      type="button"
-                      onClick={toggleAdShield}
-                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold tracking-tight transition-all border ${
-                        adShield
-                          ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20 shadow-[0_0_8px_rgba(16,185,129,0.2)]"
-                          : "bg-white/5 text-muted-foreground border-white/10 hover:text-foreground hover:bg-white/10"
-                      }`}
-                      title={
-                        adShield
-                          ? "Ad-Shield Active: Popups, redirects, and sketchy new tabs are blocked at the browser sandbox level."
-                          : "Ad-Shield Disabled: Click to enable popup blocking."
-                      }
-                    >
-                      <ShieldCheckIcon className="size-3 shrink-0" />
-                      <span>{adShield ? "Ad-Shield" : "Shield Off"}</span>
-                    </button>
                     {currentSource.quality && (
                       <span className="px-2 py-0.5 rounded-md bg-white/10 text-foreground font-mono text-[10px] font-bold">
                         {currentSource.quality}
