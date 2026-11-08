@@ -2,6 +2,7 @@ import { Suspense } from "react"
 import { cacheLife } from "next/cache"
 import Link from "next/link"
 import { supabase, fetchAllRows } from "@/lib/supabase"
+import { MetricScatter, type ScatterPlayer } from "@/components/metric-scatter"
 import { resolveSeason } from "@/lib/seasons"
 import {
   resolveCompetition,
@@ -310,6 +311,35 @@ async function loadPlayers(season: string, comp: Competition): Promise<PlayerRow
   return data
 }
 
+/**
+ * Season totals for the scatter, as opposed to loadPlayers' per-90 columns.
+ *
+ * A separate query rather than widening loadPlayers: the boards above are
+ * built entirely from per-90 rates and would pay for columns they never read.
+ */
+async function loadTotals(season: string): Promise<ScatterPlayer[]> {
+  "use cache"
+  cacheLife("minutes")
+
+  // Every competition, unscoped: the scatter carries its own competition
+  // picker, so the page's League/UCL toggle must not also narrow it or the
+  // Champions League option would have nothing to show.
+  return fetchAllRows<ScatterPlayer>((from, to) =>
+    (
+      supabase
+        .from("players")
+        .select(
+          "player, slug, team, league, role, minutes, npxg, xa, goals, assists, dribbles, " +
+            "shots, key_passes, big_chances_created, touches, passes, " +
+            "final_third_passes, crosses, tackles_won, interceptions, recoveries, " +
+            "clearances, aerials_won, dispossessed",
+        )
+        .eq("season", season)
+        .order("player_id", { ascending: true })
+    ).range(from, to) as unknown as PromiseLike<{ data: ScatterPlayer[] | null }>,
+  )
+}
+
 async function Content({
   searchParams,
 }: {
@@ -321,7 +351,10 @@ async function Content({
   const scope = scopeQuery(season, comp)
   const label = `${season} · ${COMPETITION_LABEL[comp]}`
 
-  const all = await loadPlayers(season, comp)
+  const [all, totals] = await Promise.all([
+    loadPlayers(season, comp),
+    loadTotals(season),
+  ])
   // A floor, not the whole defence against noise: it keeps out players with
   // almost no season, and the shrinkage below handles everyone above it.
   const maxMin = Math.max(0, ...all.map((p) => Number(p.minutes) || 0))
@@ -363,6 +396,16 @@ async function Content({
         {label} · min {Math.round(minMin)} minutes · {eligible.length} players ·
         thin samples pulled toward each board&apos;s average
       </p>
+      <div className="mb-5">
+        <h2
+          className="text-lg sm:text-xl font-bold tracking-tight mb-2.5"
+          style={{ fontFamily: "var(--font-condensed)" }}
+        >
+          PLOT ANY TWO
+        </h2>
+        <MetricScatter players={totals} />
+      </div>
+
       <div className="grid lg:grid-cols-2 gap-5 stagger">
         {boards.map((b) => (
           <SignalBoard

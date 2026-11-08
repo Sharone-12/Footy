@@ -145,12 +145,23 @@ COUNTING_STATS = {
     "redCards": "reds",
     "penaltyWon": "penalties_won",
     "penaltyConceded": "penalties_conceded",
+    # For non-penalty xG. Sofascore does not expose nonPenaltyExpectedGoals,
+    # but `fields=` is a parameter on a request we already make, so these two
+    # cost nothing extra.
+    "penaltyGoals": "penalty_goals",
+    "penaltiesTaken": "penalties_taken",
 }
 
 EXTRA_FIELDS = {"minutesPlayed": "minutes", "appearances": "appearances"}
 
-FEATURES = list(COUNTING_STATS.values())
+FEATURES = list(COUNTING_STATS.values()) + ["npxg"]
 ALL_FIELDS = {**COUNTING_STATS, **EXTRA_FIELDS}
+
+# Expected goals from a penalty. Sofascore gives no shot-level xG in the
+# season aggregate and no nonPenaltyExpectedGoals field, so npxG is
+# reconstructed from the count. 0.79 is the long-run conversion rate of a
+# penalty and is what every public model uses for this.
+PENALTY_XG = 0.79
 
 
 # ── Browser-based fetcher ──
@@ -354,6 +365,9 @@ def fetch_player_stats(start: int, leagues: dict | None = None, refresh: bool = 
     df = pd.DataFrame(rows)
     if df.empty:
         return df
+    df["npxg"] = (
+        df["xg"].fillna(0) - PENALTY_XG * df["penalties_taken"].fillna(0)
+    ).clip(lower=0).round(4)
     num_cols = FEATURES + ["minutes", "appearances"]
     df[num_cols] = df[num_cols].fillna(0)
     df["season"] = season_label(start)
