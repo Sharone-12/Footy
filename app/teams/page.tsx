@@ -224,6 +224,7 @@ type RankedTeam = {
   score: number
   ppg: number
   gd: number
+  gapg: number
   played: number
 }
 
@@ -274,6 +275,7 @@ function PowerRankings({
                           ? "oklch(0.65 0.14 25)"
                           : undefined,
                   },
+                  { value: r.gapg.toFixed(2), label: "ga/g" },
                 ],
               }))}
               teamIds={teamIds}
@@ -281,7 +283,7 @@ function PowerRankings({
           )}
         </div>
         <p className="stat-label mt-1">
-          Points per game, goal difference &amp; xG — weighted toward results
+          Points per game, goal difference, goals conceded &amp; xG — weighted toward results
         </p>
       </header>
 
@@ -380,6 +382,8 @@ function computePowerRankings(
   // let a 2-win-from-2 team top the chart over a proven leader.
   const PRIOR_PPG = 1.3
   const PRIOR_GDPG = 0
+  // League-average goals conceded per game across the big five.
+  const PRIOR_GAPG = 1.3
   const K = 4
 
   // Absolute anchors — a team is scored against football norms, not against
@@ -390,20 +394,29 @@ function computePowerRankings(
     Math.max(0, Math.min(100, ((gdpg + 1) / 4) * 100))  // -1 = 0, +3 = 100
   const xgPts = (xg: number) =>
     Math.max(0, Math.min(100, (xg / 3) * 100))          // 3 xG/g = 100
+  const gaPts = (gapg: number) =>
+    Math.max(0, Math.min(100, (1 - gapg / 2) * 100))    // clean sheets = 100, 2 conceded/g = 0
 
   return teams
     .map((t) => {
       const ppgRaw = (t.points + PRIOR_PPG * K) / (t.played + K)
       const gdpgRaw = (t.goal_diff + PRIOR_GDPG * K) / (t.played + K)
+      const gapgRaw = (t.goals_against + PRIOR_GAPG * K) / (t.played + K)
       const xg = statValue(byKey.get(`${t.team}|${POWER_STAT.stat}`), POWER_STAT)
+      // Goal difference alone let a leaky 3-2 side outrank a 1-0 one at the
+      // same margin, so defence is scored on its own as well.
       const score =
-        ppgPts(ppgRaw) * 0.5 + gdPts(gdpgRaw) * 0.3 + xgPts(xg) * 0.2
+        ppgPts(ppgRaw) * 0.45 +
+        gdPts(gdpgRaw) * 0.2 +
+        gaPts(gapgRaw) * 0.2 +
+        xgPts(xg) * 0.15
       return {
         team: t.team,
         league: t.league,
         score,
         ppg: t.points / t.played,
         gd: t.goal_diff,
+        gapg: t.goals_against / t.played,
         played: t.played,
       }
     })
