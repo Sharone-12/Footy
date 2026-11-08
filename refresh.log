@@ -1945,3 +1945,58 @@ server closed the connection unexpectedly
   players: 1840 known, 1871 mirrored, 1 to fetch
   teams: 86 known, 86 mirrored, 0 to fetch
   mirrored 1 players, 0 teams (0 with no image at source)
+2026-11-08 08:04 refresh started
+2026-11-08 08:07 Premier League 2025/26: 514 players
+2026-11-08 08:07 La Liga 2025/26: 539 players
+2026-11-08 08:07 Serie A 2025/26: 566 players
+2026-11-08 08:07 Ligue 1 2025/26: 502 players
+2026-11-08 08:07 Bundesliga 2025/26: 475 players
+2026-11-08 08:07 Champions League 2025/26: 842 players
+2026-11-08 08:07 saved 2778 players with 10%+ of available minutes
+2026-11-08 08:07 Fetching matches...
+2026-11-08 08:07 Premier League 2025/26: 381 matches (38 rounds)
+2026-11-08 08:07 La Liga 2025/26: 383 matches (38 rounds)
+2026-11-08 08:07 Serie A 2025/26: 385 matches (38 rounds)
+2026-11-08 08:07 Ligue 1 2025/26: 307 matches (34 rounds)
+2026-11-08 08:07 Bundesliga 2025/26: 309 matches (34 rounds)
+2026-11-08 08:07 Champions League 2025/26: 144 matches (8 rounds)
+2026-11-08 08:07 saved 1895 results, 0 upcoming
+2026-11-08 08:07 Premier League 2026/27: 456 players
+2026-11-08 08:07 La Liga 2026/27: 484 players
+2026-11-08 08:07 Serie A 2026/27: 499 players
+2026-11-08 08:07 Ligue 1 2026/27: 430 players
+2026-11-08 08:07 Bundesliga 2026/27: 419 players
+2026-11-08 08:07 Champions League 2026/27: 733 players
+2026-11-08 08:07 saved 2570 players with 10%+ of available minutes
+2026-11-08 08:07 Fetching matches...
+2026-11-08 08:07 Premier League 2026/27: 380 matches (38 rounds)
+2026-11-08 08:07 La Liga 2026/27: 381 matches (38 rounds)
+2026-11-08 08:07 Serie A 2026/27: 380 matches (38 rounds)
+2026-11-08 08:07 Ligue 1 2026/27: 306 matches (34 rounds)
+2026-11-08 08:07 Bundesliga 2026/27: 306 matches (34 rounds)
+2026-11-08 08:07 Champions League 2026/27: 144 matches (8 rounds)
+2026-11-08 08:07 saved 548 results, 1347 upcoming
+2026-11-08 08:07 fetching team stats for 3 new matches...
+2026-11-08 08:07 syncing to supabase
+  players players_26_27: 2570 rows
+  matches matches_26_27: 1897 rows
+  match_stats match_stats_26_27: 26246 rows
+  synced 30713 rows, skipped 3 unchanged files
+2026-11-08 08:07 supabase sync done
+2026-11-08 08:07 mirroring images
+  players: 3017 known, 1872 mirrored, 1172 to fetch
+    100/1172...
+    200/1172...
+    300/1172...
+    400/1172...
+    500/1172...
+    600/1172...
+    700/1172...
+    800/1172...
+    900/1172...
+    1000/1172...
+    1100/1172...
+2026-11-08 12:17 image mirror done
+2026-11-08 12:18 committed 3 files and pushed
+  teams: 134 known, 86 mirrored, 48 to fetch
+  mirrored 1171 players, 48 teams (1 with no image at source)
