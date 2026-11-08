@@ -69,6 +69,7 @@ export function MatchStream({
           referrerPolicy="strict-origin-when-cross-origin"
           allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
           allowFullScreen
+          sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
           className="absolute inset-0 h-full w-full border-0"
         />
       </div>
