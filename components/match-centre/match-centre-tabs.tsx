@@ -1,18 +1,28 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { BarChart3Icon, UsersIcon, TrophyIcon, HistoryIcon, ActivityIcon } from "lucide-react"
+import {
+  InfoIcon,
+  ActivityIcon,
+  BarChart3Icon,
+  UsersIcon,
+  TrophyIcon,
+  HistoryIcon,
+} from "lucide-react"
 import type { LiveFixture } from "@/components/live-sections"
 import type { LiveScore } from "@/lib/livescores"
 import { WatchLiveStatsCard } from "@/components/watch-live-stats"
 import { PitchLineup } from "./pitch-lineup"
 import { TableStandings } from "./table-standings"
 import { H2HHistory } from "./h2h-history"
+import { MatchSummary } from "./match-summary"
+import { MatchInfo } from "./match-info"
 import type { MatchLineupsResponse } from "@/app/api/livescores/lineups/route"
 import type { LeagueTableResponse } from "@/app/api/livescores/table/route"
 import type { H2HResponse } from "@/app/api/livescores/h2h/route"
+import type { MatchSummaryResponse } from "@/app/api/livescores/summary/route"
 
-export type MatchCentreTab = "stats" | "lineups" | "table" | "h2h"
+export type MatchCentreTab = "info" | "summary" | "stats" | "lineups" | "table" | "h2h"
 
 export type MatchCentreTabsProps = {
   fixture: LiveFixture
@@ -20,14 +30,20 @@ export type MatchCentreTabsProps = {
   initialTab?: MatchCentreTab
 }
 
-export function MatchCentreTabs({ fixture, liveScore, initialTab = "stats" }: MatchCentreTabsProps) {
+export function MatchCentreTabs({
+  fixture,
+  liveScore,
+  initialTab = "summary",
+}: MatchCentreTabsProps) {
   const [activeTab, setActiveTab] = useState<MatchCentreTab>(initialTab)
 
   // Sub-data states
+  const [summaryData, setSummaryData] = useState<MatchSummaryResponse | null>(null)
   const [lineups, setLineups] = useState<MatchLineupsResponse | null>(null)
   const [tableData, setTableData] = useState<LeagueTableResponse | null>(null)
   const [h2hData, setH2HData] = useState<H2HResponse | null>(null)
 
+  const [isLoadingSummary, setIsLoadingSummary] = useState(false)
   const [isLoadingLineups, setIsLoadingLineups] = useState(false)
   const [isLoadingTable, setIsLoadingTable] = useState(false)
   const [isLoadingH2H, setIsLoadingH2H] = useState(false)
@@ -40,11 +56,8 @@ export function MatchCentreTabs({ fixture, liveScore, initialTab = "stats" }: Ma
    * centre mounts — not when its tab is first clicked.
    *
    * Each of these routes resolves the fixture and then calls out to
-   * livescore.com, so a cold tab cost 1.5-4.3s. Fetching lazily meant paying
-   * that on the first click of every tab, which is why switching kept
-   * showing "loading". Firing them together means the work overlaps with the
-   * user reading the stats tab, and the server-side caches are warm by the
-   * time anything is clicked.
+   * livescore.com, so firing them together ensures the server-side caches
+   * are warm by the time anything is clicked.
    */
   useEffect(() => {
     const param = eid
@@ -65,14 +78,14 @@ export function MatchCentreTabs({ fixture, liveScore, initialTab = "stats" }: Ma
           if (data) setData(data)
         }
       } catch {
-        // Aborted on unmount, or the provider is down; the panel shows its
-        // own empty state and a retry is one tab switch away.
+        // Aborted on unmount, or provider is down
       } finally {
         if (!ac.signal.aborted) setLoading(false)
       }
     }
 
     void Promise.all([
+      load<MatchSummaryResponse>("summary", setSummaryData, setIsLoadingSummary),
       load<MatchLineupsResponse>("lineups", setLineups, setIsLoadingLineups),
       load<LeagueTableResponse>("table", setTableData, setIsLoadingTable),
       load<H2HResponse>("h2h", setH2HData, setIsLoadingH2H),
@@ -83,15 +96,41 @@ export function MatchCentreTabs({ fixture, liveScore, initialTab = "stats" }: Ma
 
   return (
     <section aria-label="Match Centre Live Data" className="flex flex-col gap-3">
-      {/* Tab Navigation Bar - Styled matching LiveScores tabs bar */}
+      {/* Tab Navigation Bar - Styled matching LiveScores exact tabs bar */}
       <div className="flex items-center gap-1 sm:gap-2 border-b border-white/10 pb-1 overflow-x-auto no-scrollbar select-none">
         <button
           type="button"
+          onClick={() => setActiveTab("info")}
+          className={`relative px-3 sm:px-4.5 py-2 text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+            activeTab === "info" ? "text-white" : "text-white/50 hover:text-white/80"
+          }`}
+        >
+          <InfoIcon className="size-3.5 sm:size-4" />
+          <span>Info</span>
+          {activeTab === "info" && (
+            <span className="absolute bottom-[-5px] inset-x-2 h-0.5 bg-[var(--pitch)] rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+          )}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab("summary")}
+          className={`relative px-3 sm:px-4.5 py-2 text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+            activeTab === "summary" ? "text-white" : "text-white/50 hover:text-white/80"
+          }`}
+        >
+          <ActivityIcon className="size-3.5 sm:size-4" />
+          <span>Summary</span>
+          {activeTab === "summary" && (
+            <span className="absolute bottom-[-5px] inset-x-2 h-0.5 bg-[var(--pitch)] rounded-full shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
+          )}
+        </button>
+
+        <button
+          type="button"
           onClick={() => setActiveTab("stats")}
-          className={`relative px-3.5 sm:px-5 py-2 text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-            activeTab === "stats"
-              ? "text-white"
-              : "text-white/50 hover:text-white/80"
+          className={`relative px-3 sm:px-4.5 py-2 text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+            activeTab === "stats" ? "text-white" : "text-white/50 hover:text-white/80"
           }`}
         >
           <BarChart3Icon className="size-3.5 sm:size-4" />
@@ -104,10 +143,8 @@ export function MatchCentreTabs({ fixture, liveScore, initialTab = "stats" }: Ma
         <button
           type="button"
           onClick={() => setActiveTab("lineups")}
-          className={`relative px-3.5 sm:px-5 py-2 text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-            activeTab === "lineups"
-              ? "text-white"
-              : "text-white/50 hover:text-white/80"
+          className={`relative px-3 sm:px-4.5 py-2 text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+            activeTab === "lineups" ? "text-white" : "text-white/50 hover:text-white/80"
           }`}
         >
           <UsersIcon className="size-3.5 sm:size-4" />
@@ -120,10 +157,8 @@ export function MatchCentreTabs({ fixture, liveScore, initialTab = "stats" }: Ma
         <button
           type="button"
           onClick={() => setActiveTab("table")}
-          className={`relative px-3.5 sm:px-5 py-2 text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-            activeTab === "table"
-              ? "text-white"
-              : "text-white/50 hover:text-white/80"
+          className={`relative px-3 sm:px-4.5 py-2 text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+            activeTab === "table" ? "text-white" : "text-white/50 hover:text-white/80"
           }`}
         >
           <TrophyIcon className="size-3.5 sm:size-4" />
@@ -136,10 +171,8 @@ export function MatchCentreTabs({ fixture, liveScore, initialTab = "stats" }: Ma
         <button
           type="button"
           onClick={() => setActiveTab("h2h")}
-          className={`relative px-3.5 sm:px-5 py-2 text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-            activeTab === "h2h"
-              ? "text-white"
-              : "text-white/50 hover:text-white/80"
+          className={`relative px-3 sm:px-4.5 py-2 text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+            activeTab === "h2h" ? "text-white" : "text-white/50 hover:text-white/80"
           }`}
         >
           <HistoryIcon className="size-3.5 sm:size-4" />
@@ -152,10 +185,21 @@ export function MatchCentreTabs({ fixture, liveScore, initialTab = "stats" }: Ma
 
       {/* Active Tab Content Panel */}
       <div className="pt-1">
+        {activeTab === "info" && (
+          <div className="surface rounded-2xl bg-card p-3.5 sm:p-4 md:p-5 border border-border/70 shadow-sm animate-fade-in">
+            <MatchInfo summaryData={summaryData} fixture={fixture} isLoading={isLoadingSummary} />
+          </div>
+        )}
+
+        {activeTab === "summary" && (
+          <div className="surface rounded-2xl bg-card p-3.5 sm:p-4 md:p-5 border border-border/70 shadow-sm animate-fade-in">
+            <MatchSummary summaryData={summaryData} fixture={fixture} isLoading={isLoadingSummary} />
+          </div>
+        )}
+
         {/* Hidden rather than unmounted: this card owns its own fetch and
             poll, so unmounting threw those away and every return to the tab
-            restarted from a spinner. The other panels take their data as
-            props, so remounting those costs nothing. */}
+            restarted from a spinner. */}
         <div className={activeTab === "stats" ? undefined : "hidden"}>
           <WatchLiveStatsCard fixture={fixture} liveScore={liveScore} />
         </div>
@@ -181,4 +225,3 @@ export function MatchCentreTabs({ fixture, liveScore, initialTab = "stats" }: Ma
     </section>
   )
 }
-

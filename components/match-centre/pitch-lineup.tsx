@@ -199,7 +199,7 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
             {/* Away Team (Top Half, facing down) */}
             <div className="absolute inset-x-0 top-0 h-1/2 p-3 sm:p-4">
               {awayStarting.map((player, idx) => {
-                const top = rowPercent(player.row, awayMaxRow, 8, 84)
+                const top = rowPercent(player.row, awayMaxRow, 8, 70)
                 const totalInRow = player.totalInRow || 1
                 const colPercent = (player.col / (totalInRow + 1)) * 100
 
@@ -209,16 +209,16 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
                     className="absolute"
                     style={{ top: `${top}%`, left: `${colPercent}%` }}
                   >
-                    <PlayerNode player={player} isAway size={awayMaxRow >= 6 ? 28 : 34} />
+                    <PlayerNode player={player} isAway size={awayMaxRow >= 5 ? 28 : 32} />
                   </div>
                 )
               })}
             </div>
 
             {/* Home Team (Bottom Half, facing up) */}
-            <div className="absolute inset-x-0 bottom-0 h-1/2 p-3 sm:p-4 pb-8">
+            <div className="absolute inset-x-0 bottom-0 h-1/2 p-3 sm:p-4 pb-4">
               {homeStarting.map((player, idx) => {
-                const bottom = rowPercent(player.row, homeMaxRow, 10, 84)
+                const bottom = rowPercent(player.row, homeMaxRow, 8, 70)
                 const totalInRow = player.totalInRow || 1
                 const colPercent = (player.col / (totalInRow + 1)) * 100
 
@@ -228,7 +228,7 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
                     className="absolute"
                     style={{ bottom: `${bottom}%`, left: `${colPercent}%` }}
                   >
-                    <PlayerNode player={player} size={homeMaxRow >= 6 ? 28 : 34} />
+                    <PlayerNode player={player} size={homeMaxRow >= 5 ? 28 : 32} />
                   </div>
                 )
               })}
