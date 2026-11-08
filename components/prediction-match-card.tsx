@@ -57,6 +57,10 @@ export function PredictionMatchCard({ p }: { p: MatchPrediction }) {
   const isLive = liveScore != null
   const hasLiveStream = useHasLiveStream(p.event_id)
 
+  const start = p.kickoff ? new Date(p.kickoff).getTime() : new Date(`${p.date}T23:59:59Z`).getTime()
+  const isWithin15Min = start - now <= 15 * 60_000 && now - start < 2 * 60 * 60 * 1000
+  const showWatchNow = hasLiveStream && (isLive || isWithin15Min)
+
   const tournamentId = LEAGUE_TOURNAMENT_ID[p.league]
 
   return (
@@ -177,8 +181,8 @@ export function PredictionMatchCard({ p }: { p: MatchPrediction }) {
             </span>
           )}
 
-          {/* Watch Now Button: Highlighted when stream is currently live */}
-          {hasLiveStream && (
+          {/* Watch Now Button: Highlighted when stream is currently live or within 15 mins of kickoff */}
+          {showWatchNow && (
             <Link
               href={`/live/watch?id=${p.event_id}`}
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[var(--pitch)] text-black hover:brightness-110 font-bold text-xs shadow-md transition-all hover:scale-[1.03] shrink-0"

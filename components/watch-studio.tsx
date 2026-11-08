@@ -318,9 +318,26 @@ export function WatchStudio({
     return now < kickoffMs
   }, [kickoffMs, now])
 
+  // Stream broadcast window: streams unlock and are fetched 15 minutes before kickoff through match finish
+  const isStreamWindowOpen = useMemo(() => {
+    if (initialChannelId) return true // direct 24/7 channel requested
+    if (!kickoffMs) return true // no exact kickoff, allow streams
+    if (liveScore != null) return true // match is actively in-play in live feed
+    if (now >= kickoffMs) return now <= kickoffMs + 120 * 60_000 // live playing window
+    return kickoffMs - now <= 15 * 60_000 // within 15 minutes before kickoff
+  }, [initialChannelId, kickoffMs, liveScore, now])
+
   // Fetch streams for fixture
   useEffect(() => {
     let unmounted = false
+
+    // Do not fetch streams if match is more than 15 minutes away from kickoff
+    if (!isStreamWindowOpen) {
+      setIsBundleLoading(false)
+      setBundle({})
+      return
+    }
+
     setIsBundleLoading(true)
     setBundleError(null)
 
@@ -488,7 +505,7 @@ export function WatchStudio({
     return () => {
       unmounted = true
     }
-  }, [fixture?.event_id, initialChannelId])
+  }, [fixture?.event_id, initialChannelId, isStreamWindowOpen, reloadKey])
 
   // Build normalized providers
   const providers: WatchProvider[] = useMemo(() => {
@@ -958,30 +975,42 @@ export function WatchStudio({
                 </div>
               )}
 
-              {/* 2. NO STREAMS / OFFLINE STATE */}
+              {/* 2. NO STREAMS / OFFLINE / PRE-MATCH WINDOW STATE */}
               {!isBundleLoading && !currentSource && (
                 <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 bg-black/95 text-center">
                   <div className="size-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-muted-foreground">
-                    <AlertCircleIcon className="size-7 text-amber-400" />
+                    {!isStreamWindowOpen ? (
+                      <ClockIcon className="size-7 text-[var(--pitch)]" />
+                    ) : (
+                      <AlertCircleIcon className="size-7 text-amber-400" />
+                    )}
                   </div>
                   <h3
                     className="text-xl font-bold uppercase tracking-tight text-foreground"
                     style={{ fontFamily: "var(--font-condensed)" }}
                   >
-                    {isUpcoming ? "STREAM STARTING SOON" : "STREAM CURRENTLY UNAVAILABLE"}
+                    {!isStreamWindowOpen
+                      ? "STREAMS UNLOCK 15 MINUTES BEFORE KICKOFF"
+                      : isUpcoming
+                      ? "STREAM STARTING SOON"
+                      : "STREAM CURRENTLY UNAVAILABLE"}
                   </h3>
                   <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 max-w-md">
-                    {isUpcoming
-                      ? `Coverage for ${fixture?.home} vs ${fixture?.away} typically activates 15–30 minutes before kickoff.`
+                    {!isStreamWindowOpen
+                      ? `Live video broadcasts for ${fixture?.home} vs ${fixture?.away} activate and load automatically 15 minutes prior to match kickoff.`
+                      : isUpcoming
+                      ? `Coverage for ${fixture?.home} vs ${fixture?.away} is preparing to air. Verified feeds will connect momentarily.`
                       : "No verified broadcast feed has been opened yet by our streaming providers for this fixture."}
                   </p>
 
                   {isUpcoming && kickoffMs && (
                     <div className="mt-4 px-4 py-2 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-2">
                       <ClockIcon className="size-4 text-[var(--pitch)]" />
-                      <span className="text-xs text-muted-foreground">Scheduled Kickoff In:</span>
+                      <span className="text-xs text-muted-foreground">
+                        {!isStreamWindowOpen ? "Streams Unlock In:" : "Scheduled Kickoff In:"}
+                      </span>
                       <span className="font-mono text-xs font-bold text-foreground">
-                        {formatCountdown(kickoffMs, now)}
+                        {formatCountdown(!isStreamWindowOpen ? kickoffMs - 15 * 60_000 : kickoffMs, now)}
                       </span>
                     </div>
                   )}

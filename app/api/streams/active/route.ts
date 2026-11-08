@@ -47,12 +47,12 @@ async function computeActiveStreamEventIds(): Promise<number[]> {
   if (fixtures.length === 0) return cache?.eventIds || []
 
   // Create a map of fixture broadcast windows:
-  // Match is live if within [-30 min before kickoff, +150 min after kickoff]
+  // Match streams unlock 15 minutes before kickoff through match finish [+150 min after kickoff]
   const broadcastWindowMap = new Map<number, boolean>()
   for (const f of fixtures) {
     const kickoffMs = f.kickoff ? Date.parse(f.kickoff) : Date.parse(`${f.date}T12:00:00Z`)
     const inWindow = Number.isFinite(kickoffMs)
-      ? nowMs >= kickoffMs - 30 * 60_000 && nowMs <= kickoffMs + 150 * 60_000
+      ? nowMs >= kickoffMs - 15 * 60_000 && nowMs <= kickoffMs + 150 * 60_000
       : true
     broadcastWindowMap.set(f.event_id, inWindow)
   }

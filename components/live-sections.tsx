@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import Link from "next/link"
 import { PlayIcon, TvIcon } from "lucide-react"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
@@ -251,7 +251,7 @@ function Row({
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--pitch)] text-black hover:brightness-110 font-bold text-xs shadow-md transition-all hover:scale-[1.03] shrink-0"
           >
             <PlayIcon className="size-3 fill-current" />
-            Watch
+            Watch Now
           </Link>
         </div>
       )}
@@ -348,9 +348,24 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
     return () => clearInterval(t)
   }, [])
 
-  // Fetch Matchora stream matches on mount
+  // Only fetch streams when at least one fixture is live or within 15 minutes of kickoff.
+  // When a match reaches the 15-minute window, streamEligibleKey updates and streams are fetched.
+  const streamEligibleKey = useMemo(() => {
+    const currentNow = now ?? Date.now()
+    return matches
+      .filter((m) => {
+        const start = startOf(m)
+        const left = start - currentNow
+        return left <= 15 * 60_000 && currentNow - start < PLAYING_MS
+      })
+      .map((m) => m.event_id)
+      .sort()
+      .join(",")
+  }, [matches, now])
+
+  // Fetch Matchora stream matches when within 15 mins of kickoff
   useEffect(() => {
-    if (!isProviderEnabled("matchora")) {
+    if (!isProviderEnabled("matchora") || !streamEligibleKey) {
       setMatchoraMap({})
       return
     }
@@ -375,11 +390,11 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
     return () => {
       unmounted = true
     }
-  }, [])
+  }, [streamEligibleKey])
 
-  // Fetch StreamFree stream matches on mount
+  // Fetch StreamFree stream matches when within 15 mins of kickoff
   useEffect(() => {
-    if (!isProviderEnabled("streamfree")) {
+    if (!isProviderEnabled("streamfree") || !streamEligibleKey) {
       setStreamMap({})
       return
     }
@@ -404,11 +419,11 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
     return () => {
       unmounted = true
     }
-  }, [])
+  }, [streamEligibleKey])
 
-  // Fetch DAMITV stream matches on mount
+  // Fetch DAMITV stream matches when within 15 mins of kickoff
   useEffect(() => {
-    if (!isProviderEnabled("damitv")) {
+    if (!isProviderEnabled("damitv") || !streamEligibleKey) {
       setDamitvMap({})
       return
     }
@@ -433,11 +448,11 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
     return () => {
       unmounted = true
     }
-  }, [])
+  }, [streamEligibleKey])
 
-  // Fetch Cinevid stream matches on mount
+  // Fetch Cinevid stream matches when within 15 mins of kickoff
   useEffect(() => {
-    if (!isProviderEnabled("cinevid")) {
+    if (!isProviderEnabled("cinevid") || !streamEligibleKey) {
       setCinevidMap({})
       return
     }
@@ -462,11 +477,11 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
     return () => {
       unmounted = true
     }
-  }, [])
+  }, [streamEligibleKey])
 
-  // Fetch Live24 stream matches on mount
+  // Fetch Live24 stream matches when within 15 mins of kickoff
   useEffect(() => {
-    if (!isProviderEnabled("live24")) {
+    if (!isProviderEnabled("live24") || !streamEligibleKey) {
       setLive24Map({})
       return
     }
@@ -491,11 +506,11 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
     return () => {
       unmounted = true
     }
-  }, [])
+  }, [streamEligibleKey])
 
-  // Fetch DaddyLive stream matches on mount
+  // Fetch DaddyLive stream matches when within 15 mins of kickoff
   useEffect(() => {
-    if (!isProviderEnabled("daddylive")) {
+    if (!isProviderEnabled("daddylive") || !streamEligibleKey) {
       setDaddyliveMap({})
       return
     }
@@ -520,9 +535,9 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
     return () => {
       unmounted = true
     }
-  }, [])
+  }, [streamEligibleKey])
 
-  // Fetch ZLive stream matches and generic channels on mount
+  // Fetch ZLive stream matches and generic channels when within 15 mins of kickoff
   useEffect(() => {
     if (!isProviderEnabled("zlive")) {
       setZliveMap({})
@@ -532,12 +547,23 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
     let unmounted = false
     async function loadZLive() {
       try {
-        const [matchesRes, genericRes] = await Promise.allSettled([
-          fetch("/api/zlive"),
-          fetch("/api/zlive?generic=1"),
-        ])
+        const promises: Promise<Response>[] = [fetch("/api/zlive?generic=1")]
+        if (streamEligibleKey) {
+          promises.push(fetch("/api/zlive"))
+        }
 
-        if (matchesRes.status === "fulfilled" && matchesRes.value.ok) {
+        const results = await Promise.allSettled(promises)
+        const genericRes = results[0]
+        const matchesRes = streamEligibleKey ? results[1] : null
+
+        if (genericRes?.status === "fulfilled" && genericRes.value.ok) {
+          const data = await genericRes.value.json()
+          if (data?.channels && Array.isArray(data.channels) && !unmounted) {
+            setGenericChannels(data.channels)
+          }
+        }
+
+        if (matchesRes && matchesRes.status === "fulfilled" && matchesRes.value.ok) {
           const data = await matchesRes.value.json()
           if (data?.channels && Array.isArray(data.channels) && !unmounted) {
             const map: Record<number, MatchedZLive> = {}
@@ -546,13 +572,8 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
             }
             setZliveMap(map)
           }
-        }
-
-        if (genericRes.status === "fulfilled" && genericRes.value.ok) {
-          const data = await genericRes.value.json()
-          if (data?.channels && Array.isArray(data.channels) && !unmounted) {
-            setGenericChannels(data.channels)
-          }
+        } else if (!streamEligibleKey) {
+          setZliveMap({})
         }
       } catch (err) {
         console.warn("[live] Could not load ZLive data:", err)
@@ -562,7 +583,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
     return () => {
       unmounted = true
     }
-  }, [])
+  }, [streamEligibleKey])
 
   // Close player with Esc key
   useEffect(() => {
