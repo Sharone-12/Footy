@@ -61,15 +61,24 @@ const fmt = (v: number) =>
 export function StatBarChart({
   data,
   players,
+  scale,
 }: {
   data: Record<string, string | number>[]
   players: string[]
+  /**
+   * Bar length denominator per stat label. Without it the bar is scaled to
+   * the largest value in its own row, which is what you want when comparing
+   * players side by side and meaningless with one: the single value is its
+   * own maximum, so every bar renders full. The player page passes the
+   * positional cohort's spread instead.
+   */
+  scale?: Record<string, number>
 }) {
   return (
     <div className="space-y-3">
       {data.map((row) => {
         const vals = players.map((p) => Number(row[p]) || 0)
-        const max = Math.max(...vals, 0.01)
+        const max = scale?.[row.stat as string] ?? Math.max(...vals, 0.01)
 
         return (
           <div key={row.stat as string}>
@@ -79,7 +88,7 @@ export function StatBarChart({
             <div className="space-y-1">
               {players.map((name, i) => {
                 const v = vals[i]
-                const pct = (v / max) * 100
+                const pct = Math.min(100, (v / max) * 100)
                 return (
                   <div key={name} className="flex items-center gap-2">
                     <div className="flex-1 h-[10px] rounded-full overflow-hidden bg-white/[0.04]">

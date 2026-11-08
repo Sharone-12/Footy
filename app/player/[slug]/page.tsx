@@ -74,7 +74,16 @@ async function PlayerContent({
   const { data: positionPeers } = await scopeLeague(
     supabase
       .from("players")
-      .select(RADAR_STATS.map((s) => s.key).join(","))
+      // Both sets: the radar needs RADAR_STATS, the bars need every
+      // STAT_GROUPS key. Selecting only the radar's left the rest undefined,
+      // so each bar's cohort best read 0 and the bar scaled to the player's
+      // own value — which is 100% by definition.
+      .select(
+        [...new Set([
+          ...RADAR_STATS.map((s) => s.key),
+          ...STAT_GROUPS.flatMap((g) => g.stats.map((s) => s.key)),
+        ])].join(","),
+      )
       // Peers in the same ROLE, not the same broad bucket: a winger compared
       // against every midfielder is measured on the wrong job.
       .eq("role", (player.role as string) || (player.position as string))
@@ -91,6 +100,24 @@ async function PlayerContent({
     const pct = percentileRank(Number(player[s.key]) || 0, allValues)
     return { stat: s.label, [player.player as string]: pct }
   })
+
+  /**
+   * Bar length is measured against the positional cohort, not against the
+   * player's own number — one value is always its own maximum, so every bar
+   * used to render full whatever it said.
+   *
+   * The cohort's best, so a full bar means "nobody in this position does
+   * more of it". A 95th percentile was tried first and pegged ten of this
+   * page's twenty-eight bars for a single player, which loses the resolution
+   * the bars exist to show.
+   */
+  const barScale: Record<string, number> = {}
+  for (const group of STAT_GROUPS) {
+    for (const s of group.stats) {
+      const best = Math.max(0, ...(peers || []).map((p) => Number(p[s.key]) || 0))
+      barScale[s.label] = Math.max(best, Number(player[s.key]) || 0, 0.01)
+    }
+  }
 
   const barData = STAT_GROUPS.map((group) => ({
     label: group.label,
@@ -225,7 +252,7 @@ async function PlayerContent({
               <p className="text-xs text-muted-foreground/60">per 90 minutes</p>
             </CardHeader>
             <CardContent>
-              <StatBarChart data={group.data} players={[name]} />
+              <StatBarChart data={group.data} players={[name]} scale={barScale} />
             </CardContent>
           </Card>
         ))}
