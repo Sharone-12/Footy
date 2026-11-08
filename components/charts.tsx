@@ -97,7 +97,12 @@ export function StatBarChart({
                         style={{
                           width: `${Math.max(pct, 1)}%`,
                           background: PLAYER_COLORS[i % PLAYER_COLORS.length],
-                          opacity: v === max && players.length > 1 ? 0.9 : 0.45,
+                          // Dimming is a comparison cue: it marks the bars
+                          // that are not the longest in their row. With one
+                          // player there is nothing to lose to, so every bar
+                          // was drawn at 0.45 for no reason.
+                          opacity:
+                            players.length > 1 ? (v === max ? 0.95 : 0.5) : 1,
                         }}
                       />
                     </div>
