@@ -60,6 +60,14 @@ export type ScatterPlayer = {
 
 const n = (v: number | null | undefined) => (typeof v === "number" ? v : 0)
 
+/** Counting stats, so they add across competitions. */
+const SUMMED = [
+  "minutes", "npxg", "xa", "goals", "assists", "dribbles", "shots",
+  "key_passes", "big_chances_created", "touches", "passes",
+  "final_third_passes", "crosses", "tackles_won", "interceptions",
+  "recoveries", "clearances", "aerials_won", "dispossessed",
+] as const satisfies readonly (keyof ScatterPlayer)[]
+
 /** `get` rather than a column name, so composites like npxG+xA are first class. */
 type Metric = { key: string; label: string; get: (p: ScatterPlayer) => number }
 
@@ -160,16 +168,15 @@ export function MetricScatter({ players }: { players: ScatterPlayer[] }) {
   const [yKey, setYKey] = useState("npxg_xa")
   const [floor, setFloor] = useState(450)
   const [role, setRole] = useState("Winger")
-  // A set, so leagues combine. UCL stays exclusive: a player holds one row
-  // per competition, so pairing it with a domestic league would plot the same
-  // man twice, at two different points, as if he were two players.
-  const [leagues, setLeagues] = useState<string[]>(TOP5)
+  // Any combination, Champions League included. A player holds one row per
+  // competition, so selecting Europe alongside a domestic league would plot
+  // him twice — once for each — which is why the rows are summed into a
+  // single point below rather than drawn separately.
+  const [leagues, setLeagues] = useState<string[]>([...TOP5, UCL])
 
   function toggleLeague(lg: string) {
     setLeagues((cur) => {
-      if (lg === UCL) return cur.includes(UCL) ? TOP5 : [UCL]
-      const base = cur.filter((l) => l !== UCL)
-      const next = base.includes(lg) ? base.filter((l) => l !== lg) : [...base, lg]
+      const next = cur.includes(lg) ? cur.filter((l) => l !== lg) : [...cur, lg]
       return next.length ? next : [lg]
     })
   }
@@ -178,13 +185,29 @@ export function MetricScatter({ players }: { players: ScatterPlayer[] }) {
   const ym = METRICS.find((m) => m.key === yKey) ?? METRICS[0]
 
   const { points, shownLeagues } = useMemo(() => {
-    const raw = players
-      .filter(
-        (p) =>
-          n(p.minutes) >= floor &&
-          (role === "all" || p.role === role) &&
-          leagues.includes(p.league),
-      )
+    const selected = players.filter(
+      (p) => (role === "all" || p.role === role) && leagues.includes(p.league),
+    )
+
+    // One point per player, summing whatever competitions are selected.
+    // Colour follows his domestic league where he has one, so a combined
+    // view still reads by league rather than turning everything UCL-blue.
+    const merged = new Map<string, ScatterPlayer>()
+    for (const p of selected) {
+      const key = p.slug || p.player
+      const cur = merged.get(key)
+      if (!cur) {
+        merged.set(key, { ...p })
+        continue
+      }
+      for (const f of SUMMED) {
+        ;(cur[f] as number) = n(cur[f]) + n(p[f])
+      }
+      if (cur.league === UCL && p.league !== UCL) cur.league = p.league
+    }
+
+    const raw = [...merged.values()]
+      .filter((p) => n(p.minutes) >= floor)
       .map((p) => ({
         x: xm.get(p),
         y: ym.get(p),
@@ -194,12 +217,15 @@ export function MetricScatter({ players }: { players: ScatterPlayer[] }) {
         league: p.league,
         minutes: n(p.minutes),
         label: "",
+        /** Near the right edge: its name has to sit on the left or it clips. */
+        flip: false,
       }))
 
     // Outliers by distance from the origin in normalised space, so neither
     // axis wins the argument just by carrying bigger numbers.
     const maxX = Math.max(1, ...raw.map((r) => r.x))
     const maxY = Math.max(1, ...raw.map((r) => r.y))
+    for (const r of raw) r.flip = r.x / maxX > 0.72
     const ranked = [...raw].sort(
       (a, b) =>
         (b.x / maxX) ** 2 + (b.y / maxY) ** 2 - ((a.x / maxX) ** 2 + (a.y / maxY) ** 2),
@@ -373,11 +399,31 @@ export function MetricScatter({ players }: { players: ScatterPlayer[] }) {
               {points.map((p, i) => (
                 <Cell key={i} fill={LEAGUE_COLOR[p.league] ?? OTHER} />
               ))}
+              {/* Custom, so a name on the right-hand edge flips to the left
+                  of its dot instead of being clipped by the plot area. */}
               <LabelList
                 dataKey="label"
-                position="right"
-                offset={8}
-                style={{ fontSize: 10, fill: "oklch(0.95 0 0)", fontWeight: 600 }}
+                content={(props) => {
+                  const { x, y, value, index } = props as {
+                    x?: number
+                    y?: number
+                    value?: string | number
+                    index?: number
+                  }
+                  if (!value || x == null || y == null) return null
+                  const flip = index != null && points[index]?.flip
+                  return (
+                    <text
+                      x={flip ? x - 9 : x + 9}
+                      y={y}
+                      dy={4}
+                      textAnchor={flip ? "end" : "start"}
+                      style={{ fontSize: 10, fill: "oklch(0.95 0 0)", fontWeight: 600 }}
+                    >
+                      {value}
+                    </text>
+                  )
+                }}
               />
             </Scatter>
           </ScatterChart>
