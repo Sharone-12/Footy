@@ -256,11 +256,18 @@ export async function fetchTeamIdMap(
   supabase: { from: (t: string) => any },
   season: string,
 ): Promise<Map<string, number>> {
-  const { data } = await supabase
-    .from("players")
-    .select("team, team_id")
-    .eq("season", season)
-    .not("team_id", "is", null)
+  // Paged: a season holds 2631 player rows, and one request comes back
+  // silently cut to 1000, which drops the crest for every club whose players
+  // happen to sit past the boundary.
+  const data = await fetchAllRows<{ team: string; team_id: number }>((from, to) =>
+    supabase
+      .from("players")
+      .select("team, team_id")
+      .eq("season", season)
+      .not("team_id", "is", null)
+      .order("player_id", { ascending: true })
+      .range(from, to),
+  )
   const map = new Map<string, number>()
   for (const r of (data || []) as { team: string; team_id: number }[]) {
     if (!map.has(r.team)) map.set(r.team, r.team_id)

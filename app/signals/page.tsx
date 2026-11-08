@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { cacheLife } from "next/cache"
 import Link from "next/link"
-import { supabase } from "@/lib/supabase"
+import { supabase, fetchAllRows } from "@/lib/supabase"
 import { resolveSeason } from "@/lib/seasons"
 import {
   resolveCompetition,
@@ -288,21 +288,26 @@ async function loadPlayers(season: string, comp: Competition): Promise<PlayerRow
   "use cache"
   cacheLife("minutes")
 
-  const { data } = await scopeLeague(
-    supabase
-      .from("players")
-      .select(
-        "player, slug, team, team_id, league, position, minutes, " +
-          "goals_p90, xg_p90, xa_p90, key_passes_p90, big_chances_created_p90, " +
-          "touches_p90, dispossessed_p90, dribbles_p90, " +
-          "final_third_passes_p90, total_passes_p90, " +
-          "tackles_won_p90, aerials_won_p90, interceptions_p90",
-      )
-      .eq("season", season),
-    comp,
-  ).limit(2000)
+  // Paged: 1930 non-UCL players in 2026/27 against a 1000-row server cap, so
+  // a single request showed barely half the league.
+  const data = await fetchAllRows<PlayerRow>((from, to) =>
+    scopeLeague(
+      supabase
+        .from("players")
+        .select(
+          "player, slug, team, team_id, league, position, minutes, " +
+            "goals_p90, xg_p90, xa_p90, key_passes_p90, big_chances_created_p90, " +
+            "touches_p90, dispossessed_p90, dribbles_p90, " +
+            "final_third_passes_p90, total_passes_p90, " +
+            "tackles_won_p90, aerials_won_p90, interceptions_p90",
+        )
+        .eq("season", season)
+        .order("player_id", { ascending: true }),
+      comp,
+    ).range(from, to) as unknown as PromiseLike<{ data: PlayerRow[] | null }>,
+  )
 
-  return (data || []) as unknown as PlayerRow[]
+  return data
 }
 
 async function Content({

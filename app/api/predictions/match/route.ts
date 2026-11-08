@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { supabase } from "@/lib/supabase"
+import { supabase, fetchAllRows } from "@/lib/supabase"
 import { resolveSeason } from "@/lib/seasons"
 import { fetchTeamData, TEAM_STAT_GROUPS, TEAM_RADAR_STATS } from "@/lib/teams"
 import { predictMatches, type MatchPrediction } from "@/lib/predictions"
@@ -22,13 +22,16 @@ export async function getMatchPrediction(eventId: number): Promise<MatchPredicti
   }
 
   const season = resolveSeason()
-  const [{ table, stats, xg }, { data: allMatchData }] = await Promise.all([
+  const [{ table, stats, xg }, allMatchData] = await Promise.all([
     fetchTeamData(supabase, season, ALL_STATS),
-    supabase
-      .from("matches")
-      .select("event_id, league, season, round, date, kickoff, home, home_id, away, away_id, status, home_goals, away_goals")
-      .eq("season", season)
-      .limit(2000),
+    fetchAllRows((from, to) =>
+      supabase
+        .from("matches")
+        .select("event_id, league, season, round, date, kickoff, home, home_id, away, away_id, status, home_goals, away_goals")
+        .eq("season", season)
+        .order("event_id", { ascending: true })
+        .range(from, to),
+    ),
   ])
 
   const allMatches = (allMatchData || []) as {
