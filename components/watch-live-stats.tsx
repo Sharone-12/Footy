@@ -212,7 +212,6 @@ export function WatchLiveStatsCard({ fixture, liveScore, summaryData }: WatchLiv
                   key={`h-goal-${idx}`}
                   className="flex items-center gap-1.5 text-[11px] text-white/80 justify-start sm:justify-center"
                 >
-                  <span className="text-[10px] select-none text-emerald-400">⚽</span>
                   <span className="font-semibold text-white/95 truncate max-w-[95px] sm:max-w-[130px]">
                     {g.player}
                   </span>
@@ -276,7 +275,6 @@ export function WatchLiveStatsCard({ fixture, liveScore, summaryData }: WatchLiv
                   key={`a-goal-${idx}`}
                   className="flex items-center gap-1.5 text-[11px] text-white/80 justify-end sm:justify-center"
                 >
-                  <span className="text-[10px] select-none text-emerald-400">⚽</span>
                   <span className="font-semibold text-white/95 truncate max-w-[95px] sm:max-w-[130px]">
                     {g.player}
                   </span>
