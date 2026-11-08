@@ -404,12 +404,14 @@ function computePowerRankings(
       const gapgRaw = (t.goals_against + PRIOR_GAPG * K) / (t.played + K)
       const xg = statValue(byKey.get(`${t.team}|${POWER_STAT.stat}`), POWER_STAT)
       // Goal difference alone let a leaky 3-2 side outrank a 1-0 one at the
-      // same margin, so defence is scored on its own as well.
+      // same margin, so defence is scored on its own as well. Its weight comes
+      // out of xG, never out of points: funding it from ppg put 8-point Bayern
+      // above 9-point Barcelona in the Champions League on xG alone.
       const score =
-        ppgPts(ppgRaw) * 0.45 +
+        ppgPts(ppgRaw) * 0.55 +
         gdPts(gdpgRaw) * 0.2 +
-        gaPts(gapgRaw) * 0.2 +
-        xgPts(xg) * 0.15
+        gaPts(gapgRaw) * 0.15 +
+        xgPts(xg) * 0.1
       return {
         team: t.team,
         league: t.league,
