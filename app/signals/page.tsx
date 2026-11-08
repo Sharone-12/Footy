@@ -138,25 +138,6 @@ const SIGNALS: Signal[] = [
     eligible: (p) => !isGk(p),
   },
   {
-    key: "chance_quality",
-    label: "Chance Quality",
-    hint: "How big the chances they create are",
-    formula: "big chances created ÷ key passes",
-    what: "Of all the passes a player plays that lead to a shot, the share that set up a genuine big chance.",
-    signifies: "High values = when they find someone, it's a real opening. Low values = plenty of shots created, mostly from distance or bad angles.",
-    why: "Creator Index rewards volume, so a player who feeds twelve half-chances a game outranks one who carves out three clear ones. This is the other half: not how many chances, but how good. The two boards disagreeing about a player is the interesting part.",
-    compute: (p) => {
-      const kp = n(p.key_passes_p90)
-      if (kp <= 0) return 0
-      return Math.min(100, (n(p.big_chances_created_p90) / kp) * 100)
-    },
-    fmt: (v) => `${v.toFixed(1)}%`,
-    fmtKey: "pct1",
-    higherIsBetter: true,
-    eligible: (p) => !isGk(p) && n(p.key_passes_p90) >= 2,
-    pool: "outfielders creating 2+ key passes per 90",
-  },
-  {
     key: "ball_winning_volume",
     label: "Ball-Winning Volume",
     hint: "Raw volume — reads position as much as skill",
