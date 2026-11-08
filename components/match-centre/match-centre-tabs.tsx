@@ -28,12 +28,14 @@ export type MatchCentreTabsProps = {
   fixture: LiveFixture
   liveScore?: LiveScore | null
   initialTab?: MatchCentreTab
+  onSummaryLoaded?: (data: MatchSummaryResponse) => void
 }
 
 export function MatchCentreTabs({
   fixture,
   liveScore,
   initialTab = "stats",
+  onSummaryLoaded,
 }: MatchCentreTabsProps) {
   const [activeTab, setActiveTab] = useState<MatchCentreTab>(initialTab)
 
@@ -87,9 +89,14 @@ export function MatchCentreTabs({
       }
     }
 
+    const handleSummaryUpdate = (data: MatchSummaryResponse) => {
+      setSummaryData(data)
+      onSummaryLoaded?.(data)
+    }
+
     // Initial load
     void Promise.all([
-      load<MatchSummaryResponse>("summary", setSummaryData, setIsLoadingSummary),
+      load<MatchSummaryResponse>("summary", handleSummaryUpdate, setIsLoadingSummary),
       load<MatchLineupsResponse>("lineups", setLineups, setIsLoadingLineups),
       load<LeagueTableResponse>("table", setTableData, setIsLoadingTable),
       load<H2HResponse>("h2h", setH2HData, setIsLoadingH2H),
@@ -97,7 +104,7 @@ export function MatchCentreTabs({
 
     // Continuous real-time polling every 4 seconds for instant live updates without manual reload
     const pollTimer = setInterval(() => {
-      void load<MatchSummaryResponse>("summary", setSummaryData)
+      void load<MatchSummaryResponse>("summary", handleSummaryUpdate)
       void load<LeagueTableResponse>("table", setTableData)
     }, 4_000)
 
@@ -105,7 +112,7 @@ export function MatchCentreTabs({
       ac.abort()
       clearInterval(pollTimer)
     }
-  }, [eid, fixtureId])
+  }, [eid, fixtureId, onSummaryLoaded])
 
   // Instant re-fetch trigger as soon as goal or period status changes in the live feed
   useEffect(() => {
@@ -117,7 +124,10 @@ export function MatchCentreTabs({
     fetch(`/api/livescores/summary?${param}`, { cache: "no-store" })
       .then((res) => (res.ok ? res.json() : null))
       .then((data: MatchSummaryResponse | null) => {
-        if (data && data.incidents) setSummaryData(data)
+        if (data && data.incidents) {
+          setSummaryData(data)
+          onSummaryLoaded?.(data)
+        }
       })
       .catch(() => {})
 
@@ -127,7 +137,7 @@ export function MatchCentreTabs({
         if (data && data.rows && data.rows.length > 0) setTableData(data)
       })
       .catch(() => {})
-  }, [liveScore?.homeGoals, liveScore?.awayGoals, liveScore?.status, eid, fixtureId])
+  }, [liveScore?.homeGoals, liveScore?.awayGoals, liveScore?.status, eid, fixtureId, onSummaryLoaded])
 
   return (
     <section aria-label="Match Centre Live Data" className="flex flex-col gap-3">

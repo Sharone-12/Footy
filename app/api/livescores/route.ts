@@ -83,7 +83,7 @@ export async function GET() {
   }
 
   return NextResponse.json(
-    { at: snapshot!.at, scores: snapshot!.scores },
+    { at: snapshot!.at, scores: snapshot!.scores, final: snapshot!.final },
     { headers: { "Cache-Control": "public, s-maxage=15, stale-while-revalidate=60" } },
   )
 }

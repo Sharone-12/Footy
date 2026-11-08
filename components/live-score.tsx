@@ -21,6 +21,7 @@ const TEARDOWN_DELAY_MS = 10_000
 
 type Snapshot = {
   scores: LiveScore[]
+  final: LiveScore[]
   activeStreamIds: Set<number>
   now: number
   hasLoadedScores: boolean
@@ -29,6 +30,7 @@ type Snapshot = {
 
 let snapshot: Snapshot = {
   scores: [],
+  final: [],
   activeStreamIds: new Set(),
   now: Date.now(),
   hasLoadedScores: false,
@@ -50,9 +52,14 @@ async function pollScores() {
   try {
     const res = await fetch("/api/livescores")
     if (!res.ok) return
-    const body = (await res.json()) as { scores?: LiveScore[] }
+    const body = (await res.json()) as { scores?: LiveScore[]; final?: LiveScore[] }
     if (Array.isArray(body.scores)) {
-      publish({ scores: body.scores, now: Date.now(), hasLoadedScores: true })
+      publish({
+        scores: body.scores,
+        final: Array.isArray(body.final) ? body.final : [],
+        now: Date.now(),
+        hasLoadedScores: true,
+      })
       syncTick()
     }
   } catch {
@@ -151,6 +158,7 @@ const EMPTY_SCORES: LiveScore[] = []
 const EMPTY_IDS: Set<number> = new Set()
 
 const getScores = () => snapshot.scores
+const getFinalScores = () => snapshot.final
 const getServerScores = () => EMPTY_SCORES
 const getStreamIds = () => snapshot.activeStreamIds
 const getServerStreamIds = () => EMPTY_IDS
@@ -160,6 +168,12 @@ const getServerNow = () => 0
 export function useLiveScore(fixture: FixtureLike): LiveScore | null {
   const scores = useSyncExternalStore(subscribe, getScores, getServerScores)
   return findLive(fixture, scores)
+}
+
+export function useFinalScore(fixture?: FixtureLike | null): LiveScore | null {
+  const finalScores = useSyncExternalStore(subscribe, getFinalScores, getServerScores)
+  if (!fixture) return null
+  return findLive(fixture, finalScores)
 }
 
 /** Check if a fixture currently has an active confirmed live stream. */

@@ -53,10 +53,11 @@ import {
   type StreamBundle,
 } from "@/lib/streaming/resolve"
 import { formatKickoffIST, formatTimeIST, formatDateIST } from "@/lib/time"
-import { useLiveScore, useLiveNow } from "@/components/live-score"
+import { useLiveScore, useFinalScore, useLiveNow } from "@/components/live-score"
 import { matchClock } from "@/lib/livescores"
 import type { MatchPrediction } from "@/lib/predictions"
 import { MatchCentreTabs } from "@/components/match-centre/match-centre-tabs"
+import type { MatchSummaryResponse } from "@/app/api/livescores/summary/route"
 
 export type WatchStudioProps = {
   fixture: LiveFixture | null
@@ -295,9 +296,13 @@ export function WatchStudio({
     return () => clearInterval(t)
   }, [])
 
+  // Match summary response from LiveScore (incidents, status, referee, stadium)
+  const [studioSummary, setStudioSummary] = useState<MatchSummaryResponse | null>(null)
+
   // Live match score & running clock from live feed
   const dummyFixture = useMemo(() => ({ home: "", away: "", date: "" }), [])
   const liveScore = useLiveScore(fixture ?? dummyFixture)
+  const finalScore = useFinalScore(fixture ?? dummyFixture)
   const liveNow = useLiveNow()
   const liveClock = liveScore ? matchClock(liveScore, liveNow) : null
 
@@ -307,25 +312,66 @@ export function WatchStudio({
     return new Date(fixture.kickoff).getTime()
   }, [fixture?.kickoff])
 
-  const isLiveNow = useMemo(() => {
-    if (!kickoffMs) return false
-    // Match is within 115 minutes from kickoff
-    return now >= kickoffMs && now <= kickoffMs + 115 * 60_000
-  }, [kickoffMs, now])
-
   const isUpcoming = useMemo(() => {
     if (!kickoffMs) return false
     return now < kickoffMs
   }, [kickoffMs, now])
 
-  // Stream broadcast window: streams unlock and are fetched 15 minutes before kickoff through match finish
+  // Is match finished / full time reached
+  const isMatchFinished = useMemo(() => {
+    // 1. Direct status from database/fixture record
+    const fixStatus = (fixture?.status || "").toUpperCase()
+    if (["FT", "FINISHED", "AET", "AP", "AOT", "POSTP", "CANC", "ABD"].includes(fixStatus)) {
+      return true
+    }
+
+    // 2. Score feed status (from live score or settled final scores)
+    const liveStatus = (liveScore?.status || "").toUpperCase()
+    if (["FT", "FINISHED", "AET", "AP", "AOT"].includes(liveStatus)) {
+      return true
+    }
+    if (finalScore != null) {
+      return true
+    }
+
+    // 3. Status reported directly from livescore summary route
+    const summaryStatus = (studioSummary?.status || "").toUpperCase()
+    if (["FT", "FINISHED", "AET", "AP", "AOT"].includes(summaryStatus)) {
+      return true
+    }
+
+    // 4. Elapsed time check: If match kicked off > 125 mins ago and no live feed is running
+    if (kickoffMs && now >= kickoffMs + 125 * 60_000 && !liveScore) {
+      return true
+    }
+
+    return false
+  }, [fixture?.status, liveScore, finalScore, studioSummary?.status, kickoffMs, now])
+
+  const isLiveNow = useMemo(() => {
+    if (isMatchFinished) return false
+    if (liveScore != null) return true
+    if (!kickoffMs) return false
+    return now >= kickoffMs && now <= kickoffMs + 115 * 60_000
+  }, [isMatchFinished, kickoffMs, liveScore, now])
+
+  // Stream broadcast window: streams unlock and are fetched 15 minutes before kickoff through 15 minutes post-whistle
   const isStreamWindowOpen = useMemo(() => {
     if (initialChannelId) return true // direct 24/7 channel requested
     if (!kickoffMs) return true // no exact kickoff, allow streams
     if (liveScore != null) return true // match is actively in-play in live feed
-    if (now >= kickoffMs) return now <= kickoffMs + 120 * 60_000 // live playing window
+
+    // If match is finished, keep window open up to 15 minutes post-whistle (e.g. 125m after kickoff)
+    if (isMatchFinished) {
+      if (kickoffMs && now <= kickoffMs + 125 * 60_000) {
+        return true
+      }
+      return false
+    }
+
+    if (now >= kickoffMs) return now <= kickoffMs + 125 * 60_000 // live playing window
     return kickoffMs - now <= 15 * 60_000 // within 15 minutes before kickoff
-  }, [initialChannelId, kickoffMs, liveScore, now])
+  }, [initialChannelId, isMatchFinished, kickoffMs, liveScore, now])
 
   // Fetch streams for fixture
   useEffect(() => {
@@ -707,8 +753,18 @@ export function WatchStudio({
 
       {/* 2. MATCH INFORMATION HEADER CARD (Compacted Hero Header) */}
       {fixture && (() => {
-        const homeScore = liveScore?.homeGoals ?? fixture.home_goals ?? null
-        const awayScore = liveScore?.awayGoals ?? fixture.away_goals ?? null
+        const homeScore =
+          liveScore?.homeGoals ??
+          finalScore?.homeGoals ??
+          studioSummary?.scores?.ft?.[0] ??
+          fixture.home_goals ??
+          null
+        const awayScore =
+          liveScore?.awayGoals ??
+          finalScore?.awayGoals ??
+          studioSummary?.scores?.ft?.[1] ??
+          fixture.away_goals ??
+          null
         const hasScore = homeScore != null && awayScore != null
         return (
           <section
@@ -777,7 +833,7 @@ export function WatchStudio({
                           </div>
                         </div>
                       )}
-                      {liveClock && (
+                      {liveClock ? (
                         <div className="flex items-center gap-1 px-2.5 border-l border-white/10 bg-[var(--pitch)]/10">
                           <span className="relative flex size-1.5">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--pitch)] opacity-75 motion-reduce:hidden" />
@@ -787,7 +843,13 @@ export function WatchStudio({
                             {liveClock.display}
                           </span>
                         </div>
-                      )}
+                      ) : isMatchFinished ? (
+                        <div className="flex items-center gap-1 px-2.5 border-l border-white/10 bg-white/5">
+                          <span className="font-mono font-bold text-[10px] sm:text-[11px] uppercase tracking-wider text-white/70 leading-none">
+                            FT
+                          </span>
+                        </div>
+                      ) : null}
                     </div>
                   ) : (
                     <span
@@ -976,66 +1038,97 @@ export function WatchStudio({
               )}
 
               {/* 2. NO STREAMS / OFFLINE / PRE-MATCH WINDOW STATE */}
-              {!isBundleLoading && !currentSource && (
-                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 bg-black/95 text-center">
-                  <div className="size-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-muted-foreground">
-                    {!isStreamWindowOpen ? (
-                      <ClockIcon className="size-7 text-[var(--pitch)]" />
-                    ) : (
-                      <AlertCircleIcon className="size-7 text-amber-400" />
+              {!isBundleLoading && !currentSource && (() => {
+                const homeScore =
+                  liveScore?.homeGoals ??
+                  finalScore?.homeGoals ??
+                  studioSummary?.scores?.ft?.[0] ??
+                  fixture?.home_goals ??
+                  null
+                const awayScore =
+                  liveScore?.awayGoals ??
+                  finalScore?.awayGoals ??
+                  studioSummary?.scores?.ft?.[1] ??
+                  fixture?.away_goals ??
+                  null
+                const hasScore = homeScore != null && awayScore != null
+
+                return (
+                  <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 bg-black/95 text-center">
+                    <div className="size-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-muted-foreground">
+                      {isMatchFinished ? (
+                        <CheckCircle2Icon className="size-7 text-[var(--pitch)]" />
+                      ) : isUpcoming && !isStreamWindowOpen ? (
+                        <ClockIcon className="size-7 text-[var(--pitch)]" />
+                      ) : (
+                        <AlertCircleIcon className="size-7 text-amber-400" />
+                      )}
+                    </div>
+                    <h3
+                      className="text-xl font-bold uppercase tracking-tight text-foreground"
+                      style={{ fontFamily: "var(--font-condensed)" }}
+                    >
+                      {isMatchFinished
+                        ? "MATCH CONCLUDED · BROADCAST ENDED"
+                        : isUpcoming && !isStreamWindowOpen
+                        ? "STREAMS UNLOCK 15 MINUTES BEFORE KICKOFF"
+                        : isUpcoming
+                        ? "STREAM STARTING SOON"
+                        : "STREAM CURRENTLY UNAVAILABLE"}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 max-w-md">
+                      {isMatchFinished
+                        ? hasScore
+                          ? `The live broadcast for ${fixture?.home} vs ${fixture?.away} has ended. Final score: ${homeScore} – ${awayScore}.`
+                          : `The live broadcast for ${fixture?.home} vs ${fixture?.away} has ended.`
+                        : isUpcoming && !isStreamWindowOpen
+                        ? `Live video broadcasts for ${fixture?.home} vs ${fixture?.away} activate and load automatically 15 minutes prior to match kickoff.`
+                        : isUpcoming
+                        ? `Coverage for ${fixture?.home} vs ${fixture?.away} is preparing to air. Verified feeds will connect momentarily.`
+                        : "No verified broadcast feed has been opened yet by our streaming providers for this fixture."}
+                    </p>
+
+                    {!isMatchFinished && isUpcoming && kickoffMs && (
+                      <div className="mt-4 px-4 py-2 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-2">
+                        <ClockIcon className="size-4 text-[var(--pitch)]" />
+                        <span className="text-xs text-muted-foreground">
+                          {!isStreamWindowOpen ? "Streams Unlock In:" : "Scheduled Kickoff In:"}
+                        </span>
+                        <span className="font-mono text-xs font-bold text-foreground">
+                          {formatCountdown(!isStreamWindowOpen ? kickoffMs - 15 * 60_000 : kickoffMs, now)}
+                        </span>
+                      </div>
+                    )}
+
+                    {isMatchFinished && (
+                      <div className="mt-3.5 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs text-muted-foreground">
+                        <span className="size-2 rounded-full bg-[var(--pitch)]/70" />
+                        <span>Full Time reached · Live match coverage has concluded</span>
+                      </div>
+                    )}
+
+                    {genericChannels.length > 0 && (
+                      <div className="mt-6 flex flex-col items-center">
+                        <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
+                          Or Watch 24/7 Football Broadcasters:
+                        </span>
+                        <div className="flex flex-wrap items-center justify-center gap-2 max-w-lg">
+                          {genericChannels.slice(0, 4).map((ch) => (
+                            <button
+                              key={ch.id}
+                              type="button"
+                              onClick={() => selectSource("zlive", `zlive:${ch.id}`)}
+                              className="px-3 py-1 rounded-xl bg-card border border-border/80 hover:border-[var(--pitch)] hover:text-[var(--pitch)] text-xs font-semibold transition-all"
+                            >
+                              {ch.name}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     )}
                   </div>
-                  <h3
-                    className="text-xl font-bold uppercase tracking-tight text-foreground"
-                    style={{ fontFamily: "var(--font-condensed)" }}
-                  >
-                    {!isStreamWindowOpen
-                      ? "STREAMS UNLOCK 15 MINUTES BEFORE KICKOFF"
-                      : isUpcoming
-                      ? "STREAM STARTING SOON"
-                      : "STREAM CURRENTLY UNAVAILABLE"}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 max-w-md">
-                    {!isStreamWindowOpen
-                      ? `Live video broadcasts for ${fixture?.home} vs ${fixture?.away} activate and load automatically 15 minutes prior to match kickoff.`
-                      : isUpcoming
-                      ? `Coverage for ${fixture?.home} vs ${fixture?.away} is preparing to air. Verified feeds will connect momentarily.`
-                      : "No verified broadcast feed has been opened yet by our streaming providers for this fixture."}
-                  </p>
-
-                  {isUpcoming && kickoffMs && (
-                    <div className="mt-4 px-4 py-2 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-2">
-                      <ClockIcon className="size-4 text-[var(--pitch)]" />
-                      <span className="text-xs text-muted-foreground">
-                        {!isStreamWindowOpen ? "Streams Unlock In:" : "Scheduled Kickoff In:"}
-                      </span>
-                      <span className="font-mono text-xs font-bold text-foreground">
-                        {formatCountdown(!isStreamWindowOpen ? kickoffMs - 15 * 60_000 : kickoffMs, now)}
-                      </span>
-                    </div>
-                  )}
-
-                  {genericChannels.length > 0 && (
-                    <div className="mt-6 flex flex-col items-center">
-                      <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
-                        Or Watch 24/7 Football Broadcasters:
-                      </span>
-                      <div className="flex flex-wrap items-center justify-center gap-2 max-w-lg">
-                        {genericChannels.slice(0, 4).map((ch) => (
-                          <button
-                            key={ch.id}
-                            type="button"
-                            onClick={() => selectSource("zlive", `zlive:${ch.id}`)}
-                            className="px-3 py-1 rounded-xl bg-card border border-border/80 hover:border-[var(--pitch)] hover:text-[var(--pitch)] text-xs font-semibold transition-all"
-                          >
-                            {ch.name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+                )
+              })()}
 
               {/* 3. ACTIVE IFRAME STREAM PLAYER */}
               {isLeaving && (
@@ -1192,7 +1285,11 @@ export function WatchStudio({
 
           {/* 1. Live Match Centre (Stats, Line-ups on Pitch with Player Faces, Table with Active Highlights, H2H History) */}
           {fixture && (
-            <MatchCentreTabs fixture={fixture} liveScore={liveScore} />
+            <MatchCentreTabs
+              fixture={fixture}
+              liveScore={liveScore}
+              onSummaryLoaded={setStudioSummary}
+            />
           )}
 
           {/* 2. Win Probability Card Pushed Below Live Match Stats */}
