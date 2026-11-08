@@ -1402,11 +1402,11 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 14167948,Ligue 1,2025/26,28,2026-04-05,AS Monaco,1653,Olympique de Marseille,1641,finished,2.0,1.0,2026-04-05T18:45:00Z
 14167962,Ligue 1,2025/26,29,2026-04-10,Paris FC,6070,AS Monaco,1653,finished,4.0,1.0,2026-04-10T17:00:00Z
 14167957,Ligue 1,2025/26,29,2026-04-10,Olympique de Marseille,1641,Metz,1651,finished,3.0,1.0,2026-04-10T19:05:00Z
-14167964,Ligue 1,2025/26,29,2026-04-11,Auxerre,1646,Nantes,1647,finished,0.0,0.0,2026-04-11T17:00:00Z
+14167964,Ligue 1,2025/26,29,2026-04-11,AJ Auxerre,1646,Nantes,1647,finished,0.0,0.0,2026-04-11T17:00:00Z
 14167959,Ligue 1,2025/26,29,2026-04-11,Stade Rennais,1658,Angers,1684,finished,2.0,1.0,2026-04-11T19:05:00Z
-14167960,Ligue 1,2025/26,29,2026-04-12,Nice,1661,Le Havre,1662,finished,1.0,1.0,2026-04-12T15:15:00Z
+14167960,Ligue 1,2025/26,29,2026-04-12,OGC Nice,1661,Le Havre,1662,finished,1.0,1.0,2026-04-12T15:15:00Z
 14167961,Ligue 1,2025/26,29,2026-04-12,Stade Brestois,1715,RC Strasbourg,1659,postponed,,,2026-04-12T15:15:00Z
-14167963,Ligue 1,2025/26,29,2026-04-12,Toulouse,1681,Lille,1643,finished,0.0,4.0,2026-04-12T15:15:00Z
+14167963,Ligue 1,2025/26,29,2026-04-12,Toulouse,1681,LOSC Lille,1643,finished,0.0,4.0,2026-04-12T15:15:00Z
 14167958,Ligue 1,2025/26,29,2026-04-12,Olympique Lyonnais,1649,Lorient,1656,finished,2.0,0.0,2026-04-12T18:45:00Z
 15889322,Ligue 1,2025/26,29,2026-05-13,Stade Brestois,1715,RC Strasbourg,1659,finished,1.0,2.0,2026-05-13T17:00:00Z
 15889331,Ligue 1,2025/26,29,2026-05-13,RC Lens,1648,Paris Saint-Germain,1644,finished,0.0,2.0,2026-05-13T19:00:00Z
@@ -1446,10 +1446,10 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 14064510,Ligue 1,2025/26,33,2026-05-10,Paris Saint-Germain,1644,Stade Brestois,1715,finished,1.0,0.0,2026-05-10T19:00:00Z
 14064513,Ligue 1,2025/26,33,2026-05-10,Stade Rennais,1658,Paris FC,6070,finished,2.0,1.0,2026-05-10T19:00:00Z
 14064515,Ligue 1,2025/26,33,2026-05-10,Toulouse,1681,Olympique Lyonnais,1649,finished,2.0,1.0,2026-05-10T19:00:00Z
-14061906,Ligue 1,2025/26,34,2026-05-17,Lille,1643,Auxerre,1646,finished,0.0,2.0,2026-05-17T19:00:00Z
+14061906,Ligue 1,2025/26,34,2026-05-17,LOSC Lille,1643,AJ Auxerre,1646,finished,0.0,2.0,2026-05-17T19:00:00Z
 14061904,Ligue 1,2025/26,34,2026-05-17,Lorient,1656,Le Havre,1662,finished,0.0,2.0,2026-05-17T19:00:00Z
 14061912,Ligue 1,2025/26,34,2026-05-17,Nantes,1647,Toulouse,1681,canceled,,,2026-05-17T19:00:00Z
-14061909,Ligue 1,2025/26,34,2026-05-17,Nice,1661,Metz,1651,finished,0.0,0.0,2026-05-17T19:00:00Z
+14061909,Ligue 1,2025/26,34,2026-05-17,OGC Nice,1661,Metz,1651,finished,0.0,0.0,2026-05-17T19:00:00Z
 14061911,Ligue 1,2025/26,34,2026-05-17,Olympique Lyonnais,1649,RC Lens,1648,finished,0.0,4.0,2026-05-17T19:00:00Z
 14061907,Ligue 1,2025/26,34,2026-05-17,Olympique de Marseille,1641,Stade Rennais,1658,finished,3.0,1.0,2026-05-17T19:00:00Z
 14061910,Ligue 1,2025/26,34,2026-05-17,Paris FC,6070,Paris Saint-Germain,1644,finished,2.0,1.0,2026-05-17T19:00:00Z
