@@ -7,10 +7,12 @@ import type { LiveFixture } from "@/components/live-sections"
 import { useLiveNow } from "@/components/live-score"
 import { matchClock, type LiveScore } from "@/lib/livescores"
 import type { LiveMatchStatsResponse } from "@/app/api/livescores/stats/route"
+import type { MatchSummaryResponse, MatchIncident } from "@/app/api/livescores/summary/route"
 
 export type WatchLiveStatsProps = {
   fixture: LiveFixture
   liveScore?: LiveScore | null
+  summaryData?: MatchSummaryResponse | null
 }
 
 function StatRow({
@@ -100,13 +102,16 @@ function StatRow({
   )
 }
 
-export function WatchLiveStatsCard({ fixture, liveScore }: WatchLiveStatsProps) {
+export function WatchLiveStatsCard({ fixture, liveScore, summaryData }: WatchLiveStatsProps) {
   const [stats, setStats] = useState<LiveMatchStatsResponse | null>(null)
+  const [localSummary, setLocalSummary] = useState<MatchSummaryResponse | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const pollTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const liveNow = useLiveNow()
   const liveClock = liveScore ? matchClock(liveScore, liveNow) : null
+
+  const effectiveSummary = summaryData ?? localSummary
 
   const eid = liveScore?.id || null
   const fixtureId = fixture?.event_id || null
@@ -121,12 +126,19 @@ export function WatchLiveStatsCard({ fixture, liveScore }: WatchLiveStatsProps) 
 
     try {
       const param = eid ? `eid=${encodeURIComponent(eid)}` : `fixture_id=${encodeURIComponent(fixtureId!)}`
-      const res = await fetch(`/api/livescores/stats?${param}`)
-      if (res.ok) {
-        const data = (await res.json()) as LiveMatchStatsResponse
+      const [resStats, resSummary] = await Promise.all([
+        fetch(`/api/livescores/stats?${param}`),
+        !summaryData ? fetch(`/api/livescores/summary?${param}`).catch(() => null) : Promise.resolve(null),
+      ])
+      if (resStats.ok) {
+        const data = (await resStats.json()) as LiveMatchStatsResponse
         if (data && data.hasStats) {
           setStats(data)
         }
+      }
+      if (resSummary && resSummary.ok) {
+        const sumData = (await resSummary.json()) as MatchSummaryResponse
+        if (sumData) setLocalSummary(sumData)
       }
     } catch {
       // Retain existing stats on network blip
@@ -157,15 +169,25 @@ export function WatchLiveStatsCard({ fixture, liveScore }: WatchLiveStatsProps) 
   const home = stats?.home
   const away = stats?.away
 
+  const isGoal = (i: MatchIncident) =>
+    i.type === "goal" || i.type === "penalty" || i.type === "own-goal"
+
+  const homeGoals = (effectiveSummary?.incidents || []).filter(
+    (i) => isGoal(i) && i.team === "home",
+  )
+  const awayGoals = (effectiveSummary?.incidents || []).filter(
+    (i) => isGoal(i) && i.team === "away",
+  )
+
   return (
     <section
       aria-label="Live Match Detailed Stats"
       className="surface rounded-2xl bg-card p-3.5 sm:p-4 md:p-5 border border-border/70 shadow-sm transition-all animate-fade-in"
     >
       {/* Big Team Crests directly over their side & numbers */}
-      <div className="grid grid-cols-3 items-center pt-2 pb-5 px-3 mb-3 border-b border-white/10 select-none">
+      <div className="grid grid-cols-3 items-start pt-2 pb-5 px-3 mb-3 border-b border-white/10 select-none">
         {/* Home Team & Crest directly over left numbers */}
-        <div className="flex flex-col items-start sm:items-center text-left sm:text-center gap-2 min-w-0">
+        <div className="flex flex-col items-start sm:items-center text-left sm:text-center gap-1.5 min-w-0">
           {fixture.home_id ? (
             <TeamCrest
               teamId={fixture.home_id}
@@ -181,10 +203,31 @@ export function WatchLiveStatsCard({ fixture, liveScore }: WatchLiveStatsProps) 
           <span className="font-bold text-xs sm:text-sm text-white max-w-[130px] sm:max-w-[180px] truncate leading-tight">
             {fixture.home}
           </span>
+
+          {/* Home Scorers directly below crest and name */}
+          {homeGoals.length > 0 && (
+            <div className="flex flex-col gap-1 mt-1 text-left sm:text-center w-full">
+              {homeGoals.map((g, idx) => (
+                <div
+                  key={`h-goal-${idx}`}
+                  className="flex items-center gap-1.5 text-[11px] text-white/80 justify-start sm:justify-center"
+                >
+                  <span className="text-[10px] select-none text-emerald-400">⚽</span>
+                  <span className="font-semibold text-white/95 truncate max-w-[95px] sm:max-w-[130px]">
+                    {g.player}
+                  </span>
+                  <span className="text-[10px] text-white/45 font-mono">
+                    {g.minDisplay}
+                    {g.type === "penalty" ? " (P)" : g.type === "own-goal" ? " (OG)" : ""}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Center: Live Scoreline & Time */}
-        <div className="flex flex-col items-center justify-center text-center">
+        <div className="flex flex-col items-center justify-center text-center pt-2">
           <div className="font-mono font-black text-2xl sm:text-3xl tracking-wider text-white tabular-nums drop-shadow-md">
             <span>{liveScore?.homeGoals ?? 0}</span>
             <span className="text-white/30 mx-2">-</span>
@@ -208,7 +251,7 @@ export function WatchLiveStatsCard({ fixture, liveScore }: WatchLiveStatsProps) 
         </div>
 
         {/* Away Team & Crest directly over right numbers */}
-        <div className="flex flex-col items-end sm:items-center text-right sm:text-center gap-2 min-w-0">
+        <div className="flex flex-col items-end sm:items-center text-right sm:text-center gap-1.5 min-w-0">
           {fixture.away_id ? (
             <TeamCrest
               teamId={fixture.away_id}
@@ -224,6 +267,27 @@ export function WatchLiveStatsCard({ fixture, liveScore }: WatchLiveStatsProps) 
           <span className="font-bold text-xs sm:text-sm text-white max-w-[130px] sm:max-w-[180px] truncate leading-tight">
             {fixture.away}
           </span>
+
+          {/* Away Scorers directly below crest and name */}
+          {awayGoals.length > 0 && (
+            <div className="flex flex-col gap-1 mt-1 text-right sm:text-center w-full">
+              {awayGoals.map((g, idx) => (
+                <div
+                  key={`a-goal-${idx}`}
+                  className="flex items-center gap-1.5 text-[11px] text-white/80 justify-end sm:justify-center"
+                >
+                  <span className="text-[10px] select-none text-emerald-400">⚽</span>
+                  <span className="font-semibold text-white/95 truncate max-w-[95px] sm:max-w-[130px]">
+                    {g.player}
+                  </span>
+                  <span className="text-[10px] text-white/45 font-mono">
+                    {g.minDisplay}
+                    {g.type === "penalty" ? " (P)" : g.type === "own-goal" ? " (OG)" : ""}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

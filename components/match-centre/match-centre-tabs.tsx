@@ -201,7 +201,7 @@ export function MatchCentreTabs({
             poll, so unmounting threw those away and every return to the tab
             restarted from a spinner. */}
         <div className={activeTab === "stats" ? undefined : "hidden"}>
-          <WatchLiveStatsCard fixture={fixture} liveScore={liveScore} />
+          <WatchLiveStatsCard fixture={fixture} liveScore={liveScore} summaryData={summaryData} />
         </div>
 
         {activeTab === "lineups" && (
