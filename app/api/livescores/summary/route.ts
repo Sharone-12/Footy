@@ -3,7 +3,7 @@ import { resolveLiveScoreEvent, fetchScoreboard } from "@/lib/livescores-resolve
 
 const INCIDENTS_API = "https://prod-public-api.livescore.com/v1/api/app/incidents/soccer"
 const INFO_API = "https://prod-public-api.livescore.com/v1/api/app/info/soccer"
-const CACHE_TTL_MS = 15_000
+const CACHE_TTL_MS = 2_000
 
 type CachedSummary = {
   timestamp: number
@@ -84,7 +84,7 @@ export async function GET(request: Request) {
   const cached = summaryCache.get(eid)
   if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
     return NextResponse.json(cached.data, {
-      headers: { "Cache-Control": "public, s-maxage=15, stale-while-revalidate=30" },
+      headers: { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" },
     })
   }
 
@@ -96,7 +96,7 @@ export async function GET(request: Request) {
           "User-Agent":
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         },
-        next: { revalidate: 15 },
+        cache: "no-store",
       }).catch(() => null),
       fetch(`${INFO_API}/${encodeURIComponent(eid)}`, {
         headers: {
@@ -104,7 +104,7 @@ export async function GET(request: Request) {
           "User-Agent":
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         },
-        next: { revalidate: 60 },
+        cache: "no-store",
       }).catch(() => null),
       fetchScoreboard(eid),
     ])
@@ -276,7 +276,7 @@ export async function GET(request: Request) {
     summaryCache.set(eid, { timestamp: Date.now(), data: payload })
 
     return NextResponse.json(payload, {
-      headers: { "Cache-Control": "public, s-maxage=15, stale-while-revalidate=30" },
+      headers: { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" },
     })
   } catch (err) {
     console.error(`[livescores/summary] Error processing eid ${eid}:`, err)

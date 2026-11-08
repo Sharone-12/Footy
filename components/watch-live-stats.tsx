@@ -111,7 +111,11 @@ export function WatchLiveStatsCard({ fixture, liveScore, summaryData }: WatchLiv
   const liveNow = useLiveNow()
   const liveClock = liveScore ? matchClock(liveScore, liveNow) : null
 
-  const effectiveSummary = summaryData ?? localSummary
+  // Prefer whichever has more incidents or latest data
+  const effectiveSummary =
+    (localSummary?.incidents?.length ?? 0) >= (summaryData?.incidents?.length ?? 0)
+      ? localSummary ?? summaryData
+      : summaryData ?? localSummary
 
   const eid = liveScore?.id || null
   const fixtureId = fixture?.event_id || null
@@ -127,8 +131,8 @@ export function WatchLiveStatsCard({ fixture, liveScore, summaryData }: WatchLiv
     try {
       const param = eid ? `eid=${encodeURIComponent(eid)}` : `fixture_id=${encodeURIComponent(fixtureId!)}`
       const [resStats, resSummary] = await Promise.all([
-        fetch(`/api/livescores/stats?${param}`),
-        !summaryData ? fetch(`/api/livescores/summary?${param}`).catch(() => null) : Promise.resolve(null),
+        fetch(`/api/livescores/stats?${param}`, { cache: "no-store" }),
+        fetch(`/api/livescores/summary?${param}`, { cache: "no-store" }).catch(() => null),
       ])
       if (resStats.ok) {
         const data = (await resStats.json()) as LiveMatchStatsResponse
@@ -138,7 +142,9 @@ export function WatchLiveStatsCard({ fixture, liveScore, summaryData }: WatchLiv
       }
       if (resSummary && resSummary.ok) {
         const sumData = (await resSummary.json()) as MatchSummaryResponse
-        if (sumData) setLocalSummary(sumData)
+        if (sumData && sumData.incidents) {
+          setLocalSummary(sumData)
+        }
       }
     } catch {
       // Retain existing stats on network blip
@@ -148,13 +154,18 @@ export function WatchLiveStatsCard({ fixture, liveScore, summaryData }: WatchLiv
     }
   }
 
+  // Instant trigger when a goal or status changes from the live feed
+  useEffect(() => {
+    fetchStats()
+  }, [liveScore?.homeGoals, liveScore?.awayGoals, liveScore?.status])
+
   useEffect(() => {
     fetchStats()
 
-    // Poll every 15 seconds during live match
+    // Real-time polling every 4 seconds during live match for instant throughput
     pollTimerRef.current = setInterval(() => {
       fetchStats()
-    }, 15_000)
+    }, 4_000)
 
     return () => {
       if (pollTimerRef.current) clearInterval(pollTimerRef.current)

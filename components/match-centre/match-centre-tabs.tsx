@@ -68,11 +68,14 @@ export function MatchCentreTabs({
     const load = async <T,>(
       path: string,
       setData: (v: T) => void,
-      setLoading: (v: boolean) => void,
+      setLoading?: (v: boolean) => void,
     ) => {
-      setLoading(true)
+      if (setLoading) setLoading(true)
       try {
-        const res = await fetch(`/api/livescores/${path}?${param}`, { signal: ac.signal })
+        const res = await fetch(`/api/livescores/${path}?${param}`, {
+          signal: ac.signal,
+          cache: "no-store",
+        })
         if (res.ok) {
           const data = (await res.json()) as T
           if (data) setData(data)
@@ -80,10 +83,11 @@ export function MatchCentreTabs({
       } catch {
         // Aborted on unmount, or provider is down
       } finally {
-        if (!ac.signal.aborted) setLoading(false)
+        if (!ac.signal.aborted && setLoading) setLoading(false)
       }
     }
 
+    // Initial load
     void Promise.all([
       load<MatchSummaryResponse>("summary", setSummaryData, setIsLoadingSummary),
       load<MatchLineupsResponse>("lineups", setLineups, setIsLoadingLineups),
@@ -91,8 +95,39 @@ export function MatchCentreTabs({
       load<H2HResponse>("h2h", setH2HData, setIsLoadingH2H),
     ])
 
-    return () => ac.abort()
+    // Continuous real-time polling every 4 seconds for instant live updates without manual reload
+    const pollTimer = setInterval(() => {
+      void load<MatchSummaryResponse>("summary", setSummaryData)
+      void load<LeagueTableResponse>("table", setTableData)
+    }, 4_000)
+
+    return () => {
+      ac.abort()
+      clearInterval(pollTimer)
+    }
   }, [eid, fixtureId])
+
+  // Instant re-fetch trigger as soon as goal or period status changes in the live feed
+  useEffect(() => {
+    if (!eid && !fixtureId) return
+    const param = eid
+      ? `eid=${encodeURIComponent(eid)}`
+      : `fixture_id=${encodeURIComponent(fixtureId)}`
+
+    fetch(`/api/livescores/summary?${param}`, { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: MatchSummaryResponse | null) => {
+        if (data && data.incidents) setSummaryData(data)
+      })
+      .catch(() => {})
+
+    fetch(`/api/livescores/table?${param}`, { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: LeagueTableResponse | null) => {
+        if (data && data.rows && data.rows.length > 0) setTableData(data)
+      })
+      .catch(() => {})
+  }, [liveScore?.homeGoals, liveScore?.awayGoals, liveScore?.status, eid, fixtureId])
 
   return (
     <section aria-label="Match Centre Live Data" className="flex flex-col gap-3">

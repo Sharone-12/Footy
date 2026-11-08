@@ -16,7 +16,7 @@ export type ResolvedMatchEvent = {
 
 const SCOREBOARD_API = "https://prod-public-api.livescore.com/v1/api/app/scoreboard/soccer"
 const scoreboardCache = new Map<string, { timestamp: number; data: any }>()
-const CACHE_TTL_MS = 30_000
+const CACHE_TTL_MS = 2_000
 
 export async function fetchScoreboard(eid: string): Promise<any | null> {
   const cached = scoreboardCache.get(eid)
@@ -31,7 +31,7 @@ export async function fetchScoreboard(eid: string): Promise<any | null> {
         "User-Agent":
           "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
       },
-      next: { revalidate: 30 },
+      cache: "no-store",
     })
 
     if (!res.ok) return null
