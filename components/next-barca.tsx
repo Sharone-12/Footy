@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { BARCA_ID, LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
@@ -40,14 +40,6 @@ function parts(ms: number) {
 }
 
 const pad = (n: number) => String(n).padStart(2, "0")
-
-// Pre-kickoff provider discovery, hung off the clock this component already
-// runs rather than a second scheduler. At T-5 the providers are queried and
-// the answer cached server-side, so opening /squad/stream is instant; the
-// T-1 repeat catches providers that only publish a stream near kickoff.
-// Discovery, metadata, matching and the embed check are one server round
-// trip, so they do not need a tick each.
-const DISCOVER_AT_MS = [5 * 60_000, 60_000]
 
 export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
   // Starts null and fills on mount: the server has no live clock to pick a
@@ -115,26 +107,6 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
       ? override.matches
       : null
   const waiting = source == null
-
-  // Keyed per fixture and per threshold so a reload or a second crossing
-  // cannot re-fire one that already went out.
-  const fired = useRef(new Set<string>())
-
-  useEffect(() => {
-    if (now == null || !source) return
-    const next = pick(source, now)
-    if (!next) return
-    const left = startOf(next) - now
-    for (const at of DISCOVER_AT_MS) {
-      const key = `${next.event_id}:${at}`
-      if (left > 0 && left <= at && !fired.current.has(key)) {
-        fired.current.add(key)
-        // Fire and forget: the page reads the cached result, and a failure
-        // here must never disturb the countdown.
-        fetch(`/api/streams?event_id=${next.event_id}`).catch(() => {})
-      }
-    }
-  }, [source, now])
 
   const match = source ? (pick(source, now ?? 0) ?? source[0] ?? null) : null
 

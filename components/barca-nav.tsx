@@ -7,7 +7,6 @@ const TABS = [
   { key: "squad", label: "Squad", href: "/squad" },
   { key: "fixtures", label: "Fixtures", href: "/squad/fixtures" },
   { key: "leaders", label: "Leaders", href: "/squad/leaders" },
-  { key: "stream", label: "Stream", href: "/squad/stream" },
 ]
 
 /** Section nav for the Barça pages, sitting under the page header. */
