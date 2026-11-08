@@ -1,7 +1,7 @@
 import { Suspense } from "react"
 import { cacheLife } from "next/cache"
 import Link from "next/link"
-import { supabase } from "@/lib/supabase"
+import { supabase, fetchAllRows } from "@/lib/supabase"
 import { resolveSeason } from "@/lib/seasons"
 import {
   fetchTeamData,
@@ -251,16 +251,19 @@ async function loadSeason(season: string) {
   "use cache"
   cacheLife("minutes")
 
-  const [{ table, stats, xg }, { data: matchData }] = await Promise.all([
+  const [{ table, stats, xg }, matchData] = await Promise.all([
     fetchTeamData(supabase, season, WANTED_STATS),
-    supabase
-      .from("matches")
-      .select("event_id, league, season, round, date, kickoff, home, home_id, away, away_id, status, home_goals, away_goals")
-      .eq("season", season)
-      .limit(2000),
+    fetchAllRows<SeasonMatch>((from, to) =>
+      supabase
+        .from("matches")
+        .select("event_id, league, season, round, date, kickoff, home, home_id, away, away_id, status, home_goals, away_goals")
+        .eq("season", season)
+        .order("event_id", { ascending: true })
+        .range(from, to),
+    ),
   ])
 
-  const matches = (matchData || []) as SeasonMatch[]
+  const matches = matchData
 
   const trackedLeagues = new Set(table.map((t) => t.league))
   const trackedTeamNames = new Set(table.map((t) => t.team))

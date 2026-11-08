@@ -1,4 +1,5 @@
 import { scopeLeague, type Competition } from "@/lib/competition"
+import { fetchAllRows } from "@/lib/supabase"
 
 export const CURRENT_SEASON = "2026/27"
 
@@ -278,13 +279,18 @@ export async function fetchTeamData(
   /** Omit for every competition (predictions need all of them). */
   comp?: Competition,
 ): Promise<{ table: TeamTableRow[]; stats: SeasonStatRow[]; xg: MatchXg }> {
-  let query = supabase
-    .from("matches")
-    .select("event_id, league, season, home, away, status, home_goals, away_goals")
-    .eq("season", season)
-    .eq("status", "finished")
-  if (comp) query = scopeLeague(query, comp)
-  const { data: matchData } = await query.limit(1000)
+  // Paged: 25/26 alone holds 1895 finished matches, and a single request
+  // would come back silently truncated at 1000, building a standings table
+  // from half a season.
+  const matchData = await fetchAllRows((from, to) => {
+    let query = supabase
+      .from("matches")
+      .select("event_id, league, season, home, away, status, home_goals, away_goals")
+      .eq("season", season)
+      .eq("status", "finished")
+    if (comp) query = scopeLeague(query, comp)
+    return query.order("event_id", { ascending: true }).range(from, to)
+  })
 
   const matchRows = (matchData || []) as {
     event_id: number; league: string; season: string
