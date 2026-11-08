@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import {
   CartesianGrid,
   Cell,
@@ -149,19 +149,20 @@ const ROLES = [
   "Goalkeeper",
 ]
 
-const LABEL_COUNT = 14
 
 /**
- * Keep-out box around a placed label, as a fraction of each axis.
+ * Keep-out box around a placed label, in pixels.
  *
- * Sized from what actually renders, not from taste: the text sits to the
- * right of its dot and runs about 110px, which on a ~980px plot is ~0.11 of
- * the x range. Measured both ways: names 0.09 apart did overlap on screen,
- * names 0.16 apart did not, so the box sits between them. Wider than that
- * and it starts dropping genuinely notable points to protect nothing.
+ * Pixels, not axis fractions, because a name is a fixed width on screen
+ * while the axis is not. Expressed as a fraction it was tuned for a ~980px
+ * desktop plot and fell apart on a phone, where the same 110px label is a
+ * third of a 336px axis — five names overlapped at 390px.
  */
-const LABEL_GAP_X = 0.13
-const LABEL_GAP_Y = 0.055
+const LABEL_PX_X = 118
+const LABEL_PX_Y = 17
+
+/** Fourteen names suit a wide plot; a phone has room for half that. */
+const labelCount = (plotWidth: number) => (plotWidth < 520 ? 7 : 14)
 
 export function MetricScatter({ players }: { players: ScatterPlayer[] }) {
   const [xKey, setXKey] = useState("dribbles")
@@ -180,6 +181,20 @@ export function MetricScatter({ players }: { players: ScatterPlayer[] }) {
       return next.length ? next : [lg]
     })
   }
+
+  // The plot's real size, so label spacing can be reasoned about in pixels.
+  const plotRef = useRef<HTMLDivElement>(null)
+  const [plot, setPlot] = useState({ w: 900, h: 520 })
+  useEffect(() => {
+    const el = plotRef.current
+    if (!el) return
+    const ro = new ResizeObserver(([entry]) =>
+      setPlot({ w: entry.contentRect.width, h: entry.contentRect.height }),
+    )
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  const narrow = plot.w < 520
 
   const xm = METRICS.find((m) => m.key === xKey) ?? METRICS[0]
   const ym = METRICS.find((m) => m.key === yKey) ?? METRICS[0]
@@ -235,13 +250,16 @@ export function MetricScatter({ players }: { players: ScatterPlayer[] }) {
     // outliers sit close together, which is the exact failure this chart is
     // meant to avoid — so a candidate is skipped if an already-labelled point
     // is within roughly a label's width and height of it, in normalised space.
+    const gapX = LABEL_PX_X / Math.max(120, plot.w)
+    const gapY = LABEL_PX_Y / Math.max(120, plot.h)
+    const limit = labelCount(plot.w)
     const placed: { x: number; y: number }[] = []
     for (const r of ranked) {
-      if (placed.length >= LABEL_COUNT) break
+      if (placed.length >= limit) break
       const nx = r.x / maxX
       const ny = r.y / maxY
       const clash = placed.some(
-        (q) => Math.abs(q.x - nx) < LABEL_GAP_X && Math.abs(q.y - ny) < LABEL_GAP_Y,
+        (q) => Math.abs(q.x - nx) < gapX && Math.abs(q.y - ny) < gapY,
       )
       if (clash) continue
       r.label = r.player
@@ -249,7 +267,7 @@ export function MetricScatter({ players }: { players: ScatterPlayer[] }) {
     }
 
     return { points: raw, shownLeagues: [...new Set(raw.map((r) => r.league))].sort() }
-  }, [players, xm, ym, floor, role, leagues])
+  }, [players, xm, ym, floor, role, leagues, plot])
 
   return (
     <section className="surface rounded-2xl bg-card border border-border/70 p-3.5 sm:p-5 shadow-sm">
@@ -338,9 +356,15 @@ export function MetricScatter({ players }: { players: ScatterPlayer[] }) {
           </p>
         </div>
       ) : (
-      <div className="h-[420px] sm:h-[560px] w-full">
+      <div ref={plotRef} className="h-[380px] sm:h-[560px] w-full">
         <ResponsiveContainer>
-          <ScatterChart margin={{ top: 12, right: 30, bottom: 36, left: 8 }}>
+          <ScatterChart
+            margin={
+              narrow
+                ? { top: 10, right: 12, bottom: 8, left: -18 }
+                : { top: 12, right: 30, bottom: 36, left: 8 }
+            }
+          >
             <CartesianGrid stroke="oklch(1 0 0 / 7%)" />
             <XAxis
               type="number"
@@ -348,13 +372,19 @@ export function MetricScatter({ players }: { players: ScatterPlayer[] }) {
               name={xm.label}
               tick={{ fontSize: 11, fill: "oklch(0.72 0.02 250)" }}
               stroke="oklch(1 0 0 / 18%)"
-              label={{
-                value: xm.label,
-                position: "insideBottom",
-                offset: -18,
-                fill: "oklch(0.72 0.02 250)",
-                fontSize: 12,
-              }}
+              // The pickers above already name both axes, so on a phone the
+              // titles are duplication that costs real plot area.
+              label={
+                narrow
+                  ? undefined
+                  : {
+                      value: xm.label,
+                      position: "insideBottom",
+                      offset: -18,
+                      fill: "oklch(0.72 0.02 250)",
+                      fontSize: 12,
+                    }
+              }
             />
             <YAxis
               type="number"
@@ -362,15 +392,19 @@ export function MetricScatter({ players }: { players: ScatterPlayer[] }) {
               name={ym.label}
               tick={{ fontSize: 11, fill: "oklch(0.72 0.02 250)" }}
               stroke="oklch(1 0 0 / 18%)"
-              label={{
-                value: ym.label,
-                angle: -90,
-                position: "insideLeft",
-                fill: "oklch(0.72 0.02 250)",
-                fontSize: 12,
-              }}
+              label={
+                narrow
+                  ? undefined
+                  : {
+                      value: ym.label,
+                      angle: -90,
+                      position: "insideLeft",
+                      fill: "oklch(0.72 0.02 250)",
+                      fontSize: 12,
+                    }
+              }
             />
-            <ZAxis type="number" dataKey="z" range={[18, 320]} />
+            <ZAxis type="number" dataKey="z" range={narrow ? [10, 150] : [18, 320]} />
             <Tooltip
               cursor={{ strokeDasharray: "3 3", stroke: "oklch(1 0 0 / 25%)" }}
               content={({ active, payload }) => {
