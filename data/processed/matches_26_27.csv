@@ -494,7 +494,7 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16421103,La Liga,2026/27,12,2026-11-07,Málaga CF,2830,Real Racing Club,2835,finished,1.0,2.0,2026-11-07T13:00:00Z
 16421108,La Liga,2026/27,12,2026-11-07,Espanyol,2814,Deportivo de A Coruña,2832,finished,0.0,0.0,2026-11-07T15:15:00Z
 16421106,La Liga,2026/27,12,2026-11-07,Osasuna,2820,Athletic Club,2825,finished,1.0,1.0,2026-11-07T17:30:00Z
-16421105,La Liga,2026/27,12,2026-11-07,Valencia,2828,Real Madrid,2829,upcoming,,,2026-11-07T20:00:00Z
+16421105,La Liga,2026/27,12,2026-11-07,Valencia,2828,Real Madrid,2829,finished,0.0,3.0,2026-11-07T20:00:00Z
 16421102,La Liga,2026/27,12,2026-11-08,Elche,2846,Real Betis,2816,upcoming,,,2026-11-08T13:00:00Z
 16421107,La Liga,2026/27,12,2026-11-08,Real Sociedad,2824,Rayo Vallecano,2818,upcoming,,,2026-11-08T15:15:00Z
 16421104,La Liga,2026/27,12,2026-11-08,Celta Vigo,2821,Levante UD,2849,upcoming,,,2026-11-08T17:30:00Z
@@ -864,7 +864,7 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16285077,Serie A,2026/27,11,2026-11-07,Cagliari,2719,Frosinone,2801,finished,1.0,0.0,2026-11-07T14:00:00Z
 16285086,Serie A,2026/27,11,2026-11-07,Torino,2696,Lecce,2689,finished,1.0,1.0,2026-11-07T14:00:00Z
 16285084,Serie A,2026/27,11,2026-11-07,Parma,2690,Bologna,2685,finished,1.0,2.0,2026-11-07T17:00:00Z
-16285085,Serie A,2026/27,11,2026-11-07,AS Roma,2702,Sassuolo,2793,upcoming,,,2026-11-07T19:45:00Z
+16285085,Serie A,2026/27,11,2026-11-07,AS Roma,2702,Sassuolo,2793,finished,3.0,0.0,2026-11-07T19:45:00Z
 16285083,Serie A,2026/27,11,2026-11-08,SSC Napoli,2714,Lazio,2699,upcoming,,,2026-11-08T11:30:00Z
 16285080,Serie A,2026/27,11,2026-11-08,Genoa,2713,AC Milan,2692,upcoming,,,2026-11-08T14:00:00Z
 16285082,Serie A,2026/27,11,2026-11-08,Monza,2729,Atalanta,2686,upcoming,,,2026-11-08T14:00:00Z
@@ -1223,7 +1223,7 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16310995,Ligue 1,2026/27,9,2026-11-02,Lorient,1656,Stade Brestois,1715,finished,0.0,2.0,2026-11-02T19:45:00Z
 16311010,Ligue 1,2026/27,10,2026-11-06,Toulouse,1681,RC Strasbourg,1659,finished,3.0,1.0,2026-11-06T19:45:00Z
 16311003,Ligue 1,2026/27,10,2026-11-07,AJ Auxerre,1646,Paris FC,6070,finished,0.0,1.0,2026-11-07T18:00:00Z
-16311008,Ligue 1,2026/27,10,2026-11-07,Paris Saint-Germain,1644,Troyes,1652,upcoming,,,2026-11-07T20:05:00Z
+16311008,Ligue 1,2026/27,10,2026-11-07,Paris Saint-Germain,1644,Troyes,1652,finished,1.0,0.0,2026-11-07T20:05:00Z
 16311009,Ligue 1,2026/27,10,2026-11-08,Stade Rennais,1658,LOSC Lille,1643,upcoming,,,2026-11-08T14:00:00Z
 16311002,Ligue 1,2026/27,10,2026-11-08,Angers,1684,OGC Nice,1661,upcoming,,,2026-11-08T16:15:00Z
 16311005,Ligue 1,2026/27,10,2026-11-08,Le Havre,1662,Lorient,1656,upcoming,,,2026-11-08T16:15:00Z
