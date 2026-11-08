@@ -13,6 +13,7 @@ import {
   statValue,
   indexStats,
   fetchTeamData,
+  fetchTeamIdMap,
   primaryRows,
   type SeasonStatRow,
   type TeamTableRow,
@@ -128,20 +129,19 @@ export default function TeamCompareContent() {
   useEffect(() => {
     let cancelled = false
     async function load() {
-      const [{ table: built, stats: builtStats }, idsRes] = await Promise.all([
+      // fetchTeamIdMap rather than an inlined copy of it: this page used to
+      // run its own unpaged `players` query, which PostgREST capped at 1000
+      // rows in physical order — the picker ended up knowing 50 of 112 clubs,
+      // so only Bundesliga and Champions League sides showed a crest.
+      const [{ table: built, stats: builtStats }, idMap] = await Promise.all([
         fetchTeamData(supabase, season, WANTED_STATS, comp),
-        supabase
-          .from("players")
-          .select("team, team_id")
-          .eq("season", season),
+        fetchTeamIdMap(supabase, season),
       ])
       if (cancelled) return
 
       // Clubs, not competitions: one entry each in the picker and standings.
       setTable(primaryRows(built))
       setStats(builtStats)
-      const idMap = new Map<string, number>()
-      for (const r of idsRes.data || []) idMap.set(r.team, r.team_id)
       setTeamIds(idMap)
       setLoading(false)
     }
