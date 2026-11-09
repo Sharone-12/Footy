@@ -164,7 +164,7 @@ export default function CompareContent() {
         <CompetitionToggle />
         {!loading && missing.length > 0 && (
           <p className="stat-label mt-3">
-            No {comp === "ucl" ? UCL : "league"} stats for {missing.join(", ")}
+            No {comp === "ucl" ? UCL : comp === "all" ? "competition" : "league"} stats for {missing.join(", ")}
           </p>
         )}
       </div>

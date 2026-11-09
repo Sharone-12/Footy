@@ -3,7 +3,7 @@ import { connection } from "next/server"
 import { cacheLife } from "next/cache"
 import { supabase } from "@/lib/supabase"
 import { resolveSeason } from "@/lib/seasons"
-import { resolveCompetition, scopeLeague, scopeQuery, COMPETITION_LABEL, type Competition } from "@/lib/competition"
+import { resolveCompetition, scopeLeague, scopeQuery, COMPETITION_LABEL, UCL, type Competition } from "@/lib/competition"
 import { CompetitionToggle } from "@/components/competition-toggle"
 import { LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
 import { PlayerSearch } from "@/components/player-search"
@@ -67,6 +67,7 @@ const LEAGUE_TAG: Record<string, { short: string; hue: string }> = {
   "La Liga": { short: "LL", hue: "0.80 0.14 60" },
   "Ligue 1": { short: "L1", hue: "0.78 0.13 240" },
   Bundesliga: { short: "BL", hue: "0.78 0.14 15" },
+  "Serie A": { short: "SA", hue: "0.78 0.14 120" },
   "Champions League": { short: "UCL", hue: "0.78 0.14 230" },
 }
 
@@ -188,6 +189,93 @@ async function loadBoards(season: string, comp: Competition) {
   "use cache"
   cacheLife("minutes")
 
+  if (comp === "all") {
+    const [dScorers, uclScorers, dAssists, uclAssists] = await Promise.all([
+      supabase
+        .from("players")
+        .select("slug")
+        .eq("season", season)
+        .neq("league", UCL)
+        .order("goals", { ascending: false })
+        .limit(30),
+      supabase
+        .from("players")
+        .select("slug")
+        .eq("season", season)
+        .eq("league", UCL)
+        .order("goals", { ascending: false })
+        .limit(20),
+      supabase
+        .from("players")
+        .select("slug")
+        .eq("season", season)
+        .neq("league", UCL)
+        .order("assists", { ascending: false })
+        .limit(30),
+      supabase
+        .from("players")
+        .select("slug")
+        .eq("season", season)
+        .eq("league", UCL)
+        .order("assists", { ascending: false })
+        .limit(20),
+    ])
+
+    const slugs = new Set<string>()
+    for (const res of [dScorers.data, uclScorers.data, dAssists.data, uclAssists.data]) {
+      for (const r of res || []) {
+        if (r.slug) slugs.add(r.slug)
+      }
+    }
+
+    const { data: allRows } = await supabase
+      .from("players")
+      .select("player, slug, team, team_id, league, goals, assists, minutes")
+      .eq("season", season)
+      .in("slug", Array.from(slugs))
+
+    const groups = new Map<string, (Row & { minutes?: number })[]>()
+    for (const r of (allRows || []) as (Row & { minutes?: number })[]) {
+      const list = groups.get(r.slug)
+      if (list) list.push(r)
+      else groups.set(r.slug, [r])
+    }
+
+    const combined: Row[] = []
+    for (const group of groups.values()) {
+      if (group.length === 1) {
+        combined.push({
+          player: group[0].player,
+          slug: group[0].slug,
+          team: group[0].team,
+          team_id: group[0].team_id,
+          league: group[0].league,
+          goals: group[0].goals ?? 0,
+          assists: group[0].assists ?? 0,
+        })
+        continue
+      }
+      const domesticRow = group.find((r) => r.league !== UCL)
+      const base = domesticRow ?? [...group].sort((a, b) => (Number(b.minutes) || 0) - (Number(a.minutes) || 0))[0]
+      const goals = group.reduce((sum, r) => sum + (Number(r.goals) || 0), 0)
+      const assists = group.reduce((sum, r) => sum + (Number(r.assists) || 0), 0)
+      combined.push({
+        player: base.player,
+        slug: base.slug,
+        team: base.team,
+        team_id: base.team_id,
+        league: base.league,
+        goals,
+        assists,
+      })
+    }
+
+    const topScorers = [...combined].sort((a, b) => (b.goals ?? 0) - (a.goals ?? 0)).slice(0, 12)
+    const topAssisters = [...combined].sort((a, b) => (b.assists ?? 0) - (a.assists ?? 0)).slice(0, 12)
+
+    return { topScorers, topAssisters }
+  }
+
   const [{ data: scorers }, { data: assisters }] = await Promise.all([
     scopeLeague(
       supabase
@@ -226,7 +314,10 @@ async function Content({
   const season = resolveSeason(sp.season)
   const comp = resolveCompetition(sp.comp)
   const scope = scopeQuery(season, comp)
-  const label = `${season} · ${COMPETITION_LABEL[comp]}`
+  const label =
+    comp === "all"
+      ? `${season} · All (League + UCL)`
+      : `${season} · ${COMPETITION_LABEL[comp]}`
   const { topScorers, topAssisters } = await loadBoards(season, comp)
   const leader = topScorers[0]
   const creator = topAssisters[0]
@@ -234,7 +325,7 @@ async function Content({
   const headline = [
     {
       icon: <BallIcon />,
-      label: "Leading scorer",
+      label: comp === "all" ? "Leading scorer (All Competitions)" : "Leading scorer",
       figure: leader?.goals ?? 0,
       unit: "goals",
       name: leader?.player,
@@ -244,7 +335,7 @@ async function Content({
     },
     {
       icon: <AssistIcon />,
-      label: "Most assists",
+      label: comp === "all" ? "Most assists (All Competitions)" : "Most assists",
       figure: creator?.assists ?? 0,
       unit: "assists",
       name: creator?.player,

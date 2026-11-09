@@ -215,7 +215,7 @@ export default function TeamCompareContent() {
         </h1>
         <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
           Per-match averages across {season}
-          {comp === "ucl" ? " in the Champions League" : " in league play"}. Add up
+          {comp === "ucl" ? " in the Champions League" : comp === "all" ? " across all competitions" : " in league play"}. Add up
           to {MAX_TEAMS}.
         </p>
         <div className="mt-4">
@@ -223,7 +223,7 @@ export default function TeamCompareContent() {
         </div>
         {!loading && missing.length > 0 && (
           <p className="stat-label mt-3">
-            No {comp === "ucl" ? UCL : "league"} matches for {missing.join(", ")}
+            No {comp === "ucl" ? UCL : comp === "all" ? "competition" : "league"} matches for {missing.join(", ")}
           </p>
         )}
       </div>

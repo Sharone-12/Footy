@@ -8,15 +8,16 @@ import { DEFAULT_SEASON } from "@/lib/seasons"
  *
  * Carried as ?comp= like ?season=, with the default dropped from the URL.
  */
-export const COMPETITIONS = ["league", "ucl"] as const
+export const COMPETITIONS = ["all", "league", "ucl"] as const
 
 export type Competition = (typeof COMPETITIONS)[number]
 
-export const DEFAULT_COMPETITION: Competition = "league"
+export const DEFAULT_COMPETITION: Competition = "all"
 
 export const UCL = "Champions League"
 
 export const COMPETITION_LABEL: Record<Competition, string> = {
+  all: "All",
   league: "League",
   ucl: "UCL",
 }
@@ -30,6 +31,7 @@ export function resolveCompetition(value?: string | string[] | null): Competitio
 }
 
 export function inCompetition(league: string, comp: Competition): boolean {
+  if (comp === "all") return true
   return comp === "ucl" ? league === UCL : league !== UCL
 }
 
@@ -44,6 +46,7 @@ type Filterable = {
  * TypeScript into "excessively deep" instantiation on supabase-js types.
  */
 export function scopeLeague<Q>(query: Q, comp: Competition): Q {
+  if (comp === "all") return query
   const q = query as unknown as Filterable
   return (comp === "ucl" ? q.eq("league", UCL) : q.neq("league", UCL)) as Q
 }
