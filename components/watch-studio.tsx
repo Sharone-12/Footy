@@ -32,7 +32,7 @@ import {
   EyeOffIcon,
 } from "lucide-react"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
-import { LEAGUE_TOURNAMENT_ID, BARCA_ID, getLeagueTournamentId } from "@/lib/teams"
+import { LEAGUE_TOURNAMENT_ID, BARCA_ID, getLeagueTournamentId, isPredictable } from "@/lib/teams"
 import type { LiveFixture } from "@/components/live-sections"
 import type { MatchedStream } from "@/lib/streamfree/types"
 import type { MatchedZLive, ZLiveChannel } from "@/lib/zlive/types"
@@ -1813,6 +1813,7 @@ export function WatchStudio({
                 </div>
 
                 <div className="flex flex-col gap-1.5">
+                  {isPredictable(fixture.league) && (
                   <Link
                     href={`/predictions/match?id=${fixture.event_id}`}
                     className="flex items-center justify-between p-2.5 rounded-xl bg-background/50 hover:bg-accent text-xs font-semibold text-foreground border border-border/50 transition-all hover:translate-x-1 group"
@@ -1823,6 +1824,7 @@ export function WatchStudio({
                     </span>
                     <ArrowRightIcon className="size-3.5 text-muted-foreground group-hover:text-foreground transition-colors" />
                   </Link>
+                  )}
 
                   <Link
                     href={`/teams/compare?team1=${fixture.home_id}&team2=${fixture.away_id}`}

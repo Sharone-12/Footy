@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
-import { LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
+import { LEAGUE_TOURNAMENT_ID, isPredictable } from "@/lib/teams"
 import { formatDateIST } from "@/lib/time"
 
 export type UpcomingMatch = {
@@ -22,6 +22,25 @@ function formatWhen(iso: string) {
 }
 
 const SLOT_MS = 4000
+
+/** A link when there is somewhere to go, a plain card otherwise. */
+function Card({
+  href,
+  className,
+  children,
+}: {
+  href?: string
+  className: string
+  children: React.ReactNode
+}) {
+  return href ? (
+    <Link href={href} className={className}>
+      {children}
+    </Link>
+  ) : (
+    <div className={className}>{children}</div>
+  )
+}
 
 export function UpcomingTicker({ matches }: { matches: UpcomingMatch[] }) {
   const [i, setI] = useState(0)
@@ -88,9 +107,11 @@ export function UpcomingTicker({ matches }: { matches: UpcomingMatch[] }) {
         </div>
       </header>
       <div className="px-3 pb-4 h-[170px]">
-        <Link
+        {/* An international has no prediction page to open, so that card is
+            shown rather than linked. */}
+        <Card
           key={m.event_id}
-          href={`/predictions/match?id=${m.event_id}`}
+          href={isPredictable(m.league) ? `/predictions/match?id=${m.event_id}` : undefined}
           className="card-lift animate-in fade-in slide-in-from-right-3 duration-500 flex flex-col justify-center gap-3 px-4 py-4 rounded-xl h-full"
         >
           <div className="flex items-center justify-between gap-3">
@@ -117,7 +138,7 @@ export function UpcomingTicker({ matches }: { matches: UpcomingMatch[] }) {
               )}
             </div>
           </div>
-        </Link>
+        </Card>
       </div>
     </section>
   )

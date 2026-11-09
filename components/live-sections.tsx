@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from "react"
 import Link from "next/link"
 import { PlayIcon, TvIcon } from "lucide-react"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
-import { LEAGUE_TOURNAMENT_ID, getLeagueTournamentId } from "@/lib/teams"
+import { LEAGUE_TOURNAMENT_ID, getLeagueTournamentId, isPredictable } from "@/lib/teams"
 import { splitFixtures, startOf, PLAYING_MS, type Timed } from "@/lib/live"
 import { StreamingNetworkHealth } from "@/components/streaming-network-health"
 import type { MatchedStream } from "@/lib/streamfree/types"
@@ -140,6 +140,30 @@ function providerPills(m: {
   )
 }
 
+/**
+ * The fixture half of a row. A link to its prediction breakdown, unless the
+ * competition is one we hold no table for — an international has no
+ * prediction to open, so it should not look tappable.
+ */
+function FixtureLink({
+  eventId,
+  league,
+  children,
+}: {
+  eventId: number
+  league: string
+  children: React.ReactNode
+}) {
+  const className = "flex items-center gap-3 sm:gap-4 min-w-0 flex-1 group"
+  return isPredictable(league) ? (
+    <Link href={`/predictions/match?id=${eventId}`} className={className}>
+      {children}
+    </Link>
+  ) : (
+    <span className={className}>{children}</span>
+  )
+}
+
 function Row({
   m,
   now,
@@ -191,10 +215,7 @@ function Row({
           seven provider badges sharing one line they were truncating to
           "L…" and "Tott…" on a 2000px display. */}
       <div className="flex items-center gap-3 sm:gap-4">
-        <Link
-          href={`/predictions/match?id=${m.event_id}`}
-          className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1 group"
-        >
+        <FixtureLink eventId={m.event_id} league={m.league}>
           <span className="flex flex-col leading-none w-20 sm:w-24 shrink-0">
             {live ? (
               <LiveBadge />
@@ -217,7 +238,7 @@ function Row({
               {m.away}
             </span>
           </span>
-        </Link>
+        </FixtureLink>
 
         <div className="flex items-center gap-2 shrink-0">
           <LiveFixtureMark fixture={m} />

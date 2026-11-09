@@ -14,6 +14,18 @@ export const FULL_LEAGUES = [
 ] as const
 
 /**
+ * Whether a competition can be modelled at all.
+ *
+ * Predictions read a season-long table, per-team stat averages and form.
+ * International fixtures ride in the same `matches` table but have none of
+ * that — six games of a Nations League group is not a model — so every
+ * prediction surface asks this before rating a fixture.
+ */
+export function isPredictable(league: string): boolean {
+  return (FULL_LEAGUES as readonly string[]).includes(league)
+}
+
+/**
  * Clubs tracked on their own, without the rest of their league. Only these
  * teams' fixtures are ingested, so `team_table` rows for their opponents are
  * fragments (two games, not 34) — never render those leagues as a table.

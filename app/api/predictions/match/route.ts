@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { supabase, fetchAllRows } from "@/lib/supabase"
 import { resolveSeason } from "@/lib/seasons"
-import { fetchTeamData, TEAM_STAT_GROUPS, TEAM_RADAR_STATS } from "@/lib/teams"
+import { fetchTeamData, isPredictable, TEAM_STAT_GROUPS, TEAM_RADAR_STATS } from "@/lib/teams"
 import { predictMatches, type MatchPrediction } from "@/lib/predictions"
 import { withFrozenPredictions } from "@/lib/predictions-freeze"
 
@@ -51,7 +51,10 @@ export async function getMatchPrediction(eventId: number): Promise<MatchPredicti
   }[]
 
   const match = allMatches.find((m) => m.event_id === eventId)
-  if (!match) {
+  // International fixtures ride in the same table but have no standings, no
+  // season-long stats and no form behind them — six games of a Nations League
+  // group is not a model. Rating them would invent confidence we don't have.
+  if (!match || !isPredictable(match.league)) {
     cache.set(eventId, { timestamp: Date.now(), prediction: null })
     return null
   }

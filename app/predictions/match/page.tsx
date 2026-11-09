@@ -13,6 +13,7 @@ import {
   type TeamTableRow,
   type SeasonStatRow,
   type TeamStat,
+  isPredictable,
 } from "@/lib/teams"
 import { predictMatches } from "@/lib/predictions"
 import { withFrozenPredictions } from "@/lib/predictions-freeze"
@@ -381,6 +382,21 @@ async function Content({
   }[]
 
   const match = allMatches.find((m) => m.event_id === eventId)
+  if (match && !isPredictable(match.league)) {
+    return (
+      <div className="text-center py-20">
+        <p className="text-muted-foreground">
+          No prediction for {match.home} v {match.away}.
+        </p>
+        <p className="stat-label mt-2">
+          {match.league} sits outside the leagues we carry a season of form for.
+        </p>
+        <Link href="/predictions" className="text-sm mt-2 inline-block" style={{ color: "var(--pitch)" }}>
+          ← Back to predictions
+        </Link>
+      </div>
+    )
+  }
   if (!match) {
     return (
       <div className="text-center py-20">
