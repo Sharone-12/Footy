@@ -15,6 +15,11 @@ import {
   type PreferredTeam,
 } from "@/lib/preferred-team"
 
+// Champions League (7) and Premier League (17) are drawn in deep purple, which
+// disappears against the dark pill. Those two get the white badge the crest
+// already knows how to draw; every other competition reads fine bare.
+const DARK_ON_DARK = new Set([7, 17])
+
 export type NextBarcaMatch = {
   event_id: number
   kickoff: string | null
@@ -172,7 +177,7 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
           tournamentId={tid}
           name={match.league}
           size={18}
-          variant="transparent"
+          variant={DARK_ON_DARK.has(tid) ? "circle" : "transparent"}
           className="hidden sm:inline-block shrink-0"
         />
       )}
