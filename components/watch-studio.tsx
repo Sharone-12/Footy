@@ -1092,14 +1092,14 @@ export function WatchStudio({
             </div>
 
             {/* Cinematic Video Display Area (Aspect Ratio adjusts between 16:9 Broadcast & 21:9 CinemaScope) */}
-            <div className={`relative w-full bg-black flex items-center justify-center overflow-hidden transition-all duration-300 ${
+            <div className={`relative w-full bg-black flex items-center justify-center transition-all duration-300 ${
               isFullscreen
-                ? "w-full h-full flex-1"
-                : isCinemaMode
-                ? "aspect-[21/9] sm:aspect-[2.35/1] max-h-[calc(100vh-180px)]"
+                ? "w-full h-full flex-1 overflow-hidden"
+                : isCinemaMode && viewMode === "single"
+                ? "aspect-[21/9] sm:aspect-[2.35/1] max-h-[calc(100vh-180px)] overflow-hidden"
                 : viewMode === "single"
-                ? "aspect-video max-h-[calc(100vh-230px)]"
-                : "min-h-[500px] sm:min-h-[640px]"
+                ? "aspect-video max-h-[calc(100vh-230px)] overflow-hidden"
+                : "w-full h-auto overflow-visible"
             }`}>
               {viewMode === "single" ? (
                 <div className="relative w-full h-full flex items-center justify-center">
@@ -1294,14 +1294,22 @@ export function WatchStudio({
                   )}
                 </div>
               ) : (
-                <div className={`w-full ${isFullscreen ? "h-full flex-1" : ""} grid ${
-                  viewMode === "dual" ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 sm:grid-cols-2"
-                } gap-2 p-2 bg-black`}>
+                <div className={`w-full ${
+                  isFullscreen
+                    ? viewMode === "dual"
+                      ? "h-full flex-1 grid grid-cols-2 grid-rows-1 gap-1.5 p-1.5"
+                      : "h-full flex-1 grid grid-cols-2 grid-rows-2 gap-1.5 p-1.5"
+                    : viewMode === "dual"
+                    ? "grid grid-cols-1 md:grid-cols-2 gap-2 p-2"
+                    : "grid grid-cols-1 sm:grid-cols-2 gap-2 p-2"
+                } bg-black`}>
                   {/* Slot 0 Card (Feed 1) */}
                   <article
                     aria-label={`Feed 1: ${slot0Override?.title || (fixture ? `${fixture.home} vs ${fixture.away}` : "Primary Feed")}`}
                     onClick={() => setFocusedSlot(0)}
-                    className={`relative aspect-video w-full h-full rounded-2xl overflow-hidden bg-black border flex flex-col group transition-all duration-200 ${
+                    className={`relative ${
+                      isFullscreen ? "w-full h-full min-h-0" : "aspect-video w-full"
+                    } rounded-2xl overflow-hidden bg-black border flex flex-col group transition-all duration-200 ${
                       focusedSlot === 0 ? "border-[var(--pitch)] ring-1 ring-[var(--pitch)]/30" : "border-white/10 hover:border-white/20"
                     }`}
                   >
@@ -1311,6 +1319,11 @@ export function WatchStudio({
                           <span className="size-1.5 rounded-full bg-[var(--pitch)] inline-block shadow-[0_0_6px_var(--pitch)] animate-pulse" />
                           FEED 1
                         </span>
+                        {focusedSlot === 0 && (
+                          <span className="hidden sm:inline-block px-1 py-0.2 rounded text-[8px] font-black uppercase tracking-wider bg-[var(--pitch)]/20 text-[var(--pitch)] border border-[var(--pitch)]/40">
+                            AUDIO FOCUS
+                          </span>
+                        )}
                         <span className="text-xs font-semibold text-foreground truncate max-w-[140px] sm:max-w-xs">
                           {slot0Override?.title || (fixture ? `${fixture.home} vs ${fixture.away}` : "Primary Feed")}
                         </span>
@@ -1320,6 +1333,23 @@ export function WatchStudio({
                       </div>
 
                       <div className="flex items-center gap-1 shrink-0">
+                        {currentProvider?.id === "daddylive" && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              toggleDaddyLiveClean()
+                            }}
+                            className={`p-1 rounded-md text-[10px] font-bold transition-colors ${
+                              daddyLiveClean
+                                ? "text-[var(--pitch)] bg-[var(--pitch)]/10"
+                                : "text-muted-foreground hover:text-foreground hover:bg-white/10"
+                            }`}
+                            title={daddyLiveClean ? "Clean View Active (Cropped)" : "Native Player Bar Active"}
+                          >
+                            <SparklesIcon className="size-3.5" />
+                          </button>
+                        )}
                         {slot0Override && (
                           <button
                             type="button"
@@ -1419,6 +1449,7 @@ export function WatchStudio({
                     onSwapWithMain={handleSwapWithMain}
                     onSoloSlot={handleSoloSlot}
                     isFocused={focusedSlot === 1}
+                    isFullscreen={isFullscreen}
                     onFocus={() => setFocusedSlot(1)}
                   />
 
@@ -1436,6 +1467,7 @@ export function WatchStudio({
                         onSwapWithMain={handleSwapWithMain}
                         onSoloSlot={handleSoloSlot}
                         isFocused={focusedSlot === 2}
+                        isFullscreen={isFullscreen}
                         onFocus={() => setFocusedSlot(2)}
                       />
                       <MultiViewSlotPlayer
@@ -1449,6 +1481,7 @@ export function WatchStudio({
                         onSwapWithMain={handleSwapWithMain}
                         onSoloSlot={handleSoloSlot}
                         isFocused={focusedSlot === 3}
+                        isFullscreen={isFullscreen}
                         onFocus={() => setFocusedSlot(3)}
                       />
                     </>

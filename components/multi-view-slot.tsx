@@ -196,6 +196,7 @@ export type MultiViewSlotPlayerProps = {
   onSwapWithMain: (slotIndex: number) => void
   onSoloSlot: (slotIndex: number) => void
   isFocused?: boolean
+  isFullscreen?: boolean
   onFocus?: () => void
 }
 
@@ -210,6 +211,7 @@ export function MultiViewSlotPlayer({
   onSwapWithMain,
   onSoloSlot,
   isFocused,
+  isFullscreen,
   onFocus,
 }: MultiViewSlotPlayerProps) {
   const [activeTab, setActiveTab] = useState<"matches" | "channels" | "sources">("matches")
@@ -218,11 +220,13 @@ export function MultiViewSlotPlayer({
   const [streamError, setStreamError] = useState<string | null>(null)
   const [reloadKey, setReloadKey] = useState(0)
   const [daddyLiveClean, setDaddyLiveClean] = useState(true)
+  const [isEditingFeed, setIsEditingFeed] = useState(false)
 
   const feedLabel = `FEED ${slotIndex + 1}`
 
   const handlePickChannel = useCallback(
     (ch: ZLiveChannel) => {
+      setIsEditingFeed(false)
       onSelectStream(slotIndex, {
         id: `ch-${ch.id}`,
         title: ch.name,
@@ -238,6 +242,7 @@ export function MultiViewSlotPlayer({
 
   const handlePickSource = useCallback(
     (item: { provider: WatchProvider; source: WatchSource }) => {
+      setIsEditingFeed(false)
       onSelectStream(slotIndex, {
         id: `src-${item.source.key}`,
         title: item.source.label,
@@ -259,6 +264,7 @@ export function MultiViewSlotPlayer({
       try {
         const best = await fetchBestStreamForFixture(fix)
         if (best?.url) {
+          setIsEditingFeed(false)
           onSelectStream(slotIndex, {
             id: `fix-${fix.event_id}`,
             title: `${fix.home} vs ${fix.away}`,
@@ -313,12 +319,14 @@ export function MultiViewSlotPlayer({
     )
   }, [alternateSources, searchQuery])
 
-  if (!slotData) {
+  if (!slotData || isEditingFeed) {
     return (
       <article
         aria-label={`${feedLabel} Selection`}
         onClick={onFocus}
-        className={`relative aspect-video w-full h-full rounded-2xl overflow-hidden bg-neutral-950/95 border flex flex-col p-3 sm:p-4 transition-all duration-200 ${
+        className={`relative ${
+          isFullscreen ? "w-full h-full min-h-0" : "aspect-video min-h-[260px] w-full"
+        } rounded-2xl overflow-hidden bg-neutral-950/95 border flex flex-col p-3 sm:p-4 transition-all duration-200 ${
           isFocused ? "border-[var(--pitch)] ring-1 ring-[var(--pitch)]/30" : "border-white/10 hover:border-white/20"
         }`}
       >
@@ -328,8 +336,20 @@ export function MultiViewSlotPlayer({
               {feedLabel}
             </span>
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-              ADD STREAM
+              {isEditingFeed ? "CHANGE STREAM" : "ADD STREAM"}
             </span>
+            {isEditingFeed && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setIsEditingFeed(false)
+                }}
+                className="px-2 py-0.5 rounded text-[10px] font-bold text-muted-foreground hover:text-foreground bg-white/10"
+              >
+                Cancel
+              </button>
+            )}
           </div>
 
           <nav aria-label="Stream categories" className="flex items-center gap-1 bg-white/[0.04] p-0.5 rounded-lg border border-white/[0.06]">
@@ -546,7 +566,9 @@ export function MultiViewSlotPlayer({
     <article
       aria-label={`${feedLabel}: ${slotData.title}`}
       onClick={onFocus}
-      className={`relative aspect-video w-full h-full rounded-2xl overflow-hidden bg-black border flex flex-col group transition-all duration-200 ${
+      className={`relative ${
+        isFullscreen ? "w-full h-full min-h-0" : "aspect-video w-full"
+      } rounded-2xl overflow-hidden bg-black border flex flex-col group transition-all duration-200 ${
         isFocused ? "border-[var(--pitch)] ring-1 ring-[var(--pitch)]/30" : "border-white/10 hover:border-white/20"
       }`}
     >
@@ -556,6 +578,11 @@ export function MultiViewSlotPlayer({
             <span className="size-1.5 rounded-full bg-[var(--pitch)] inline-block shadow-[0_0_6px_var(--pitch)] animate-pulse" />
             {feedLabel}
           </span>
+          {isFocused && (
+            <span className="hidden sm:inline-block px-1 py-0.2 rounded text-[8px] font-black uppercase tracking-wider bg-[var(--pitch)]/20 text-[var(--pitch)] border border-[var(--pitch)]/40">
+              AUDIO FOCUS
+            </span>
+          )}
           <span className="text-xs font-semibold text-foreground truncate max-w-[140px] sm:max-w-xs">
             {slotData.title}
           </span>
@@ -567,9 +594,42 @@ export function MultiViewSlotPlayer({
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
+          {slotData.providerId === "daddylive" && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                setDaddyLiveClean((prev) => !prev)
+              }}
+              className={`p-1 rounded-md text-[10px] font-bold transition-colors ${
+                daddyLiveClean
+                  ? "text-[var(--pitch)] bg-[var(--pitch)]/10"
+                  : "text-muted-foreground hover:text-foreground hover:bg-white/10"
+              }`}
+              title={daddyLiveClean ? "Clean View Active (Cropped)" : "Native Player Bar Active"}
+            >
+              <SparklesIcon className="size-3.5" />
+            </button>
+          )}
+
           <button
             type="button"
-            onClick={() => onSwapWithMain(slotIndex)}
+            onClick={(e) => {
+              e.stopPropagation()
+              setIsEditingFeed(true)
+            }}
+            className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
+            title="Change Feed"
+          >
+            <TvIcon className="size-3.5" />
+          </button>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onSwapWithMain(slotIndex)
+            }}
             className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
             title="Swap with Main Feed (Feed 1)"
           >
@@ -578,7 +638,10 @@ export function MultiViewSlotPlayer({
 
           <button
             type="button"
-            onClick={() => onSoloSlot(slotIndex)}
+            onClick={(e) => {
+              e.stopPropagation()
+              onSoloSlot(slotIndex)
+            }}
             className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
             title="Solo this Feed (Switch to Single View)"
           >
@@ -587,7 +650,10 @@ export function MultiViewSlotPlayer({
 
           <button
             type="button"
-            onClick={() => setReloadKey((k) => k + 1)}
+            onClick={(e) => {
+              e.stopPropagation()
+              setReloadKey((k) => k + 1)
+            }}
             className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
             title="Reload Feed"
           >
@@ -596,7 +662,10 @@ export function MultiViewSlotPlayer({
 
           <button
             type="button"
-            onClick={() => onClearSlot(slotIndex)}
+            onClick={(e) => {
+              e.stopPropagation()
+              onClearSlot(slotIndex)
+            }}
             className="p-1 rounded-md text-muted-foreground hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
             title="Close Feed"
           >
