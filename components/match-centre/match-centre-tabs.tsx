@@ -104,13 +104,23 @@ export function MatchCentreTabs({
 
     // Continuous real-time polling every 4 seconds for instant live updates without manual reload
     const pollTimer = setInterval(() => {
+      if (typeof document !== "undefined" && document.hidden) return
       void load<MatchSummaryResponse>("summary", handleSummaryUpdate)
       void load<LeagueTableResponse>("table", setTableData)
     }, 4_000)
 
+    const handleVisibility = () => {
+      if (typeof document !== "undefined" && !document.hidden) {
+        void load<MatchSummaryResponse>("summary", handleSummaryUpdate)
+        void load<LeagueTableResponse>("table", setTableData)
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibility)
+
     return () => {
       ac.abort()
       clearInterval(pollTimer)
+      document.removeEventListener("visibilitychange", handleVisibility)
     }
   }, [eid, fixtureId, onSummaryLoaded])
 

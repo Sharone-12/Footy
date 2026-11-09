@@ -10,6 +10,7 @@ import { SeasonToggle } from "@/components/season-toggle"
 import { MainNav, MainNavFallback } from "@/components/main-nav"
 import { UclBackdrop } from "@/components/ucl-backdrop"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { TopProgressBar } from "@/components/top-progress-bar"
 import "./globals.css"
 
 const sans = Archivo({
@@ -90,6 +91,9 @@ export default function RootLayout({
       className={`${sans.variable} ${condensed.variable} dark h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        <Suspense fallback={null}>
+          <TopProgressBar />
+        </Suspense>
         <Suspense fallback={null}>
           <UclBackdrop />
         </Suspense>

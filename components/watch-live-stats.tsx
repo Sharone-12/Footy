@@ -130,20 +130,11 @@ export function WatchLiveStatsCard({ fixture, liveScore, summaryData }: WatchLiv
 
     try {
       const param = eid ? `eid=${encodeURIComponent(eid)}` : `fixture_id=${encodeURIComponent(fixtureId!)}`
-      const [resStats, resSummary] = await Promise.all([
-        fetch(`/api/livescores/stats?${param}`, { cache: "no-store" }),
-        fetch(`/api/livescores/summary?${param}`, { cache: "no-store" }).catch(() => null),
-      ])
+      const resStats = await fetch(`/api/livescores/stats?${param}`)
       if (resStats.ok) {
         const data = (await resStats.json()) as LiveMatchStatsResponse
         if (data && data.hasStats) {
           setStats(data)
-        }
-      }
-      if (resSummary && resSummary.ok) {
-        const sumData = (await resSummary.json()) as MatchSummaryResponse
-        if (sumData && sumData.incidents) {
-          setLocalSummary(sumData)
         }
       }
     } catch {
@@ -162,15 +153,32 @@ export function WatchLiveStatsCard({ fixture, liveScore, summaryData }: WatchLiv
   useEffect(() => {
     fetchStats()
 
-    // Real-time polling every 4 seconds during live match for instant throughput
+    const isMatchConcluded =
+      effectiveSummary?.status === "FT" ||
+      effectiveSummary?.status === "AET" ||
+      effectiveSummary?.status === "AP" ||
+      liveScore?.status === "FT"
+
+    if (isMatchConcluded) return
+
+    // Poll stats at 15s interval (matching upstream stats cadence) when document is visible
     pollTimerRef.current = setInterval(() => {
+      if (typeof document !== "undefined" && document.hidden) return
       fetchStats()
-    }, 4_000)
+    }, 15_000)
+
+    const handleVisibility = () => {
+      if (typeof document !== "undefined" && !document.hidden) {
+        fetchStats()
+      }
+    }
+    document.addEventListener("visibilitychange", handleVisibility)
 
     return () => {
       if (pollTimerRef.current) clearInterval(pollTimerRef.current)
+      document.removeEventListener("visibilitychange", handleVisibility)
     }
-  }, [eid, fixtureId])
+  }, [eid, fixtureId, effectiveSummary?.status, liveScore?.status])
 
   // If no stats yet and not loading, or stats don't exist yet (pre-match)
   if (!isLoading && (!stats || !stats.hasStats)) {

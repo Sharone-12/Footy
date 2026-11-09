@@ -11,6 +11,7 @@ type CachedSummary = {
 }
 
 const summaryCache = new Map<string, CachedSummary>()
+const inflightSummary = new Map<string, Promise<MatchSummaryResponse>>()
 
 export type MatchIncident = {
   id: string
@@ -84,7 +85,15 @@ export async function GET(request: Request) {
   const cached = summaryCache.get(eid)
   if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
     return NextResponse.json(cached.data, {
-      headers: { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" },
+      headers: { "Cache-Control": "public, s-maxage=3, stale-while-revalidate=6" },
+    })
+  }
+
+  const pending = inflightSummary.get(eid)
+  if (pending) {
+    const data = await pending
+    return NextResponse.json(data, {
+      headers: { "Cache-Control": "public, s-maxage=3, stale-while-revalidate=6" },
     })
   }
 
@@ -276,7 +285,7 @@ export async function GET(request: Request) {
     summaryCache.set(eid, { timestamp: Date.now(), data: payload })
 
     return NextResponse.json(payload, {
-      headers: { "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0" },
+      headers: { "Cache-Control": "public, s-maxage=3, stale-while-revalidate=6" },
     })
   } catch (err) {
     console.error(`[livescores/summary] Error processing eid ${eid}:`, err)

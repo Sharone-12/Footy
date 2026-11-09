@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useLayoutEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
 
 const LINKS = [
@@ -81,9 +81,20 @@ export function MainNav() {
   const itemRefs = useRef<Array<HTMLAnchorElement | null>>([])
   const [pill, setPill] = useState<Pill | null>(null)
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
+  const [optimisticIdx, setOptimisticIdx] = useState<number | null>(null)
+  const [canHover, setCanHover] = useState(false)
+
+  useEffect(() => {
+    setOptimisticIdx(null)
+  }, [pathname])
+
+  useEffect(() => {
+    setCanHover(window.matchMedia("(hover: hover)").matches)
+  }, [])
 
   const activeIdx = LINKS.findIndex((l) => isActive(pathname, l.href))
-  const targetIdx = hoveredIdx ?? activeIdx
+  const effectiveActiveIdx = optimisticIdx ?? activeIdx
+  const targetIdx = hoveredIdx ?? (effectiveActiveIdx >= 0 ? effectiveActiveIdx : 0)
 
   // Measure after layout so the pill lands on the right item on first paint
   // and re-measures on route change or window resize.
@@ -95,7 +106,7 @@ export function MainNav() {
       return
     }
     measure(container, el, setPill)
-  }, [targetIdx, pathname])
+  }, [targetIdx, pathname, optimisticIdx])
 
   useLayoutEffect(() => {
     function onResize() {
@@ -125,33 +136,40 @@ export function MainNav() {
         />
       )}
       {LINKS.map((l, i) => {
-        const active = i === activeIdx
+        const active = i === effectiveActiveIdx
         const isBarca = l.href === "/squad"
+
+        const linkEl = (
+          <Link
+            ref={(el) => {
+              itemRefs.current[i] = el
+            }}
+            href={l.href}
+            prefetch={true}
+            onClick={() => setOptimisticIdx(i)}
+            onMouseEnter={() => setHoveredIdx(i)}
+            onFocus={() => setHoveredIdx(i)}
+            onBlur={() => setHoveredIdx(null)}
+            data-active={active || undefined}
+            className={`relative z-10 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 shrink-0 ${
+              isBarca
+                ? "barca-stripes barca-stripes-tight overflow-hidden text-white font-bold min-w-[4.75rem] sm:min-w-[5.25rem] inline-flex items-center justify-center text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_2px_6px_rgba(0,0,0,0.5)] hover:brightness-110"
+                : "text-muted-foreground hover:text-foreground data-[active]:text-foreground"
+            }`}
+          >
+            <span className={isBarca ? "drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" : undefined}>
+              {l.label}
+            </span>
+          </Link>
+        )
+
+        if (!canHover) {
+          return <span key={l.href}>{linkEl}</span>
+        }
+
         return (
           <Tooltip key={l.href}>
-            <TooltipTrigger
-              render={
-                <Link
-                  ref={(el) => {
-                    itemRefs.current[i] = el
-                  }}
-                  href={l.href}
-                  onMouseEnter={() => setHoveredIdx(i)}
-                  onFocus={() => setHoveredIdx(i)}
-                  onBlur={() => setHoveredIdx(null)}
-                  data-active={active || undefined}
-                  className={`relative z-10 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 shrink-0 ${
-                    isBarca
-                      ? "barca-stripes barca-stripes-tight overflow-hidden text-white font-bold min-w-[4.75rem] sm:min-w-[5.25rem] inline-flex items-center justify-center text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_2px_6px_rgba(0,0,0,0.5)] hover:brightness-110"
-                      : "text-muted-foreground hover:text-foreground data-[active]:text-foreground"
-                  }`}
-                >
-                  <span className={isBarca ? "drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" : undefined}>
-                    {l.label}
-                  </span>
-                </Link>
-              }
-            />
+            <TooltipTrigger render={linkEl} />
             <TooltipContent sideOffset={8}>{l.hint}</TooltipContent>
           </Tooltip>
         )
