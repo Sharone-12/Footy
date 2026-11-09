@@ -1896,3 +1896,71 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16938915,Champions League,2026/27,8,2027-01-27,Shakhtar Donetsk,3313,Real Madrid,2829,upcoming,,,2027-01-27T20:00:00Z
 16938923,Champions League,2026/27,8,2027-01-27,Villarreal,2819,Manchester United,35,upcoming,,,2027-01-27T20:00:00Z
 16939038,Champions League,2026/27,8,2027-01-27,ŠK Slovan Bratislava,2404,Inter,2697,upcoming,,,2027-01-27T20:00:00Z
+16814493,International Friendly Games,2026/27,0,2026-09-25,Australia,4741,Brazil,4748,finished,1.0,1.0,2026-09-25T10:00:00Z
+15534031,UEFA Nations League,2026/27,0,2026-09-25,Türkiye,4700,France,4481,finished,0.0,1.0,2026-09-25T18:45:00Z
+15534037,UEFA Nations League,2026/27,0,2026-09-25,Italy,4707,Belgium,4717,finished,0.0,2.0,2026-09-25T18:45:00Z
+17018552,Africa Cup of Nations Qual.,2026/27,0,2026-09-25,Morocco,4778,Gabon,4761,finished,2.0,0.0,2026-09-25T19:00:00Z
+15534090,UEFA Nations League,2026/27,0,2026-09-26,Czechia,4714,Croatia,4715,finished,1.0,2.0,2026-09-26T18:45:00Z
+15534084,UEFA Nations League,2026/27,0,2026-09-26,England,4713,Spain,4698,finished,2.0,3.0,2026-09-26T18:45:00Z
+15534115,UEFA Nations League,2026/27,0,2026-09-26,North Macedonia,4777,Switzerland,4699,finished,0.0,3.0,2026-09-26T18:45:00Z
+17080689,International Friendly Games,2026/27,0,2026-09-27,Mexico,4781,Colombia,4820,finished,1.0,1.0,2026-09-27T01:00:00Z
+15534068,UEFA Nations League,2026/27,0,2026-09-27,Serbia,6355,Netherlands,4705,finished,1.0,2.0,2026-09-27T16:00:00Z
+15534060,UEFA Nations League,2026/27,0,2026-09-27,Germany,4711,Greece,4710,finished,0.0,1.0,2026-09-27T18:45:00Z
+15534096,UEFA Nations League,2026/27,0,2026-09-27,Norway,4475,Portugal,4704,finished,1.0,2.0,2026-09-27T18:45:00Z
+15534026,UEFA Nations League,2026/27,0,2026-09-28,Belgium,4717,France,4481,finished,0.0,1.0,2026-09-28T18:45:00Z
+15534051,UEFA Nations League,2026/27,0,2026-09-28,Türkiye,4700,Italy,4707,finished,1.0,4.0,2026-09-28T18:45:00Z
+16814491,International Friendly Games,2026/27,0,2026-09-29,Australia,4741,Brazil,4748,finished,2.0,4.0,2026-09-29T10:00:00Z
+17018554,Africa Cup of Nations Qual.,2026/27,0,2026-09-29,Lesotho,8033,Morocco,4778,finished,0.0,2.0,2026-09-29T13:00:00Z
+15534106,UEFA Nations League,2026/27,0,2026-09-29,Scotland,4695,Switzerland,4699,finished,0.0,3.0,2026-09-29T18:45:00Z
+15534081,UEFA Nations League,2026/27,0,2026-09-29,Spain,4698,Croatia,4715,finished,4.0,1.0,2026-09-29T18:45:00Z
+15534092,UEFA Nations League,2026/27,0,2026-09-29,Czechia,4714,England,4713,finished,0.0,2.0,2026-09-29T18:45:00Z
+17156126,International Friendly Games,2026/27,0,2026-09-30,Mexico,4781,Peru,4790,finished,1.0,1.0,2026-09-30T01:00:00Z
+17167343,International Friendly Games,2026/27,0,2026-10-01,Argentina,4819,Bolivia,4746,finished,4.0,0.0,2026-10-01T00:00:00Z
+15534070,UEFA Nations League,2026/27,0,2026-10-01,Greece,4710,Netherlands,4705,finished,2.0,2.0,2026-10-01T18:45:00Z
+15534058,UEFA Nations League,2026/27,0,2026-10-01,Germany,4711,Serbia,6355,finished,2.0,0.0,2026-10-01T18:45:00Z
+15534094,UEFA Nations League,2026/27,0,2026-10-01,Denmark,4476,Portugal,4704,finished,2.0,4.0,2026-10-01T18:45:00Z
+15534028,UEFA Nations League,2026/27,0,2026-10-02,France,4481,Italy,4707,finished,1.0,1.0,2026-10-02T18:45:00Z
+15534040,UEFA Nations League,2026/27,0,2026-10-02,Belgium,4717,Türkiye,4700,finished,3.0,0.0,2026-10-02T18:45:00Z
+17219232,International Friendly Games,2026/27,0,2026-10-03,Colombia,4820,Paraguay,4789,finished,0.0,1.0,2026-10-03T00:00:00Z
+17184820,International Friendly Games,2026/27,0,2026-10-03,India,4828,Brazil,4748,finished,0.0,4.0,2026-10-03T14:00:00Z
+15534087,UEFA Nations League,2026/27,0,2026-10-03,Croatia,4715,England,4713,finished,0.0,7.0,2026-10-03T16:00:00Z
+15534112,UEFA Nations League,2026/27,0,2026-10-03,Switzerland,4699,Slovenia,4484,finished,2.0,1.0,2026-10-03T18:45:00Z
+15534085,UEFA Nations League,2026/27,0,2026-10-03,Spain,4698,Czechia,4714,finished,3.0,1.0,2026-10-03T18:45:00Z
+17167377,International Friendly Games,2026/27,0,2026-10-04,Argentina,4819,Burkina Faso,4749,finished,7.0,0.0,2026-10-04T00:00:00Z
+16787726,International Friendly Games,2026/27,0,2026-10-04,USA,4724,Mexico,4781,finished,3.0,0.0,2026-10-04T02:00:00Z
+17228920,International Friendly Games,2026/27,0,2026-10-04,Morocco,4778,Mali,4831,finished,1.0,1.0,2026-10-04T18:00:00Z
+15534095,UEFA Nations League,2026/27,0,2026-10-04,Portugal,4704,Norway,4475,finished,2.0,1.0,2026-10-04T18:45:00Z
+15534061,UEFA Nations League,2026/27,0,2026-10-04,Greece,4710,Germany,4711,finished,0.0,0.0,2026-10-04T18:45:00Z
+15534067,UEFA Nations League,2026/27,0,2026-10-04,Netherlands,4705,Serbia,6355,finished,2.0,1.0,2026-10-04T18:45:00Z
+15534050,UEFA Nations League,2026/27,0,2026-10-05,Italy,4707,Türkiye,4700,finished,3.0,1.0,2026-10-05T18:45:00Z
+15534027,UEFA Nations League,2026/27,0,2026-10-05,France,4481,Belgium,4717,finished,4.0,1.0,2026-10-05T18:45:00Z
+15534091,UEFA Nations League,2026/27,0,2026-10-06,England,4713,Czechia,4714,finished,3.0,0.0,2026-10-06T18:45:00Z
+15534114,UEFA Nations League,2026/27,0,2026-10-06,Switzerland,4699,North Macedonia,4777,finished,3.0,0.0,2026-10-06T18:45:00Z
+15534082,UEFA Nations League,2026/27,0,2026-10-06,Croatia,4715,Spain,4698,finished,1.0,2.0,2026-10-06T18:45:00Z
+17167387,International Friendly Games,2026/27,0,2026-10-06,Argentina,4819,Benin,4744,finished,3.0,0.0,2026-10-06T23:00:00Z
+17254943,International Friendly Games,2026/27,0,2026-10-06,Colombia,4820,Peru,4790,finished,2.0,0.0,2026-10-06T23:45:00Z
+17257000,International Friendly Games,2026/27,0,2026-10-07,Mexico,4781,Chile,4754,finished,0.0,2.0,2026-10-07T02:30:00Z
+15534041,UEFA Nations League,2026/27,0,2026-11-12,Türkiye,4700,Belgium,4717,upcoming,,,2026-11-12T17:00:00Z
+15534086,UEFA Nations League,2026/27,0,2026-11-12,Czechia,4714,Spain,4698,upcoming,,,2026-11-12T19:45:00Z
+15534088,UEFA Nations League,2026/27,0,2026-11-12,England,4713,Croatia,4715,upcoming,,,2026-11-12T19:45:00Z
+15534030,UEFA Nations League,2026/27,0,2026-11-12,Italy,4707,France,4481,upcoming,,,2026-11-12T19:45:00Z
+15534069,UEFA Nations League,2026/27,0,2026-11-13,Netherlands,4705,Greece,4710,upcoming,,,2026-11-13T19:45:00Z
+15534113,UEFA Nations League,2026/27,0,2026-11-13,Slovenia,4484,Switzerland,4699,upcoming,,,2026-11-13T19:45:00Z
+15534059,UEFA Nations League,2026/27,0,2026-11-13,Serbia,6355,Germany,4711,upcoming,,,2026-11-13T19:45:00Z
+17364189,Africa Cup of Nations Qual.,2026/27,0,2026-11-13,Morocco,4778,Niger,8031,upcoming,,,2026-11-13T20:00:00Z
+17497151,International Friendly Games,2026/27,0,2026-11-13,Argentina,4819,Uruguay,4725,upcoming,,,2026-11-13T23:00:00Z
+17510186,International Friendly Games,2026/27,0,2026-11-14,Colombia,4820,Chile,4754,upcoming,,,2026-11-14T00:00:00Z
+17485338,International Friendly Games,2026/27,0,2026-11-14,Japan,4770,Brazil,4748,upcoming,,,2026-11-14T10:15:00Z
+15534093,UEFA Nations League,2026/27,0,2026-11-14,Portugal,4704,Denmark,4476,upcoming,,,2026-11-14T19:45:00Z
+17299151,CONCACAF Nations League,2026/27,0,2026-11-15,Jamaica,4769,Mexico,4781,upcoming,,,2026-11-15T01:00:00Z
+15534036,UEFA Nations League,2026/27,0,2026-11-15,Belgium,4717,Italy,4707,upcoming,,,2026-11-15T19:45:00Z
+15534029,UEFA Nations League,2026/27,0,2026-11-15,France,4481,Türkiye,4700,upcoming,,,2026-11-15T19:45:00Z
+15534089,UEFA Nations League,2026/27,0,2026-11-15,Croatia,4715,Czechia,4714,upcoming,,,2026-11-15T19:45:00Z
+15534083,UEFA Nations League,2026/27,0,2026-11-15,Spain,4698,England,4713,upcoming,,,2026-11-15T19:45:00Z
+15534056,UEFA Nations League,2026/27,0,2026-11-16,Germany,4711,Netherlands,4705,upcoming,,,2026-11-16T19:45:00Z
+15534107,UEFA Nations League,2026/27,0,2026-11-16,Switzerland,4699,Scotland,4695,upcoming,,,2026-11-16T19:45:00Z
+17511849,International Friendly Games,2026/27,0,2026-11-17,Argentina,4819,Costa Rica,4756,upcoming,,,2026-11-17T15:00:00Z
+15534098,UEFA Nations League,2026/27,0,2026-11-17,Wales,4702,Portugal,4704,upcoming,,,2026-11-17T19:45:00Z
+17364192,Africa Cup of Nations Qual.,2026/27,0,2026-11-17,Niger,8031,Morocco,4778,upcoming,,,2026-11-17T20:00:00Z
+17511850,International Friendly Games,2026/27,0,2026-11-17,Chile,4754,Colombia,4820,upcoming,,,2026-11-17T23:00:00Z
+17299467,CONCACAF Nations League,2026/27,0,2026-11-18,Mexico,4781,Jamaica,4769,upcoming,,,2026-11-18T02:30:00Z

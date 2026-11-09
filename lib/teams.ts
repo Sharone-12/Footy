@@ -168,6 +168,12 @@ export const LEAGUE_TOURNAMENT_ID: Record<string, number> = {
   "Coppa Italia": 326,
   "DFB-Pokal": 209,
   "Coupe de France": 328,
+  // National-team competitions, for the international fixtures that ride into
+  // `matches` alongside the clubs. Only the ones the FIFA top 15 actually
+  // play; getLeagueTournamentId's fallbacks below catch the rest.
+  "UEFA Nations League": 10783,
+  "International Friendly Games": 851,
+  "FIFA World Cup": 16,
 }
 
 /** Robust resolver to match any league string (case-insensitive, normalized) to a tournament ID */
@@ -189,6 +195,9 @@ export function getLeagueTournamentId(name?: string | null): number | undefined 
   if (clean.includes("carabao") || clean.includes("eflcup")) return 201
   if (clean.includes("coppaitalia")) return 326
   if (clean.includes("dfb")) return 209
+  if (clean.includes("nationsleague")) return 10783
+  if (clean.includes("friendly") || clean.includes("friendlies")) return 851
+  if (clean.includes("worldcup")) return 16
 
   return undefined
 }

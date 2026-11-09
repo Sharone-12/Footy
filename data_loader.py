@@ -58,6 +58,31 @@ LEAGUES = {
     "Champions League": {"tournament": 7, "slug": "champions_league"},
 }
 
+# National teams whose fixtures ride along into `matches`, so the live section
+# is not empty through an international break. Deliberately NOT in LEAGUES:
+# that dict also drives fetch_player_stats, and national squads in `players`
+# would wreck every leaderboard and squad page.
+#
+# Fetched per team rather than per competition. One list covers the Nations
+# League, the qualifiers of four confederations and the friendlies, and it
+# needs no new tournament id when a side enters a competition we never
+# configured. Names are Sofascore's own; ids resolved from its search.
+#
+# The FIFA top 15, ranking of 7 Nov 2026. It is a hand-kept list: re-rank it
+# when the table moves enough to care.
+NATIONAL_TEAMS = {
+    "Spain": 4698, "Argentina": 4819, "France": 4481, "England": 4713,
+    "Portugal": 4704, "Brazil": 4748, "Morocco": 4778, "Belgium": 4717,
+    "Netherlands": 4705, "Mexico": 4781, "Colombia": 4820, "Switzerland": 4699,
+    "Germany": 4711, "Croatia": 4715, "Italy": 4707,
+}
+
+# How far back a played international is still worth carrying. The live
+# section looks a day back and a week forward, and these rows feed no table,
+# so a season of history would only buy stat fetches nobody reads.
+# ponytail: fixed window, widen it if a page ever wants international history.
+INTERNATIONAL_BACKFILL_DAYS = 45
+
 
 def _trim_to_teams(df: pd.DataFrame, leagues: dict, cols: tuple[str, ...]) -> pd.DataFrame:
     """Drop rows from restricted leagues that don't involve one of their teams.
@@ -490,6 +515,41 @@ def _status_of(ev: dict) -> str:
     return STATUS_MAP.get(str((ev.get("status") or {}).get("type") or ""), "upcoming")
 
 
+def _match_row(ev: dict, league: str, season: str, rnd: int) -> dict:
+    """One `matches` row from a Sofascore event, whatever fetched it."""
+    hs = ev.get("homeScore", {})
+    aws = ev.get("awayScore", {})
+    status = _status_of(ev)
+    finished = status == "finished"
+    return {
+        "event_id": ev["id"],
+        "league": league,
+        "season": season,
+        "round": rnd,
+        "date": ev.get("startTimestamp"),
+        "home": ev["homeTeam"]["name"],
+        "home_id": ev["homeTeam"]["id"],
+        "away": ev["awayTeam"]["name"],
+        "away_id": ev["awayTeam"]["id"],
+        "status": status,
+        "home_goals": hs.get("current") if finished else None,
+        "away_goals": aws.get("current") if finished else None,
+    }
+
+
+def _finalise_dates(df: pd.DataFrame) -> pd.DataFrame:
+    """Epoch -> the day-only `date` everything groups by, plus a true `kickoff`."""
+    if df.empty or "date" not in df.columns:
+        return df
+    ts = pd.to_datetime(df["date"], unit="s", utc=True)
+    # Sofascore gives the real kickoff epoch; `date` keeps the day-only form
+    # everything downstream already groups by, `kickoff` keeps the time so a
+    # countdown has something true to count to.
+    df["kickoff"] = ts.dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+    df["date"] = ts.dt.strftime("%Y-%m-%d")
+    return df
+
+
 def fetch_matches(start: int, leagues: dict | None = None, refresh: bool = False) -> pd.DataFrame:
     leagues = leagues or LEAGUES
     rows = []
@@ -516,38 +576,73 @@ def fetch_matches(start: int, leagues: dict | None = None, refresh: bool = False
             if not events:
                 break
             for ev in events:
-                hs = ev.get("homeScore", {})
-                aws = ev.get("awayScore", {})
-                status = _status_of(ev)
-                finished = status == "finished"
-                row = {
-                    "event_id": ev["id"],
-                    "league": league,
-                    "season": season_label(start),
-                    "round": rnd,
-                    "date": ev.get("startTimestamp"),
-                    "home": ev["homeTeam"]["name"],
-                    "home_id": ev["homeTeam"]["id"],
-                    "away": ev["awayTeam"]["name"],
-                    "away_id": ev["awayTeam"]["id"],
-                    "status": status,
-                    "home_goals": hs.get("current") if finished else None,
-                    "away_goals": aws.get("current") if finished else None,
-                }
-                rows.append(row)
+                rows.append(_match_row(ev, league, season_label(start), rnd))
             rnd += 1
         print(f"  {league} {season_label(start)}: {sum(1 for r in rows if r['league'] == league)} matches ({rnd - 1} rounds)")
-    df = pd.DataFrame(rows)
+    return _finalise_dates(pd.DataFrame(rows))
+
+
+def fetch_international_matches(start: int, refresh: bool = False) -> pd.DataFrame:
+    """Fixtures and recent results for the national teams in NATIONAL_TEAMS.
+
+    Per team, not per competition: `/team/{id}/events/next` and `/events/last`
+    return whatever that side is actually playing, so a Nations League round,
+    an AFCON qualifier and a friendly all arrive without a tournament id each.
+
+    `league` is the competition's own name, so these rows sit outside
+    FULL_LEAGUES and are ignored by the standings, the power rankings and the
+    predictions model — all of which are club-season shaped. They are visible
+    exactly where fixtures are listed.
+    """
+    cutoff = time.time() - INTERNATIONAL_BACKFILL_DAYS * 86_400
+    rows: dict[int, dict] = {}
+    for team, tid in NATIONAL_TEAMS.items():
+        got = 0
+        for kind in ("next", "last"):
+            url = f"{SOFASCORE}/api/v1/team/{tid}/events/{kind}/0"
+            cache = RAW / f"events_team_{tid}_{kind}.json"
+            try:
+                data = _get(url, cache, refresh)
+            except RuntimeError as e:
+                # One nation being blocked must not sink the other fourteen.
+                print(f"  SKIPPED {team} {kind}: {e}")
+                continue
+            for ev in data.get("events", []):
+                # Both sides of a top-15 v top-15 tie fetch the same event.
+                if ev["id"] in rows:
+                    continue
+                if kind == "last" and (ev.get("startTimestamp") or 0) < cutoff:
+                    continue
+                tour = ev.get("tournament") or {}
+                league = (tour.get("uniqueTournament") or {}).get("name") or tour.get("name")
+                if not league:
+                    continue
+                rows[ev["id"]] = _match_row(ev, league, season_label(start), 0)
+                got += 1
+        print(f"  {team}: {got} matches")
+    return _dedupe_fixtures(_finalise_dates(pd.DataFrame(list(rows.values()))))
+
+
+def _dedupe_fixtures(df: pd.DataFrame) -> pd.DataFrame:
+    """One row per fixture.
+
+    Sofascore holds two listings for some friendlies — same sides, same day,
+    different event ids, and often one of them with a midnight placeholder
+    kickoff (Colombia v Chile, 14 Nov 2026). Both would be drawn in the live
+    list. Keep the listing that has a real kickoff time, and the newer id when
+    neither does.
+    """
     if df.empty:
         return df
-    if "date" in df.columns:
-        ts = pd.to_datetime(df["date"], unit="s", utc=True)
-        # Sofascore gives the real kickoff epoch; `date` keeps the day-only form
-        # everything downstream already groups by, `kickoff` keeps the time so a
-        # countdown has something true to count to.
-        df["kickoff"] = ts.dt.strftime("%Y-%m-%dT%H:%M:%SZ")
-        df["date"] = ts.dt.strftime("%Y-%m-%d")
-    return df
+    placeholder = df["kickoff"].str.endswith("T00:00:00Z")
+    return (
+        df.assign(_placeholder=placeholder.astype(int))
+        .sort_values(["_placeholder", "event_id"], ascending=[True, False])
+        .drop_duplicates(subset=["date", "home", "away"], keep="first")
+        .drop(columns="_placeholder")
+        .sort_values("kickoff")
+        .reset_index(drop=True)
+    )
 
 
 def fetch_match_stats(event_ids: list[int], refresh: bool = False, limit: int | None = None) -> pd.DataFrame:
@@ -728,6 +823,24 @@ def build(
                 print(f"  API error ({e}), falling back to cache")
                 matches = fetch_matches(start, leagues, refresh=False)
             matches = _trim_to_teams(matches, leagues, ("home", "away"))
+
+            # Internationals ride into the same file so the live section keeps
+            # working through a break. Current season only, and skipped when
+            # the run is narrowed to one league. Their ids stay out of
+            # `club_ids` because the stats fetch below is for club football —
+            # nothing reads team stats for a friendly.
+            club_ids = set(matches["event_id"]) if not matches.empty else set()
+            if is_current and not league_filter:
+                print("Fetching international fixtures...")
+                try:
+                    intl = fetch_international_matches(start, refresh=do_refresh)
+                except RuntimeError as e:
+                    print(f"  API error ({e}), continuing without internationals")
+                    intl = pd.DataFrame()
+                if not intl.empty:
+                    print(f"  {len(intl)} international matches")
+                    matches = pd.concat([matches, intl], ignore_index=True)
+
             if not matches.empty:
                 matches.to_csv(PROCESSED / f"matches_{season_tag(start)}.csv", index=False)
                 finished = matches[matches["status"] == "finished"]
@@ -735,7 +848,7 @@ def build(
                 print(f"  saved {len(finished)} results, {len(upcoming)} upcoming")
                 out[f"matches_{tag}"] = matches
 
-                finished_ids = finished["event_id"].tolist()
+                finished_ids = [e for e in finished["event_id"].tolist() if e in club_ids]
                 cached_stats = [eid for eid in finished_ids if (RAW / f"match_stats_{eid}.json").exists()]
                 new_ids = [eid for eid in finished_ids if eid not in cached_stats]
                 if new_ids and not offline:

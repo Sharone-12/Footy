@@ -203,6 +203,78 @@ def test_status_is_not_collapsed() -> None:
     assert dl._status_of({"status": None}) == "upcoming"
 
 
+def _intl_event(eid: int, kickoff: float, league: str, home: str, away: str) -> dict:
+    return {
+        "id": eid,
+        "startTimestamp": kickoff,
+        "status": {"type": "notstarted"},
+        "homeTeam": {"name": home, "id": 1},
+        "awayTeam": {"name": away, "id": 2},
+        "homeScore": {},
+        "awayScore": {},
+        "tournament": {"name": "UEFA Nations League, League A, Gr. 3",
+                       "uniqueTournament": {"name": "UEFA Nations League"}},
+    }
+
+
+def test_international_fetch() -> None:
+    """Per-team fetching must dedupe the tie both sides return, drop results
+    older than the window, and never pull national squads into `players`."""
+    # The leaderboards break quietly if these ever share a dict.
+    assert not set(dl.NATIONAL_TEAMS) & set(dl.LEAGUES)
+
+    old = time.time() - (dl.INTERNATIONAL_BACKFILL_DAYS + 5) * DAY
+    payload = {
+        ("next", 4698): [_intl_event(9001, time.time() + DAY, "x", "Spain", "England")],
+        ("last", 4698): [_intl_event(9002, old, "x", "Spain", "Croatia")],
+        # England returns the same upcoming tie from its own side.
+        ("next", 4713): [_intl_event(9001, time.time() + DAY, "x", "Spain", "England")],
+        ("last", 4713): [],
+    }
+
+    real_get, real_teams = dl._get, dl.NATIONAL_TEAMS
+    dl.NATIONAL_TEAMS = {"Spain": 4698, "England": 4713}
+    try:
+        def fake_get(url: str, cache, refresh: bool = False) -> dict:
+            tid = int(url.split("/team/")[1].split("/")[0])
+            kind = "next" if "/next/" in url else "last"
+            return {"events": payload.get((kind, tid), [])}
+
+        dl._get = fake_get
+        df = dl.fetch_international_matches(2026)
+    finally:
+        dl._get, dl.NATIONAL_TEAMS = real_get, real_teams
+
+    assert list(df["event_id"]) == [9001], list(df["event_id"])  # deduped, 9002 too old
+    row = df.iloc[0]
+    assert row["league"] == "UEFA Nations League"  # the short name, not the group label
+    assert row["season"] == "2026/27"
+    assert row["date"] and row["kickoff"].endswith("Z")
+
+
+def test_duplicate_friendlies_collapse() -> None:
+    """Sofascore lists some friendlies twice. The live list must draw one."""
+    import pandas as pd
+
+    df = pd.DataFrame([
+        # Same tie, two ids, both with the midnight placeholder: newer id wins.
+        {"event_id": 1, "date": "2026-11-14", "kickoff": "2026-11-14T00:00:00Z",
+         "home": "Colombia", "away": "Chile"},
+        {"event_id": 2, "date": "2026-11-14", "kickoff": "2026-11-14T00:00:00Z",
+         "home": "Colombia", "away": "Chile"},
+        # Same tie, one real kickoff: the real one wins despite the older id.
+        {"event_id": 9, "date": "2026-11-17", "kickoff": "2026-11-17T00:00:00Z",
+         "home": "Argentina", "away": "Costa Rica"},
+        {"event_id": 3, "date": "2026-11-17", "kickoff": "2026-11-17T15:00:00Z",
+         "home": "Argentina", "away": "Costa Rica"},
+        # A real second fixture between the same sides on another day stays.
+        {"event_id": 4, "date": "2026-11-18", "kickoff": "2026-11-18T19:00:00Z",
+         "home": "Argentina", "away": "Costa Rica"},
+    ])
+    out = dl._dedupe_fixtures(df)
+    assert list(out["event_id"]) == [2, 3, 4], list(out["event_id"])
+
+
 if __name__ == "__main__":
     for name, fn in sorted(globals().items()):
         if name.startswith("test_"):
