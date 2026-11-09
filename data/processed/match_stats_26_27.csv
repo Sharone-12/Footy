@@ -5003,6 +5003,59 @@ event_id,stat,home,away
 16363920,Goals prevented,0.26,0.27
 16363920,Punches,1,1
 16363920,Goal kicks,8,4
+16363918,Ball possession,56%,44%
+16363918,Distance covered,119.1 km,118.9 km
+16363918,Expected goals,3.55,2.88
+16363918,Big chances,6,5
+16363918,Total shots,26,12
+16363918,Goalkeeper saves,3,5
+16363918,Number of sprints,120,89
+16363918,Corner kicks,8,1
+16363918,Fouls,18,9
+16363918,Passes,502,410
+16363918,Tackles,26,11
+16363918,Free kicks,8,17
+16363918,Yellow cards,1,1
+16363918,Average rating,7.13,6.94
+16363918,Total shots,26,12
+16363918,Shots on target,9,6
+16363918,Expected goals,3.55,2.88
+16363918,Expected goals on target,4.39,2.63
+16363918,Hit woodwork,1,1
+16363918,Shots off target,10,4
+16363918,Blocked shots,7,2
+16363918,Shots inside box,14,10
+16363918,Shots outside box,12,2
+16363918,Big chances scored,3,3
+16363918,Big chances missed,3,2
+16363918,Through balls,2,3
+16363918,Touches in penalty area,48,18
+16363918,Fouled in final third,5,4
+16363918,Offsides,2,0
+16363918,Accurate passes,438,347
+16363918,Throw-ins,17,11
+16363918,Final third entries,58,46
+16363918,Final third phase,157/197 (80%),57/83 (69%)
+16363918,Long balls,19/33 (58%),19/46 (41%)
+16363918,Crosses,5/30 (17%),2/5 (40%)
+16363918,Duels,51%,49%
+16363918,Dispossessed,6,13
+16363918,Ground duels,43/80 (54%),37/80 (46%)
+16363918,Aerial duels,9/22 (41%),13/22 (59%)
+16363918,Dribbles,8/13 (62%),8/21 (38%)
+16363918,Tackles won,54%,73%
+16363918,Total tackles,26,11
+16363918,Interceptions,12,12
+16363918,Recoveries,57,50
+16363918,Clearances,12,36
+16363918,Errors lead to a shot,0,4
+16363918,Errors lead to a goal,1,1
+16363918,Total saves,3,5
+16363918,Goals prevented,-1.37,0.39
+16363918,Big saves,0,3
+16363918,High claims,0,1
+16363918,Punches,0,1
+16363918,Goal kicks,7,15
 16421047,Ball possession,52%,48%
 16421047,Distance covered,101.1 km,94.8 km
 16421047,Expected goals,1.93,0.24
@@ -10755,6 +10808,148 @@ event_id,stat,home,away
 16421107,Big saves,2,0
 16421107,Punches,1,0
 16421107,Goal kicks,8,5
+16421104,Ball possession,59%,41%
+16421104,Expected goals,3.04,0.22
+16421104,Big chances,5,0
+16421104,Total shots,23,6
+16421104,Goalkeeper saves,0,9
+16421104,Corner kicks,6,1
+16421104,Fouls,8,9
+16421104,Passes,631,451
+16421104,Tackles,11,9
+16421104,Free kicks,9,8
+16421104,Yellow cards,1,2
+16421104,Average rating,7.65,7.40
+16421104,Total shots,23,6
+16421104,Shots on target,8,0
+16421104,Expected goals,3.04,0.22
+16421104,Expected goals on target,2.08,0.00
+16421104,Hit woodwork,1,0
+16421104,Shots off target,9,5
+16421104,Blocked shots,6,1
+16421104,Shots inside box,17,3
+16421104,Shots outside box,6,3
+16421104,Big chances missed,5,0
+16421104,Touches in penalty area,45,6
+16421104,Fouled in final third,2,1
+16421104,Offsides,10,0
+16421104,Accurate passes,562,378
+16421104,Throw-ins,25,6
+16421104,Final third entries,65,42
+16421104,Final third phase,151/183 (83%),44/67 (66%)
+16421104,Long balls,25/46 (54%),27/69 (39%)
+16421104,Crosses,3/22 (14%),1/5 (20%)
+16421104,Duels,57%,43%
+16421104,Dispossessed,5,5
+16421104,Ground duels,24/43 (56%),19/43 (44%)
+16421104,Aerial duels,13/22 (59%),9/22 (41%)
+16421104,Dribbles,6/10 (60%),3/9 (33%)
+16421104,Tackles won,55%,56%
+16421104,Total tackles,11,9
+16421104,Interceptions,4,11
+16421104,Recoveries,43,38
+16421104,Clearances,14,24
+16421104,Total saves,0,9
+16421104,Goals prevented,0.00,2.08
+16421104,Big saves,0,1
+16421104,High claims,1,0
+16421104,Goal kicks,5,11
+16421110,Ball possession,72%,28%
+16421110,Expected goals,2.30,0.62
+16421110,Big chances,5,1
+16421110,Total shots,22,9
+16421110,Goalkeeper saves,1,5
+16421110,Corner kicks,9,4
+16421110,Fouls,6,13
+16421110,Passes,566,219
+16421110,Tackles,22,20
+16421110,Free kicks,13,6
+16421110,Yellow cards,2,2
+16421110,Average rating,8.27,6.87
+16421110,Total shots,22,9
+16421110,Shots on target,7,1
+16421110,Expected goals,2.30,0.62
+16421110,Expected goals on target,3.36,0.20
+16421110,Shots off target,5,5
+16421110,Blocked shots,10,3
+16421110,Shots inside box,13,6
+16421110,Shots outside box,9,3
+16421110,Big chances scored,2,0
+16421110,Big chances missed,3,1
+16421110,Through balls,3,1
+16421110,Touches in penalty area,41,11
+16421110,Fouled in final third,7,0
+16421110,Offsides,2,1
+16421110,Accurate passes,488,133
+16421110,Throw-ins,17,15
+16421110,Final third entries,86,50
+16421110,Final third phase,128/183 (70%),39/74 (53%)
+16421110,Long balls,31/62 (50%),24/62 (39%)
+16421110,Crosses,3/26 (12%),1/7 (14%)
+16421110,Duels,51%,49%
+16421110,Dispossessed,6,14
+16421110,Ground duels,39/72 (54%),33/72 (46%)
+16421110,Aerial duels,14/31 (45%),17/31 (55%)
+16421110,Dribbles,5/19 (26%),7/15 (47%)
+16421110,Tackles won,64%,75%
+16421110,Total tackles,22,20
+16421110,Interceptions,8,8
+16421110,Recoveries,54,53
+16421110,Clearances,18,51
+16421110,Errors lead to a shot,0,1
+16421110,Total saves,1,5
+16421110,Goals prevented,0.20,1.36
+16421110,Big saves,0,1
+16421110,Punches,0,5
+16421110,Goal kicks,7,13
+16421101,Ball possession,37%,63%
+16421101,Expected goals,1.67,1.61
+16421101,Big chances,4,2
+16421101,Total shots,9,19
+16421101,Goalkeeper saves,3,3
+16421101,Corner kicks,4,2
+16421101,Fouls,14,14
+16421101,Passes,389,675
+16421101,Tackles,30,15
+16421101,Free kicks,14,14
+16421101,Yellow cards,4,1
+16421101,Average rating,7.07,7.45
+16421101,Total shots,9,19
+16421101,Shots on target,4,4
+16421101,Expected goals,1.67,1.61
+16421101,Expected goals on target,1.06,1.41
+16421101,Hit woodwork,1,1
+16421101,Shots off target,4,10
+16421101,Blocked shots,1,5
+16421101,Shots inside box,6,11
+16421101,Shots outside box,3,8
+16421101,Big chances scored,1,1
+16421101,Big chances missed,3,1
+16421101,Through balls,3,1
+16421101,Touches in penalty area,19,30
+16421101,Fouled in final third,1,3
+16421101,Offsides,5,1
+16421101,Accurate passes,314,615
+16421101,Throw-ins,13,13
+16421101,Final third entries,34,68
+16421101,Final third phase,56/85 (66%),141/177 (80%)
+16421101,Long balls,28/61 (46%),18/33 (55%)
+16421101,Crosses,3/6 (50%),2/9 (22%)
+16421101,Duels,55%,45%
+16421101,Dispossessed,11,19
+16421101,Ground duels,52/92 (57%),40/92 (43%)
+16421101,Aerial duels,6/14 (43%),8/14 (57%)
+16421101,Dribbles,8/12 (67%),11/22 (50%)
+16421101,Tackles won,53%,87%
+16421101,Total tackles,30,15
+16421101,Interceptions,10,7
+16421101,Recoveries,45,42
+16421101,Clearances,11,16
+16421101,Errors lead to a shot,2,1
+16421101,Total saves,3,3
+16421101,Goals prevented,-0.59,0.06
+16421101,High claims,0,2
+16421101,Goal kicks,11,5
 16283050,Ball possession,70%,30%
 16283050,Distance covered,103.7 km,107.6 km
 16283050,Expected goals,1.05,1.23
@@ -16163,6 +16358,104 @@ event_id,stat,home,away
 16285082,High claims,0,1
 16285082,Punches,0,1
 16285082,Goal kicks,7,8
+16285081,Ball possession,43%,57%
+16285081,Expected goals,1.81,0.21
+16285081,Big chances,4,0
+16285081,Total shots,14,5
+16285081,Goalkeeper saves,1,2
+16285081,Corner kicks,4,2
+16285081,Fouls,13,6
+16285081,Passes,499,652
+16285081,Tackles,13,13
+16285081,Free kicks,6,13
+16285081,Yellow cards,1,0
+16285081,Average rating,7.99,6.97
+16285081,Total shots,14,5
+16285081,Shots on target,4,1
+16285081,Expected goals,1.81,0.21
+16285081,Expected goals on target,1.24,0.01
+16285081,Hit woodwork,0,1
+16285081,Shots off target,8,3
+16285081,Blocked shots,2,1
+16285081,Shots inside box,10,4
+16285081,Shots outside box,4,1
+16285081,Big chances scored,2,0
+16285081,Big chances missed,2,0
+16285081,Through balls,0,1
+16285081,Touches in penalty area,33,11
+16285081,Fouled in final third,1,1
+16285081,Offsides,8,3
+16285081,Accurate passes,439,593
+16285081,Throw-ins,9,13
+16285081,Final third entries,35,70
+16285081,Final third phase,90/114 (79%),136/163 (83%)
+16285081,Long balls,31/48 (65%),17/31 (55%)
+16285081,Crosses,2/12 (17%),7/22 (32%)
+16285081,Duels,49%,51%
+16285081,Dispossessed,11,5
+16285081,Ground duels,21/49 (43%),28/49 (57%)
+16285081,Aerial duels,12/19 (63%),7/19 (37%)
+16285081,Dribbles,2/4 (50%),2/10 (20%)
+16285081,Tackles won,69%,38%
+16285081,Total tackles,13,13
+16285081,Interceptions,12,9
+16285081,Recoveries,46,43
+16285081,Clearances,20,23
+16285081,Errors lead to a shot,0,1
+16285081,Total saves,1,2
+16285081,Goals prevented,0.01,-0.76
+16285081,Big saves,0,1
+16285081,High claims,0,2
+16285081,Goal kicks,7,2
+16285076,Ball possession,41%,59%
+16285076,Expected goals,2.10,2.44
+16285076,Big chances,3,4
+16285076,Total shots,22,18
+16285076,Goalkeeper saves,4,4
+16285076,Corner kicks,5,12
+16285076,Fouls,16,18
+16285076,Passes,323,452
+16285076,Tackles,20,17
+16285076,Free kicks,18,16
+16285076,Yellow cards,1,3
+16285076,Average rating,7.38,7.56
+16285076,Total shots,22,18
+16285076,Shots on target,6,6
+16285076,Expected goals,2.10,2.44
+16285076,Expected goals on target,2.34,1.68
+16285076,Shots off target,9,6
+16285076,Blocked shots,7,6
+16285076,Shots inside box,13,12
+16285076,Shots outside box,9,6
+16285076,Big chances scored,2,2
+16285076,Big chances missed,1,2
+16285076,Touches in penalty area,25,38
+16285076,Fouled in final third,3,1
+16285076,Offsides,0,1
+16285076,Accurate passes,273,384
+16285076,Throw-ins,20,18
+16285076,Final third entries,40,53
+16285076,Final third phase,71/97 (73%),136/169 (80%)
+16285076,Long balls,17/33 (52%),17/42 (40%)
+16285076,Crosses,5/15 (33%),8/29 (28%)
+16285076,Duels,48%,52%
+16285076,Dispossessed,9,12
+16285076,Ground duels,41/86 (48%),45/86 (52%)
+16285076,Aerial duels,11/23 (48%),12/23 (52%)
+16285076,Dribbles,6/14 (43%),13/21 (62%)
+16285076,Tackles won,65%,35%
+16285076,Total tackles,20,17
+16285076,Interceptions,6,5
+16285076,Recoveries,32,37
+16285076,Clearances,26,16
+16285076,Errors lead to a shot,0,1
+16285076,Errors lead to a goal,1,0
+16285076,Total saves,4,4
+16285076,Goals prevented,-0.32,0.34
+16285076,Big saves,1,1
+16285076,High claims,1,0
+16285076,Punches,1,0
+16285076,Goal kicks,6,9
 16310922,Ball possession,67%,33%
 16310922,Distance covered,100.3 km,105.3 km
 16310922,Expected goals,1.86,0.18
@@ -20397,6 +20690,250 @@ event_id,stat,home,away
 16311009,High claims,0,2
 16311009,Punches,1,0
 16311009,Goal kicks,3,6
+16311002,Ball possession,52%,48%
+16311002,Expected goals,0.85,2.13
+16311002,Big chances,2,5
+16311002,Total shots,12,16
+16311002,Goalkeeper saves,6,3
+16311002,Corner kicks,6,4
+16311002,Fouls,10,6
+16311002,Passes,474,460
+16311002,Tackles,12,11
+16311002,Free kicks,6,10
+16311002,Yellow cards,3,1
+16311002,Average rating,7.57,8.59
+16311002,Total shots,12,16
+16311002,Shots on target,3,8
+16311002,Expected goals,0.85,2.13
+16311002,Expected goals on target,1.38,2.77
+16311002,Shots off target,8,6
+16311002,Blocked shots,1,2
+16311002,Shots inside box,7,14
+16311002,Shots outside box,5,2
+16311002,Big chances scored,0,1
+16311002,Big chances missed,2,4
+16311002,Through balls,0,3
+16311002,Touches in penalty area,23,30
+16311002,Fouled in final third,2,1
+16311002,Offsides,0,1
+16311002,Accurate passes,413,400
+16311002,Throw-ins,16,18
+16311002,Final third entries,45,35
+16311002,Final third phase,68/99 (69%),90/118 (76%)
+16311002,Long balls,22/32 (69%),36/57 (63%)
+16311002,Crosses,6/27 (22%),2/11 (18%)
+16311002,Duels,53%,47%
+16311002,Dispossessed,4,7
+16311002,Ground duels,31/57 (54%),26/57 (46%)
+16311002,Aerial duels,7/15 (47%),8/15 (53%)
+16311002,Dribbles,12/19 (63%),5/11 (45%)
+16311002,Tackles won,58%,82%
+16311002,Total tackles,12,11
+16311002,Interceptions,5,8
+16311002,Recoveries,43,39
+16311002,Clearances,22,29
+16311002,Total saves,6,3
+16311002,Goals prevented,0.77,1.38
+16311002,Big saves,2,2
+16311002,High claims,1,1
+16311002,Goal kicks,6,9
+16311005,Ball possession,54%,46%
+16311005,Expected goals,0.96,1.65
+16311005,Big chances,0,2
+16311005,Total shots,21,7
+16311005,Goalkeeper saves,1,5
+16311005,Corner kicks,5,0
+16311005,Fouls,16,19
+16311005,Passes,498,438
+16311005,Tackles,14,14
+16311005,Free kicks,19,16
+16311005,Yellow cards,1,3
+16311005,Average rating,6.61,7.56
+16311005,Total shots,21,7
+16311005,Shots on target,5,3
+16311005,Expected goals,0.96,1.65
+16311005,Expected goals on target,0.37,0.94
+16311005,Shots off target,7,3
+16311005,Blocked shots,9,1
+16311005,Shots inside box,14,5
+16311005,Shots outside box,7,2
+16311005,Big chances scored,0,1
+16311005,Big chances missed,0,1
+16311005,Touches in penalty area,27,16
+16311005,Fouled in final third,3,0
+16311005,Offsides,0,3
+16311005,Accurate passes,431,352
+16311005,Throw-ins,17,22
+16311005,Final third entries,49,38
+16311005,Final third phase,74/110 (67%),53/80 (66%)
+16311005,Long balls,23/48 (48%),20/60 (33%)
+16311005,Crosses,8/27 (30%),2/7 (29%)
+16311005,Duels,58%,42%
+16311005,Dispossessed,4,10
+16311005,Ground duels,43/74 (58%),31/74 (42%)
+16311005,Aerial duels,17/29 (59%),12/29 (41%)
+16311005,Dribbles,12/22 (55%),3/7 (43%)
+16311005,Tackles won,79%,64%
+16311005,Total tackles,14,14
+16311005,Interceptions,14,4
+16311005,Recoveries,49,48
+16311005,Clearances,10,25
+16311005,Errors lead to a shot,0,3
+16311005,Errors lead to a goal,1,0
+16311005,Total saves,1,5
+16311005,Goals prevented,-1.06,0.37
+16311005,Big saves,0,1
+16311005,High claims,0,3
+16311005,Goal kicks,5,13
+16311006,Ball possession,48%,52%
+16311006,Expected goals,1.45,0.96
+16311006,Big chances,2,2
+16311006,Total shots,19,6
+16311006,Goalkeeper saves,2,4
+16311006,Corner kicks,8,7
+16311006,Fouls,16,8
+16311006,Passes,424,471
+16311006,Tackles,17,10
+16311006,Free kicks,8,16
+16311006,Average rating,7.49,7.22
+16311006,Total shots,19,6
+16311006,Shots on target,5,3
+16311006,Expected goals,1.45,0.96
+16311006,Expected goals on target,2.46,1.12
+16311006,Shots off target,9,2
+16311006,Blocked shots,5,1
+16311006,Shots inside box,12,3
+16311006,Shots outside box,7,3
+16311006,Big chances scored,1,1
+16311006,Big chances missed,1,1
+16311006,Touches in penalty area,33,18
+16311006,Fouled in final third,3,1
+16311006,Offsides,2,3
+16311006,Accurate passes,342,393
+16311006,Throw-ins,19,21
+16311006,Final third entries,54,37
+16311006,Final third phase,70/110 (64%),56/79 (71%)
+16311006,Long balls,32/54 (59%),30/58 (52%)
+16311006,Crosses,8/29 (28%),3/22 (14%)
+16311006,Duels,48%,52%
+16311006,Dispossessed,6,4
+16311006,Ground duels,32/63 (51%),31/63 (49%)
+16311006,Aerial duels,9/22 (41%),13/22 (59%)
+16311006,Dribbles,8/12 (67%),6/19 (32%)
+16311006,Tackles won,71%,50%
+16311006,Total tackles,17,10
+16311006,Interceptions,15,10
+16311006,Recoveries,60,58
+16311006,Clearances,21,28
+16311006,Errors lead to a shot,0,1
+16311006,Errors lead to a goal,1,0
+16311006,Total saves,2,4
+16311006,Goals prevented,0.12,1.46
+16311006,Big saves,1,1
+16311006,High claims,0,3
+16311006,Punches,1,0
+16311006,Goal kicks,5,7
+16311004,Ball possession,31%,69%
+16311004,Expected goals,1.84,0.64
+16311004,Big chances,3,2
+16311004,Total shots,13,10
+16311004,Goalkeeper saves,2,4
+16311004,Corner kicks,1,8
+16311004,Fouls,14,10
+16311004,Passes,313,664
+16311004,Tackles,22,22
+16311004,Free kicks,9,14
+16311004,Yellow cards,1,2
+16311004,Average rating,7.97,6.99
+16311004,Total shots,13,10
+16311004,Shots on target,6,2
+16311004,Expected goals,1.84,0.64
+16311004,Expected goals on target,2.38,0.58
+16311004,Hit woodwork,0,1
+16311004,Shots off target,5,5
+16311004,Blocked shots,2,3
+16311004,Shots inside box,8,7
+16311004,Shots outside box,5,3
+16311004,Big chances scored,1,0
+16311004,Big chances missed,2,2
+16311004,Through balls,0,1
+16311004,Touches in penalty area,24,33
+16311004,Fouled in final third,1,4
+16311004,Offsides,2,2
+16311004,Accurate passes,250,588
+16311004,Throw-ins,14,14
+16311004,Final third entries,43,83
+16311004,Final third phase,53/83 (64%),145/183 (79%)
+16311004,Long balls,30/60 (50%),22/42 (52%)
+16311004,Crosses,0/4 (0%),5/36 (14%)
+16311004,Duels,45%,55%
+16311004,Dispossessed,9,9
+16311004,Ground duels,38/87 (44%),49/87 (56%)
+16311004,Aerial duels,12/23 (52%),11/23 (48%)
+16311004,Dribbles,8/21 (38%),14/27 (52%)
+16311004,Tackles won,59%,55%
+16311004,Total tackles,22,22
+16311004,Interceptions,11,5
+16311004,Recoveries,55,58
+16311004,Clearances,36,13
+16311004,Errors lead to a shot,0,3
+16311004,Errors lead to a goal,0,1
+16311004,Total saves,2,4
+16311004,Goals prevented,0.58,0.38
+16311004,Big saves,0,1
+16311004,High claims,2,0
+16311004,Punches,1,0
+16311004,Goal kicks,9,6
+16311007,Ball possession,41%,59%
+16311007,Expected goals,1.92,2.16
+16311007,Big chances,5,3
+16311007,Total shots,13,16
+16311007,Goalkeeper saves,2,5
+16311007,Corner kicks,4,6
+16311007,Fouls,15,8
+16311007,Passes,446,644
+16311007,Tackles,10,15
+16311007,Free kicks,8,15
+16311007,Yellow cards,1,2
+16311007,Average rating,7.29,8.10
+16311007,Total shots,13,16
+16311007,Shots on target,6,5
+16311007,Expected goals,1.92,2.16
+16311007,Expected goals on target,2.53,2.21
+16311007,Hit woodwork,0,1
+16311007,Shots off target,5,8
+16311007,Blocked shots,2,3
+16311007,Shots inside box,8,10
+16311007,Shots outside box,5,6
+16311007,Big chances scored,1,2
+16311007,Big chances missed,4,1
+16311007,Through balls,1,1
+16311007,Touches in penalty area,21,20
+16311007,Fouled in final third,0,5
+16311007,Offsides,1,0
+16311007,Accurate passes,350,553
+16311007,Throw-ins,21,20
+16311007,Final third entries,44,50
+16311007,Final third phase,73/102 (72%),99/140 (71%)
+16311007,Long balls,23/60 (38%),22/50 (44%)
+16311007,Crosses,4/17 (24%),3/14 (21%)
+16311007,Duels,39%,61%
+16311007,Dispossessed,11,7
+16311007,Ground duels,20/57 (35%),37/57 (65%)
+16311007,Aerial duels,11/23 (48%),12/23 (52%)
+16311007,Dribbles,2/6 (33%),7/10 (70%)
+16311007,Tackles won,50%,40%
+16311007,Total tackles,10,15
+16311007,Interceptions,12,10
+16311007,Recoveries,49,48
+16311007,Clearances,24,18
+16311007,Errors lead to a shot,2,1
+16311007,Errors lead to a goal,1,0
+16311007,Total saves,2,5
+16311007,Goals prevented,0.21,1.53
+16311007,Big saves,0,1
+16311007,High claims,1,2
+16311007,Goal kicks,11,5
 16434087,Ball possession,59%,41%
 16434087,Distance covered,105.8 km,106.2 km
 16434087,Expected goals,4.06,0.79
@@ -24353,6 +24890,105 @@ event_id,stat,home,away
 16434095,Big saves,3,1
 16434095,High claims,0,1
 16434095,Goal kicks,12,4
+16434093,Ball possession,59%,41%
+16434093,Expected goals,2.58,0.35
+16434093,Big chances,5,1
+16434093,Total shots,20,4
+16434093,Goalkeeper saves,1,8
+16434093,Corner kicks,5,1
+16434093,Fouls,10,17
+16434093,Passes,537,368
+16434093,Tackles,7,13
+16434093,Free kicks,16,10
+16434093,Yellow cards,2,2
+16434093,Average rating,7.87,6.83
+16434093,Total shots,20,4
+16434093,Shots on target,9,0
+16434093,Expected goals,2.58,0.35
+16434093,Expected goals on target,3.11,0.00
+16434093,Hit woodwork,1,0
+16434093,Shots off target,6,2
+16434093,Blocked shots,5,2
+16434093,Shots inside box,14,4
+16434093,Shots outside box,6,0
+16434093,Big chances scored,1,0
+16434093,Big chances missed,4,1
+16434093,Through balls,1,0
+16434093,Touches in penalty area,44,11
+16434093,Fouled in final third,6,0
+16434093,Offsides,0,3
+16434093,Accurate passes,465,276
+16434093,Throw-ins,18,19
+16434093,Final third entries,66,33
+16434093,Final third phase,127/163 (78%),50/78 (64%)
+16434093,Long balls,15/42 (36%),23/58 (40%)
+16434093,Crosses,4/23 (17%),3/10 (30%)
+16434093,Duels,51%,49%
+16434093,Dispossessed,4,5
+16434093,Ground duels,27/50 (54%),23/50 (46%)
+16434093,Aerial duels,16/34 (47%),18/34 (53%)
+16434093,Dribbles,5/14 (36%),2/4 (50%)
+16434093,Tackles won,86%,77%
+16434093,Total tackles,7,13
+16434093,Interceptions,7,6
+16434093,Recoveries,44,43
+16434093,Clearances,30,34
+16434093,Errors lead to a shot,0,1
+16434093,Total saves,1,8
+16434093,Goals prevented,0.00,1.11
+16434093,Big saves,0,3
+16434093,High claims,0,4
+16434093,Punches,1,1
+16434093,Goal kicks,3,10
+16434093,Penalty saves,0,1
+16434094,Ball possession,49%,51%
+16434094,Expected goals,1.90,2.60
+16434094,Big chances,4,4
+16434094,Total shots,15,23
+16434094,Goalkeeper saves,4,5
+16434094,Corner kicks,6,4
+16434094,Fouls,10,9
+16434094,Passes,456,466
+16434094,Tackles,17,14
+16434094,Free kicks,9,10
+16434094,Yellow cards,0,2
+16434094,Average rating,7.86,7.28
+16434094,Total shots,15,23
+16434094,Shots on target,7,6
+16434094,Expected goals,1.90,2.60
+16434094,Expected goals on target,1.58,0.81
+16434094,Hit woodwork,0,1
+16434094,Shots off target,6,7
+16434094,Blocked shots,2,10
+16434094,Shots inside box,10,18
+16434094,Shots outside box,5,5
+16434094,Big chances scored,2,1
+16434094,Big chances missed,2,3
+16434094,Touches in penalty area,26,38
+16434094,Fouled in final third,4,2
+16434094,Offsides,6,2
+16434094,Accurate passes,367,348
+16434094,Throw-ins,21,26
+16434094,Final third entries,46,75
+16434094,Final third phase,66/104 (63%),96/155 (62%)
+16434094,Long balls,35/67 (52%),17/53 (32%)
+16434094,Crosses,3/15 (20%),6/21 (29%)
+16434094,Duels,51%,49%
+16434094,Dispossessed,7,8
+16434094,Ground duels,32/63 (51%),31/63 (49%)
+16434094,Aerial duels,16/32 (50%),16/32 (50%)
+16434094,Dribbles,7/14 (50%),7/16 (44%)
+16434094,Tackles won,65%,57%
+16434094,Total tackles,17,14
+16434094,Interceptions,13,14
+16434094,Recoveries,55,57
+16434094,Clearances,45,24
+16434094,Errors lead to a goal,0,1
+16434094,Total saves,4,5
+16434094,Goals prevented,-0.19,-0.42
+16434094,High claims,0,2
+16434094,Punches,1,0
+16434094,Goal kicks,9,10
 16939050,Ball possession,49%,51%
 16939050,Distance covered,112.6 km,114.4 km
 16939050,Big chances,4,3
