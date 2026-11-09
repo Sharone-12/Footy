@@ -94,7 +94,7 @@ export async function GET(request: Request) {
         })),
       },
       {
-        headers: { "Cache-Control": "public, s-maxage=4, stale-while-revalidate=12" },
+        headers: { "Cache-Control": "public, s-maxage=20, stale-while-revalidate=60" },
       },
     )
   }
@@ -169,7 +169,7 @@ export async function GET(request: Request) {
     tableCache.set(cacheKey, { timestamp: Date.now(), data: result })
 
     return NextResponse.json(result, {
-      headers: { "Cache-Control": "public, s-maxage=4, stale-while-revalidate=12" },
+      headers: { "Cache-Control": "public, s-maxage=20, stale-while-revalidate=60" },
     })
   } catch (err) {
     console.error("[livescores/table] Error fetching table:", err)

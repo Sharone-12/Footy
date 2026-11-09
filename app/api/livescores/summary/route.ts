@@ -85,7 +85,7 @@ export async function GET(request: Request) {
   const cached = summaryCache.get(eid)
   if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
     return NextResponse.json(cached.data, {
-      headers: { "Cache-Control": "public, s-maxage=3, stale-while-revalidate=6" },
+      headers: { "Cache-Control": "public, s-maxage=10, stale-while-revalidate=20" },
     })
   }
 
@@ -93,7 +93,7 @@ export async function GET(request: Request) {
   if (pending) {
     const data = await pending
     return NextResponse.json(data, {
-      headers: { "Cache-Control": "public, s-maxage=3, stale-while-revalidate=6" },
+      headers: { "Cache-Control": "public, s-maxage=10, stale-while-revalidate=20" },
     })
   }
 
@@ -285,7 +285,7 @@ export async function GET(request: Request) {
     summaryCache.set(eid, { timestamp: Date.now(), data: payload })
 
     return NextResponse.json(payload, {
-      headers: { "Cache-Control": "public, s-maxage=3, stale-while-revalidate=6" },
+      headers: { "Cache-Control": "public, s-maxage=10, stale-while-revalidate=20" },
     })
   } catch (err) {
     console.error(`[livescores/summary] Error processing eid ${eid}:`, err)

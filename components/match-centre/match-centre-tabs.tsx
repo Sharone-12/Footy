@@ -102,12 +102,11 @@ export function MatchCentreTabs({
       load<H2HResponse>("h2h", setH2HData, setIsLoadingH2H),
     ])
 
-    // Continuous real-time polling every 4 seconds for instant live updates without manual reload
+    // Periodic background polling while document is visible (instant trigger still runs on liveScore change)
     const pollTimer = setInterval(() => {
       if (typeof document !== "undefined" && document.hidden) return
       void load<MatchSummaryResponse>("summary", handleSummaryUpdate)
-      void load<LeagueTableResponse>("table", setTableData)
-    }, 4_000)
+    }, 12_000)
 
     const handleVisibility = () => {
       if (typeof document !== "undefined" && !document.hidden) {

@@ -109,10 +109,15 @@ export function StreamingNetworkHealth() {
   }
 
   useEffect(() => {
-    pingProviders()
-    const timer = setInterval(() => {
+    if (typeof document !== "undefined" && document.visibilityState === "visible") {
       pingProviders()
-    }, 60_000) // Re-ping every 60s automatically
+    }
+
+    const timer = setInterval(() => {
+      if (typeof document !== "undefined" && document.visibilityState === "visible") {
+        pingProviders()
+      }
+    }, 180_000)
 
     return () => clearInterval(timer)
   }, [])

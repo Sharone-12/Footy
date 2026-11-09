@@ -84,6 +84,11 @@ async function pollStreams() {
   }
 }
 
+function isDocumentVisible(): boolean {
+  if (typeof document === "undefined") return true
+  return document.visibilityState === "visible"
+}
+
 function startPolling() {
   if (teardownTimer) {
     clearTimeout(teardownTimer)
@@ -92,15 +97,39 @@ function startPolling() {
 
   syncTick()
 
+  // Only poll if document is currently visible
+  if (!isDocumentVisible()) return
+
   if (!scoresTimer) {
     void pollScores()
-    scoresTimer = setInterval(pollScores, POLL_SCORES_MS)
+    const interval = snapshot.scores.length > 0 ? POLL_SCORES_MS : 35_000
+    scoresTimer = setInterval(pollScores, interval)
   }
 
   if (!streamsTimer) {
     void pollStreams()
-    streamsTimer = setInterval(pollStreams, POLL_STREAMS_MS)
+    streamsTimer = setInterval(pollStreams, 60_000)
   }
+}
+
+function pausePolling() {
+  if (scoresTimer) clearInterval(scoresTimer)
+  if (streamsTimer) clearInterval(streamsTimer)
+  if (tickTimer) clearInterval(tickTimer)
+  scoresTimer = streamsTimer = tickTimer = null
+}
+
+// Listen to visibility changes: freeze completely when tab is hidden, resume when focused
+if (typeof document !== "undefined") {
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      if (listeners.size > 0) {
+        startPolling()
+      }
+    } else {
+      pausePolling()
+    }
+  })
 }
 
 /**

@@ -30,7 +30,11 @@ import {
   ClapperboardIcon,
   EyeIcon,
   EyeOffIcon,
+  Columns2Icon,
+  Grid2x2Icon,
+  SquareIcon,
 } from "lucide-react"
+import { MultiViewSlotPlayer, type MultiViewSlotData } from "@/components/multi-view-slot"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { LEAGUE_TOURNAMENT_ID, BARCA_ID, getLeagueTournamentId, isPredictable } from "@/lib/teams"
 import type { LiveFixture } from "@/components/live-sections"
@@ -566,6 +570,89 @@ export function WatchStudio({
   const currentProvider = activeResolution?.provider ?? null
   const currentSource = activeResolution?.source ?? null
 
+  const [viewMode, setViewMode] = useState<"single" | "dual" | "quad">(() => {
+    if (typeof window === "undefined") return "single"
+    try {
+      const saved = localStorage.getItem("footyy_multiview_mode")
+      if (saved === "dual" || saved === "quad") return saved
+    } catch {}
+    return "single"
+  })
+
+  const changeViewMode = useCallback((mode: "single" | "dual" | "quad") => {
+    setViewMode(mode)
+    try {
+      localStorage.setItem("footyy_multiview_mode", mode)
+    } catch {}
+  }, [])
+
+  const [secondarySlots, setSecondarySlots] = useState<(MultiViewSlotData | null)[]>([null, null, null])
+  const [focusedSlot, setFocusedSlot] = useState<number>(0)
+  const [slot0Override, setSlot0Override] = useState<MultiViewSlotData | null>(null)
+
+  const alternateSources = useMemo(() => {
+    const list: { provider: WatchProvider; source: WatchSource }[] = []
+    for (const prov of providers) {
+      for (const src of prov.sources) {
+        if (src.url && src.key !== currentSource?.key) {
+          list.push({ provider: prov, source: src })
+        }
+      }
+    }
+    return list
+  }, [providers, currentSource?.key])
+
+  const handleSelectSecondaryStream = useCallback((slotIndex: number, data: MultiViewSlotData) => {
+    setSecondarySlots((prev) => {
+      const next = [...prev]
+      next[slotIndex - 1] = data
+      return next
+    })
+  }, [])
+
+  const handleClearSecondarySlot = useCallback((slotIndex: number) => {
+    setSecondarySlots((prev) => {
+      const next = [...prev]
+      next[slotIndex - 1] = null
+      return next
+    })
+  }, [])
+
+  const handleSwapWithMain = useCallback((slotIndex: number) => {
+    const secondary = secondarySlots[slotIndex - 1]
+    if (!secondary) return
+
+    const currentMainData: MultiViewSlotData = slot0Override ?? {
+      id: `main-${Date.now()}`,
+      title: fixture ? `${fixture.home} vs ${fixture.away}` : (currentSource?.label || "Primary Feed"),
+      subtitle: currentProvider?.name || "Feed 1",
+      streamUrl: currentSource?.url || "",
+      providerName: currentProvider?.name,
+      providerId: currentProvider?.id,
+      quality: currentSource?.quality,
+      fixture: fixture,
+      sourceKey: currentSource?.key,
+    }
+
+    setSecondarySlots((prev) => {
+      const next = [...prev]
+      next[slotIndex - 1] = currentMainData
+      return next
+    })
+
+    setSlot0Override(secondary)
+    setFocusedSlot(0)
+  }, [secondarySlots, slot0Override, fixture, currentSource, currentProvider])
+
+  const handleSoloSlot = useCallback((slotIndex: number) => {
+    if (slotIndex === 0) {
+      changeViewMode("single")
+      return
+    }
+    handleSwapWithMain(slotIndex)
+    changeViewMode("single")
+  }, [changeViewMode, handleSwapWithMain])
+
   // Auto-dismiss iframe loading overlay after max 1.6s so cross-origin feeds are never blocked
   useEffect(() => {
     if (isFrameLoading) {
@@ -973,7 +1060,7 @@ export function WatchStudio({
                     className="font-black text-[11px] uppercase tracking-wider text-foreground"
                     style={{ fontFamily: "var(--font-condensed)" }}
                   >
-                    FOOTYY LIVE
+                    {viewMode === "single" ? "FOOTYY LIVE" : `MULTI-VIEW (${viewMode === "dual" ? "2 FEEDS" : "4 FEEDS"})`}
                   </span>
                 </div>
                 <span className="text-white/20 text-xs">/</span>
@@ -1010,183 +1097,363 @@ export function WatchStudio({
                 ? "w-full h-full flex-1"
                 : isCinemaMode
                 ? "aspect-[21/9] sm:aspect-[2.35/1] max-h-[calc(100vh-180px)]"
-                : "aspect-video max-h-[calc(100vh-230px)]"
+                : viewMode === "single"
+                ? "aspect-video max-h-[calc(100vh-230px)]"
+                : "min-h-[500px] sm:min-h-[640px]"
             }`}>
+              {viewMode === "single" ? (
+                <div className="relative w-full h-full flex items-center justify-center">
+                  {slot0Override ? (
+                    <iframe
+                      key={`slot0-override-${slot0Override.streamUrl}-${reloadKey}`}
+                      src={slot0Override.streamUrl}
+                      title={slot0Override.title}
+                      className="w-full h-full border-0 bg-black block"
+                      allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                      allowFullScreen
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <>
+                      {/* 1. LOADING STATE */}
+                      {isBundleLoading && (
+                        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 bg-black/90 backdrop-blur-sm animate-fade-in text-center">
+                          <div className="relative flex items-center justify-center mb-4">
+                            <div className="size-16 rounded-full border-2 border-white/10 border-t-[var(--pitch)] animate-spin" />
+                            <span
+                              className="absolute font-black text-sm tracking-tighter text-white uppercase"
+                              style={{ fontFamily: "var(--font-condensed)" }}
+                            >
+                              FOOTYY
+                            </span>
+                          </div>
+                          <h3
+                            className="text-lg font-bold uppercase tracking-tight text-foreground"
+                            style={{ fontFamily: "var(--font-condensed)" }}
+                          >
+                            CONNECTING TO BROADCAST
+                          </h3>
+                          <p className="text-xs text-muted-foreground mt-1 max-w-sm">
+                            Aggregating verified streaming feeds across StreamFree, DAMITV, DaddyLive, and ZLive...
+                          </p>
+                        </div>
+                      )}
 
-              {/* 1. LOADING STATE */}
-              {isBundleLoading && (
-                <div className="absolute inset-0 z-30 flex flex-col items-center justify-center p-6 bg-black/90 backdrop-blur-sm animate-fade-in text-center">
-                  <div className="relative flex items-center justify-center mb-4">
-                    <div className="size-16 rounded-full border-2 border-white/10 border-t-[var(--pitch)] animate-spin" />
-                    <span
-                      className="absolute font-black text-sm tracking-tighter text-white uppercase"
-                      style={{ fontFamily: "var(--font-condensed)" }}
-                    >
-                      FOOTYY
-                    </span>
-                  </div>
-                  <h3
-                    className="text-lg font-bold uppercase tracking-tight text-foreground"
-                    style={{ fontFamily: "var(--font-condensed)" }}
-                  >
-                    CONNECTING TO BROADCAST
-                  </h3>
-                  <p className="text-xs text-muted-foreground mt-1 max-w-sm">
-                    Aggregating verified streaming feeds across StreamFree, DAMITV, DaddyLive, and ZLive...
-                  </p>
+                      {/* 2. NO STREAMS / OFFLINE / PRE-MATCH WINDOW STATE */}
+                      {!isBundleLoading && !currentSource && (() => {
+                        const homeScore =
+                          liveScore?.homeGoals ??
+                          finalScore?.homeGoals ??
+                          studioSummary?.scores?.ft?.[0] ??
+                          fixture?.home_goals ??
+                          null
+                        const awayScore =
+                          liveScore?.awayGoals ??
+                          finalScore?.awayGoals ??
+                          studioSummary?.scores?.ft?.[1] ??
+                          fixture?.away_goals ??
+                          null
+                        const hasScore = homeScore != null && awayScore != null
+
+                        return (
+                          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 bg-black/95 text-center">
+                            <div className="size-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-muted-foreground">
+                              {isMatchFinished ? (
+                                <CheckCircle2Icon className="size-7 text-[var(--pitch)]" />
+                              ) : isUpcoming && !isStreamWindowOpen ? (
+                                <ClockIcon className="size-7 text-[var(--pitch)]" />
+                              ) : (
+                                <AlertCircleIcon className="size-7 text-amber-400" />
+                              )}
+                            </div>
+                            <h3
+                              className="text-xl font-bold uppercase tracking-tight text-foreground"
+                              style={{ fontFamily: "var(--font-condensed)" }}
+                            >
+                              {isMatchFinished
+                                ? "MATCH CONCLUDED · BROADCAST ENDED"
+                                : isUpcoming && !isStreamWindowOpen
+                                ? "STREAMS UNLOCK 15 MINUTES BEFORE KICKOFF"
+                                : isUpcoming
+                                ? "STREAM STARTING SOON"
+                                : "STREAM CURRENTLY UNAVAILABLE"}
+                            </h3>
+                            <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 max-w-md">
+                              {isMatchFinished
+                                ? hasScore
+                                  ? `The live broadcast for ${fixture?.home} vs ${fixture?.away} has ended. Final score: ${homeScore} – ${awayScore}.`
+                                  : `The live broadcast for ${fixture?.home} vs ${fixture?.away} has ended.`
+                                : isUpcoming && !isStreamWindowOpen
+                                ? `Live video broadcasts for ${fixture?.home} vs ${fixture?.away} activate and load automatically 15 minutes prior to match kickoff.`
+                                : isUpcoming
+                                ? `Coverage for ${fixture?.home} vs ${fixture?.away} is preparing to air. Verified feeds will connect momentarily.`
+                                : "No verified broadcast feed has been opened yet by our streaming providers for this fixture."}
+                            </p>
+
+                            {!isMatchFinished && isUpcoming && kickoffMs && (
+                              <div className="mt-4 px-4 py-2 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-2">
+                                <ClockIcon className="size-4 text-[var(--pitch)]" />
+                                <span className="text-xs text-muted-foreground">
+                                  {!isStreamWindowOpen ? "Streams Unlock In:" : "Scheduled Kickoff In:"}
+                                </span>
+                                <span className="font-mono text-xs font-bold text-foreground">
+                                  {formatCountdown(!isStreamWindowOpen ? kickoffMs - 15 * 60_000 : kickoffMs, now)}
+                                </span>
+                              </div>
+                            )}
+
+                            {isMatchFinished && (
+                              <div className="mt-3.5 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs text-muted-foreground">
+                                <span className="size-2 rounded-full bg-[var(--pitch)]/70" />
+                                <span>Full Time reached · Live match coverage has concluded</span>
+                              </div>
+                            )}
+
+                            {genericChannels.length > 0 && (
+                              <div className="mt-6 flex flex-col items-center">
+                                <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
+                                  Or Watch 24/7 Football Broadcasters:
+                                </span>
+                                <div className="flex flex-wrap items-center justify-center gap-2 max-w-lg">
+                                  {genericChannels.slice(0, 4).map((ch) => (
+                                    <button
+                                      key={ch.id}
+                                      type="button"
+                                      onClick={() => selectSource("zlive", `zlive:${ch.id}`)}
+                                      className="px-3 py-1 rounded-xl bg-card border border-border/80 hover:border-[var(--pitch)] hover:text-[var(--pitch)] text-xs font-semibold transition-all"
+                                    >
+                                      {ch.name}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )
+                      })()}
+
+                      {/* 3. ACTIVE IFRAME STREAM PLAYER */}
+                      {isLeaving && (
+                        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black animate-fade-in">
+                          <div className="size-8 rounded-full border-2 border-white/10 border-t-[var(--pitch)] animate-spin" />
+                        </div>
+                      )}
+
+                      {!isLeaving && !isBundleLoading && currentSource && (
+                        <>
+                          {isFrameLoading && (
+                            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/85 backdrop-blur-xs pointer-events-none transition-opacity duration-300">
+                              <div className="size-10 rounded-full border-2 border-white/10 border-t-[var(--pitch)] animate-spin mb-3" />
+                              <span className="text-xs text-muted-foreground font-mono">
+                                INITIALIZING {currentSource.label.toUpperCase()} ({currentProvider?.name.toUpperCase()})...
+                              </span>
+                            </div>
+                          )}
+
+                          {hasFrameError && (
+                            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 bg-black/95 text-center">
+                              <AlertCircleIcon className="size-8 text-rose-500 mb-2" />
+                              <h4 className="font-bold text-sm text-foreground">STREAM FEED TIMED OUT</h4>
+                              <p className="text-xs text-muted-foreground max-w-sm mt-1 mb-4">
+                                The provider stream encountered a connection interruption. Try reconnecting or switch to another provider.
+                              </p>
+                              <button
+                                type="button"
+                                onClick={reloadStream}
+                                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--pitch)] text-black font-bold text-xs hover:brightness-110"
+                              >
+                                <RefreshCwIcon className="size-3.5" />
+                                Reconnect Stream
+                              </button>
+                            </div>
+                          )}
+
+                          <iframe
+                            key={`${currentSource.key}-${reloadKey}`}
+                            src={currentSource.url}
+                            title={`${fixture?.home ?? "Live"} vs ${fixture?.away ?? "Match"} — ${currentSource.label}`}
+                            className={`border-0 bg-black block transition-all ${
+                              currentProvider?.id === "zlive"
+                                ? "w-full h-full scale-[1.035] origin-center"
+                                : currentProvider?.id === "daddylive" && daddyLiveClean
+                                  ? "absolute top-0 inset-x-0 w-full h-[calc(100%+62px)] max-h-none"
+                                  : "w-full h-full"
+                            }`}
+                            allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                            allowFullScreen
+                            referrerPolicy="no-referrer"
+                            onLoad={() => setIsFrameLoading(false)}
+                            onError={() => {
+                              setIsFrameLoading(false)
+                              setHasFrameError(true)
+                            }}
+                          />
+                        </>
+                      )}
+                    </>
+                  )}
                 </div>
-              )}
+              ) : (
+                <div className={`w-full ${isFullscreen ? "h-full flex-1" : ""} grid ${
+                  viewMode === "dual" ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 sm:grid-cols-2"
+                } gap-2 p-2 bg-black`}>
+                  {/* Slot 0 Card (Feed 1) */}
+                  <article
+                    aria-label={`Feed 1: ${slot0Override?.title || (fixture ? `${fixture.home} vs ${fixture.away}` : "Primary Feed")}`}
+                    onClick={() => setFocusedSlot(0)}
+                    className={`relative aspect-video w-full h-full rounded-2xl overflow-hidden bg-black border flex flex-col group transition-all duration-200 ${
+                      focusedSlot === 0 ? "border-[var(--pitch)] ring-1 ring-[var(--pitch)]/30" : "border-white/10 hover:border-white/20"
+                    }`}
+                  >
+                    <header className="flex items-center justify-between px-2.5 sm:px-3 py-1.5 bg-gradient-to-b from-neutral-950 via-neutral-950/90 to-neutral-950/70 border-b border-white/[0.08] z-20 shrink-0">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="px-1.5 py-0.5 rounded-md bg-white/[0.08] text-[var(--pitch)] text-[9px] font-black uppercase tracking-wider shrink-0 flex items-center gap-1">
+                          <span className="size-1.5 rounded-full bg-[var(--pitch)] inline-block shadow-[0_0_6px_var(--pitch)] animate-pulse" />
+                          FEED 1
+                        </span>
+                        <span className="text-xs font-semibold text-foreground truncate max-w-[140px] sm:max-w-xs">
+                          {slot0Override?.title || (fixture ? `${fixture.home} vs ${fixture.away}` : "Primary Feed")}
+                        </span>
+                        <span className="hidden sm:inline-block text-[10px] text-muted-foreground truncate">
+                          ({slot0Override?.providerName || currentProvider?.name || "Direct"})
+                        </span>
+                      </div>
 
-              {/* 2. NO STREAMS / OFFLINE / PRE-MATCH WINDOW STATE */}
-              {!isBundleLoading && !currentSource && (() => {
-                const homeScore =
-                  liveScore?.homeGoals ??
-                  finalScore?.homeGoals ??
-                  studioSummary?.scores?.ft?.[0] ??
-                  fixture?.home_goals ??
-                  null
-                const awayScore =
-                  liveScore?.awayGoals ??
-                  finalScore?.awayGoals ??
-                  studioSummary?.scores?.ft?.[1] ??
-                  fixture?.away_goals ??
-                  null
-                const hasScore = homeScore != null && awayScore != null
+                      <div className="flex items-center gap-1 shrink-0">
+                        {slot0Override && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSlot0Override(null)
+                            }}
+                            className="px-1.5 py-0.5 rounded text-[10px] font-bold text-muted-foreground hover:text-foreground bg-white/5 hover:bg-white/10"
+                            title="Reset to Primary Match"
+                          >
+                            Reset
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            changeViewMode("single")
+                          }}
+                          className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
+                          title="Solo Feed 1 (Single View)"
+                        >
+                          <Maximize2Icon className="size-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            reloadStream()
+                          }}
+                          className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
+                          title="Reload Feed"
+                        >
+                          <RefreshCwIcon className="size-3.5" />
+                        </button>
+                      </div>
+                    </header>
 
-                return (
-                  <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 bg-black/95 text-center">
-                    <div className="size-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-4 text-muted-foreground">
-                      {isMatchFinished ? (
-                        <CheckCircle2Icon className="size-7 text-[var(--pitch)]" />
-                      ) : isUpcoming && !isStreamWindowOpen ? (
-                        <ClockIcon className="size-7 text-[var(--pitch)]" />
+                    <div className="relative w-full h-full flex-1 bg-black overflow-hidden flex items-center justify-center">
+                      {slot0Override ? (
+                        <iframe
+                          key={`slot0-override-${slot0Override.streamUrl}-${reloadKey}`}
+                          src={slot0Override.streamUrl}
+                          title={slot0Override.title}
+                          className="w-full h-full border-0 bg-black block"
+                          allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                          allowFullScreen
+                          referrerPolicy="no-referrer"
+                        />
                       ) : (
-                        <AlertCircleIcon className="size-7 text-amber-400" />
+                        <>
+                          {isBundleLoading && (
+                            <div className="absolute inset-0 z-30 flex flex-col items-center justify-center p-4 bg-black/90 backdrop-blur-sm text-center">
+                              <div className="size-8 rounded-full border-2 border-white/10 border-t-[var(--pitch)] animate-spin mb-2" />
+                              <span className="text-xs font-bold text-foreground">CONNECTING FEED 1...</span>
+                            </div>
+                          )}
+
+                          {!isBundleLoading && !currentSource && (
+                            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-4 bg-black/95 text-center">
+                              <AlertCircleIcon className="size-6 text-amber-400 mb-2" />
+                              <span className="text-xs font-bold text-foreground">STREAM UNAVAILABLE</span>
+                            </div>
+                          )}
+
+                          {!isBundleLoading && currentSource && (
+                            <iframe
+                              key={`slot0-grid-${currentSource.key}-${reloadKey}`}
+                              src={currentSource.url}
+                              title={`Feed 1 — ${currentSource.label}`}
+                              className={`border-0 bg-black block transition-all ${
+                                currentProvider?.id === "zlive"
+                                  ? "w-full h-full scale-[1.035] origin-center"
+                                  : currentProvider?.id === "daddylive" && daddyLiveClean
+                                    ? "absolute top-0 inset-x-0 w-full h-[calc(100%+62px)] max-h-none"
+                                    : "w-full h-full"
+                              }`}
+                              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                              allowFullScreen
+                              referrerPolicy="no-referrer"
+                            />
+                          )}
+                        </>
                       )}
                     </div>
-                    <h3
-                      className="text-xl font-bold uppercase tracking-tight text-foreground"
-                      style={{ fontFamily: "var(--font-condensed)" }}
-                    >
-                      {isMatchFinished
-                        ? "MATCH CONCLUDED · BROADCAST ENDED"
-                        : isUpcoming && !isStreamWindowOpen
-                        ? "STREAMS UNLOCK 15 MINUTES BEFORE KICKOFF"
-                        : isUpcoming
-                        ? "STREAM STARTING SOON"
-                        : "STREAM CURRENTLY UNAVAILABLE"}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 max-w-md">
-                      {isMatchFinished
-                        ? hasScore
-                          ? `The live broadcast for ${fixture?.home} vs ${fixture?.away} has ended. Final score: ${homeScore} – ${awayScore}.`
-                          : `The live broadcast for ${fixture?.home} vs ${fixture?.away} has ended.`
-                        : isUpcoming && !isStreamWindowOpen
-                        ? `Live video broadcasts for ${fixture?.home} vs ${fixture?.away} activate and load automatically 15 minutes prior to match kickoff.`
-                        : isUpcoming
-                        ? `Coverage for ${fixture?.home} vs ${fixture?.away} is preparing to air. Verified feeds will connect momentarily.`
-                        : "No verified broadcast feed has been opened yet by our streaming providers for this fixture."}
-                    </p>
+                  </article>
 
-                    {!isMatchFinished && isUpcoming && kickoffMs && (
-                      <div className="mt-4 px-4 py-2 rounded-2xl bg-white/5 border border-white/10 flex items-center gap-2">
-                        <ClockIcon className="size-4 text-[var(--pitch)]" />
-                        <span className="text-xs text-muted-foreground">
-                          {!isStreamWindowOpen ? "Streams Unlock In:" : "Scheduled Kickoff In:"}
-                        </span>
-                        <span className="font-mono text-xs font-bold text-foreground">
-                          {formatCountdown(!isStreamWindowOpen ? kickoffMs - 15 * 60_000 : kickoffMs, now)}
-                        </span>
-                      </div>
-                    )}
-
-                    {isMatchFinished && (
-                      <div className="mt-3.5 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs text-muted-foreground">
-                        <span className="size-2 rounded-full bg-[var(--pitch)]/70" />
-                        <span>Full Time reached · Live match coverage has concluded</span>
-                      </div>
-                    )}
-
-                    {genericChannels.length > 0 && (
-                      <div className="mt-6 flex flex-col items-center">
-                        <span className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold mb-2">
-                          Or Watch 24/7 Football Broadcasters:
-                        </span>
-                        <div className="flex flex-wrap items-center justify-center gap-2 max-w-lg">
-                          {genericChannels.slice(0, 4).map((ch) => (
-                            <button
-                              key={ch.id}
-                              type="button"
-                              onClick={() => selectSource("zlive", `zlive:${ch.id}`)}
-                              className="px-3 py-1 rounded-xl bg-card border border-border/80 hover:border-[var(--pitch)] hover:text-[var(--pitch)] text-xs font-semibold transition-all"
-                            >
-                              {ch.name}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )
-              })()}
-
-              {/* 3. ACTIVE IFRAME STREAM PLAYER */}
-              {isLeaving && (
-                <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black animate-fade-in">
-                  <div className="size-8 rounded-full border-2 border-white/10 border-t-[var(--pitch)] animate-spin" />
-                </div>
-              )}
-
-              {!isLeaving && !isBundleLoading && currentSource && (
-                <>
-                  {isFrameLoading && (
-                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/85 backdrop-blur-xs pointer-events-none transition-opacity duration-300">
-                      <div className="size-10 rounded-full border-2 border-white/10 border-t-[var(--pitch)] animate-spin mb-3" />
-                      <span className="text-xs text-muted-foreground font-mono">
-                        INITIALIZING {currentSource.label.toUpperCase()} ({currentProvider?.name.toUpperCase()})...
-                      </span>
-                    </div>
-                  )}
-
-                  {hasFrameError && (
-                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 bg-black/95 text-center">
-                      <AlertCircleIcon className="size-8 text-rose-500 mb-2" />
-                      <h4 className="font-bold text-sm text-foreground">STREAM FEED TIMED OUT</h4>
-                      <p className="text-xs text-muted-foreground max-w-sm mt-1 mb-4">
-                        The provider stream encountered a connection interruption. Try reconnecting or switch to another provider.
-                      </p>
-                      <button
-                        type="button"
-                        onClick={reloadStream}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--pitch)] text-black font-bold text-xs hover:brightness-110"
-                      >
-                        <RefreshCwIcon className="size-3.5" />
-                        Reconnect Stream
-                      </button>
-                    </div>
-                  )}
-
-                  <iframe
-                    key={`${currentSource.key}-${reloadKey}`}
-                    src={currentSource.url}
-                    title={`${fixture?.home ?? "Live"} vs ${fixture?.away ?? "Match"} — ${currentSource.label}`}
-                    className={`border-0 bg-black block transition-all ${
-                      currentProvider?.id === "zlive"
-                        ? "w-full h-full scale-[1.035] origin-center"
-                        : currentProvider?.id === "daddylive" && daddyLiveClean
-                          ? "absolute top-0 inset-x-0 w-full h-[calc(100%+62px)] max-h-none"
-                          : "w-full h-full"
-                    }`}
-                    allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                    allowFullScreen
-                    referrerPolicy="no-referrer"
-                    onLoad={() => setIsFrameLoading(false)}
-                    onError={() => {
-                      setIsFrameLoading(false)
-                      setHasFrameError(true)
-                    }}
+                  {/* Slot 1 */}
+                  <MultiViewSlotPlayer
+                    slotIndex={1}
+                    slotData={secondarySlots[0]}
+                    similarMatches={similarMatches}
+                    genericChannels={genericChannels}
+                    alternateSources={alternateSources}
+                    onSelectStream={handleSelectSecondaryStream}
+                    onClearSlot={handleClearSecondarySlot}
+                    onSwapWithMain={handleSwapWithMain}
+                    onSoloSlot={handleSoloSlot}
+                    isFocused={focusedSlot === 1}
+                    onFocus={() => setFocusedSlot(1)}
                   />
-                </>
+
+                  {/* Slot 2 & Slot 3 for Quad Mode */}
+                  {viewMode === "quad" && (
+                    <>
+                      <MultiViewSlotPlayer
+                        slotIndex={2}
+                        slotData={secondarySlots[1]}
+                        similarMatches={similarMatches}
+                        genericChannels={genericChannels}
+                        alternateSources={alternateSources}
+                        onSelectStream={handleSelectSecondaryStream}
+                        onClearSlot={handleClearSecondarySlot}
+                        onSwapWithMain={handleSwapWithMain}
+                        onSoloSlot={handleSoloSlot}
+                        isFocused={focusedSlot === 2}
+                        onFocus={() => setFocusedSlot(2)}
+                      />
+                      <MultiViewSlotPlayer
+                        slotIndex={3}
+                        slotData={secondarySlots[2]}
+                        similarMatches={similarMatches}
+                        genericChannels={genericChannels}
+                        alternateSources={alternateSources}
+                        onSelectStream={handleSelectSecondaryStream}
+                        onClearSlot={handleClearSecondarySlot}
+                        onSwapWithMain={handleSwapWithMain}
+                        onSoloSlot={handleSoloSlot}
+                        isFocused={focusedSlot === 3}
+                        onFocus={() => setFocusedSlot(3)}
+                      />
+                    </>
+                  )}
+                </div>
               )}
             </div>
 
@@ -1257,6 +1524,48 @@ export function WatchStudio({
                 >
                   <RefreshCwIcon className="size-4" />
                 </button>
+
+                <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-white/[0.08] border border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => changeViewMode("single")}
+                    className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold transition-all ${
+                      viewMode === "single"
+                        ? "bg-[var(--pitch)] text-black shadow-xs"
+                        : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                    }`}
+                    title="Single Screen (1 Stream)"
+                  >
+                    <SquareIcon className="size-3" />
+                    <span className="hidden sm:inline">1</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => changeViewMode("dual")}
+                    className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold transition-all ${
+                      viewMode === "dual"
+                        ? "bg-[var(--pitch)] text-black shadow-xs"
+                        : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                    }`}
+                    title="Dual Split View (2 Streams)"
+                  >
+                    <Columns2Icon className="size-3" />
+                    <span className="hidden sm:inline">2</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => changeViewMode("quad")}
+                    className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold transition-all ${
+                      viewMode === "quad"
+                        ? "bg-[var(--pitch)] text-black shadow-xs"
+                        : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                    }`}
+                    title="Quad Grid Multi-View (4 Streams 2x2)"
+                  >
+                    <Grid2x2Icon className="size-3" />
+                    <span className="hidden sm:inline">4</span>
+                  </button>
+                </div>
 
                 <button
                   type="button"
