@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useMemo, useCallback } from "react"
+import { useState, useMemo, useCallback } from "react"
 import {
   TvIcon,
   AlertCircleIcon,
@@ -11,10 +11,10 @@ import {
   SearchIcon,
   PlayIcon,
   RadioIcon,
-  ClockIcon,
+  LayersIcon,
   SparklesIcon,
 } from "lucide-react"
-import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
+import { TeamCrest } from "@/components/player-avatar"
 import type { LiveFixture } from "@/components/live-sections"
 import type { ZLiveChannel } from "@/lib/zlive/types"
 import type { StreamingProviderId } from "@/lib/streaming/types"
@@ -45,6 +45,12 @@ export type MultiViewSlotData = {
   fixture?: LiveFixture | null
   channel?: ZLiveChannel | null
   sourceKey?: string | null
+}
+
+export function resolveZLiveChannelUrl(channel: ZLiveChannel): string {
+  if (channel.url && channel.url.startsWith("http")) return channel.url
+  if (channel.id && channel.id.startsWith("http")) return channel.id
+  return `https://zlive.st/embed/${channel.id}`
 }
 
 export async function fetchBestStreamForFixture(fixture: LiveFixture): Promise<{
@@ -185,6 +191,330 @@ export async function fetchBestStreamForFixture(fixture: LiveFixture): Promise<{
   }
 }
 
+export type StreamPickerPanelProps = {
+  feedLabel: string
+  similarMatches: LiveFixture[]
+  genericChannels: ZLiveChannel[]
+  alternateSources: { provider: WatchProvider; source: WatchSource }[]
+  onSelectFixture: (fixture: LiveFixture) => void
+  onSelectChannel: (channel: ZLiveChannel) => void
+  onSelectSource: (item: { provider: WatchProvider; source: WatchSource }) => void
+  onCancel?: () => void
+  isLoading?: boolean
+  error?: string | null
+  onDismissError?: () => void
+  isFocused?: boolean
+  isFullscreen?: boolean
+  onFocus?: () => void
+}
+
+export function StreamPickerPanel({
+  feedLabel,
+  similarMatches,
+  genericChannels,
+  alternateSources,
+  onSelectFixture,
+  onSelectChannel,
+  onSelectSource,
+  onCancel,
+  isLoading,
+  error,
+  onDismissError,
+  isFocused,
+  isFullscreen,
+  onFocus,
+}: StreamPickerPanelProps) {
+  const [activeTab, setActiveTab] = useState<"sources" | "channels" | "matches">(() => {
+    return alternateSources.length > 0 ? "sources" : genericChannels.length > 0 ? "channels" : "matches"
+  })
+  const [searchQuery, setSearchQuery] = useState("")
+
+  const filteredMatches = useMemo(() => {
+    if (!searchQuery.trim()) return similarMatches
+    const q = searchQuery.toLowerCase()
+    return similarMatches.filter(
+      (m) =>
+        m.home.toLowerCase().includes(q) ||
+        m.away.toLowerCase().includes(q) ||
+        (m.league && m.league.toLowerCase().includes(q)),
+    )
+  }, [similarMatches, searchQuery])
+
+  const filteredChannels = useMemo(() => {
+    if (!searchQuery.trim()) return genericChannels
+    const q = searchQuery.toLowerCase()
+    return genericChannels.filter(
+      (c) =>
+        c.name.toLowerCase().includes(q) ||
+        (c.region && c.region.toLowerCase().includes(q)),
+    )
+  }, [genericChannels, searchQuery])
+
+  const filteredSources = useMemo(() => {
+    if (!searchQuery.trim()) return alternateSources
+    const q = searchQuery.toLowerCase()
+    return alternateSources.filter(
+      (s) =>
+        s.source.label.toLowerCase().includes(q) ||
+        s.provider.name.toLowerCase().includes(q),
+    )
+  }, [alternateSources, searchQuery])
+
+  return (
+    <article
+      aria-label={`${feedLabel} Stream Selection`}
+      onClick={onFocus}
+      className={`relative ${
+        isFullscreen ? "w-full h-full min-h-0" : "aspect-video min-h-[300px] w-full"
+      } rounded-2xl overflow-hidden bg-neutral-950/95 border flex flex-col p-3 sm:p-4 transition-all duration-200 ${
+        isFocused ? "border-[var(--pitch)] ring-1 ring-[var(--pitch)]/30" : "border-white/10 hover:border-white/20"
+      }`}
+    >
+      <header className="flex items-center justify-between pb-2.5 border-b border-white/[0.08] shrink-0 gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="px-2 py-0.5 rounded-md bg-white/[0.08] text-[var(--pitch)] text-[10px] font-black uppercase tracking-wider shrink-0">
+            {feedLabel}
+          </span>
+          <span className="text-xs font-bold text-foreground uppercase tracking-wide truncate">
+            SELECT STREAM FEED
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5 shrink-0">
+          <nav aria-label="Stream categories" className="flex items-center gap-1 bg-white/[0.04] p-0.5 rounded-lg border border-white/[0.06]">
+            {alternateSources.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setActiveTab("sources")}
+                className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${
+                  activeTab === "sources"
+                    ? "bg-white/15 text-foreground shadow-xs"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Servers ({alternateSources.length})
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => setActiveTab("channels")}
+              className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${
+                activeTab === "channels"
+                  ? "bg-white/15 text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              24/7 TV ({genericChannels.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab("matches")}
+              className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${
+                activeTab === "matches"
+                  ? "bg-white/15 text-foreground shadow-xs"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              Matches ({similarMatches.length})
+            </button>
+          </nav>
+
+          {onCancel && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                onCancel()
+              }}
+              className="px-2 py-1 rounded-md text-[10px] font-bold text-muted-foreground hover:text-foreground bg-white/10 hover:bg-white/15 transition-colors"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
+      </header>
+
+      {isLoading && (
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/90 backdrop-blur-xs p-4 text-center">
+          <div className="size-8 rounded-full border-2 border-white/10 border-t-[var(--pitch)] animate-spin mb-2" />
+          <span className="text-xs font-bold text-foreground">CONNECTING FEED...</span>
+          <span className="text-[11px] text-muted-foreground mt-1">
+            Resolving provider video streams for {feedLabel}
+          </span>
+        </div>
+      )}
+
+      {error && (
+        <div className="my-2 p-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-[11px] flex items-center justify-between gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 truncate">
+            <AlertCircleIcon className="size-3.5 shrink-0 text-rose-400" />
+            <span className="truncate">{error}</span>
+          </div>
+          {onDismissError && (
+            <button
+              type="button"
+              onClick={onDismissError}
+              className="text-[10px] text-muted-foreground hover:text-foreground"
+            >
+              Dismiss
+            </button>
+          )}
+        </div>
+      )}
+
+      <div className="mt-2.5 mb-2 relative shrink-0">
+        <SearchIcon className="size-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder={
+            activeTab === "sources"
+              ? "Search servers or qualities..."
+              : activeTab === "channels"
+              ? "Search 24/7 channels (DAZN, Sky, TSN, beIN)..."
+              : "Search matches or leagues..."
+          }
+          className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[var(--pitch)]/60 transition-colors"
+        />
+      </div>
+
+      <div className="flex-1 overflow-y-auto min-h-0 space-y-1.5 pr-1">
+        {activeTab === "sources" && (
+          <>
+            {filteredSources.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full p-4 text-center text-muted-foreground text-xs">
+                <PlayIcon className="size-6 mb-1 opacity-50" />
+                <span>No matching servers</span>
+              </div>
+            ) : (
+              filteredSources.map((s) => (
+                <button
+                  key={`${s.provider.id}-${s.source.key}`}
+                  type="button"
+                  onClick={() => onSelectSource(s)}
+                  className="w-full flex items-center justify-between p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06] hover:border-[var(--pitch)]/40 transition-all text-left group"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="size-6 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                      <LayersIcon className="size-3 text-muted-foreground group-hover:text-[var(--pitch)]" />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-semibold text-foreground truncate group-hover:text-[var(--pitch)] transition-colors">
+                        {s.source.label}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground truncate">
+                        Provider: {s.provider.name}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                    {s.source.quality && (
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-foreground font-bold">
+                        {s.source.quality}
+                      </span>
+                    )}
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--pitch)]/10 text-[var(--pitch)] border border-[var(--pitch)]/20">
+                      + Watch
+                    </span>
+                  </div>
+                </button>
+              ))
+            )}
+          </>
+        )}
+
+        {activeTab === "channels" && (
+          <>
+            {filteredChannels.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full p-4 text-center text-muted-foreground text-xs">
+                <TvIcon className="size-6 mb-1 opacity-50" />
+                <span>No channels found</span>
+              </div>
+            ) : (
+              filteredChannels.map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => onSelectChannel(c)}
+                  className="w-full flex items-center justify-between p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06] hover:border-[var(--pitch)]/40 transition-all text-left group"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="size-6 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+                      <TvIcon className="size-3 text-muted-foreground group-hover:text-[var(--pitch)]" />
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-semibold text-foreground truncate group-hover:text-[var(--pitch)] transition-colors">
+                        {c.name}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground truncate">
+                        {c.region || "24/7 Broadcaster"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                    {c.quality && (
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-foreground font-bold">
+                        {c.quality}
+                      </span>
+                    )}
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--pitch)]/10 text-[var(--pitch)] border border-[var(--pitch)]/20">
+                      + Watch
+                    </span>
+                  </div>
+                </button>
+              ))
+            )}
+          </>
+        )}
+
+        {activeTab === "matches" && (
+          <>
+            {filteredMatches.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full p-4 text-center text-muted-foreground text-xs">
+                <RadioIcon className="size-6 mb-1 opacity-50" />
+                <span>No concurrent matches found</span>
+              </div>
+            ) : (
+              filteredMatches.map((m) => (
+                <button
+                  key={m.event_id}
+                  type="button"
+                  onClick={() => onSelectFixture(m)}
+                  className="w-full flex items-center justify-between p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06] hover:border-[var(--pitch)]/40 transition-all text-left group"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex items-center -space-x-1.5 shrink-0">
+                      {m.home_id && <TeamCrest teamId={m.home_id} name={m.home} size={20} />}
+                      {m.away_id && <TeamCrest teamId={m.away_id} name={m.away} size={20} />}
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-xs font-semibold text-foreground truncate group-hover:text-[var(--pitch)] transition-colors">
+                        {m.home} vs {m.away}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground truncate">
+                        {m.league || "Live Match"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1.5 shrink-0 ml-2">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--pitch)]/10 text-[var(--pitch)] border border-[var(--pitch)]/20">
+                      + Watch
+                    </span>
+                  </div>
+                </button>
+              ))
+            )}
+          </>
+        )}
+      </div>
+    </article>
+  )
+}
+
 export type MultiViewSlotPlayerProps = {
   slotIndex: number
   slotData: MultiViewSlotData | null
@@ -214,8 +544,6 @@ export function MultiViewSlotPlayer({
   isFullscreen,
   onFocus,
 }: MultiViewSlotPlayerProps) {
-  const [activeTab, setActiveTab] = useState<"matches" | "channels" | "sources">("matches")
-  const [searchQuery, setSearchQuery] = useState("")
   const [isLoadingStream, setIsLoadingStream] = useState(false)
   const [streamError, setStreamError] = useState<string | null>(null)
   const [reloadKey, setReloadKey] = useState(0)
@@ -230,8 +558,8 @@ export function MultiViewSlotPlayer({
       onSelectStream(slotIndex, {
         id: `ch-${ch.id}`,
         title: ch.name,
-        subtitle: ch.region || "Broadcaster",
-        streamUrl: `https://streamembed.net/live/${ch.id}`,
+        subtitle: ch.region || "24/7 Broadcaster",
+        streamUrl: resolveZLiveChannelUrl(ch),
         providerName: "ZLive 24/7",
         providerId: "zlive",
         channel: ch,
@@ -288,277 +616,24 @@ export function MultiViewSlotPlayer({
     [onSelectStream, slotIndex],
   )
 
-  const filteredMatches = useMemo(() => {
-    if (!searchQuery.trim()) return similarMatches
-    const q = searchQuery.toLowerCase()
-    return similarMatches.filter(
-      (m) =>
-        m.home.toLowerCase().includes(q) ||
-        m.away.toLowerCase().includes(q) ||
-        (m.league && m.league.toLowerCase().includes(q)),
-    )
-  }, [similarMatches, searchQuery])
-
-  const filteredChannels = useMemo(() => {
-    if (!searchQuery.trim()) return genericChannels
-    const q = searchQuery.toLowerCase()
-    return genericChannels.filter(
-      (c) =>
-        c.name.toLowerCase().includes(q) ||
-        (c.region && c.region.toLowerCase().includes(q)),
-    )
-  }, [genericChannels, searchQuery])
-
-  const filteredSources = useMemo(() => {
-    if (!searchQuery.trim()) return alternateSources
-    const q = searchQuery.toLowerCase()
-    return alternateSources.filter(
-      (s) =>
-        s.source.label.toLowerCase().includes(q) ||
-        s.provider.name.toLowerCase().includes(q),
-    )
-  }, [alternateSources, searchQuery])
-
   if (!slotData || isEditingFeed) {
     return (
-      <article
-        aria-label={`${feedLabel} Selection`}
-        onClick={onFocus}
-        className={`relative ${
-          isFullscreen ? "w-full h-full min-h-0" : "aspect-video min-h-[260px] w-full"
-        } rounded-2xl overflow-hidden bg-neutral-950/95 border flex flex-col p-3 sm:p-4 transition-all duration-200 ${
-          isFocused ? "border-[var(--pitch)] ring-1 ring-[var(--pitch)]/30" : "border-white/10 hover:border-white/20"
-        }`}
-      >
-        <header className="flex items-center justify-between pb-2 border-b border-white/[0.08] shrink-0">
-          <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded-md bg-white/[0.08] text-foreground text-[10px] font-black uppercase tracking-wider">
-              {feedLabel}
-            </span>
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-              {isEditingFeed ? "CHANGE STREAM" : "ADD STREAM"}
-            </span>
-            {isEditingFeed && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setIsEditingFeed(false)
-                }}
-                className="px-2 py-0.5 rounded text-[10px] font-bold text-muted-foreground hover:text-foreground bg-white/10"
-              >
-                Cancel
-              </button>
-            )}
-          </div>
-
-          <nav aria-label="Stream categories" className="flex items-center gap-1 bg-white/[0.04] p-0.5 rounded-lg border border-white/[0.06]">
-            <button
-              type="button"
-              onClick={() => setActiveTab("matches")}
-              className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${
-                activeTab === "matches"
-                  ? "bg-white/15 text-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Matches ({similarMatches.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("channels")}
-              className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${
-                activeTab === "channels"
-                  ? "bg-white/15 text-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              24/7 ({genericChannels.length})
-            </button>
-            {alternateSources.length > 0 && (
-              <button
-                type="button"
-                onClick={() => setActiveTab("sources")}
-                className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase transition-all ${
-                  activeTab === "sources"
-                    ? "bg-white/15 text-foreground shadow-xs"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Feeds ({alternateSources.length})
-              </button>
-            )}
-          </nav>
-        </header>
-
-        {isLoadingStream && (
-          <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/90 backdrop-blur-xs p-4 text-center">
-            <div className="size-8 rounded-full border-2 border-white/10 border-t-[var(--pitch)] animate-spin mb-2" />
-            <span className="text-xs font-bold text-foreground">CONNECTING FEED...</span>
-            <span className="text-[11px] text-muted-foreground mt-1">
-              Resolving provider video streams for {feedLabel}
-            </span>
-          </div>
-        )}
-
-        {streamError && (
-          <div className="my-2 p-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-300 text-[11px] flex items-center justify-between gap-2 shrink-0">
-            <div className="flex items-center gap-1.5 truncate">
-              <AlertCircleIcon className="size-3.5 shrink-0 text-rose-400" />
-              <span className="truncate">{streamError}</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setStreamError(null)}
-              className="text-[10px] text-muted-foreground hover:text-foreground"
-            >
-              Dismiss
-            </button>
-          </div>
-        )}
-
-        <div className="mt-2.5 mb-2 relative shrink-0">
-          <SearchIcon className="size-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={
-              activeTab === "matches"
-                ? "Search matches or leagues..."
-                : activeTab === "channels"
-                ? "Search TV channels..."
-                : "Search feeds..."
-            }
-            className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-white/[0.04] border border-white/10 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-[var(--pitch)]/60 transition-colors"
-          />
-        </div>
-
-        <div className="flex-1 overflow-y-auto min-h-0 space-y-1.5 pr-1">
-          {activeTab === "matches" && (
-            <>
-              {filteredMatches.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full p-4 text-center text-muted-foreground text-xs">
-                  <RadioIcon className="size-6 mb-1 opacity-50" />
-                  <span>No concurrent matches found</span>
-                </div>
-              ) : (
-                filteredMatches.map((m) => (
-                  <button
-                    key={m.event_id}
-                    type="button"
-                    onClick={() => handlePickFixture(m)}
-                    className="w-full flex items-center justify-between p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06] hover:border-[var(--pitch)]/40 transition-all text-left group"
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="flex items-center -space-x-1.5 shrink-0">
-                        {m.home_id && <TeamCrest teamId={m.home_id} name={m.home} size={20} />}
-                        {m.away_id && <TeamCrest teamId={m.away_id} name={m.away} size={20} />}
-                      </div>
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-xs font-semibold text-foreground truncate group-hover:text-[var(--pitch)] transition-colors">
-                          {m.home} vs {m.away}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground truncate">
-                          {m.league || "Live Match"}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--pitch)]/10 text-[var(--pitch)] border border-[var(--pitch)]/20">
-                        + Watch
-                      </span>
-                    </div>
-                  </button>
-                ))
-              )}
-            </>
-          )}
-
-          {activeTab === "channels" && (
-            <>
-              {filteredChannels.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full p-4 text-center text-muted-foreground text-xs">
-                  <TvIcon className="size-6 mb-1 opacity-50" />
-                  <span>No channels found</span>
-                </div>
-              ) : (
-                filteredChannels.map((c) => (
-                  <button
-                    key={c.id}
-                    type="button"
-                    onClick={() => handlePickChannel(c)}
-                    className="w-full flex items-center justify-between p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06] hover:border-[var(--pitch)]/40 transition-all text-left group"
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="size-6 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
-                        <TvIcon className="size-3 text-muted-foreground group-hover:text-[var(--pitch)]" />
-                      </div>
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-xs font-semibold text-foreground truncate group-hover:text-[var(--pitch)] transition-colors">
-                          {c.name}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground truncate">
-                          {c.region || "Broadcaster"}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--pitch)]/10 text-[var(--pitch)] border border-[var(--pitch)]/20">
-                        + Watch
-                      </span>
-                    </div>
-                  </button>
-                ))
-              )}
-            </>
-          )}
-
-          {activeTab === "sources" && (
-            <>
-              {filteredSources.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full p-4 text-center text-muted-foreground text-xs">
-                  <PlayIcon className="size-6 mb-1 opacity-50" />
-                  <span>No alternate feeds</span>
-                </div>
-              ) : (
-                filteredSources.map((s) => (
-                  <button
-                    key={`${s.provider.id}-${s.source.key}`}
-                    type="button"
-                    onClick={() => handlePickSource(s)}
-                    className="w-full flex items-center justify-between p-2 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.06] hover:border-[var(--pitch)]/40 transition-all text-left group"
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-xs font-semibold text-foreground truncate group-hover:text-[var(--pitch)] transition-colors">
-                          {s.source.label}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground truncate">
-                          via {s.provider.name}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                      {s.source.quality && (
-                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-foreground font-bold">
-                          {s.source.quality}
-                        </span>
-                      )}
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-[var(--pitch)]/10 text-[var(--pitch)] border border-[var(--pitch)]/20">
-                        + Watch
-                      </span>
-                    </div>
-                  </button>
-                ))
-              )}
-            </>
-          )}
-        </div>
-      </article>
+      <StreamPickerPanel
+        feedLabel={feedLabel}
+        similarMatches={similarMatches}
+        genericChannels={genericChannels}
+        alternateSources={alternateSources}
+        onSelectFixture={handlePickFixture}
+        onSelectChannel={handlePickChannel}
+        onSelectSource={handlePickSource}
+        onCancel={slotData ? () => setIsEditingFeed(false) : undefined}
+        isLoading={isLoadingStream}
+        error={streamError}
+        onDismissError={() => setStreamError(null)}
+        isFocused={isFocused}
+        isFullscreen={isFullscreen}
+        onFocus={onFocus}
+      />
     )
   }
 
@@ -619,7 +694,7 @@ export function MultiViewSlotPlayer({
               setIsEditingFeed(true)
             }}
             className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
-            title="Change Feed"
+            title="Change Feed / Server"
           >
             <TvIcon className="size-3.5" />
           </button>
@@ -694,4 +769,3 @@ export function MultiViewSlotPlayer({
     </article>
   )
 }
-
