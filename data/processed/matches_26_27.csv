@@ -1572,15 +1572,15 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16434137,Bundesliga,2026/27,14,2026-12-20,SC Freiburg,2538,VfB Stuttgart,2677,upcoming,,,2026-12-20T14:30:00Z
 16434143,Bundesliga,2026/27,14,2026-12-20,1. FC Union Berlin,2547,TSG Hoffenheim,2569,upcoming,,,2026-12-20T16:30:00Z
 16434141,Bundesliga,2026/27,14,2026-12-20,FC Schalke 04,2530,Borussia M'gladbach,2527,upcoming,,,2026-12-20T18:30:00Z
-16434148,Bundesliga,2026/27,15,2027-01-09,1. FC Köln,2671,SC Freiburg,2538,upcoming,,,2027-01-09T10:00:00Z
-16434144,Bundesliga,2026/27,15,2027-01-09,Borussia Dortmund,2673,1. FSV Mainz 05,2556,upcoming,,,2027-01-09T10:00:00Z
-16434147,Bundesliga,2026/27,15,2027-01-09,Borussia M'gladbach,2527,FC Bayern München,2672,upcoming,,,2027-01-09T10:00:00Z
-16434146,Bundesliga,2026/27,15,2027-01-09,Eintracht Frankfurt,2674,FC Schalke 04,2530,upcoming,,,2027-01-09T10:00:00Z
-16434149,Bundesliga,2026/27,15,2027-01-09,Hamburger SV,2676,Bayer 04 Leverkusen,2681,upcoming,,,2027-01-09T10:00:00Z
-16434150,Bundesliga,2026/27,15,2027-01-09,SC Paderborn 07,2561,RB Leipzig,36360,upcoming,,,2027-01-09T10:00:00Z
-16434151,Bundesliga,2026/27,15,2027-01-09,SV Werder Bremen,2534,1. FC Union Berlin,2547,upcoming,,,2027-01-09T10:00:00Z
-16434145,Bundesliga,2026/27,15,2027-01-09,TSG Hoffenheim,2569,SV 07 Elversberg,2598,upcoming,,,2027-01-09T10:00:00Z
-16434142,Bundesliga,2026/27,15,2027-01-09,VfB Stuttgart,2677,FC Augsburg,2600,upcoming,,,2027-01-09T10:00:00Z
+16434144,Bundesliga,2026/27,15,2027-01-08,Borussia Dortmund,2673,1. FSV Mainz 05,2556,upcoming,,,2027-01-08T19:30:00Z
+16434148,Bundesliga,2026/27,15,2027-01-09,1. FC Köln,2671,SC Freiburg,2538,upcoming,,,2027-01-09T14:30:00Z
+16434146,Bundesliga,2026/27,15,2027-01-09,Eintracht Frankfurt,2674,FC Schalke 04,2530,upcoming,,,2027-01-09T14:30:00Z
+16434150,Bundesliga,2026/27,15,2027-01-09,SC Paderborn 07,2561,RB Leipzig,36360,upcoming,,,2027-01-09T14:30:00Z
+16434145,Bundesliga,2026/27,15,2027-01-09,TSG Hoffenheim,2569,SV 07 Elversberg,2598,upcoming,,,2027-01-09T14:30:00Z
+16434142,Bundesliga,2026/27,15,2027-01-09,VfB Stuttgart,2677,FC Augsburg,2600,upcoming,,,2027-01-09T14:30:00Z
+16434147,Bundesliga,2026/27,15,2027-01-09,Borussia M'gladbach,2527,FC Bayern München,2672,upcoming,,,2027-01-09T17:30:00Z
+16434151,Bundesliga,2026/27,15,2027-01-10,SV Werder Bremen,2534,1. FC Union Berlin,2547,upcoming,,,2027-01-10T14:30:00Z
+16434149,Bundesliga,2026/27,15,2027-01-10,Hamburger SV,2676,Bayer 04 Leverkusen,2681,upcoming,,,2027-01-10T16:30:00Z
 16434163,Bundesliga,2026/27,16,2027-01-13,1. FC Köln,2671,Borussia Dortmund,2673,upcoming,,,2027-01-13T10:00:00Z
 16434155,Bundesliga,2026/27,16,2027-01-13,1. FC Union Berlin,2547,SC Paderborn 07,2561,upcoming,,,2027-01-13T10:00:00Z
 16434156,Bundesliga,2026/27,16,2027-01-13,1. FSV Mainz 05,2556,TSG Hoffenheim,2569,upcoming,,,2027-01-13T10:00:00Z
