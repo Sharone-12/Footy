@@ -100,7 +100,7 @@ function PlayerCard({ p, scope }: { p: SquadRow; scope: string }) {
   )
 }
 
-/** The squad for a season, one row per player. Cached: it changes twice a year. */
+/** The squad for a season, combining all competitions (La Liga + UCL). Cached: changes twice a year. */
 async function loadSquad(season: string) {
   "use cache"
   cacheLife("minutes")
@@ -114,21 +114,35 @@ async function loadSquad(season: string) {
     .eq("season", season)
     .order("minutes", { ascending: false })
 
-  // A player holds one row per competition. Keep the domestic one — the
-  // Champions League row is a handful of games and would read as a whole
-  // season's return on the card.
-  const byPlayer = new Map<number, SquadRow>()
+  // Players hold one row per competition (La Liga, Champions League).
+  // Combine all competitions so the squad cards show their total goals, assists,
+  // appearances, and minutes across the entire season.
+  const groups = new Map<number, SquadRow[]>()
   for (const row of (data || []) as SquadRow[]) {
-    const kept = byPlayer.get(row.player_id)
-    if (!kept || (kept.league === UCL && row.league !== UCL)) {
-      byPlayer.set(row.player_id, row)
-    }
+    const list = groups.get(row.player_id)
+    if (list) list.push(row)
+    else groups.set(row.player_id, [row])
   }
 
-  return [...byPlayer.values()].map((p) => ({
-    ...p,
-    position: squadPosition(p.slug, p.position),
-  }))
+  const combined: SquadRow[] = []
+  for (const group of groups.values()) {
+    const base = group.find((r) => r.league !== UCL) ?? group[0]
+    const appearances = group.reduce((t, r) => t + (r.appearances ?? 0), 0)
+    const goals = group.reduce((t, r) => t + (r.goals ?? 0), 0)
+    const assists = group.reduce((t, r) => t + (r.assists ?? 0), 0)
+    const minutes = group.reduce((t, r) => t + (r.minutes ?? 0), 0)
+
+    combined.push({
+      ...base,
+      appearances,
+      goals,
+      assists,
+      minutes,
+      position: squadPosition(base.slug, base.position),
+    })
+  }
+
+  return combined
 }
 
 async function Squad({
