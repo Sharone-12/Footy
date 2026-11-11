@@ -14,6 +14,7 @@ import {
 import { LEAGUE_ABBR, LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
 import { resolveSeason } from "@/lib/seasons"
 import { resolveCompetition, inCompetition, scopeQuery, UCL } from "@/lib/competition"
+import { combineCompetitions } from "@/lib/leaders"
 import { CompetitionToggle } from "@/components/competition-toggle"
 import { PlayerSearch } from "@/components/player-search"
 import { PlayerAvatar, TeamCrest, LeagueCrest } from "@/components/player-avatar"
@@ -53,14 +54,18 @@ export default function CompareContent() {
       .in("slug", slugs)
       .order("season", { ascending: false })
       .then(({ data }) => {
+        const allData = (data || []) as Record<string, unknown>[]
+        let pool: Record<string, unknown>[]
+        if (comp === "all") {
+          const seasonRows = allData.filter((p) => p.season === season)
+          const otherRows = allData.filter((p) => p.season !== season)
+          pool = [...combineCompetitions(seasonRows), ...combineCompetitions(otherRows)]
+        } else {
+          pool = allData.filter((p) => inCompetition(p.league as string, comp))
+        }
+
         const seen = new Set<string>()
-        // Only the chosen competition: a player holds a league row and a
-        // Champions League row, and either could win the dedupe otherwise.
-        const rows = (data || []).filter((p) => inCompetition(p.league, comp))
-        const unique = [
-          ...rows.filter((p) => p.season === season),
-          ...rows,
-        ].filter((p) => {
+        const unique = pool.filter((p) => {
           const s = p.slug as string
           if (seen.has(s)) return false
           seen.add(s)

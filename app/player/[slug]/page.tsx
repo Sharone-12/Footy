@@ -9,6 +9,7 @@ import {
   UCL,
   type Competition,
 } from "@/lib/competition"
+import { combineCompetitions } from "@/lib/leaders"
 import { CompetitionToggle } from "@/components/competition-toggle"
 import { notFound } from "next/navigation"
 import { RADAR_STATS, STAT_GROUPS, percentileRank } from "@/lib/stats"
@@ -64,11 +65,20 @@ async function PlayerContent({
 
   // Prefer the chosen competition, then the selected season; fall back to the
   // newest row we hold, since a player may not appear in both.
-  const inComp = players.filter((p) => inCompetition(p.league as string, comp))
-  const pool = inComp.length ? inComp : players
+  let pool: Record<string, unknown>[]
+  if (comp === "all") {
+    const allData = (players || []) as Record<string, unknown>[]
+    const seasonRows = allData.filter((p) => p.season === season)
+    const otherRows = allData.filter((p) => p.season !== season)
+    pool = [...combineCompetitions(seasonRows), ...combineCompetitions(otherRows)]
+  } else {
+    const inComp = players.filter((p) => inCompetition(p.league as string, comp))
+    pool = (inComp.length ? inComp : players) as unknown as Record<string, unknown>[]
+  }
+
   const player = ((pool.find((p) => p.season === season) ??
     pool[0]) as unknown) as Record<string, unknown>
-  const shown: Competition = player.league === UCL ? "ucl" : "league"
+  const shown: Competition = comp === "ucl" ? "ucl" : "league"
   const playsUcl = players.some((p) => p.league === UCL)
 
   const { data: positionPeers } = await scopeLeague(
@@ -189,7 +199,7 @@ async function PlayerContent({
             />
             {player.team as string}
             <span className="opacity-40">·</span>
-            {player.league as string}
+            {comp === "all" ? "All Competitions" : (player.league as string)}
             <span className="opacity-40">·</span>
             {player.season as string}
           </p>

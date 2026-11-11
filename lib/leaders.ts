@@ -227,6 +227,8 @@ export function topMetrics(profile: Weight[] | undefined, n = 4): ProfileMetric[
  * Counting columns in `players`. Each has a matching `<col>_p90` that is
  * derived, never summed — adding two rates together is meaningless.
  */
+const UCL = "Champions League"
+
 export const SUM_COLS = [
   "goals", "assists", "xg", "xa", "shots", "shots_on_target",
   "big_chances_created", "big_chances_missed", "passes", "total_passes",
@@ -266,7 +268,8 @@ export function combineCompetitions<T extends Record<string, unknown>>(rows: T[]
       out.push(group[0])
       continue
     }
-    const base = [...group].sort((a, b) => (num(b.minutes) ?? 0) - (num(a.minutes) ?? 0))[0]
+    const domestic = group.find((r) => r.league !== UCL)
+    const base = domestic ?? [...group].sort((a, b) => (num(b.minutes) ?? 0) - (num(a.minutes) ?? 0))[0]
     const merged: Record<string, unknown> = { ...base }
 
     const minutes = group.reduce((t, r) => t + (num(r.minutes) ?? 0), 0)
