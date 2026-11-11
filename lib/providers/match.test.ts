@@ -76,4 +76,31 @@ assert.equal(score(fixture, {}), 0)
 assert.equal(score(fixture, { title: "" }), 0)
 assert.equal(score(fixture, { title: "Premier League highlights" }), 0)
 
+// International fixtures matching: full names, 3-letter codes, localized names, competition names
+const intlFixture: Fixture = {
+  event_id: 15534088,
+  home: "England",
+  away: "Croatia",
+  league: "UEFA Nations League",
+  kickoff: "2026-11-12T19:45:00Z",
+  date: "2026-11-12",
+}
+
+assert.ok(score(intlFixture, { title: "England vs Croatia", kickoff: intlFixture.kickoff }) >= T)
+assert.ok(score(intlFixture, { title: "ENG vs CRO", kickoff: intlFixture.kickoff }) >= T)
+assert.ok(score(intlFixture, { title: "Hrvatska vs England", kickoff: intlFixture.kickoff }) >= T)
+assert.ok(score(intlFixture, { title: "England vs Croatia - UEFA Nations League", kickoff: intlFixture.kickoff }) >= 0.95)
+
+const espGerFixture: Fixture = {
+  event_id: 15534090,
+  home: "Spain",
+  away: "Germany",
+  league: "UEFA Nations League",
+  kickoff: "2026-11-15T19:45:00Z",
+  date: "2026-11-15",
+}
+
+assert.ok(score(espGerFixture, { title: "ESP vs GER", kickoff: espGerFixture.kickoff }) >= T)
+assert.ok(score(espGerFixture, { title: "España vs Deutschland", kickoff: espGerFixture.kickoff }) >= T)
+
 console.log("providers/match: all assertions passed")

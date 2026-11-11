@@ -1,4 +1,5 @@
 import type { Fixture } from "@/lib/providers/types"
+import { INTERNATIONAL_ALIASES, INTERNATIONAL_COMPETITIONS } from "../streaming/aliases.ts"
 import type {
   MatchedStream,
   StreamFreeItem,
@@ -187,6 +188,7 @@ const ALIASES: Record<string, string[]> = {
   "sk slavia praha": ["slavia prague", "slavia praha"],
   "slavia prague": ["sk slavia praha", "slavia praha"],
   "sparta praha": ["sparta prague", "sparta praha"],
+  ...INTERNATIONAL_ALIASES,
 }
 
 /** Competition synonyms for bonus scoring. */
@@ -199,6 +201,7 @@ const COMPETITIONS: Record<string, string[]> = {
   "ligue 1": ["ligue1", "french league"],
   "fa cup": ["the fa cup", "emirates fa cup"],
   "efl championship": ["championship", "english championship"],
+  ...INTERNATIONAL_COMPETITIONS,
 }
 
 /**

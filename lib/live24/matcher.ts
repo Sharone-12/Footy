@@ -3,8 +3,9 @@
  * Matches SofaScore fixtures with Live24 events using fuzzy team matching and alias lookup.
  */
 
-import type { Fixture } from "@/lib/providers/types"
-import type { Live24ParsedEvent, MatchedLive24 } from "./types"
+import type { Fixture } from "../providers/types.ts"
+import type { Live24ParsedEvent, MatchedLive24 } from "./types.ts"
+import { INTERNATIONAL_ALIASES, matchesAliasTarget } from "../streaming/aliases.ts"
 
 export const CONFIDENCE_REJECT_THRESHOLD = 75
 export const CONFIDENCE_CONFIRMED_THRESHOLD = 85
@@ -145,6 +146,7 @@ const ALIASES: Record<string, string[]> = {
   "sk slavia praha": ["slavia prague", "slavia praha"],
   "slavia prague": ["sk slavia praha", "slavia praha"],
   "sparta praha": ["sparta prague", "sparta praha"],
+  ...INTERNATIONAL_ALIASES,
 }
 
 export function cleanTeamName(name: string): string {
@@ -201,7 +203,7 @@ export function areAliases(nameA: string, nameB: string): boolean {
 
   for (const [canonical, aliasList] of Object.entries(ALIASES)) {
     const group = [canonical, ...aliasList].map(cleanTeamName)
-    if (group.includes(normA) && group.includes(normB)) {
+    if (group.some((a) => matchesAliasTarget(normA, a)) && group.some((b) => matchesAliasTarget(normB, b))) {
       return true
     }
   }

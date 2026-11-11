@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
-import { normalizeLive24Event } from "./client"
-import { matchFixtureToLive24, cleanTeamName, matchTeamNames } from "./matcher"
-import type { Live24EventItem } from "./types"
+import { normalizeLive24Event } from "./client.ts"
+import { matchFixtureToLive24, cleanTeamName, matchTeamNames } from "./matcher.ts"
+import type { Live24EventItem } from "./types.ts"
 
 console.log("Running Live24 matcher unit tests...")
 

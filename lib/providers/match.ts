@@ -11,6 +11,7 @@
  * plus metadata, which is the exact wrong answer.
  */
 import type { Fixture } from "./types"
+import { INTERNATIONAL_ALIASES, INTERNATIONAL_COMPETITIONS } from "../streaming/aliases.ts"
 
 export type Candidate = {
   home?: string | null
@@ -57,6 +58,7 @@ const ALIASES: Record<string, string[]> = {
   "borussia dortmund": ["dortmund", "bvb"],
   "sporting cp": ["sporting lisbon", "sporting"],
   "olympique marseille": ["marseille", "om"],
+  ...INTERNATIONAL_ALIASES,
 }
 
 /** Competition names as providers write them. */
@@ -66,6 +68,7 @@ const COMPETITIONS: Record<string, string[]> = {
   "premier league": ["epl", "premier", "english premier league"],
   "ligue 1": ["ligue1", "french league"],
   bundesliga: ["german league", "bundesliga 1"],
+  ...INTERNATIONAL_COMPETITIONS,
 }
 
 /** Lower-case, de-accent, drop punctuation. */

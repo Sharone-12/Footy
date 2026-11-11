@@ -56,6 +56,20 @@ async function runTests() {
         },
       ],
     },
+    {
+      id: "intl-eng-cro",
+      name: "ENG vs CRO",
+      home: "ENG",
+      away: "CRO",
+      league: "UEFA Nations League",
+      status: "LIVE",
+      isLive: true,
+      startsAt: 1794500000,
+      endsAt: 1794510000,
+      kickoffIso: new Date(1794500000 * 1000).toISOString(),
+      embedUrl: "https://damitv.st/embed/?id=intl-eng-cro",
+      sources: [],
+    },
   ]
 
   // Test 1: High confidence match with team alias (Barca / Barcelona)
@@ -111,6 +125,20 @@ async function runTests() {
   assert.equal(batch.size, 2, "Should match exactly the 2 valid fixtures")
   assert.equal(batch.get(201)?.stream.id, "es-laliga-barca-atleti")
   assert.equal(batch.get(202)?.stream.id, "mm-au-aus1-401892147")
+
+  // Test 5: International fixture matching with 3-letter abbreviations (ENG vs CRO)
+  const intlFixture: Fixture = {
+    event_id: 15534088,
+    home: "England",
+    away: "Croatia",
+    league: "UEFA Nations League",
+    date: "2026-11-12",
+    kickoff: new Date(1794500000 * 1000).toISOString(),
+  }
+  const matchIntl = matchFixtureToDamiTv(intlFixture, streams)
+  assert.ok(matchIntl, "Should associate international England vs Croatia fixture")
+  assert.equal(matchIntl.stream.id, "intl-eng-cro")
+  assert.ok(matchIntl.confidence >= 85, "Confidence should be >= 85")
 
   console.log("damitv matcher: all assertions passed")
 }

@@ -4,8 +4,9 @@
  * fuzzy team matching, alias lookup, competition verification, and UTC kickoff timing.
  */
 
-import type { Fixture } from "@/lib/providers/types"
-import type { CinevidParsedEvent, MatchedCinevid } from "./types"
+import type { Fixture } from "../providers/types.ts"
+import type { CinevidParsedEvent, MatchedCinevid } from "./types.ts"
+import { INTERNATIONAL_ALIASES, matchesAliasTarget } from "../streaming/aliases.ts"
 
 export const CONFIDENCE_REJECT_THRESHOLD = 75
 export const CONFIDENCE_CONFIRMED_THRESHOLD = 85
@@ -170,6 +171,7 @@ const ALIASES: Record<string, string[]> = {
   "sk slavia praha": ["slavia prague", "slavia praha"],
   "slavia prague": ["sk slavia praha", "slavia praha"],
   "sparta praha": ["sparta prague", "sparta praha"],
+  ...INTERNATIONAL_ALIASES,
 }
 
 /**
@@ -240,8 +242,8 @@ export function teamSimilarity(fixtureTeam: string, eventTeam: string): number {
   for (const [canon, aliases] of Object.entries(ALIASES)) {
     const canonNorm = normalise(canon)
     const all = [canonNorm, ...aliases.map(normalise)].filter((a) => a && a.length >= 3)
-    const matchesA = all.some((a) => a === normA || normA.startsWith(`${a} `) || normA.endsWith(` ${a}`))
-    const matchesB = all.some((b) => b === normB || normB.startsWith(`${b} `) || normB.endsWith(` ${b}`))
+    const matchesA = all.some((a) => matchesAliasTarget(normA, a))
+    const matchesB = all.some((b) => matchesAliasTarget(normB, b))
     if (matchesA && matchesB) {
       return 0.98
     }

@@ -1,10 +1,10 @@
-import type { Fixture } from "@/lib/providers/types"
-import type { MatchedZLive, ZLiveChannel } from "./types"
+import type { Fixture } from "../providers/types.ts"
+import type { MatchedZLive, ZLiveChannel } from "./types.ts"
 import {
   normalise,
   diceSimilarity,
   teamSimilarity,
-} from "@/lib/streamfree/matcher"
+} from "../streamfree/matcher.ts"
 
 export const CONFIDENCE_THRESHOLD = 0.75
 

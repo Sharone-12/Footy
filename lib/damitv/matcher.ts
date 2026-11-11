@@ -1,6 +1,7 @@
-import type { Fixture } from "@/lib/providers/types"
-import type { DamiTvParsedStream, MatchedDamiTv } from "./types"
-import { normalise, diceSimilarity } from "@/lib/streamfree/matcher"
+import type { Fixture } from "../providers/types.ts"
+import type { DamiTvParsedStream, MatchedDamiTv } from "./types.ts"
+import { normalise, diceSimilarity } from "../streamfree/matcher.ts"
+import { INTERNATIONAL_ALIASES, matchesAliasTarget } from "../streaming/aliases.ts"
 
 export const CONFIDENCE_REJECTION_THRESHOLD = 75
 export const CONFIDENCE_CONFIRMED_THRESHOLD = 85
@@ -135,6 +136,7 @@ const ALIASES: Record<string, string[]> = {
   "sk slavia praha": ["slavia prague", "slavia praha"],
   "slavia prague": ["sk slavia praha", "slavia praha"],
   "sparta praha": ["sparta prague", "sparta praha"],
+  ...INTERNATIONAL_ALIASES,
 }
 
 /** Check if two team names match (via direct equality, substring, aliases, or fuzzy similarity) */
@@ -149,8 +151,8 @@ function teamSimilarity(fixtureTeam: string, streamTeam: string): number {
   for (const [canon, aliases] of Object.entries(ALIASES)) {
     const canonNorm = normalise(canon)
     const all = [canonNorm, ...aliases.map(normalise)]
-    const matchesA = all.some((a) => a === normA || normA.includes(a) || a.includes(normA))
-    const matchesB = all.some((b) => b === normB || normB.includes(b) || b.includes(normB))
+    const matchesA = all.some((a) => matchesAliasTarget(normA, a))
+    const matchesB = all.some((b) => matchesAliasTarget(normB, b))
     if (matchesA && matchesB) return 0.98
   }
 
