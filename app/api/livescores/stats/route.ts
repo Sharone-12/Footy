@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
-import { fetchDaySnapshot, findLive, type FixtureLike } from "@/lib/livescores"
-import { supabase } from "@/lib/supabase"
+import { resolveLiveScoreEvent } from "@/lib/livescores-resolver"
 
 const STATS_API_BASE = "https://prod-public-api.livescore.com/v1/api/app/statistics/soccer"
 const CACHE_TTL_MS = 15_000 // 15 seconds in-memory cache
@@ -123,38 +122,18 @@ async function fetchStatsForEid(eid: string): Promise<LiveMatchStatsResponse> {
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
-  let eid = searchParams.get("eid")
-  const fixtureId = searchParams.get("fixture_id")
+  const eidParam = searchParams.get("eid")
+  const fixtureIdParam = searchParams.get("fixture_id")
 
-  // If no direct eid, look up via fixture_id against current snapshot
-  if (!eid && fixtureId) {
-    try {
-      const { data: fixtureRow } = await supabase
-        .from("matches")
-        .select("event_id, home, away, date, kickoff")
-        .eq("event_id", Number(fixtureId))
-        .maybeSingle()
-
-      if (fixtureRow) {
-        const { live } = await fetchDaySnapshot()
-        const matchedLive = findLive(fixtureRow as FixtureLike, live)
-        if (matchedLive?.id) {
-          eid = matchedLive.id
-        }
-      }
-    } catch {
-      // Continue to eid validation
-    }
-  }
-
-  if (!eid) {
+  const matchEvent = await resolveLiveScoreEvent(eidParam, fixtureIdParam)
+  if (!matchEvent?.eid) {
     return NextResponse.json(
       { error: "Missing eid or active live match" },
       { status: 400 },
     )
   }
 
-  const stats = await fetchStatsForEid(eid)
+  const stats = await fetchStatsForEid(matchEvent.eid)
 
   return NextResponse.json(stats, {
     headers: {

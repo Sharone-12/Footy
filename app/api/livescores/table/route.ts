@@ -99,6 +99,15 @@ export async function GET(request: Request) {
     )
   }
 
+  if (!stageCode) {
+    return NextResponse.json({
+      leagueName: stageName || "League Table",
+      homeTeam: home,
+      awayTeam: away,
+      rows: [],
+    })
+  }
+
   try {
     const res = await fetch(
       `${TABLE_API_BASE}/${encodeURIComponent(countryCode || "")}/${encodeURIComponent(stageCode || "")}/table`,

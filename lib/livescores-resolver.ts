@@ -1,4 +1,4 @@
-import { fetchDaySnapshot, findLive, type FixtureLike, type LiveScore } from "./livescores"
+import { fetchDaySnapshot, findLive, type FixtureLike, type LiveScore } from "./livescores.ts"
 import { supabase } from "./supabase"
 
 export type ResolvedMatchEvent = {
@@ -111,18 +111,37 @@ async function resolveUncached(
       league = fixtureRow.league || ""
       date = fixtureRow.date || ""
 
-      // Find eid in current snapshot if not given directly
+      // Find eid in target date snapshot if not given directly
       if (!eid) {
         try {
-          const snapshot = await fetchDaySnapshot()
-          const allScores = snapshot.all && snapshot.all.length > 0 ? snapshot.all : snapshot.live
-          const matched = findLive(fixtureRow as FixtureLike, allScores)
+          const targetDate = fixtureRow.date ? new Date(`${fixtureRow.date}T12:00:00Z`) : undefined
+          let snapshot = await fetchDaySnapshot(targetDate)
+          let allScores = snapshot.all && snapshot.all.length > 0 ? snapshot.all : snapshot.live
+          let matched = findLive(fixtureRow as FixtureLike, allScores)
+
+          // Fallback to today's snapshot (covers timezone offsets / matches crossing UTC midnight)
+          if (!matched?.id && targetDate) {
+            const todaySnapshot = await fetchDaySnapshot()
+            const todayScores = todaySnapshot.all && todaySnapshot.all.length > 0 ? todaySnapshot.all : todaySnapshot.live
+            matched = findLive(fixtureRow as FixtureLike, todayScores)
+          }
+
           if (matched?.id) {
             eid = matched.id
           }
         } catch {
           // ignore error
         }
+      }
+    } else {
+      // If not in database, fixtureIdParam might be a direct LiveScore eid
+      try {
+        const directSb = await fetchScoreboard(fixtureIdParam)
+        if (directSb?.T1?.[0]?.Nm) {
+          eid = fixtureIdParam
+        }
+      } catch {
+        // ignore error
       }
     }
   }
@@ -133,14 +152,21 @@ async function resolveUncached(
   const sb = await fetchScoreboard(eid)
   const stg = sb?.Stg
 
+  const esdStr = sb?.Esd ? String(sb.Esd) : ""
+  const formattedDate =
+    date ||
+    (esdStr.length >= 8
+      ? `${esdStr.slice(0, 4)}-${esdStr.slice(4, 6)}-${esdStr.slice(6, 8)}`
+      : "")
+
   return {
     eid,
     home: home || sb?.T1?.[0]?.Nm || "Home",
     away: away || sb?.T2?.[0]?.Nm || "Away",
     homeId,
     awayId,
-    league: league || stg?.Sdn || stg?.Snm || "Football",
-    date,
+    league: league || stg?.Sdn || stg?.Snm || stg?.Cnm || "Football",
+    date: formattedDate,
     countryCode: stg?.Ccd || stg?.CnmT || "international",
     stageCode: stg?.Scd || stg?.CompUrlName || "",
     stageName: stg?.Sdn || stg?.Snm || "",

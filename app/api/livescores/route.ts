@@ -47,7 +47,30 @@ async function load(): Promise<Snapshot> {
   return inflight
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const dateParam = searchParams.get("date")
+
+  if (dateParam) {
+    try {
+      const targetDate = new Date(`${dateParam}T12:00:00Z`)
+      const { live, final } = await fetchDaySnapshot(targetDate)
+      return NextResponse.json(
+        { scores: live, final },
+        {
+          headers: {
+            "Cache-Control": "public, s-maxage=15, stale-while-revalidate=30",
+          },
+        },
+      )
+    } catch (error) {
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : "live feed unavailable" },
+        { status: 503, headers: { "Cache-Control": "no-store" } },
+      )
+    }
+  }
+
   let snapshot = cached
   const fresh = snapshot && Date.now() - snapshot.at < TTL_MS
 

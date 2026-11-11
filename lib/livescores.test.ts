@@ -157,6 +157,29 @@ assert.equal(
   "1",
 )
 
+// International fixtures and aliases match correctly
+assert.equal(
+  sameTeams(
+    { home: "England", away: "Croatia" },
+    { home: "ENG", away: "Croatia" },
+  ),
+  true,
+)
+assert.equal(
+  sameTeams(
+    { home: "Germany", away: "Netherlands" },
+    { home: "GER", away: "NED" },
+  ),
+  true,
+)
+assert.equal(
+  sameTeams(
+    { home: "USA", away: "Mexico" },
+    { home: "United States", away: "MEX" },
+  ),
+  true,
+)
+
 /* ── feed parsing ───────────────────────────────────────────────────────── */
 
 assert.equal(parseEsd("20261107120000"), Date.UTC(2026, 10, 7, 12, 0, 0))
