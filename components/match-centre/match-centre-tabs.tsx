@@ -76,7 +76,6 @@ export function MatchCentreTabs({
       try {
         const res = await fetch(`/api/livescores/${path}?${param}`, {
           signal: ac.signal,
-          cache: "no-store",
         })
         if (res.ok) {
           const data = (await res.json()) as T
@@ -102,14 +101,26 @@ export function MatchCentreTabs({
       load<H2HResponse>("h2h", setH2HData, setIsLoadingH2H),
     ])
 
-    // Periodic background polling while document is visible (instant trigger still runs on liveScore change)
-    const pollTimer = setInterval(() => {
-      if (typeof document !== "undefined" && document.hidden) return
-      void load<MatchSummaryResponse>("summary", handleSummaryUpdate)
-    }, 12_000)
+    const isMatchConcluded =
+      summaryData?.status === "FT" ||
+      summaryData?.status === "AET" ||
+      summaryData?.status === "AP" ||
+      liveScore?.status === "FT"
+
+    const isLive = Boolean(liveScore && !isMatchConcluded && liveScore.status !== "NS")
+
+    // Only poll while document is visible, and only at 20s if match is live (no polling if concluded, 120s if pre-match)
+    let pollTimer: ReturnType<typeof setInterval> | null = null
+    if (!isMatchConcluded) {
+      const intervalMs = isLive ? 20_000 : 120_000
+      pollTimer = setInterval(() => {
+        if (typeof document !== "undefined" && document.hidden) return
+        void load<MatchSummaryResponse>("summary", handleSummaryUpdate)
+      }, intervalMs)
+    }
 
     const handleVisibility = () => {
-      if (typeof document !== "undefined" && !document.hidden) {
+      if (typeof document !== "undefined" && !document.hidden && !isMatchConcluded) {
         void load<MatchSummaryResponse>("summary", handleSummaryUpdate)
         void load<LeagueTableResponse>("table", setTableData)
       }
@@ -118,10 +129,10 @@ export function MatchCentreTabs({
 
     return () => {
       ac.abort()
-      clearInterval(pollTimer)
+      if (pollTimer) clearInterval(pollTimer)
       document.removeEventListener("visibilitychange", handleVisibility)
     }
-  }, [eid, fixtureId, onSummaryLoaded])
+  }, [eid, fixtureId, onSummaryLoaded, liveScore?.status, summaryData?.status])
 
   // Instant re-fetch trigger as soon as goal or period status changes in the live feed
   useEffect(() => {
@@ -130,7 +141,7 @@ export function MatchCentreTabs({
       ? `eid=${encodeURIComponent(eid)}`
       : `fixture_id=${encodeURIComponent(fixtureId)}`
 
-    fetch(`/api/livescores/summary?${param}`, { cache: "no-store" })
+    fetch(`/api/livescores/summary?${param}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data: MatchSummaryResponse | null) => {
         if (data && data.incidents) {
@@ -140,7 +151,7 @@ export function MatchCentreTabs({
       })
       .catch(() => {})
 
-    fetch(`/api/livescores/table?${param}`, { cache: "no-store" })
+    fetch(`/api/livescores/table?${param}`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data: LeagueTableResponse | null) => {
         if (data && data.rows && data.rows.length > 0) setTableData(data)

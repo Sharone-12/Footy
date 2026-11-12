@@ -159,13 +159,20 @@ export function WatchLiveStatsCard({ fixture, liveScore, summaryData }: WatchLiv
       effectiveSummary?.status === "AP" ||
       liveScore?.status === "FT"
 
-    if (isMatchConcluded) return
+    const isNotStarted =
+      effectiveSummary?.status === "NS" ||
+      effectiveSummary?.status === "Scheduled" ||
+      liveScore?.status === "NS" ||
+      (!liveScore && !stats?.hasStats)
 
-    // Poll stats at 15s interval (matching upstream stats cadence) when document is visible
+    // Do not poll stats for concluded matches or matches that have not kicked off
+    if (isMatchConcluded || isNotStarted) return
+
+    // Poll stats at 20s interval (matching upstream stats cadence) when document is visible
     pollTimerRef.current = setInterval(() => {
       if (typeof document !== "undefined" && document.hidden) return
       fetchStats()
-    }, 15_000)
+    }, 20_000)
 
     const handleVisibility = () => {
       if (typeof document !== "undefined" && !document.hidden) {

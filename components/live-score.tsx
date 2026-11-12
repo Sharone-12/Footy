@@ -102,7 +102,7 @@ function startPolling() {
 
   if (!scoresTimer) {
     void pollScores()
-    const interval = snapshot.scores.length > 0 ? POLL_SCORES_MS : 35_000
+    const interval = snapshot.scores.length > 0 ? POLL_SCORES_MS : 60_000
     scoresTimer = setInterval(pollScores, interval)
   }
 
