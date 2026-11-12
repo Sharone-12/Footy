@@ -129,7 +129,7 @@ export async function GET(request: Request) {
   if (!matchEvent?.eid) {
     return NextResponse.json(
       { error: "Missing eid or active live match" },
-      { status: 400 },
+      { status: 400, headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } },
     )
   }
 

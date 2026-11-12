@@ -16,32 +16,43 @@ export type ResolvedMatchEvent = {
 
 const SCOREBOARD_API = "https://prod-public-api.livescore.com/v1/api/app/scoreboard/soccer"
 const scoreboardCache = new Map<string, { timestamp: number; data: any }>()
-const CACHE_TTL_MS = 2_000
+const inflightScoreboard = new Map<string, Promise<any | null>>()
+const SCOREBOARD_CACHE_TTL_MS = 30_000
 
 export async function fetchScoreboard(eid: string): Promise<any | null> {
   const cached = scoreboardCache.get(eid)
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+  if (cached && Date.now() - cached.timestamp < SCOREBOARD_CACHE_TTL_MS) {
     return cached.data
   }
 
-  try {
-    const res = await fetch(`${SCOREBOARD_API}/${encodeURIComponent(eid)}`, {
-      headers: {
-        Accept: "application/json",
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-      },
-      cache: "no-store",
-    })
+  const pending = inflightScoreboard.get(eid)
+  if (pending) return pending
 
-    if (!res.ok) return null
-    const json = await res.json()
-    scoreboardCache.set(eid, { timestamp: Date.now(), data: json })
-    return json
-  } catch (err) {
-    console.warn(`[livescores-resolver] Failed fetching scoreboard for eid ${eid}:`, err)
-    return null
-  }
+  const task = (async () => {
+    try {
+      const res = await fetch(`${SCOREBOARD_API}/${encodeURIComponent(eid)}`, {
+        headers: {
+          Accept: "application/json",
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        },
+        cache: "no-store",
+      })
+
+      if (!res.ok) return null
+      const json = await res.json()
+      scoreboardCache.set(eid, { timestamp: Date.now(), data: json })
+      return json
+    } catch (err) {
+      console.warn(`[livescores-resolver] Failed fetching scoreboard for eid ${eid}:`, err)
+      return null
+    } finally {
+      inflightScoreboard.delete(eid)
+    }
+  })()
+
+  inflightScoreboard.set(eid, task)
+  return task
 }
 
 /**

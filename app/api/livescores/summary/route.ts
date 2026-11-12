@@ -77,7 +77,10 @@ export async function GET(request: Request) {
 
   const matchEvent = await resolveLiveScoreEvent(eidParam, fixtureIdParam)
   if (!matchEvent?.eid) {
-    return NextResponse.json({ error: "Match not found" }, { status: 404 })
+    return NextResponse.json(
+      { error: "Match not found" },
+      { status: 404, headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } },
+    )
   }
 
   const { eid, home, away, stageName } = matchEvent

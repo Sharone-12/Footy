@@ -9,6 +9,7 @@ type CachedH2H = {
 }
 
 const h2hCache = new Map<string, CachedH2H>()
+const inflightH2H = new Map<string, Promise<H2HResponse>>()
 
 export type H2HMatch = {
   date: string
@@ -52,7 +53,10 @@ export async function GET(request: Request) {
 
   const matchEvent = await resolveLiveScoreEvent(eidParam, fixtureIdParam)
   if (!matchEvent?.eid) {
-    return NextResponse.json({ error: "Match not found" }, { status: 404 })
+    return NextResponse.json(
+      { error: "Match not found" },
+      { status: 404, headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } },
+    )
   }
 
   const { eid, home, away, countryCode, stageCode } = matchEvent
@@ -64,102 +68,124 @@ export async function GET(request: Request) {
     })
   }
 
-  try {
-    const t1Slug = slugify(home)
-    const t2Slug = slugify(away)
-    const url = `https://www.livescore.com/en/football/${countryCode || "international"}/${stageCode || "league"}/${t1Slug}-vs-${t2Slug}/${eid}/h2h/`
-
-    const res = await fetch(url, {
-      headers: {
-        Accept: "text/html,application/xhtml+xml",
-        "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-      },
-      next: { revalidate: 60 },
-    })
-
-    if (!res.ok) {
-      return NextResponse.json({
-        homeTeam: home,
-        awayTeam: away,
-        homeForm: [],
-        awayForm: [],
-        matches: [],
-      })
-    }
-
-    const html = await res.text()
-    const nextDataMatch = html.match(/<script id="__NEXT_DATA__" type="application\/json">([^<]+)<\/script>/)
-    if (!nextDataMatch) {
-      return NextResponse.json({
-        homeTeam: home,
-        awayTeam: away,
-        homeForm: [],
-        awayForm: [],
-        matches: [],
-      })
-    }
-
-    const nextJson = JSON.parse(nextDataMatch[1])
-    const eventData = nextJson?.props?.pageProps?.initialEventData?.event
-    const rawH2H = eventData?.headToHead?.h2h || []
-    const homeForm = Array.isArray(eventData?.homeScoreForm)
-      ? eventData.homeScoreForm.map((f: string) => f.toUpperCase())
-      : []
-    const awayForm = Array.isArray(eventData?.awayScoreForm)
-      ? eventData.awayScoreForm.map((f: string) => f.toUpperCase())
-      : []
-
-    const homeTeamCrest = resolveCrestUrl(eventData?.homeTeamImgSlug || eventData?.homeTeamBadge)
-    const awayTeamCrest = resolveCrestUrl(eventData?.awayTeamImgSlug || eventData?.awayTeamBadge)
-
-    const matches: H2HMatch[] = []
-    for (const stg of rawH2H) {
-      const stageName = stg?.stage?.stageName || stg?.stage?.countryName || "League"
-      for (const ev of stg?.events || []) {
-        const hScore = parseInt(ev.homeScore, 10) || 0
-        const aScore = parseInt(ev.awayScore, 10) || 0
-        const winner = hScore > aScore ? "home" : aScore > hScore ? "away" : "draw"
-
-        let formattedDate = ""
-        if (ev.startDateTimeString && ev.startDateTimeString.length >= 8) {
-          const y = ev.startDateTimeString.slice(0, 4)
-          const m = ev.startDateTimeString.slice(4, 6)
-          const d = ev.startDateTimeString.slice(6, 8)
-          formattedDate = `${d}/${m}/${y}`
-        }
-
-        matches.push({
-          date: formattedDate,
-          league: stageName,
-          home: ev.homeName || home,
-          away: ev.awayName || away,
-          homeScore: hScore,
-          awayScore: aScore,
-          winner,
-          homeCrest: resolveCrestUrl(ev.homeSlug),
-          awayCrest: resolveCrestUrl(ev.awaySlug),
-        })
-      }
-    }
-
-    const result: H2HResponse = {
-      homeTeam: home,
-      awayTeam: away,
-      homeCrest: homeTeamCrest,
-      awayCrest: awayTeamCrest,
-      homeForm: homeForm.slice(-5), // last 5 matches
-      awayForm: awayForm.slice(-5),
-      matches: matches.slice(0, 10), // last 10 h2h encounters
-    }
-
-    h2hCache.set(eid, { timestamp: Date.now(), data: result })
-
-    return NextResponse.json(result, {
+  const pending = inflightH2H.get(eid)
+  if (pending) {
+    const data = await pending
+    return NextResponse.json(data, {
       headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" },
     })
-  } catch (err) {
-    console.error("[livescores/h2h] Error fetching H2H:", err)
-    return NextResponse.json({ error: "Failed to fetch H2H" }, { status: 500 })
   }
+
+  const task = (async () => {
+    try {
+      const t1Slug = slugify(home)
+      const t2Slug = slugify(away)
+      const url = `https://www.livescore.com/en/football/${countryCode || "international"}/${stageCode || "league"}/${t1Slug}-vs-${t2Slug}/${eid}/h2h/`
+
+      const res = await fetch(url, {
+        headers: {
+          Accept: "text/html,application/xhtml+xml",
+          "User-Agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+        },
+        cache: "no-store",
+      })
+
+      if (!res.ok) {
+        return {
+          homeTeam: home,
+          awayTeam: away,
+          homeForm: [],
+          awayForm: [],
+          matches: [],
+        }
+      }
+
+      const html = await res.text()
+      const nextDataMatch = html.match(/<script id="__NEXT_DATA__" type="application\/json">([^<]+)<\/script>/)
+      if (!nextDataMatch) {
+        return {
+          homeTeam: home,
+          awayTeam: away,
+          homeForm: [],
+          awayForm: [],
+          matches: [],
+        }
+      }
+
+      const nextJson = JSON.parse(nextDataMatch[1])
+      const eventData = nextJson?.props?.pageProps?.initialEventData?.event
+      const rawH2H = eventData?.headToHead?.h2h || []
+      const homeForm = Array.isArray(eventData?.homeScoreForm)
+        ? eventData.homeScoreForm.map((f: string) => f.toUpperCase())
+        : []
+      const awayForm = Array.isArray(eventData?.awayScoreForm)
+        ? eventData.awayScoreForm.map((f: string) => f.toUpperCase())
+        : []
+
+      const homeTeamCrest = resolveCrestUrl(eventData?.homeTeamImgSlug || eventData?.homeTeamBadge)
+      const awayTeamCrest = resolveCrestUrl(eventData?.awayTeamImgSlug || eventData?.awayTeamBadge)
+
+      const matches: H2HMatch[] = []
+      for (const stg of rawH2H) {
+        const stageName = stg?.stage?.stageName || stg?.stage?.countryName || "League"
+        for (const ev of stg?.events || []) {
+          const hScore = parseInt(ev.homeScore, 10) || 0
+          const aScore = parseInt(ev.awayScore, 10) || 0
+          const winner = hScore > aScore ? "home" : aScore > hScore ? "away" : "draw"
+
+          let formattedDate = ""
+          if (ev.startDateTimeString && ev.startDateTimeString.length >= 8) {
+            const y = ev.startDateTimeString.slice(0, 4)
+            const m = ev.startDateTimeString.slice(4, 6)
+            const d = ev.startDateTimeString.slice(6, 8)
+            formattedDate = `${d}/${m}/${y}`
+          }
+
+          matches.push({
+            date: formattedDate,
+            league: stageName,
+            home: ev.homeName || home,
+            away: ev.awayName || away,
+            homeScore: hScore,
+            awayScore: aScore,
+            winner,
+            homeCrest: resolveCrestUrl(ev.homeSlug),
+            awayCrest: resolveCrestUrl(ev.awaySlug),
+          })
+        }
+      }
+
+      const result: H2HResponse = {
+        homeTeam: home,
+        awayTeam: away,
+        homeCrest: homeTeamCrest,
+        awayCrest: awayTeamCrest,
+        homeForm: homeForm.slice(-5), // last 5 matches
+        awayForm: awayForm.slice(-5),
+        matches: matches.slice(0, 10), // last 10 h2h encounters
+      }
+
+      h2hCache.set(eid, { timestamp: Date.now(), data: result })
+      return result
+    } catch (err) {
+      console.error("[livescores/h2h] Error fetching H2H:", err)
+      return {
+        homeTeam: home,
+        awayTeam: away,
+        homeForm: [],
+        awayForm: [],
+        matches: [],
+      }
+    } finally {
+      inflightH2H.delete(eid)
+    }
+  })()
+
+  inflightH2H.set(eid, task)
+  const result = await task
+
+  return NextResponse.json(result, {
+    headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" },
+  })
 }

@@ -3,8 +3,8 @@ import { resolveLiveScoreEvent } from "@/lib/livescores-resolver"
 import { normalizeTeam } from "@/lib/livescores"
 
 const TABLE_API_BASE = "https://prod-public-api.livescore.com/v1/api/app/stage/soccer"
-// Short cache during live games to provide real-time throughput
-const CACHE_TTL_MS = 2_000
+// Cached to minimize Active CPU while preserving real-time accuracy
+const CACHE_TTL_MS = 30_000
 
 type CachedTable = {
   timestamp: number
@@ -12,6 +12,7 @@ type CachedTable = {
 }
 
 const tableCache = new Map<string, CachedTable>()
+const inflightTable = new Map<string, Promise<LeagueTableResponse>>()
 
 export type TableRow = {
   rank: number
@@ -74,7 +75,10 @@ export async function GET(request: Request) {
 
   const matchEvent = await resolveLiveScoreEvent(eidParam, fixtureIdParam)
   if (!matchEvent?.eid) {
-    return NextResponse.json({ error: "Match not found" }, { status: 404 })
+    return NextResponse.json(
+      { error: "Match not found" },
+      { status: 404, headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } },
+    )
   }
 
   const { eid, home, away, countryCode, stageCode, stageName } = matchEvent
@@ -94,94 +98,124 @@ export async function GET(request: Request) {
         })),
       },
       {
-        headers: { "Cache-Control": "public, s-maxage=20, stale-while-revalidate=60" },
+        headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" },
       },
     )
   }
 
   if (!stageCode) {
-    return NextResponse.json({
-      leagueName: stageName || "League Table",
-      homeTeam: home,
-      awayTeam: away,
-      rows: [],
-    })
-  }
-
-  try {
-    const res = await fetch(
-      `${TABLE_API_BASE}/${encodeURIComponent(countryCode || "")}/${encodeURIComponent(stageCode || "")}/table`,
+    return NextResponse.json(
       {
-        headers: {
-          Accept: "application/json",
-          "User-Agent":
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        },
-        cache: "no-store",
-      },
-    )
-
-    if (!res.ok) {
-      return NextResponse.json({
         leagueName: stageName || "League Table",
         homeTeam: home,
         awayTeam: away,
         rows: [],
-      })
-    }
-
-    const json = await res.json()
-    const stage = json?.Stages?.[0]
-    const rawTable = stage?.LeagueTable?.L?.[0]?.Tables?.[0]?.team || []
-
-    const rows: TableRow[] = rawTable.map((t: any, idx: number) => {
-      const img = t.Img
-      const crest = img
-        ? img.startsWith("http")
-          ? img
-          : `https://storage.lsmedia1.com/images/team/medium/${img}`
-        : undefined
-
-      const isLive = t.Ipr === 1
-      const phr = Array.isArray(t.phr) ? t.phr : undefined
-      const rank = t.rnk ?? idx + 1
-      const qualificationColor = getQualificationColor(phr, rank, rawTable.length)
-
-      return {
-        rank,
-        team: t.Tnm || "Team",
-        teamId: String(t.Tid || ""),
-        played: t.pld ?? 0,
-        won: t.win ?? 0,
-        drawn: t.drw ?? 0,
-        lost: t.lst ?? 0,
-        goalsFor: t.gf ?? 0,
-        goalsAgainst: t.ga ?? 0,
-        goalDiff: t.gd ?? 0,
-        points: t.pts ?? 0,
-        crest,
-        isLive,
-        phr,
-        qualificationColor,
-        isHome: matchTeamName(home, t.Tnm),
-        isAway: matchTeamName(away, t.Tnm),
-      }
-    })
-
-    const result: LeagueTableResponse = {
-      leagueName: stage?.Snm || stageName || "League Table",
-      homeTeam: home,
-      awayTeam: away,
-      rows,
-    }
-
-    tableCache.set(cacheKey, { timestamp: Date.now(), data: result })
-
-    return NextResponse.json(result, {
-      headers: { "Cache-Control": "public, s-maxage=20, stale-while-revalidate=60" },
-    })
-  } catch (err) {
-    console.error("[livescores/table] Error fetching table:", err)
-    return NextResponse.json({ error: "Failed to fetch table" }, { status: 500 })
+      },
+      {
+        headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" },
+      },
+    )
   }
+
+  const pending = inflightTable.get(cacheKey)
+  if (pending) {
+    const data = await pending
+    return NextResponse.json(
+      {
+        ...data,
+        homeTeam: home,
+        awayTeam: away,
+        rows: data.rows.map((r: TableRow) => ({
+          ...r,
+          isHome: matchTeamName(home, r.team),
+          isAway: matchTeamName(away, r.team),
+        })),
+      },
+      {
+        headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" },
+      },
+    )
+  }
+
+  const task = (async () => {
+    try {
+      const res = await fetch(
+        `${TABLE_API_BASE}/${encodeURIComponent(countryCode || "")}/${encodeURIComponent(stageCode || "")}/table`,
+        {
+          headers: {
+            Accept: "application/json",
+            "User-Agent":
+              "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+          },
+          cache: "no-store",
+        },
+      )
+
+      if (!res.ok) {
+        return {
+          leagueName: stageName || "League Table",
+          homeTeam: home,
+          awayTeam: away,
+          rows: [],
+        }
+      }
+
+      const json = await res.json()
+      const stage = json?.Stages?.[0]
+      const rawTable = stage?.LeagueTable?.L?.[0]?.Tables?.[0]?.team || []
+
+      const rows: TableRow[] = rawTable.map((t: any, idx: number) => {
+        const img = t.Img
+        const crest = img
+          ? img.startsWith("http")
+            ? img
+            : `https://storage.lsmedia1.com/images/team/medium/${img}`
+          : undefined
+
+        const isLive = t.Ipr === 1
+        const phr = Array.isArray(t.phr) ? t.phr : undefined
+        const rank = t.rnk ?? idx + 1
+        const qualificationColor = getQualificationColor(phr, rank, rawTable.length)
+
+        return {
+          rank,
+          team: t.Tnm || "Team",
+          teamId: String(t.Tid || ""),
+          played: t.pld ?? 0,
+          won: t.win ?? 0,
+          drawn: t.drw ?? 0,
+          lost: t.lst ?? 0,
+          goalsFor: t.gf ?? 0,
+          goalsAgainst: t.ga ?? 0,
+          goalDiff: t.gd ?? 0,
+          points: t.pts ?? 0,
+          crest,
+          isLive,
+          phr,
+          qualificationColor,
+          isHome: matchTeamName(home, t.Tnm),
+          isAway: matchTeamName(away, t.Tnm),
+        }
+      })
+
+      const result: LeagueTableResponse = {
+        leagueName: stage?.Snm || stageName || "League Table",
+        homeTeam: home,
+        awayTeam: away,
+        rows,
+      }
+
+      tableCache.set(cacheKey, { timestamp: Date.now(), data: result })
+      return result
+    } finally {
+      inflightTable.delete(cacheKey)
+    }
+  })()
+
+  inflightTable.set(cacheKey, task)
+  const result = await task
+
+  return NextResponse.json(result, {
+    headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" },
+  })
 }

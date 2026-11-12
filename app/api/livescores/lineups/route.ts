@@ -11,6 +11,7 @@ type CachedLineup = {
 }
 
 const lineupsCache = new Map<string, CachedLineup>()
+const inflightLineups = new Map<string, Promise<MatchLineupsResponse>>()
 
 function normalizeName(s: string): string {
   return (s || "")
@@ -51,7 +52,10 @@ export async function GET(request: Request) {
 
   const matchEvent = await resolveLiveScoreEvent(eidParam, fixtureIdParam)
   if (!matchEvent?.eid) {
-    return NextResponse.json({ error: "Match not found" }, { status: 404 })
+    return NextResponse.json(
+      { error: "Match not found" },
+      { status: 404, headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } },
+    )
   }
 
   const { eid, home, away } = matchEvent
@@ -63,7 +67,16 @@ export async function GET(request: Request) {
     })
   }
 
-  try {
+  const pending = inflightLineups.get(eid)
+  if (pending) {
+    const data = await pending
+    return NextResponse.json(data, {
+      headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" },
+    })
+  }
+
+  const task = (async () => {
+    try {
     const res = await fetch(`${LINEUPS_API_BASE}/${encodeURIComponent(eid)}`, {
       headers: {
         Accept: "application/json",
@@ -73,36 +86,36 @@ export async function GET(request: Request) {
       next: { revalidate: 60 },
     })
 
-    if (!res.ok) {
-      return NextResponse.json({
-        eid,
-        hasLineups: false,
-        homeFormation: "",
-        awayFormation: "",
-        homeStarting: [],
-        awayStarting: [],
-        homeSubs: [],
-        awaySubs: [],
-      })
-    }
+      if (!res.ok) {
+        return {
+          eid,
+          hasLineups: false,
+          homeFormation: "",
+          awayFormation: "",
+          homeStarting: [],
+          awayStarting: [],
+          homeSubs: [],
+          awaySubs: [],
+        }
+      }
 
-    const raw = await res.json()
-    const lu = Array.isArray(raw?.Lu) ? raw.Lu : []
-    const homeTeamData = lu.find((t: any) => t.Tnb === 1) || lu[0]
-    const awayTeamData = lu.find((t: any) => t.Tnb === 2) || lu[1]
+      const raw = await res.json()
+      const lu = Array.isArray(raw?.Lu) ? raw.Lu : []
+      const homeTeamData = lu.find((t: any) => t.Tnb === 1) || lu[0]
+      const awayTeamData = lu.find((t: any) => t.Tnb === 2) || lu[1]
 
-    if (!homeTeamData && !awayTeamData) {
-      return NextResponse.json({
-        eid,
-        hasLineups: false,
-        homeFormation: "",
-        awayFormation: "",
-        homeStarting: [],
-        awayStarting: [],
-        homeSubs: [],
-        awaySubs: [],
-      })
-    }
+      if (!homeTeamData && !awayTeamData) {
+        return {
+          eid,
+          hasLineups: false,
+          homeFormation: "",
+          awayFormation: "",
+          homeStarting: [],
+          awayStarting: [],
+          homeSubs: [],
+          awaySubs: [],
+        }
+      }
 
     // Fetch players from DB for both teams to map IDs
     const { data: dbPlayers } = await supabase
@@ -192,13 +205,29 @@ export async function GET(request: Request) {
     }
 
     lineupsCache.set(eid, { timestamp: Date.now(), data: result })
-
-    return NextResponse.json(result, {
-      headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" },
-    })
+    return result
   } catch (err) {
     console.error("[livescores/lineups] Error fetching lineups:", err)
-    return NextResponse.json({ error: "Failed to fetch lineups" }, { status: 500 })
+    return {
+      eid,
+      hasLineups: false,
+      homeFormation: "",
+      awayFormation: "",
+      homeStarting: [],
+      awayStarting: [],
+      homeSubs: [],
+      awaySubs: [],
+    }
+  } finally {
+    inflightLineups.delete(eid)
   }
+})()
+
+inflightLineups.set(eid, task)
+const result = await task
+
+return NextResponse.json(result, {
+  headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" },
+})
 }
 
