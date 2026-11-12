@@ -71,46 +71,42 @@ function StatRow({
         </span>
       </div>
 
-      {/* Proportional Comparative Visual Progress Bar */}
+      {/* Dual Comparative Visual Progress Bars */}
       <div
         role="meter"
         aria-label={`${label}: ${formatVal(homeVal)} to ${formatVal(awayVal)}`}
         aria-valuenow={homeVal}
         aria-valuemin={0}
         aria-valuemax={total > 0 ? total : 100}
-        className="h-1.5 sm:h-2 w-full bg-white/10 rounded-full overflow-hidden flex items-center"
+        className="grid grid-cols-2 gap-2 h-1.5 sm:h-2"
       >
-        {total > 0 ? (
-          <>
-            {homePct > 0 && (
-              <div
-                className={`h-full transition-all duration-500 motion-reduce:transition-none ${
-                  isHomeLeading
-                    ? "bg-[var(--pitch)] shadow-[0_0_8px_rgba(34,197,94,0.4)]"
-                    : isEqual
-                    ? "bg-[var(--pitch)]/60"
-                    : "bg-white/20"
-                }`}
-                style={{ width: `${homePct}%` }}
-              />
-            )}
-            {homePct > 0 && awayPct > 0 && (
-              <div className="w-[1.5px] sm:w-0.5 h-full bg-card shrink-0" />
-            )}
-            {awayPct > 0 && (
-              <div
-                className={`h-full transition-all duration-500 motion-reduce:transition-none ${
-                  isAwayLeading
-                    ? "bg-[var(--pitch)] shadow-[0_0_8px_rgba(34,197,94,0.4)]"
-                    : isEqual
-                    ? "bg-[var(--pitch)]/60"
-                    : "bg-white/20"
-                }`}
-                style={{ width: `${awayPct}%` }}
-              />
-            )}
-          </>
-        ) : null}
+        {/* Left Team Bar (anchored to outer left under home stat) */}
+        <div className="h-full bg-white/[0.08] rounded-full overflow-hidden flex justify-start">
+          <div
+            className={`h-full rounded-full transition-all duration-500 motion-reduce:transition-none ${
+              isHomeLeading
+                ? "bg-[var(--pitch)] shadow-[0_0_8px_rgba(34,197,94,0.4)]"
+                : isEqual && total > 0
+                ? "bg-[var(--pitch)]/60"
+                : "bg-white/20"
+            }`}
+            style={{ width: `${total === 0 ? 0 : homePct}%` }}
+          />
+        </div>
+
+        {/* Right Team Bar (anchored to outer right under away stat) */}
+        <div className="h-full bg-white/[0.08] rounded-full overflow-hidden flex justify-end">
+          <div
+            className={`h-full rounded-full transition-all duration-500 motion-reduce:transition-none ${
+              isAwayLeading
+                ? "bg-[var(--pitch)] shadow-[0_0_8px_rgba(34,197,94,0.4)]"
+                : isEqual && total > 0
+                ? "bg-[var(--pitch)]/60"
+                : "bg-white/20"
+            }`}
+            style={{ width: `${total === 0 ? 0 : awayPct}%` }}
+          />
+        </div>
       </div>
     </div>
   )
@@ -332,13 +328,15 @@ export function WatchLiveStatsCard({ fixture, liveScore, summaryData }: WatchLiv
       {/* Stats Breakdown Rows */}
       {home && away ? (
         <div className="flex flex-col">
-          {/* 1. Expected goals (xG) */}
-          <StatRow
-            label="Expected goals (xG)"
-            homeVal={home.xg}
-            awayVal={away.xg}
-            formatVal={(v) => v.toFixed(2)}
-          />
+          {/* 1. Expected goals (xG) - only show when tracked upstream */}
+          {(home.xg > 0 || away.xg > 0) && (
+            <StatRow
+              label="Expected goals (xG)"
+              homeVal={home.xg}
+              awayVal={away.xg}
+              formatVal={(v) => v.toFixed(2)}
+            />
+          )}
 
           {/* 2. Possession (%) */}
           <StatRow
