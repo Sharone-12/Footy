@@ -1,5 +1,5 @@
 import { fetchDaySnapshot, findLive, type FixtureLike, type LiveScore } from "./livescores.ts"
-import { supabase } from "./supabase"
+import { supabase } from "./supabase.ts"
 
 export type ResolvedMatchEvent = {
   eid: string
