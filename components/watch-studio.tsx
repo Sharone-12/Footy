@@ -1182,7 +1182,7 @@ export function WatchStudio({
                       className="w-full h-full border-0 bg-black block"
                       allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                       allowFullScreen
-                      referrerPolicy="no-referrer"
+                      referrerPolicy={slot0Override.providerId === "daddylive" ? "no-referrer" : "no-referrer-when-downgrade"}
                     />
                   ) : (
                     <>
@@ -1352,7 +1352,7 @@ export function WatchStudio({
                             }`}
                             allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                             allowFullScreen
-                            referrerPolicy="no-referrer"
+                            referrerPolicy={currentProvider?.id === "daddylive" ? "no-referrer" : "no-referrer-when-downgrade"}
                             onLoad={() => setIsFrameLoading(false)}
                             onError={() => {
                               setIsFrameLoading(false)
@@ -1499,7 +1499,7 @@ export function WatchStudio({
                             className="w-full h-full border-0 bg-black block"
                             allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                             allowFullScreen
-                            referrerPolicy="no-referrer"
+                            referrerPolicy={currentProvider?.id === "daddylive" ? "no-referrer" : "no-referrer-when-downgrade"}
                           />
                         ) : (
                           <>
@@ -1531,7 +1531,7 @@ export function WatchStudio({
                                 }`}
                                 allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                                 allowFullScreen
-                                referrerPolicy="no-referrer"
+                                referrerPolicy={currentProvider?.id === "daddylive" ? "no-referrer" : "no-referrer-when-downgrade"}
                               />
                             )}
                           </>
@@ -2175,7 +2175,7 @@ export function WatchStudio({
                         {/* Individual Sources Pills */}
                         {(() => {
                           const isExpanded = Boolean(expandedProviders[p.id])
-                          const MAX_SIDEBAR_SOURCES = 4
+                          const MAX_SIDEBAR_SOURCES = 8
                           let visibleSources = p.sources
                           if (!isExpanded && p.sources.length > MAX_SIDEBAR_SOURCES) {
                             const activeIdx = p.sources.findIndex((s) => s.key === currentSource?.key)

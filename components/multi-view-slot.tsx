@@ -763,7 +763,7 @@ export function MultiViewSlotPlayer({
           }`}
           allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
           allowFullScreen
-          referrerPolicy="no-referrer"
+          referrerPolicy={slotData.providerId === "daddylive" ? "no-referrer" : "no-referrer-when-downgrade"}
         />
       </div>
     </article>

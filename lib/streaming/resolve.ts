@@ -261,6 +261,11 @@ function zLiveProvider(
   generic: ZLiveChannel | null | undefined,
   allGenerics?: ZLiveChannel[] | null,
 ): WatchProvider | null {
+  // If no match for this fixture and no explicit generic channel requested, ZLive has no stream for this match
+  if (!m && !generic) {
+    return null
+  }
+
   const sources: WatchSource[] = []
 
   // 1. Primary fixture-matched channel or specific generic channel

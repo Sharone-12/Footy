@@ -634,7 +634,7 @@ export function UnifiedPlayer({
               setHasError(true)
             }}
             loading="lazy"
-            referrerPolicy="no-referrer"
+            referrerPolicy={selectedProvider === "daddylive" ? "no-referrer" : "no-referrer-when-downgrade"}
             allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
             allowFullScreen
             style={{ border: 0 }}
