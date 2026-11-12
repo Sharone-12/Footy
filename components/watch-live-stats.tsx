@@ -35,11 +35,14 @@ function StatRow({
   let awayPct = 50
 
   if (isPercentage) {
-    homePct = Math.min(100, Math.max(0, homeVal))
-    awayPct = Math.min(100, Math.max(0, awayVal))
+    const sum = homeVal + awayVal
+    if (sum > 0) {
+      homePct = (homeVal / sum) * 100
+      awayPct = (awayVal / sum) * 100
+    }
   } else if (total > 0) {
-    homePct = Math.round((homeVal / total) * 100)
-    awayPct = Math.round((awayVal / total) * 100)
+    homePct = (homeVal / total) * 100
+    awayPct = (awayVal / total) * 100
   }
 
   const isHomeLeading = inverseHighlight ? homeVal < awayVal : homeVal > awayVal
@@ -68,35 +71,46 @@ function StatRow({
         </span>
       </div>
 
-      {/* Dual Comparative Visual Progress Bars */}
-      <div className="grid grid-cols-2 gap-1 sm:gap-2 h-1.5 sm:h-2">
-        {/* Left Team Bar (fills from left or right) */}
-        <div className="h-full bg-white/10 rounded-full overflow-hidden flex justify-end">
-          <div
-            className={`h-full rounded-full transition-all duration-500 motion-reduce:transition-none ${
-              isHomeLeading
-                ? "bg-[var(--pitch)] shadow-[0_0_8px_rgba(34,197,94,0.4)]"
-                : isEqual && total > 0
-                ? "bg-[var(--pitch)]/60"
-                : "bg-white/20"
-            }`}
-            style={{ width: `${total === 0 ? 0 : homePct}%` }}
-          />
-        </div>
-
-        {/* Right Team Bar */}
-        <div className="h-full bg-white/10 rounded-full overflow-hidden flex justify-start">
-          <div
-            className={`h-full rounded-full transition-all duration-500 motion-reduce:transition-none ${
-              isAwayLeading
-                ? "bg-[var(--pitch)] shadow-[0_0_8px_rgba(34,197,94,0.4)]"
-                : isEqual && total > 0
-                ? "bg-[var(--pitch)]/60"
-                : "bg-white/20"
-            }`}
-            style={{ width: `${total === 0 ? 0 : awayPct}%` }}
-          />
-        </div>
+      {/* Proportional Comparative Visual Progress Bar */}
+      <div
+        role="meter"
+        aria-label={`${label}: ${formatVal(homeVal)} to ${formatVal(awayVal)}`}
+        aria-valuenow={homeVal}
+        aria-valuemin={0}
+        aria-valuemax={total > 0 ? total : 100}
+        className="h-1.5 sm:h-2 w-full bg-white/10 rounded-full overflow-hidden flex items-center"
+      >
+        {total > 0 ? (
+          <>
+            {homePct > 0 && (
+              <div
+                className={`h-full transition-all duration-500 motion-reduce:transition-none ${
+                  isHomeLeading
+                    ? "bg-[var(--pitch)] shadow-[0_0_8px_rgba(34,197,94,0.4)]"
+                    : isEqual
+                    ? "bg-[var(--pitch)]/60"
+                    : "bg-white/20"
+                }`}
+                style={{ width: `${homePct}%` }}
+              />
+            )}
+            {homePct > 0 && awayPct > 0 && (
+              <div className="w-[1.5px] sm:w-0.5 h-full bg-card shrink-0" />
+            )}
+            {awayPct > 0 && (
+              <div
+                className={`h-full transition-all duration-500 motion-reduce:transition-none ${
+                  isAwayLeading
+                    ? "bg-[var(--pitch)] shadow-[0_0_8px_rgba(34,197,94,0.4)]"
+                    : isEqual
+                    ? "bg-[var(--pitch)]/60"
+                    : "bg-white/20"
+                }`}
+                style={{ width: `${awayPct}%` }}
+              />
+            )}
+          </>
+        ) : null}
       </div>
     </div>
   )
