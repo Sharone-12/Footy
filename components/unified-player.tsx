@@ -641,8 +641,16 @@ export function UnifiedPlayer({
             className={`border-0 transition-all ${
               selectedProvider === "daddylive" && daddyLiveClean
                 ? "absolute top-0 inset-x-0 w-full h-[calc(100%+62px)] max-h-none"
+                : selectedProvider === "matchora"
+                ? "absolute top-0 left-0 w-[calc(100%+112px)] max-w-none h-full"
                 : "absolute inset-0 h-full w-full"
             }`}
+          />
+        )}
+        {selectedProvider === "matchora" && (
+          <div
+            className="absolute bottom-0 right-0 w-32 h-24 z-20 pointer-events-auto bg-transparent select-none"
+            onClick={(e) => e.stopPropagation()}
           />
         )}
       </div>

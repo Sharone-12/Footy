@@ -1179,7 +1179,11 @@ export function WatchStudio({
                       key={`slot0-override-${slot0Override.streamUrl}-${reloadKey}`}
                       src={slot0Override.streamUrl}
                       title={slot0Override.title}
-                      className="w-full h-full border-0 bg-black block"
+                      className={`border-0 bg-black block ${
+                        slot0Override.providerId === "matchora"
+                          ? "absolute top-0 left-0 w-[calc(100%+112px)] max-w-none h-full"
+                          : "w-full h-full"
+                      }`}
                       allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                       allowFullScreen
                       referrerPolicy={slot0Override.providerId === "daddylive" ? "no-referrer" : "no-referrer-when-downgrade"}
@@ -1348,7 +1352,9 @@ export function WatchStudio({
                                 ? "w-full h-full scale-[1.035] origin-center"
                                 : currentProvider?.id === "daddylive" && daddyLiveClean
                                   ? "absolute top-0 inset-x-0 w-full h-[calc(100%+62px)] max-h-none"
-                                  : "w-full h-full"
+                                  : currentProvider?.id === "matchora"
+                                    ? "absolute top-0 left-0 w-[calc(100%+112px)] max-w-none h-full"
+                                    : "w-full h-full"
                             }`}
                             allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                             allowFullScreen
@@ -1359,6 +1365,13 @@ export function WatchStudio({
                               setHasFrameError(true)
                             }}
                           />
+                          {/* Matchora shield: blocks clicks on the corner to prevent internal channels popup from expanding */}
+                          {currentProvider?.id === "matchora" && (
+                            <div
+                              className="absolute bottom-0 right-0 w-32 h-24 z-20 pointer-events-auto bg-transparent select-none"
+                              onClick={(e) => e.stopPropagation()}
+                            />
+                          )}
                         </>
                       )}
                     </>
@@ -1492,15 +1505,29 @@ export function WatchStudio({
 
                       <div className="relative w-full h-full flex-1 bg-black overflow-hidden flex items-center justify-center">
                         {slot0Override ? (
-                          <iframe
-                            key={`slot0-override-${slot0Override.streamUrl}-${reloadKey}`}
-                            src={slot0Override.streamUrl}
-                            title={slot0Override.title}
-                            className="w-full h-full border-0 bg-black block"
-                            allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                            allowFullScreen
-                            referrerPolicy={currentProvider?.id === "daddylive" ? "no-referrer" : "no-referrer-when-downgrade"}
-                          />
+                          <>
+                            <iframe
+                              key={`slot0-override-${slot0Override.streamUrl}-${reloadKey}`}
+                              src={slot0Override.streamUrl}
+                              title={slot0Override.title}
+                              className={`border-0 bg-black block ${
+                                slot0Override.providerId === "matchora"
+                                  ? "absolute top-0 left-0 w-[calc(100%+112px)] max-w-none h-full"
+                                  : "w-full h-full"
+                              }`}
+                              allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                              allowFullScreen
+                              referrerPolicy={currentProvider?.id === "daddylive" ? "no-referrer" : "no-referrer-when-downgrade"}
+                            />
+                            {slot0Override.providerId === "matchora" && (
+                              <div
+                                className="absolute bottom-0 right-0 w-32 h-24 z-20 pointer-events-auto bg-transparent select-none cursor-pointer"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                }}
+                              />
+                            )}
+                          </>
                         ) : (
                           <>
                             {isBundleLoading && (
@@ -1518,21 +1545,33 @@ export function WatchStudio({
                             )}
 
                             {!isBundleLoading && currentSource && (
-                              <iframe
-                                key={`slot0-grid-${currentSource.key}-${reloadKey}`}
-                                src={currentSource.url}
-                                title={`Feed 1 — ${currentSource.label}`}
-                                className={`border-0 bg-black block transition-all ${
-                                  currentProvider?.id === "zlive"
-                                    ? "w-full h-full scale-[1.035] origin-center"
-                                    : currentProvider?.id === "daddylive" && daddyLiveClean
-                                      ? "absolute top-0 inset-x-0 w-full h-[calc(100%+62px)] max-h-none"
-                                      : "w-full h-full"
-                                }`}
-                                allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                                allowFullScreen
-                                referrerPolicy={currentProvider?.id === "daddylive" ? "no-referrer" : "no-referrer-when-downgrade"}
-                              />
+                              <>
+                                <iframe
+                                  key={`slot0-grid-${currentSource.key}-${reloadKey}`}
+                                  src={currentSource.url}
+                                  title={`Feed 1 — ${currentSource.label}`}
+                                  className={`border-0 bg-black block transition-all ${
+                                    currentProvider?.id === "zlive"
+                                      ? "w-full h-full scale-[1.035] origin-center"
+                                      : currentProvider?.id === "daddylive" && daddyLiveClean
+                                        ? "absolute top-0 inset-x-0 w-full h-[calc(100%+62px)] max-h-none"
+                                        : currentProvider?.id === "matchora"
+                                          ? "absolute top-0 left-0 w-[calc(100%+112px)] max-w-none h-full"
+                                          : "w-full h-full"
+                                  }`}
+                                  allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                                  allowFullScreen
+                                  referrerPolicy={currentProvider?.id === "daddylive" ? "no-referrer" : "no-referrer-when-downgrade"}
+                                />
+                                {currentProvider?.id === "matchora" && (
+                                  <div
+                                    className="absolute bottom-0 right-0 w-32 h-24 z-20 pointer-events-auto bg-transparent select-none cursor-pointer"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                    }}
+                                  />
+                                )}
+                              </>
                             )}
                           </>
                         )}
