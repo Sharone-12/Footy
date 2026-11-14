@@ -1581,33 +1581,33 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16434147,Bundesliga,2026/27,15,2027-01-09,Borussia M'gladbach,2527,FC Bayern München,2672,upcoming,,,2027-01-09T17:30:00Z
 16434151,Bundesliga,2026/27,15,2027-01-10,SV Werder Bremen,2534,1. FC Union Berlin,2547,upcoming,,,2027-01-10T14:30:00Z
 16434149,Bundesliga,2026/27,15,2027-01-10,Hamburger SV,2676,Bayer 04 Leverkusen,2681,upcoming,,,2027-01-10T16:30:00Z
-16434163,Bundesliga,2026/27,16,2027-01-13,1. FC Köln,2671,Borussia Dortmund,2673,upcoming,,,2027-01-13T10:00:00Z
-16434155,Bundesliga,2026/27,16,2027-01-13,1. FC Union Berlin,2547,SC Paderborn 07,2561,upcoming,,,2027-01-13T10:00:00Z
-16434156,Bundesliga,2026/27,16,2027-01-13,1. FSV Mainz 05,2556,TSG Hoffenheim,2569,upcoming,,,2027-01-13T10:00:00Z
-16434154,Bundesliga,2026/27,16,2027-01-13,FC Augsburg,2600,Borussia M'gladbach,2527,upcoming,,,2027-01-13T10:00:00Z
-16434160,Bundesliga,2026/27,16,2027-01-13,FC Bayern München,2672,Bayer 04 Leverkusen,2681,upcoming,,,2027-01-13T10:00:00Z
-16434152,Bundesliga,2026/27,16,2027-01-13,RB Leipzig,36360,VfB Stuttgart,2677,upcoming,,,2027-01-13T10:00:00Z
-16434157,Bundesliga,2026/27,16,2027-01-13,SC Freiburg,2538,Hamburger SV,2676,upcoming,,,2027-01-13T10:00:00Z
-16434159,Bundesliga,2026/27,16,2027-01-13,SV 07 Elversberg,2598,Eintracht Frankfurt,2674,upcoming,,,2027-01-13T10:00:00Z
+16434152,Bundesliga,2026/27,16,2027-01-12,RB Leipzig,36360,VfB Stuttgart,2677,upcoming,,,2027-01-12T17:30:00Z
+16434163,Bundesliga,2026/27,16,2027-01-12,1. FC Köln,2671,Borussia Dortmund,2673,upcoming,,,2027-01-12T19:30:00Z
+16434156,Bundesliga,2026/27,16,2027-01-12,1. FSV Mainz 05,2556,TSG Hoffenheim,2569,upcoming,,,2027-01-12T19:30:00Z
+16434154,Bundesliga,2026/27,16,2027-01-12,FC Augsburg,2600,Borussia M'gladbach,2527,upcoming,,,2027-01-12T19:30:00Z
+16434159,Bundesliga,2026/27,16,2027-01-13,SV 07 Elversberg,2598,Eintracht Frankfurt,2674,upcoming,,,2027-01-13T17:30:00Z
+16434155,Bundesliga,2026/27,16,2027-01-13,1. FC Union Berlin,2547,SC Paderborn 07,2561,upcoming,,,2027-01-13T19:30:00Z
+16434160,Bundesliga,2026/27,16,2027-01-13,FC Bayern München,2672,Bayer 04 Leverkusen,2681,upcoming,,,2027-01-13T19:30:00Z
+16434157,Bundesliga,2026/27,16,2027-01-13,SC Freiburg,2538,Hamburger SV,2676,upcoming,,,2027-01-13T19:30:00Z
 16434153,Bundesliga,2026/27,16,2027-01-14,FC Schalke 04,2530,SV Werder Bremen,2534,upcoming,,,2027-01-14T19:30:00Z
-16434164,Bundesliga,2026/27,17,2027-01-16,Bayer 04 Leverkusen,2681,FC Schalke 04,2530,upcoming,,,2027-01-16T10:00:00Z
-16434170,Bundesliga,2026/27,17,2027-01-16,SV Werder Bremen,2534,SV 07 Elversberg,2598,upcoming,,,2027-01-16T10:00:00Z
-16434162,Bundesliga,2026/27,17,2027-01-16,VfB Stuttgart,2677,1. FSV Mainz 05,2556,upcoming,,,2027-01-16T10:00:00Z
+16434162,Bundesliga,2026/27,17,2027-01-15,VfB Stuttgart,2677,1. FSV Mainz 05,2556,upcoming,,,2027-01-15T19:30:00Z
 16434158,Bundesliga,2026/27,17,2027-01-16,Borussia Dortmund,2673,SC Freiburg,2538,upcoming,,,2027-01-16T14:30:00Z
 16434167,Bundesliga,2026/27,17,2027-01-16,Borussia M'gladbach,2527,1. FC Union Berlin,2547,upcoming,,,2027-01-16T14:30:00Z
 16434168,Bundesliga,2026/27,17,2027-01-16,Hamburger SV,2676,FC Augsburg,2600,upcoming,,,2027-01-16T14:30:00Z
 16434172,Bundesliga,2026/27,17,2027-01-16,SC Paderborn 07,2561,1. FC Köln,2671,upcoming,,,2027-01-16T14:30:00Z
 16434165,Bundesliga,2026/27,17,2027-01-16,TSG Hoffenheim,2569,RB Leipzig,36360,upcoming,,,2027-01-16T14:30:00Z
 16434166,Bundesliga,2026/27,17,2027-01-16,Eintracht Frankfurt,2674,FC Bayern München,2672,upcoming,,,2027-01-16T17:30:00Z
-16434173,Bundesliga,2026/27,18,2027-01-23,Bayer 04 Leverkusen,2681,SV 07 Elversberg,2598,upcoming,,,2027-01-23T10:00:00Z
-16434176,Bundesliga,2026/27,18,2027-01-23,Borussia M'gladbach,2527,RB Leipzig,36360,upcoming,,,2027-01-23T10:00:00Z
-16434175,Bundesliga,2026/27,18,2027-01-23,Eintracht Frankfurt,2674,1. FC Union Berlin,2547,upcoming,,,2027-01-23T10:00:00Z
-16434182,Bundesliga,2026/27,18,2027-01-23,FC Schalke 04,2530,FC Augsburg,2600,upcoming,,,2027-01-23T10:00:00Z
-16434189,Bundesliga,2026/27,18,2027-01-23,SC Paderborn 07,2561,1. FSV Mainz 05,2556,upcoming,,,2027-01-23T10:00:00Z
-16434178,Bundesliga,2026/27,18,2027-01-23,SV Werder Bremen,2534,SC Freiburg,2538,upcoming,,,2027-01-23T10:00:00Z
-16434171,Bundesliga,2026/27,18,2027-01-23,TSG Hoffenheim,2569,1. FC Köln,2671,upcoming,,,2027-01-23T10:00:00Z
-16434174,Bundesliga,2026/27,18,2027-01-23,VfB Stuttgart,2677,FC Bayern München,2672,upcoming,,,2027-01-23T10:00:00Z
+16434170,Bundesliga,2026/27,17,2027-01-17,SV Werder Bremen,2534,SV 07 Elversberg,2598,upcoming,,,2027-01-17T14:30:00Z
+16434164,Bundesliga,2026/27,17,2027-01-17,Bayer 04 Leverkusen,2681,FC Schalke 04,2530,upcoming,,,2027-01-17T16:30:00Z
+16434178,Bundesliga,2026/27,18,2027-01-22,SV Werder Bremen,2534,SC Freiburg,2538,upcoming,,,2027-01-22T19:30:00Z
+16434176,Bundesliga,2026/27,18,2027-01-23,Borussia M'gladbach,2527,RB Leipzig,36360,upcoming,,,2027-01-23T14:30:00Z
+16434182,Bundesliga,2026/27,18,2027-01-23,FC Schalke 04,2530,FC Augsburg,2600,upcoming,,,2027-01-23T14:30:00Z
+16434189,Bundesliga,2026/27,18,2027-01-23,SC Paderborn 07,2561,1. FSV Mainz 05,2556,upcoming,,,2027-01-23T14:30:00Z
+16434174,Bundesliga,2026/27,18,2027-01-23,VfB Stuttgart,2677,FC Bayern München,2672,upcoming,,,2027-01-23T14:30:00Z
 16434177,Bundesliga,2026/27,18,2027-01-23,Hamburger SV,2676,Borussia Dortmund,2673,upcoming,,,2027-01-23T17:30:00Z
+16434175,Bundesliga,2026/27,18,2027-01-24,Eintracht Frankfurt,2674,1. FC Union Berlin,2547,upcoming,,,2027-01-24T14:30:00Z
+16434173,Bundesliga,2026/27,18,2027-01-24,Bayer 04 Leverkusen,2681,SV 07 Elversberg,2598,upcoming,,,2027-01-24T16:30:00Z
+16434171,Bundesliga,2026/27,18,2027-01-24,TSG Hoffenheim,2569,1. FC Köln,2671,upcoming,,,2027-01-24T18:30:00Z
 16434187,Bundesliga,2026/27,19,2027-01-30,1. FC Köln,2671,VfB Stuttgart,2677,upcoming,,,2027-01-30T10:00:00Z
 16434185,Bundesliga,2026/27,19,2027-01-30,1. FC Union Berlin,2547,Bayer 04 Leverkusen,2681,upcoming,,,2027-01-30T10:00:00Z
 16434186,Bundesliga,2026/27,19,2027-01-30,1. FSV Mainz 05,2556,Hamburger SV,2676,upcoming,,,2027-01-30T10:00:00Z
@@ -1930,8 +1930,8 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 15534059,UEFA Nations League,2026/27,0,2026-11-13,Serbia,6355,Germany,4711,finished,1.0,3.0,2026-11-13T19:45:00Z
 17364189,Africa Cup of Nations Qual.,2026/27,0,2026-11-13,Morocco,4778,Niger,8031,finished,5.0,1.0,2026-11-13T20:00:00Z
 17497151,International Friendly Games,2026/27,0,2026-11-13,Argentina,4819,Uruguay,4725,finished,1.0,2.0,2026-11-13T23:00:00Z
-17485335,International Friendly Games,2026/27,0,2026-11-14,Colombia,4820,Chile,4754,upcoming,,,2026-11-14T00:00:00Z
-17485338,International Friendly Games,2026/27,0,2026-11-14,Japan,4770,Brazil,4748,upcoming,,,2026-11-14T10:15:00Z
+17485335,International Friendly Games,2026/27,0,2026-11-14,Colombia,4820,Chile,4754,finished,1.0,0.0,2026-11-14T00:00:00Z
+17485338,International Friendly Games,2026/27,0,2026-11-14,Japan,4770,Brazil,4748,finished,3.0,2.0,2026-11-14T10:15:00Z
 15534093,UEFA Nations League,2026/27,0,2026-11-14,Portugal,4704,Denmark,4476,upcoming,,,2026-11-14T19:45:00Z
 17299151,CONCACAF Nations League,2026/27,0,2026-11-15,Jamaica,4769,Mexico,4781,upcoming,,,2026-11-15T01:00:00Z
 15534029,UEFA Nations League,2026/27,0,2026-11-15,France,4481,Türkiye,4700,upcoming,,,2026-11-15T19:45:00Z
