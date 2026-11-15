@@ -139,12 +139,33 @@ export function WatchLiveStatsCard({ fixture, liveScore, summaryData }: WatchLiv
     if (isManual) setIsRefreshing(true)
 
     try {
-      const param = eid ? `eid=${encodeURIComponent(eid)}` : `fixture_id=${encodeURIComponent(fixtureId!)}`
-      const resStats = await fetch(`/api/livescores/stats?${param}`)
+      const queryParts: string[] = []
+      if (eid) queryParts.push(`eid=${encodeURIComponent(eid)}`)
+      if (fixtureId) queryParts.push(`fixture_id=${encodeURIComponent(fixtureId)}`)
+      const resStats = await fetch(`/api/livescores/stats?${queryParts.join("&")}`, { cache: "no-store" })
       if (resStats.ok) {
         const data = (await resStats.json()) as LiveMatchStatsResponse
         if (data && data.hasStats) {
-          setStats(data)
+          setStats((prev) => {
+            let homePoss = data.home.possession
+            let awayPoss = data.away.possession
+
+            // Never allow live possession to drop to 0-0 if we already had a valid measurement
+            if (homePoss === 0 && awayPoss === 0 && prev?.home?.possession && prev?.away?.possession) {
+              homePoss = prev.home.possession
+              awayPoss = prev.away.possession
+            } else if (homePoss > 0 && awayPoss === 0) {
+              awayPoss = Math.max(0, 100 - homePoss)
+            } else if (awayPoss > 0 && homePoss === 0) {
+              homePoss = Math.max(0, 100 - awayPoss)
+            }
+
+            return {
+              ...data,
+              home: { ...data.home, possession: homePoss },
+              away: { ...data.away, possession: awayPoss },
+            }
+          })
         }
       }
     } catch {
@@ -167,22 +188,23 @@ export function WatchLiveStatsCard({ fixture, liveScore, summaryData }: WatchLiv
       effectiveSummary?.status === "FT" ||
       effectiveSummary?.status === "AET" ||
       effectiveSummary?.status === "AP" ||
-      liveScore?.status === "FT"
+      liveScore?.status === "FT" ||
+      effectiveSummary?.scores?.ft != null
 
-    const isNotStarted =
+    // Stop polling once the match has officially finished
+    if (isMatchConcluded) return
+
+    // Poll stats at 15s interval during in-play (or 45s if pre-match)
+    const isPreMatch =
       effectiveSummary?.status === "NS" ||
       effectiveSummary?.status === "Scheduled" ||
-      liveScore?.status === "NS" ||
-      (!liveScore && !stats?.hasStats)
+      liveScore?.status === "NS"
+    const pollInterval = isPreMatch ? 45_000 : 15_000
 
-    // Do not poll stats for concluded matches or matches that have not kicked off
-    if (isMatchConcluded || isNotStarted) return
-
-    // Poll stats at 20s interval (matching upstream stats cadence) when document is visible
     pollTimerRef.current = setInterval(() => {
       if (typeof document !== "undefined" && document.hidden) return
       fetchStats()
-    }, 20_000)
+    }, pollInterval)
 
     const handleVisibility = () => {
       if (typeof document !== "undefined" && !document.hidden) {
@@ -339,13 +361,15 @@ export function WatchLiveStatsCard({ fixture, liveScore, summaryData }: WatchLiv
           )}
 
           {/* 2. Possession (%) */}
-          <StatRow
-            label="Possession (%)"
-            homeVal={home.possession}
-            awayVal={away.possession}
-            formatVal={(v) => `${v}%`}
-            isPercentage
-          />
+          {(home.possession > 0 || away.possession > 0) && (
+            <StatRow
+              label="Possession (%)"
+              homeVal={home.possession}
+              awayVal={away.possession}
+              formatVal={(v) => `${v}%`}
+              isPercentage
+            />
+          )}
 
           {/* 3. Total Shots */}
           <StatRow
