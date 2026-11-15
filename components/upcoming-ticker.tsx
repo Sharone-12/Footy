@@ -91,7 +91,7 @@ export function UpcomingTicker({ matches }: { matches: UpcomingMatch[] }) {
               onClick={() =>
                 setI((x) => (x - 1 + matches.length) % matches.length)
               }
-              className="inline-flex items-center justify-center size-6 rounded-full text-muted-foreground hover:text-foreground hover:bg-white/[0.06] transition-colors"
+              className="inline-flex items-center justify-center size-6 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
             >
               <ChevronLeftIcon className="size-4" />
             </button>
@@ -99,7 +99,7 @@ export function UpcomingTicker({ matches }: { matches: UpcomingMatch[] }) {
               type="button"
               aria-label="Next match"
               onClick={() => setI((x) => (x + 1) % matches.length)}
-              className="inline-flex items-center justify-center size-6 rounded-full text-muted-foreground hover:text-foreground hover:bg-white/[0.06] transition-colors"
+              className="inline-flex items-center justify-center size-6 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
             >
               <ChevronRightIcon className="size-4" />
             </button>

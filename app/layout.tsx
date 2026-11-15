@@ -11,6 +11,7 @@ import { MainNav, MainNavFallback } from "@/components/main-nav"
 import { UclBackdrop } from "@/components/ucl-backdrop"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { TopProgressBar } from "@/components/top-progress-bar"
+import { ThemeToggle } from "@/components/theme-toggle"
 import "./globals.css"
 
 const sans = Archivo({
@@ -88,8 +89,16 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${sans.variable} ${condensed.variable} dark h-full antialiased`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem("footyy-theme");var isDark=t==="dark"||(!t&&true);if(isDark){document.documentElement.classList.add("dark");document.documentElement.setAttribute("data-theme","dark");document.documentElement.style.colorScheme="dark";}else{document.documentElement.classList.remove("dark");document.documentElement.setAttribute("data-theme","light");document.documentElement.style.colorScheme="light";}}catch(e){}`,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <Suspense fallback={null}>
           <TopProgressBar />
@@ -104,7 +113,7 @@ export default function RootLayout({
             className="nav-fade absolute inset-x-0 top-0 h-24 -z-10 bg-gradient-to-b from-background via-background/85 to-transparent"
           />
           <div className="mx-auto max-w-6xl px-3 sm:px-4 pt-2.5 sm:pt-4 pb-2">
-            {/* Top row: Brand + Next Barça Countdown + Season Toggle */}
+            {/* Top row: Brand + Next Barça Countdown + Theme Toggle + Season Toggle */}
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
                 <Link
@@ -135,6 +144,7 @@ export default function RootLayout({
                   </span>
                 </Link>
                 <NextBarcaGame />
+                <ThemeToggle />
               </div>
 
               <div className="pointer-events-auto flex items-center gap-2 shrink-0">

@@ -127,7 +127,7 @@ export function MainNav() {
       {pill && (
         <span
           aria-hidden
-          className="absolute top-0 left-0 rounded-full bg-white/[0.08] shadow-[inset_0_1px_0_oklch(1_0_0_/_14%)] transition-[transform,width,height] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] pointer-events-none"
+          className="absolute top-0 left-0 rounded-full dark:bg-white/[0.08] bg-black/[0.06] dark:shadow-[inset_0_1px_0_oklch(1_0_0_/_14%)] shadow-[0_1px_2px_rgba(0,0,0,0.08)] transition-[transform,width,height] duration-300 ease-[cubic-bezier(0.2,0.8,0.2,1)] pointer-events-none"
           style={{
             transform: `translate(${pill.x}px, ${pill.y}px)`,
             width: pill.w,

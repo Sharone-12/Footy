@@ -54,39 +54,42 @@
 }
 
 :root {
-  --background: oklch(0.97 0 0);
-  --foreground: oklch(0.15 0 0);
-  --card: oklch(0.99 0 0);
-  --card-foreground: oklch(0.15 0 0);
-  --popover: oklch(0.99 0 0);
-  --popover-foreground: oklch(0.15 0 0);
-  --primary: oklch(0.18 0 0);
+  color-scheme: light;
+  --background: oklch(0.985 0 0);
+  --foreground: oklch(0.14 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.14 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.14 0 0);
+  --primary: oklch(0.16 0 0);
   --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.92 0 0);
-  --secondary-foreground: oklch(0.15 0 0);
-  --muted: oklch(0.92 0 0);
-  --muted-foreground: oklch(0.48 0 0);
-  --accent: oklch(0.92 0 0);
-  --accent-foreground: oklch(0.15 0 0);
+  --secondary: oklch(0.95 0 0);
+  --secondary-foreground: oklch(0.14 0 0);
+  --muted: oklch(0.95 0 0);
+  --muted-foreground: oklch(0.46 0 0);
+  --accent: oklch(0.95 0 0);
+  --accent-foreground: oklch(0.14 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0 0 0 / 10%);
+  --border: oklch(0 0 0 / 8%);
   --input: oklch(0 0 0 / 10%);
   --ring: oklch(0.45 0 0);
-  --chart-1: oklch(0.78 0.14 170);
-  --chart-2: oklch(0.67 0.15 290);
-  --chart-3: oklch(0.77 0.15 70);
-  --chart-4: oklch(0.60 0.20 27);
-  --chart-5: oklch(0.50 0.10 250);
+  --chart-1: oklch(0.52 0.20 148);
+  --chart-2: oklch(0.60 0.18 258);
+  --chart-3: oklch(0.65 0.16 75);
+  --chart-4: oklch(0.58 0.18 330);
+  --chart-5: oklch(0.60 0.15 40);
   --radius: 0.75rem;
-  --sidebar: oklch(0.97 0 0);
-  --sidebar-foreground: oklch(0.15 0 0);
-  --sidebar-primary: oklch(0.18 0 0);
+  --sidebar: oklch(0.98 0 0);
+  --sidebar-foreground: oklch(0.14 0 0);
+  --sidebar-primary: oklch(0.16 0 0);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.92 0 0);
-  --sidebar-accent-foreground: oklch(0.15 0 0);
-  --sidebar-border: oklch(0 0 0 / 10%);
+  --sidebar-accent: oklch(0.95 0 0);
+  --sidebar-accent-foreground: oklch(0.14 0 0);
+  --sidebar-border: oklch(0 0 0 / 8%);
   --sidebar-ring: oklch(0.45 0 0);
-  --brand: oklch(0.18 0 0);
+  --brand: oklch(0.16 0 0);
+  --pitch: oklch(0.52 0.20 148);
+  --deep: oklch(0.96 0 0);
 }
 
 /* Surfaces are neutral greys, zero chroma: a tinted backdrop competes with the
@@ -138,9 +141,15 @@
   body {
     @apply bg-background text-foreground;
     background-image:
-      radial-gradient(ellipse 90% 55% at 50% -5%, oklch(0.25 0 0) 0%, transparent 65%),
+      radial-gradient(ellipse 90% 55% at 50% -5%, oklch(0.92 0 0 / 30%) 0%, transparent 65%),
       linear-gradient(to bottom, transparent 55%, var(--deep) 100%);
     background-attachment: fixed;
+  }
+
+  .dark body {
+    background-image:
+      radial-gradient(ellipse 90% 55% at 50% -5%, oklch(0.25 0 0) 0%, transparent 65%),
+      linear-gradient(to bottom, transparent 55%, var(--deep) 100%);
   }
 
   html {
@@ -184,6 +193,13 @@
 
 /* Lit-from-above surfaces: top edge catches light, body falls off, shadow pools below. */
 .surface {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px 0 oklch(0 0 0 / 4%), 0 6px 20px -4px oklch(0 0 0 / 5%);
+}
+
+.dark .surface {
+  background-color: transparent;
   background-image: linear-gradient(to bottom,
       oklch(1 0 0 / 5%) 0%,
       transparent 38%);
@@ -195,6 +211,13 @@
 }
 
 .surface-raised {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 6px 0 oklch(0 0 0 / 5%), 0 12px 28px -6px oklch(0 0 0 / 7%);
+}
+
+.dark .surface-raised {
+  background-color: transparent;
   background-image: linear-gradient(to bottom,
       oklch(1 0 0 / 7%) 0%,
       transparent 45%);
@@ -206,9 +229,16 @@
 
 /* Segmented control — the pill group from the reference. */
 .segment {
-  background: oklch(0.185 0 0 / 72%);
+  background: oklch(1 0 0 / 88%);
   backdrop-filter: blur(14px) saturate(140%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid oklch(0 0 0 / 8%);
+  box-shadow: 0 2px 10px -2px oklch(0 0 0 / 6%), 0 1px 2px oklch(0 0 0 / 4%);
+}
+
+.dark .segment {
+  background: oklch(0.185 0 0 / 72%);
+  border: none;
   box-shadow:
     inset 0 1px 0 oklch(1 0 0 / 10%),
     inset 0 -1px 0 oklch(0 0 0 / 30%),
@@ -220,21 +250,36 @@
   box-shadow: inset 0 1px 0 oklch(1 0 0 / 12%);
 }
 
+.dark .segment-item {
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 12%);
+}
+
 /* Floating nav pill — same glass treatment as .segment, rounded for logo etc. */
 .nav-pill {
-  background: oklch(0.185 0 0 / 72%);
+  background: oklch(1 0 0 / 88%);
   backdrop-filter: blur(14px) saturate(140%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid oklch(0 0 0 / 8%);
   border-radius: 999px;
+  box-shadow: 0 2px 10px -2px oklch(0 0 0 / 6%), 0 1px 2px oklch(0 0 0 / 4%);
+  transition: box-shadow 220ms ease, transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.dark .nav-pill {
+  background: oklch(0.185 0 0 / 72%);
+  border: none;
   box-shadow:
     inset 0 1px 0 oklch(1 0 0 / 10%),
     inset 0 -1px 0 oklch(0 0 0 / 30%),
     0 1px 2px oklch(0 0 0 / 35%),
     0 10px 28px -14px oklch(0 0 0 / 55%);
-  transition: box-shadow 220ms ease, transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .nav-pill:hover {
+  box-shadow: 0 4px 16px -2px oklch(0 0 0 / 10%), 0 2px 4px oklch(0 0 0 / 6%);
+}
+
+.dark .nav-pill:hover {
   box-shadow:
     inset 0 1px 0 oklch(1 0 0 / 14%),
     inset 0 -1px 0 oklch(0 0 0 / 30%),

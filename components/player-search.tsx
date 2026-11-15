@@ -177,7 +177,7 @@ export function PlayerSearch({
           aria-controls="player-search-results"
           autoComplete="off"
           spellCheck={false}
-          className="w-full pl-10 pr-10 h-12 rounded-xl bg-card border-white/10 hover:border-white/20 focus-visible:border-white/25 focus-visible:ring-0 outline-none transition-all text-base"
+          className="w-full pl-10 pr-10 h-12 rounded-xl bg-card border border-border hover:border-foreground/20 focus-visible:border-foreground/30 focus-visible:ring-0 outline-none transition-all text-base shadow-xs"
         />
         {query && (
           <button
@@ -187,7 +187,7 @@ export function PlayerSearch({
               setQuery("")
               setOpen(false)
             }}
-            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground rounded-full hover:bg-white/10 transition-colors p-1"
+            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground rounded-full hover:bg-muted transition-colors p-1"
           >
             <XIcon className="h-4 w-4" />
           </button>
@@ -223,7 +223,7 @@ export function PlayerSearch({
                       aria-selected={i === active}
                       onMouseEnter={() => setActive(i)}
                       className={`flex items-center justify-between gap-3 px-4 py-2.5 cursor-pointer transition-colors duration-100 ${
-                        i === active ? "bg-white/[0.07]" : ""
+                        i === active ? "bg-muted" : "hover:bg-muted/50"
                       }`}
                     >
                       <div className="min-w-0">
@@ -234,7 +234,7 @@ export function PlayerSearch({
                           <span className="truncate">{p.t}</span>
                           {p.p && (
                             <>
-                              <span className="w-1 h-1 rounded-full bg-white/20 shrink-0" />
+                              <span className="w-1 h-1 rounded-full bg-muted-foreground/30 shrink-0" />
                               <span className="shrink-0">{p.p}</span>
                             </>
                           )}
