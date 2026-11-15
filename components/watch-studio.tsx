@@ -1041,7 +1041,7 @@ export function WatchStudio({
               {/* Right: Telemetry Strip */}
               <div className="flex items-center flex-wrap sm:flex-nowrap gap-2 md:border-l md:border-white/10 md:pl-4 shrink-0 justify-between md:justify-end">
                 {/* 1. Competition & Round */}
-                <div className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                <div className="flex items-center gap-2 px-2.5 py-1 rounded-xl dark:bg-white/[0.03] bg-muted/60 dark:border-white/[0.06] border-border/70">
                   {tid && <LeagueCrest tournamentId={tid} name={fixture.league} size={22} />}
                   <div className="flex flex-col leading-tight">
                     <span className="text-[11px] font-bold text-foreground truncate max-w-[120px] sm:max-w-[140px]">
@@ -1054,7 +1054,7 @@ export function WatchStudio({
                 </div>
 
                 {/* 2. Kickoff Time & Date */}
-                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl dark:bg-white/[0.03] bg-muted/60 dark:border-white/[0.06] border-border/70">
                   <ClockIcon className="size-3 text-muted-foreground shrink-0" />
                   <div className="flex flex-col leading-tight">
                     <span className="text-[11px] font-semibold text-foreground">
@@ -1077,7 +1077,7 @@ export function WatchStudio({
                       <span className="text-[10px] font-black uppercase tracking-wider">LIVE MATCH</span>
                     </div>
                   ) : isUpcoming && kickoffMs ? (
-                    <div className="flex items-center gap-2 px-2.5 py-1 rounded-xl bg-white/[0.04] border border-white/10">
+                    <div className="flex items-center gap-2 px-2.5 py-1 rounded-xl dark:bg-white/[0.04] bg-muted/60 dark:border-white/10 border-border/70">
                       <div className="flex flex-col items-end leading-tight">
                         <span className="text-[8px] uppercase font-bold text-muted-foreground tracking-wider">
                           {kickoffMs - now <= 3600_000 ? "Kickoff In" : "Status"}
@@ -1700,14 +1700,14 @@ export function WatchStudio({
                   <RefreshCwIcon className="size-4" />
                 </button>
 
-                <div className="flex items-center gap-0.5 p-0.5 rounded-lg bg-white/[0.08] border border-white/10">
+                <div className="flex items-center gap-0.5 p-0.5 rounded-lg dark:bg-white/[0.08] bg-muted/80 dark:border-white/10 border-border">
                   <button
                     type="button"
                     onClick={() => changeViewMode("single")}
                     className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold transition-all ${
                       viewMode === "single"
                         ? "bg-[var(--pitch)] text-black shadow-xs"
-                        : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                        : "text-muted-foreground hover:text-foreground dark:hover:bg-white/5 hover:bg-black/[0.04]"
                     }`}
                     title="Single Screen (1 Stream)"
                   >
@@ -1720,7 +1720,7 @@ export function WatchStudio({
                     className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold transition-all ${
                       viewMode === "dual"
                         ? "bg-[var(--pitch)] text-black shadow-xs"
-                        : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                        : "text-muted-foreground hover:text-foreground dark:hover:bg-white/5 hover:bg-black/[0.04]"
                     }`}
                     title="Dual Split View (2 Streams)"
                   >
@@ -1733,7 +1733,7 @@ export function WatchStudio({
                     className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold transition-all ${
                       viewMode === "quad"
                         ? "bg-[var(--pitch)] text-black shadow-xs"
-                        : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                        : "text-muted-foreground hover:text-foreground dark:hover:bg-white/5 hover:bg-black/[0.04]"
                     }`}
                     title="Quad Grid Multi-View (4 Streams 2x2)"
                   >

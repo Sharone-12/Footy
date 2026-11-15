@@ -82,7 +82,7 @@ export function KickoffCountdown({ msLeft }: { msLeft: number }) {
   const clamped = Math.max(0, Math.min(RING_WINDOW_MS, msLeft))
   const remaining = clamped / RING_WINDOW_MS
   const imminent = clamped <= 5 * 60_000
-  const tone = imminent ? "oklch(0.70 0.20 25)" : "oklch(0.83 0.16 85)"
+  const tone = imminent ? "var(--tone-red)" : "var(--tone-amber)"
 
   const totalSeconds = Math.floor(clamped / 1000)
   const label = `${pad(Math.floor(totalSeconds / 60))}:${pad(totalSeconds % 60)}`
@@ -143,7 +143,7 @@ export type HealthState = "healthy" | "degraded" | "offline"
 
 const BAR_TONE: Record<HealthState, string> = {
   healthy: "var(--pitch)",
-  degraded: "oklch(0.83 0.16 85)",
+  degraded: "var(--tone-amber)",
   offline: "oklch(0.55 0.01 260)",
 }
 
@@ -197,7 +197,7 @@ export function SignalBars({ state }: { state: HealthState }) {
 export function LatencyMeter({ ms }: { ms: number }) {
   const band = ms < 400 ? 3 : ms < 1200 ? 2 : 1
   const tone =
-    band === 3 ? "var(--pitch)" : band === 2 ? "oklch(0.83 0.16 85)" : "oklch(0.70 0.20 25)"
+    band === 3 ? "var(--pitch)" : band === 2 ? "var(--tone-amber)" : "var(--tone-red)"
   return (
     <span
       className="inline-flex items-center gap-1 shrink-0"

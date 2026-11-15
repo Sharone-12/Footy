@@ -146,8 +146,8 @@ export function StreamingNetworkHealth() {
               <span
                 className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border ${
                   isAllGood
-                    ? "bg-[var(--pitch)]/10 text-[var(--pitch)] border-[var(--pitch)]/30"
-                    : "bg-amber-500/10 text-amber-400 border-amber-500/30"
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-300 dark:bg-[var(--pitch)]/10 dark:text-[var(--pitch)] dark:border-[var(--pitch)]/30"
+                    : "bg-amber-50 text-amber-800 border-amber-300 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/30"
                 }`}
               >
                 {data.activeCount}/{data.totalCount} Sources Active
@@ -165,7 +165,7 @@ export function StreamingNetworkHealth() {
             type="button"
             onClick={pingProviders}
             disabled={isPending}
-            className="card-lift px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 hover:border-white/20 text-xs font-semibold text-foreground flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+            className="card-lift px-3 py-1.5 rounded-xl dark:bg-white/[0.05] dark:hover:bg-white/[0.1] bg-black/[0.04] hover:bg-black/[0.08] dark:border-white/10 dark:hover:border-white/20 border-black/10 text-xs font-semibold text-foreground flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
             title="Send real-time health ping to all 6 streaming engines"
           >
             <RefreshCwIcon className={`size-3 text-[var(--pitch)] ${isPending ? "animate-spin" : ""}`} />

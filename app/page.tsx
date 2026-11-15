@@ -79,10 +79,10 @@ function LeagueTag({ league }: { league: string }) {
   const tag = LEAGUE_TAG[league] ?? LEAGUE_TAG["Premier League"]
   return (
     <span
-      className="stat-label text-[0.6rem] px-1.5 py-0.5 rounded"
+      className="stat-label text-[0.6rem] px-1.5 py-0.5 rounded dark:brightness-100 dark:contrast-100 brightness-[0.70] contrast-125"
       style={{
         color: `oklch(${tag.hue})`,
-        background: `oklch(${tag.hue} / 13%)`,
+        background: `oklch(${tag.hue} / 15%)`,
       }}
     >
       {tag.short}

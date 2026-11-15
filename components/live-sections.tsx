@@ -71,13 +71,13 @@ type PillSpec = {
 }
 
 const PILLS: PillSpec[] = [
-  { id: "cinevid", label: "Cinevid", tone: "bg-rose-500/10 text-rose-400 border-rose-500/25" },
-  { id: "damitv", label: "DAMITV", tone: "bg-violet-500/10 text-violet-400 border-violet-500/25" },
-  { id: "matchora", label: "Matchora", tone: "bg-blue-500/10 text-blue-400 border-blue-500/25" },
-  { id: "daddylive", label: "DaddyLive", tone: "bg-amber-500/10 text-amber-400 border-amber-500/25" },
-  { id: "live24", label: "Live24", tone: "bg-emerald-500/10 text-emerald-400 border-emerald-500/25" },
-  { id: "zlive", label: "ZLive", tone: "bg-emerald-500/10 text-emerald-400 border-emerald-500/25" },
-  { id: "streamfree", label: "StreamFree", tone: "bg-cyan-500/10 text-cyan-400 border-cyan-500/25" },
+  { id: "cinevid", label: "Cinevid", tone: "bg-rose-500/15 dark:bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-300 dark:border-rose-500/25" },
+  { id: "damitv", label: "DAMITV", tone: "bg-violet-500/15 dark:bg-violet-500/10 text-violet-700 dark:text-violet-400 border-violet-300 dark:border-violet-500/25" },
+  { id: "matchora", label: "Matchora", tone: "bg-blue-500/15 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-300 dark:border-blue-500/25" },
+  { id: "daddylive", label: "DaddyLive", tone: "bg-amber-500/15 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-500/25" },
+  { id: "live24", label: "Live24", tone: "bg-emerald-500/15 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-500/25" },
+  { id: "zlive", label: "ZLive", tone: "bg-emerald-500/15 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-500/25" },
+  { id: "streamfree", label: "StreamFree", tone: "bg-cyan-500/15 dark:bg-cyan-500/10 text-cyan-700 dark:text-cyan-400 border-cyan-300 dark:border-cyan-500/25" },
 ]
 
 /** Plural-safe "3 channels" / "1 channel", used in the badge tooltips. */
@@ -269,7 +269,7 @@ function Row({
           <Link
             href={`/live/watch?id=${m.event_id}`}
             aria-label={`Watch stream for ${m.home} vs ${m.away}`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--pitch)] text-black hover:brightness-110 font-bold text-xs shadow-md transition-all hover:scale-[1.03] shrink-0"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#16a34a] text-white dark:bg-[var(--pitch)] dark:text-black hover:bg-[#15803d] dark:hover:brightness-110 font-bold text-xs shadow-md transition-all hover:scale-[1.03] shrink-0"
           >
             <PlayIcon className="size-3 fill-current" />
             Watch Now

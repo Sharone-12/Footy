@@ -169,13 +169,11 @@ export function PredictionMatchCard({ p }: { p: MatchPrediction }) {
         <div className="flex items-center gap-2">
           {isSettled && (
             <span
-              className="stat-label text-[0.62rem] font-bold px-2 py-0.5 rounded-full"
-              style={{
-                color: p.correct ? OUTCOME_COLORS.home : "oklch(0.65 0.14 25)",
-                background: p.correct
-                  ? "oklch(0.80 0.19 150 / 13%)"
-                  : "oklch(0.65 0.14 25 / 13%)",
-              }}
+              className={`stat-label text-[0.62rem] font-bold px-2 py-0.5 rounded-full ${
+                p.correct
+                  ? "bg-emerald-100 text-emerald-800 dark:bg-[oklch(0.80_0.19_150_/_13%)] dark:text-[var(--pitch)] border border-emerald-300/40 dark:border-transparent"
+                  : "bg-rose-100 text-rose-800 dark:bg-[oklch(0.65_0.14_25_/_13%)] dark:text-[oklch(0.75_0.18_25)] border border-rose-300/40 dark:border-transparent"
+              }`}
             >
               {p.correct ? "CORRECT" : "WRONG"}
             </span>
@@ -185,7 +183,7 @@ export function PredictionMatchCard({ p }: { p: MatchPrediction }) {
           {showWatchNow && (
             <Link
               href={`/live/watch?id=${p.event_id}`}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[var(--pitch)] text-black hover:brightness-110 font-bold text-xs shadow-md transition-all hover:scale-[1.03] shrink-0"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#16a34a] text-white dark:bg-[var(--pitch)] dark:text-black hover:bg-[#15803d] dark:hover:brightness-110 font-bold text-xs shadow-md transition-all hover:scale-[1.03] shrink-0"
               title={`Watch live stream for ${p.home} vs ${p.away}`}
             >
               <PlayIcon className="size-3 fill-current" />
