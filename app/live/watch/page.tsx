@@ -5,6 +5,7 @@ import { supabase } from "@/lib/supabase"
 import { verifySessionToken, LIVE_SESSION_COOKIE_NAME } from "@/lib/live/auth"
 import { LivePasswordLock } from "@/components/live-password-lock"
 import { WatchStudio } from "@/components/watch-studio"
+import { isTop10FifaMatch } from "@/lib/teams"
 import { getMatchPrediction } from "@/app/api/predictions/match/route"
 import type { MatchPrediction } from "@/lib/predictions"
 import type { LiveFixture } from "@/components/live-sections"
@@ -83,10 +84,12 @@ async function WatchContent({ searchParams }: PageProps) {
     .limit(8)
 
   if (similarData) {
-    similarMatches = (similarData as unknown as LiveFixture[]).map((m) => ({
-      ...m,
-      kickoff: m.kickoff ?? null,
-    }))
+    similarMatches = (similarData as unknown as LiveFixture[])
+      .map((m) => ({
+        ...m,
+        kickoff: m.kickoff ?? null,
+      }))
+      .filter(isTop10FifaMatch)
   }
 
   // 3. Pre-fetch prediction for this fixture

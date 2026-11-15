@@ -2096,7 +2096,7 @@ export function WatchStudio({
                 </div>
 
                 {similarMatches.length === 0 ? (
-                  <p className="text-xs text-muted-foreground py-4 text-center">No other matches this week.</p>
+                  <p className="text-xs text-muted-foreground py-4 text-center">No other upcoming matches.</p>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {similarMatches.slice(0, 6).map((m) => {

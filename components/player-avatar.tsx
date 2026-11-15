@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import {
   playerImage,
   playerImageFallback,
@@ -10,6 +10,22 @@ import {
   leagueImageFallback,
   initials,
 } from "@/lib/images"
+import { TOP_10_FIFA_NATION_IDS } from "@/lib/teams"
+
+/**
+ * Global cache of verified working and failed image URLs.
+ * Survives component unmounts, route transitions, and carousel sliding.
+ */
+const failedUrls = new Set<string>()
+const workingUrls = new Map<string, string>()
+
+/** Preload an image URL into the browser HTTP / memory cache with no-referrer */
+export function preloadImage(url: string | null | undefined) {
+  if (typeof window === "undefined" || !url || failedUrls.has(url)) return
+  const img = new Image()
+  img.referrerPolicy = "no-referrer"
+  img.src = url
+}
 
 /**
  * Tries the Supabase mirror, then Sofascore direct, then gives up.
@@ -19,10 +35,32 @@ import {
  * referer. Plain <img> rather than next/image because the images are already
  * 150x150 / ~7 KB and the fallback host isn't in remotePatterns.
  */
-function useFallbackChain(sources: string[]) {
-  const [step, setStep] = useState(0)
+function useFallbackChain(sources: string[], cacheKey?: string) {
+  const initialIndex = useMemo(() => {
+    if (cacheKey && workingUrls.has(cacheKey)) {
+      const known = workingUrls.get(cacheKey)!
+      const idx = sources.indexOf(known)
+      if (idx !== -1) return idx
+    }
+    const firstValid = sources.findIndex((s) => !failedUrls.has(s))
+    return firstValid !== -1 ? firstValid : 0
+  }, [sources, cacheKey])
+
+  const [step, setStep] = useState(initialIndex)
   const ref = useRef<HTMLImageElement>(null)
-  const next = () => setStep((s) => s + 1)
+
+  const next = () => {
+    if (step < sources.length) {
+      failedUrls.add(sources[step])
+    }
+    setStep((s) => s + 1)
+  }
+
+  const onLoad = () => {
+    if (cacheKey && step < sources.length) {
+      workingUrls.set(cacheKey, sources[step])
+    }
+  }
 
   // These pages are server-rendered, so the browser starts (and can finish)
   // loading the <img> before React hydrates. A failure in that window never
@@ -34,7 +72,13 @@ function useFallbackChain(sources: string[]) {
     if (el?.complete && el.naturalWidth === 0) next()
   }, [step])
 
-  return { ref, src: sources[step], exhausted: step >= sources.length, next }
+  return {
+    ref,
+    src: sources[step],
+    exhausted: step >= sources.length,
+    next,
+    onLoad,
+  }
 }
 
 export function PlayerAvatar({
@@ -91,17 +135,23 @@ export function LeagueCrest({
   size = 20,
   className = "",
   variant = "circle",
+  priority = false,
 }: {
   tournamentId: number | string
   name: string
   size?: number
   className?: string
   variant?: "tile" | "transparent" | "circle"
+  priority?: boolean
 }) {
-  const { ref, src, exhausted, next } = useFallbackChain([
-    leagueImage(tournamentId),
-    leagueImageFallback(tournamentId),
-  ])
+  const sources = useMemo(
+    () => [leagueImage(tournamentId), leagueImageFallback(tournamentId)],
+    [tournamentId],
+  )
+  const { ref, src, exhausted, next, onLoad } = useFallbackChain(
+    sources,
+    `league-${tournamentId}`,
+  )
   if (exhausted) return null
 
   if (variant === "transparent") {
@@ -115,9 +165,10 @@ export function LeagueCrest({
         title={name}
         width={size}
         height={size}
-        loading="lazy"
+        loading={priority ? "eager" : "lazy"}
         decoding="async"
         referrerPolicy="no-referrer"
+        onLoad={onLoad}
         onError={next}
         className={`inline-block shrink-0 object-contain ${className}`}
         style={{ width: size, height: size }}
@@ -147,9 +198,10 @@ export function LeagueCrest({
         alt={name}
         width={inner}
         height={inner}
-        loading="lazy"
+        loading={priority ? "eager" : "lazy"}
         decoding="async"
         referrerPolicy="no-referrer"
+        onLoad={onLoad}
         onError={next}
         className="object-contain"
         style={{ width: inner, height: inner }}
@@ -163,16 +215,26 @@ export function TeamCrest({
   name,
   size = 18,
   className = "",
+  priority = false,
 }: {
   teamId: number | string
   name: string
   size?: number
   className?: string
+  priority?: boolean
 }) {
-  const { ref, src, exhausted, next } = useFallbackChain([
-    teamImage(teamId),
-    teamImageFallback(teamId),
-  ])
+  const isNational = TOP_10_FIFA_NATION_IDS.has(Number(teamId))
+  const sources = useMemo(
+    () =>
+      isNational
+        ? [teamImageFallback(teamId), teamImage(teamId)]
+        : [teamImage(teamId), teamImageFallback(teamId)],
+    [teamId, isNational],
+  )
+  const { ref, src, exhausted, next, onLoad } = useFallbackChain(
+    sources,
+    `team-${teamId}`,
+  )
   if (exhausted) return null
 
   return (
@@ -185,9 +247,10 @@ export function TeamCrest({
       title={name}
       width={size}
       height={size}
-      loading="lazy"
+      loading={priority ? "eager" : "lazy"}
       decoding="async"
       referrerPolicy="no-referrer"
+      onLoad={onLoad}
       onError={next}
       className={`inline-block shrink-0 object-contain ${className}`}
       style={{ width: size, height: size }}

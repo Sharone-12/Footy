@@ -181,11 +181,70 @@ export const LEAGUE_TOURNAMENT_ID: Record<string, number> = {
   "DFB-Pokal": 209,
   "Coupe de France": 328,
   // National-team competitions, for the international fixtures that ride into
-  // `matches` alongside the clubs. Only the ones the FIFA top 15 actually
+  // `matches` alongside the clubs. Only the ones the FIFA top 10 actually
   // play; getLeagueTournamentId's fallbacks below catch the rest.
   "UEFA Nations League": 10783,
   "International Friendly Games": 851,
   "FIFA World Cup": 16,
+}
+
+/** Top 10 FIFA Ranked National Teams as of Nov 2026 */
+export const TOP_10_FIFA_NATIONS: Record<string, number> = {
+  Spain: 4698,
+  Argentina: 4819,
+  France: 4481,
+  England: 4713,
+  Brazil: 4748,
+  Portugal: 4704,
+  Netherlands: 4705,
+  Belgium: 4717,
+  Italy: 4707,
+  Germany: 4711,
+}
+
+export const TOP_10_FIFA_NATION_IDS = new Set<number>(Object.values(TOP_10_FIFA_NATIONS))
+export const TOP_10_FIFA_NATION_NAMES = new Set<string>(Object.keys(TOP_10_FIFA_NATIONS))
+
+/** Determines if a competition is an international national-team tournament / friendly */
+export function isInternationalLeague(league?: string | null): boolean {
+  if (!league) return false
+  const l = league.toLowerCase()
+  return (
+    l.includes("nations league") ||
+    l.includes("friendly") ||
+    l.includes("world cup") ||
+    l.includes("africa cup") ||
+    l.includes("concacaf") ||
+    l.includes("copa america") ||
+    l.includes("euro") ||
+    l.includes("international") ||
+    l.includes("qualification")
+  )
+}
+
+/**
+ * Filters fixtures so that international / national-team matches are only
+ * retained if they feature at least one of the top 10 FIFA nations.
+ * Regular European club competitions (La Liga, Premier League, UCL, etc.) always pass.
+ */
+export function isTop10FifaMatch(match: {
+  league?: string | null
+  home?: string | null
+  away?: string | null
+  home_id?: number | null
+  away_id?: number | null
+}): boolean {
+  if (!isInternationalLeague(match.league)) {
+    return true
+  }
+  const homeIsTop10 =
+    (match.home_id != null && TOP_10_FIFA_NATION_IDS.has(Number(match.home_id))) ||
+    (match.home != null && TOP_10_FIFA_NATION_NAMES.has(match.home))
+  const awayIsTop10 =
+    (match.away_id != null && TOP_10_FIFA_NATION_IDS.has(Number(match.away_id))) ||
+    (match.away != null && TOP_10_FIFA_NATION_NAMES.has(match.away))
+
+  return Boolean(homeIsTop10 || awayIsTop10)
 }
 
 /** Robust resolver to match any league string (case-insensitive, normalized) to a tournament ID */

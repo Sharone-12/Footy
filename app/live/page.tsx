@@ -2,6 +2,7 @@ import { Suspense } from "react"
 import { connection } from "next/server"
 import { cookies } from "next/headers"
 import { supabase } from "@/lib/supabase"
+import { isTop10FifaMatch } from "@/lib/teams"
 import { LiveSections, type LiveFixture } from "@/components/live-sections"
 import { Skeleton } from "@/components/ui/skeleton"
 import { LivePasswordLock } from "@/components/live-password-lock"
@@ -35,10 +36,12 @@ async function Fixtures() {
   let { data } = await q(`${COLS}, kickoff`)
   if (!data) ({ data } = await q(COLS))
 
-  const matches = ((data || []) as unknown as LiveFixture[]).map((m) => ({
-    ...m,
-    kickoff: m.kickoff ?? null,
-  }))
+  const matches = ((data || []) as unknown as LiveFixture[])
+    .map((m) => ({
+      ...m,
+      kickoff: m.kickoff ?? null,
+    }))
+    .filter(isTop10FifaMatch)
 
   return <LiveSections matches={matches} />
 }

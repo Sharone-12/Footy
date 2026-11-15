@@ -68,13 +68,12 @@ LEAGUES = {
 # needs no new tournament id when a side enters a competition we never
 # configured. Names are Sofascore's own; ids resolved from its search.
 #
-# The FIFA top 15, ranking of 7 Nov 2026. It is a hand-kept list: re-rank it
+# The FIFA top 10 ranking. It is a hand-kept list: re-rank it
 # when the table moves enough to care.
 NATIONAL_TEAMS = {
     "Spain": 4698, "Argentina": 4819, "France": 4481, "England": 4713,
-    "Portugal": 4704, "Brazil": 4748, "Morocco": 4778, "Belgium": 4717,
-    "Netherlands": 4705, "Mexico": 4781, "Colombia": 4820, "Switzerland": 4699,
-    "Germany": 4711, "Croatia": 4715, "Italy": 4707,
+    "Portugal": 4704, "Brazil": 4748, "Belgium": 4717, "Netherlands": 4705,
+    "Germany": 4711, "Italy": 4707,
 }
 
 # How far back a played international is still worth carrying. The live

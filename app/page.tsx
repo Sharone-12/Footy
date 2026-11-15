@@ -5,7 +5,7 @@ import { supabase } from "@/lib/supabase"
 import { resolveSeason } from "@/lib/seasons"
 import { resolveCompetition, scopeLeague, scopeQuery, COMPETITION_LABEL, UCL, type Competition } from "@/lib/competition"
 import { CompetitionToggle } from "@/components/competition-toggle"
-import { LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
+import { LEAGUE_TOURNAMENT_ID, isTop10FifaMatch } from "@/lib/teams"
 import { PlayerSearch } from "@/components/player-search"
 import { LeagueCrest, TeamCrest } from "@/components/player-avatar"
 import { UpcomingTicker, type UpcomingMatch } from "@/components/upcoming-ticker"
@@ -163,8 +163,9 @@ async function loadUpcoming(from: string, to: string) {
     .gte("date", from)
     .lte("date", to)
     .order("date", { ascending: true })
-    .limit(50)
-  return (data || []) as unknown as UpcomingMatch[]
+    .limit(60)
+  const rows = (data || []) as unknown as UpcomingMatch[]
+  return rows.filter(isTop10FifaMatch)
 }
 
 async function Upcoming() {

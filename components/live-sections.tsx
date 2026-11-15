@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from "react"
 import Link from "next/link"
 import { PlayIcon, TvIcon } from "lucide-react"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
-import { LEAGUE_TOURNAMENT_ID, getLeagueTournamentId, isPredictable } from "@/lib/teams"
+import { LEAGUE_TOURNAMENT_ID, getLeagueTournamentId, isPredictable, isTop10FifaMatch } from "@/lib/teams"
 import { splitFixtures, startOf, PLAYING_MS, type Timed } from "@/lib/live"
 import { StreamingNetworkHealth } from "@/components/streaming-network-health"
 import type { MatchedStream } from "@/lib/streamfree/types"
@@ -617,8 +617,10 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
     }
   }, [activePlayer])
 
+  const filteredMatches = useMemo(() => matches.filter(isTop10FifaMatch), [matches])
+
   // Before mount there is no clock, so nothing can be bucketed yet.
-  const { live, soon, upcoming } = splitFixtures(matches, now ?? 0)
+  const { live, soon, upcoming } = splitFixtures(filteredMatches, now ?? 0)
 
   return (
     <div className="flex flex-col gap-8 relative">
