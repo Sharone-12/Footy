@@ -70,79 +70,86 @@ function LeagueTable({
           <span className="stat-label text-right">Pts</span>
         </div>
 
-        {rows.map((t, i) => (
-          <Link
-            key={t.team}
-            href={link(t.team)}
-            className={`group grid grid-cols-[1.25rem_1fr_1.75rem_2.25rem_2.25rem] sm:grid-cols-[1.5rem_1fr_2rem_4.5rem_2.5rem_2.25rem] gap-1.5 sm:gap-2 items-center px-2.5 sm:px-3 py-2 rounded-xl hover:bg-white/[0.04] transition-colors duration-150 ${
-              t.team === "FC Barcelona" ? "barca-stripes" : ""
-            }`}
-          >
-            <span
-              className="stat-figure text-sm text-right"
-              style={{
-                color: i < 4 ? "var(--pitch)" : "var(--muted-foreground)",
-                opacity: i < 4 ? 1 : 0.5,
-              }}
+        {rows.map((t, i) => {
+          const isBarca = t.team === "FC Barcelona"
+          return (
+            <Link
+              key={t.team}
+              href={link(t.team)}
+              className={`group grid grid-cols-[1.25rem_1fr_1.75rem_2.25rem_2.25rem] sm:grid-cols-[1.5rem_1fr_2rem_4.5rem_2.5rem_2.25rem] gap-1.5 sm:gap-2 items-center px-2.5 sm:px-3 py-2 rounded-xl hover:bg-muted/50 transition-colors duration-150 ${
+                isBarca ? "barca-stripes text-white border border-white/20" : ""
+              }`}
             >
-              {i + 1}
-            </span>
+              <span
+                className="stat-figure text-sm text-right"
+                style={{
+                  color: isBarca ? "#ffffff" : i < 4 ? "var(--pitch)" : "var(--muted-foreground)",
+                  opacity: i < 4 ? 1 : 0.6,
+                }}
+              >
+                {i + 1}
+              </span>
 
-            <span className="min-w-0 flex items-center gap-2">
-              {teamIds.get(t.team) != null && (
-                <TeamCrest teamId={teamIds.get(t.team)!} name={t.team} size={20} />
-              )}
-              <span className="min-w-0">
-                <span className="block text-[0.9rem] font-medium truncate group-hover:text-white transition-colors">
-                  {t.team}
-                </span>
-                <span className="flex h-[3px] gap-px mt-1.5 rounded-full overflow-hidden max-w-[7rem]">
-                  {formBar(t).map((s) => (
-                    <span
-                      key={s.label}
-                      style={{ background: s.color, flexGrow: s.n, opacity: 0.75 }}
-                    />
-                  ))}
+              <span className="min-w-0 flex items-center gap-2">
+                {teamIds.get(t.team) != null && (
+                  <TeamCrest teamId={teamIds.get(t.team)!} name={t.team} size={20} />
+                )}
+                <span className="min-w-0">
+                  <span className={`block text-[0.9rem] font-medium truncate transition-colors ${
+                    isBarca ? "text-white" : "group-hover:text-foreground"
+                  }`}>
+                    {t.team}
+                  </span>
+                  <span className="flex h-[3px] gap-px mt-1.5 rounded-full overflow-hidden max-w-[7rem]">
+                    {formBar(t).map((s) => (
+                      <span
+                        key={s.label}
+                        style={{ background: s.color, flexGrow: s.n, opacity: 0.75 }}
+                      />
+                    ))}
+                  </span>
                 </span>
               </span>
-            </span>
 
-            <span className="stat-figure text-sm text-right text-muted-foreground">
-              {t.played}
-            </span>
+              <span className={`stat-figure text-sm text-right ${isBarca ? "text-white/80" : "text-muted-foreground"}`}>
+                {t.played}
+              </span>
 
-            <span className="hidden sm:block stat-figure text-xs text-center text-muted-foreground tracking-wide">
-              {t.won}-{t.drawn}-{t.lost}
-            </span>
+              <span className={`hidden sm:block stat-figure text-xs text-center tracking-wide ${isBarca ? "text-white/80" : "text-muted-foreground"}`}>
+                {t.won}-{t.drawn}-{t.lost}
+              </span>
 
-            <span
-              className="stat-figure text-sm text-right"
-              style={{
-                color:
-                  t.goal_diff > 0
-                    ? "var(--pitch)"
-                    : t.goal_diff < 0
-                      ? "oklch(0.65 0.14 25)"
-                      : "var(--muted-foreground)",
-              }}
-            >
-              {t.goal_diff > 0 ? "+" : ""}
-              {t.goal_diff}
-            </span>
-
-            <span className="relative text-right">
-              <span className="stat-figure text-lg">{t.points}</span>
               <span
-                className="absolute -bottom-0.5 right-0 h-[2px] rounded-full"
+                className="stat-figure text-sm text-right"
                 style={{
-                  width: `${Math.max(8, (t.points / topPoints) * 100)}%`,
-                  background: "var(--pitch)",
-                  opacity: 0.3,
+                  color:
+                    t.goal_diff > 0
+                      ? "var(--pitch)"
+                      : t.goal_diff < 0
+                        ? "oklch(0.65 0.14 25)"
+                        : isBarca
+                          ? "rgba(255,255,255,0.7)"
+                          : "var(--muted-foreground)",
                 }}
-              />
-            </span>
-          </Link>
-        ))}
+              >
+                {t.goal_diff > 0 ? "+" : ""}
+                {t.goal_diff}
+              </span>
+
+              <span className="relative text-right">
+                <span className={`stat-figure text-lg ${isBarca ? "text-white" : ""}`}>{t.points}</span>
+                <span
+                  className="absolute -bottom-0.5 right-0 h-[2px] rounded-full"
+                  style={{
+                    width: `${Math.max(8, (t.points / topPoints) * 100)}%`,
+                    background: "var(--pitch)",
+                    opacity: 0.3,
+                  }}
+                />
+              </span>
+            </Link>
+          )
+        })}
       </div>
     </section>
   )
@@ -293,78 +300,90 @@ function PowerRankings({
             Needs three matches per club — check back after round 3.
           </p>
         )}
-        {top.map((t, i) => (
-          <Link
-            key={t.team}
-            href={link(t.team)}
-            className={`group relative flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/[0.04] transition-colors ${
-              t.team === "FC Barcelona" ? "barca-stripes" : ""
-            }`}
-          >
-            <span
-              className="stat-figure text-2xl w-8 text-center shrink-0"
-              style={{ color: POWER_COLORS[i], fontFamily: "var(--font-condensed)" }}
+        {top.map((t, i) => {
+          const isBarca = t.team === "FC Barcelona"
+          return (
+            <Link
+              key={t.team}
+              href={link(t.team)}
+              className={`group relative flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-muted/50 transition-colors ${
+                isBarca ? "barca-stripes text-white border border-white/20" : ""
+              }`}
             >
-              {i + 1}
-            </span>
+              <span
+                className="stat-figure text-2xl w-8 text-center shrink-0"
+                style={{ color: POWER_COLORS[i], fontFamily: "var(--font-condensed)" }}
+              >
+                {i + 1}
+              </span>
 
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                {teamIds.get(t.team) != null && (
-                  <TeamCrest teamId={teamIds.get(t.team)!} name={t.team} size={22} />
-                )}
-                <span className="font-semibold text-[0.95rem] truncate group-hover:text-white transition-colors">
-                  {t.team}
-                </span>
-                <span className="shrink-0">
-                  {LEAGUE_TOURNAMENT_ID[t.league] ? (
-                    <LeagueCrest tournamentId={LEAGUE_TOURNAMENT_ID[t.league]} name={t.league} size={20} />
-                  ) : (
-                    <span className="stat-label">{LEAGUE_ABBR[t.league] ?? t.league}</span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  {teamIds.get(t.team) != null && (
+                    <TeamCrest teamId={teamIds.get(t.team)!} name={t.team} size={22} />
                   )}
-                </span>
+                  <span className={`font-semibold text-[0.95rem] truncate transition-colors ${
+                    isBarca ? "text-white" : "group-hover:text-foreground"
+                  }`}>
+                    {t.team}
+                  </span>
+                  <span className="shrink-0">
+                    {LEAGUE_TOURNAMENT_ID[t.league] ? (
+                      <LeagueCrest tournamentId={LEAGUE_TOURNAMENT_ID[t.league]} name={t.league} size={20} />
+                    ) : (
+                      <span className={`stat-label ${isBarca ? "!text-white/80" : ""}`}>{LEAGUE_ABBR[t.league] ?? t.league}</span>
+                    )}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 mt-1.5">
+                  <div
+                    className="h-[5px] rounded-full"
+                    style={{
+                      width: `${(displayRating(t.score) / 99) * 100}%`,
+                      background: POWER_COLORS[i],
+                      opacity: 0.7,
+                      minWidth: "1rem",
+                    }}
+                  />
+                </div>
               </div>
-              <div className="flex items-center gap-3 mt-1.5">
-                <div
-                  className="h-[5px] rounded-full"
-                  style={{
-                    width: `${(displayRating(t.score) / 99) * 100}%`,
-                    background: POWER_COLORS[i],
-                    opacity: 0.7,
-                    minWidth: "1rem",
-                  }}
-                />
-              </div>
-            </div>
 
-            <div className="flex items-center gap-4 shrink-0">
-              <div className="text-right">
-                <div
-                  className="stat-figure text-lg"
-                  style={{ color: POWER_COLORS[i] }}
-                >
-                  {displayRating(t.score).toFixed(1)}
+              <div className="flex items-center gap-4 shrink-0">
+                <div className="text-right">
+                  <div
+                    className="stat-figure text-lg"
+                    style={{ color: POWER_COLORS[i] }}
+                  >
+                    {displayRating(t.score).toFixed(1)}
+                  </div>
+                  <div className={`stat-label ${isBarca ? "!text-white/80" : ""}`}>rating</div>
                 </div>
-                <div className="stat-label">rating</div>
-              </div>
-              <div className="text-right hidden sm:block">
-                <div className="stat-figure text-sm">{t.ppg.toFixed(2)}</div>
-                <div className="stat-label">ppg</div>
-              </div>
-              <div className="text-right hidden sm:block">
-                <div
-                  className="stat-figure text-sm"
-                  style={{
-                    color: t.gd > 0 ? "var(--pitch)" : t.gd < 0 ? "oklch(0.65 0.14 25)" : "var(--muted-foreground)",
-                  }}
-                >
-                  {t.gd > 0 ? "+" : ""}{t.gd}
+                <div className="text-right hidden sm:block">
+                  <div className={`stat-figure text-sm ${isBarca ? "text-white" : ""}`}>{t.ppg.toFixed(2)}</div>
+                  <div className={`stat-label ${isBarca ? "!text-white/80" : ""}`}>ppg</div>
                 </div>
-                <div className="stat-label">gd</div>
+                <div className="text-right hidden sm:block">
+                  <div
+                    className="stat-figure text-sm"
+                    style={{
+                      color:
+                        t.gd > 0
+                          ? "var(--pitch)"
+                          : t.gd < 0
+                            ? "oklch(0.65 0.14 25)"
+                            : isBarca
+                              ? "rgba(255,255,255,0.7)"
+                              : "var(--muted-foreground)",
+                    }}
+                  >
+                    {t.gd > 0 ? "+" : ""}{t.gd}
+                  </div>
+                  <div className={`stat-label ${isBarca ? "!text-white/80" : ""}`}>gd</div>
+                </div>
               </div>
-            </div>
-          </Link>
-        ))}
+            </Link>
+          )
+        })}
       </div>
     </section>
   )

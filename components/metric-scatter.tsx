@@ -279,7 +279,7 @@ export function MetricScatter({ players }: { players: ScatterPlayer[] }) {
           <select
             value={role}
             onChange={(e) => setRole(e.target.value)}
-            className="bg-neutral-900 border border-border/70 rounded-lg px-2.5 py-1.5 text-xs font-medium text-foreground"
+            className="bg-background border border-border rounded-lg px-2.5 py-1.5 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
           >
             <option value="all">All roles</option>
             {ROLES.map((r) => (
@@ -294,7 +294,7 @@ export function MetricScatter({ players }: { players: ScatterPlayer[] }) {
           <select
             value={floor}
             onChange={(e) => setFloor(Number(e.target.value))}
-            className="bg-neutral-900 border border-border/70 rounded-lg px-2.5 py-1.5 text-xs font-medium text-foreground"
+            className="bg-background border border-border rounded-lg px-2.5 py-1.5 text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
           >
             {FLOORS.map((f) => (
               <option key={f} value={f}>
@@ -365,13 +365,13 @@ export function MetricScatter({ players }: { players: ScatterPlayer[] }) {
                 : { top: 12, right: 30, bottom: 36, left: 8 }
             }
           >
-            <CartesianGrid stroke="oklch(1 0 0 / 7%)" />
+            <CartesianGrid stroke="var(--border)" strokeOpacity={0.6} />
             <XAxis
               type="number"
               dataKey="x"
               name={xm.label}
-              tick={{ fontSize: 11, fill: "oklch(0.72 0.02 250)" }}
-              stroke="oklch(1 0 0 / 18%)"
+              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+              stroke="var(--border)"
               // The pickers above already name both axes, so on a phone the
               // titles are duplication that costs real plot area.
               label={
@@ -381,7 +381,7 @@ export function MetricScatter({ players }: { players: ScatterPlayer[] }) {
                       value: xm.label,
                       position: "insideBottom",
                       offset: -18,
-                      fill: "oklch(0.72 0.02 250)",
+                      fill: "var(--muted-foreground)",
                       fontSize: 12,
                     }
               }
@@ -390,8 +390,8 @@ export function MetricScatter({ players }: { players: ScatterPlayer[] }) {
               type="number"
               dataKey="y"
               name={ym.label}
-              tick={{ fontSize: 11, fill: "oklch(0.72 0.02 250)" }}
-              stroke="oklch(1 0 0 / 18%)"
+              tick={{ fontSize: 11, fill: "var(--muted-foreground)" }}
+              stroke="var(--border)"
               label={
                 narrow
                   ? undefined
@@ -399,14 +399,14 @@ export function MetricScatter({ players }: { players: ScatterPlayer[] }) {
                       value: ym.label,
                       angle: -90,
                       position: "insideLeft",
-                      fill: "oklch(0.72 0.02 250)",
+                      fill: "var(--muted-foreground)",
                       fontSize: 12,
                     }
               }
             />
             <ZAxis type="number" dataKey="z" range={narrow ? [10, 150] : [18, 320]} />
             <Tooltip
-              cursor={{ strokeDasharray: "3 3", stroke: "oklch(1 0 0 / 25%)" }}
+              cursor={{ strokeDasharray: "3 3", stroke: "var(--muted-foreground)" }}
               content={({ active, payload }) => {
                 if (!active || !payload?.length) return null
                 const d = payload[0].payload as (typeof points)[number]
@@ -452,7 +452,7 @@ export function MetricScatter({ players }: { players: ScatterPlayer[] }) {
                       y={y}
                       dy={4}
                       textAnchor={flip ? "end" : "start"}
-                      style={{ fontSize: 10, fill: "oklch(0.95 0 0)", fontWeight: 600 }}
+                      style={{ fontSize: 10, fill: "var(--foreground)", fontWeight: 600 }}
                     >
                       {value}
                     </text>
@@ -465,7 +465,7 @@ export function MetricScatter({ players }: { players: ScatterPlayer[] }) {
       </div>
       )}
 
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-3 pt-3 border-t border-white/10">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 mt-3 pt-3 border-t border-border/60">
         {shownLeagues.map((lg) => (
           <span key={lg} className="inline-flex items-center gap-1.5">
             <span
@@ -495,7 +495,7 @@ function Picker({
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="bg-neutral-900 border border-border/70 rounded-lg px-2.5 py-1.5 text-xs font-medium text-foreground max-w-[190px]"
+        className="bg-background border border-border rounded-lg px-2.5 py-1.5 text-xs font-medium text-foreground max-w-[190px] focus:outline-none focus:ring-1 focus:ring-ring"
       >
         {METRICS.map((m) => (
           <option key={m.key} value={m.key}>

@@ -218,23 +218,26 @@ async function PlayerContent({
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10 stagger">
-        {keyStats.map((s) => (
-          <div
-            key={s.label}
-            className={`surface rounded-2xl px-4 py-5 text-center ${
-              player.team === "FC Barcelona" ? "barca-stripes" : "bg-card"
-            }`}
-          >
+        {keyStats.map((s) => {
+          const isBarca = player.team === "FC Barcelona"
+          return (
             <div
-              className="stat-figure text-4xl"
-              style={{ color: "var(--pitch)" }}
+              key={s.label}
+              className={`surface rounded-2xl px-4 py-5 text-center border shadow-sm ${
+                isBarca ? "barca-stripes text-white border-white/20" : "bg-card border-border/70"
+              }`}
             >
-              {s.value}
+              <div
+                className="stat-figure text-4xl"
+                style={{ color: "var(--pitch)" }}
+              >
+                {s.value}
+              </div>
+              <div className={`stat-label mt-2 ${isBarca ? "!text-white/80" : ""}`}>{s.label}</div>
+              <div className={`text-xs mt-1 ${isBarca ? "text-white/70" : "text-muted-foreground/60"}`}>{s.sub}</div>
             </div>
-            <div className="stat-label mt-2">{s.label}</div>
-            <div className="text-xs text-muted-foreground/60 mt-1">{s.sub}</div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       <Card className="surface mb-10 animate-slide-up border-0">

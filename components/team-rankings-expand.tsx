@@ -105,8 +105,9 @@ export function TeamRankingsExpand({
             filtered.map((t) => {
               const absoluteRank = rows.indexOf(t) + 1
               const tid = LEAGUE_TOURNAMENT_ID[t.league]
+              const isBarca = t.team === "FC Barcelona"
               const className = `row-item flex items-center gap-3 px-3 py-2.5 rounded-xl ${
-                t.team === "FC Barcelona" ? "barca-stripes" : ""
+                isBarca ? "barca-stripes text-white border border-white/20" : ""
               }`
               const body = (
                 <>
@@ -117,10 +118,14 @@ export function TeamRankingsExpand({
                     <TeamCrest teamId={teamIds.get(t.team)!} name={t.team} size={22} />
                   )}
                   <span className="flex-1 min-w-0">
-                    <span className="block text-[0.9rem] font-medium leading-tight truncate">
+                    <span className={`block text-[0.9rem] font-medium leading-tight truncate ${
+                      isBarca ? "text-white" : "text-foreground"
+                    }`}>
                       {t.team}
                     </span>
-                    <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <span className={`flex items-center gap-1.5 text-xs ${
+                      isBarca ? "text-white/80" : "text-muted-foreground"
+                    }`}>
                       {t.meta ? (
                         <span className="truncate">{t.meta}</span>
                       ) : (
@@ -141,11 +146,11 @@ export function TeamRankingsExpand({
                       >
                         {c.value}
                       </span>
-                      <span className="stat-label">{c.label}</span>
+                      <span className={`stat-label ${isBarca ? "!text-white/80" : ""}`}>{c.label}</span>
                     </span>
                   ))}
                   <span
-                    className="stat-figure text-lg w-14 text-right shrink-0 tabular-nums"
+                    className={`stat-figure text-lg w-14 text-right shrink-0 tabular-nums ${isBarca && !t.ratingTone ? "text-white" : ""}`}
                     style={{
                       color:
                         t.ratingTone ?? (absoluteRank <= 3 ? "var(--pitch)" : undefined),

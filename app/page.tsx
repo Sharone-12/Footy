@@ -348,35 +348,38 @@ async function Content({
   return (
     <>
       <div className="grid sm:grid-cols-2 gap-2.5 sm:gap-3 mb-5 stagger">
-        {headline.map((s) => (
-          <Link
-            key={s.label}
-            href={s.slug ? `/player/${s.slug}${scope}` : "/"}
-            className={`card-lift surface-raised rounded-2xl px-4 py-3.5 sm:px-5 sm:py-4 flex items-center gap-3 sm:gap-4 ${
-              s.team === "FC Barcelona" ? "barca-stripes" : "bg-card"
-            }`}
-          >
-            <span style={{ color: "var(--pitch)" }} className="shrink-0">{s.icon}</span>
-            <span className="flex-1 min-w-0">
-              <span className="stat-label text-[0.65rem] sm:text-xs block">{s.label}</span>
-              <span className="block text-sm sm:text-base font-semibold truncate leading-snug">
-                {s.name}
+        {headline.map((s) => {
+          const isBarca = s.team === "FC Barcelona"
+          return (
+            <Link
+              key={s.label}
+              href={s.slug ? `/player/${s.slug}${scope}` : "/"}
+              className={`card-lift surface-raised rounded-2xl px-4 py-3.5 sm:px-5 sm:py-4 flex items-center gap-3 sm:gap-4 transition-all ${
+                isBarca ? "barca-stripes text-white border border-white/20" : "bg-card"
+              }`}
+            >
+              <span style={{ color: "var(--pitch)" }} className="shrink-0">{s.icon}</span>
+              <span className="flex-1 min-w-0">
+                <span className={`stat-label text-[0.65rem] sm:text-xs block ${isBarca ? "!text-white/80" : ""}`}>{s.label}</span>
+                <span className={`block text-sm sm:text-base font-semibold truncate leading-snug ${isBarca ? "text-white" : "text-foreground"}`}>
+                  {s.name}
+                </span>
+                <span className={`flex items-center gap-1.5 text-xs ${isBarca ? "text-white/80" : "text-muted-foreground"}`}>
+                  {s.team_id != null && s.team && (
+                    <TeamCrest teamId={s.team_id} name={s.team} size={14} />
+                  )}
+                  <span className="truncate">{s.team}</span>
+                </span>
               </span>
-              <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                {s.team_id != null && s.team && (
-                  <TeamCrest teamId={s.team_id} name={s.team} size={14} />
-                )}
-                <span className="truncate">{s.team}</span>
+              <span className="text-right shrink-0">
+                <span className="stat-figure stat-pop shimmer-text block text-3xl sm:text-4xl">
+                  {s.figure}
+                </span>
+                <span className={`stat-label text-[0.65rem] sm:text-xs block mt-0.5 ${isBarca ? "!text-white/80" : ""}`}>{s.unit}</span>
               </span>
-            </span>
-            <span className="text-right shrink-0">
-              <span className="stat-figure stat-pop shimmer-text block text-3xl sm:text-4xl">
-                {s.figure}
-              </span>
-              <span className="stat-label text-[0.65rem] sm:text-xs block mt-0.5">{s.unit}</span>
-            </span>
-          </Link>
-        ))}
+            </Link>
+          )
+        })}
       </div>
 
       <div className="grid md:grid-cols-2 gap-4 sm:gap-5 stagger">

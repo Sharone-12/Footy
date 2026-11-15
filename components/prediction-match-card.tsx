@@ -65,8 +65,8 @@ export function PredictionMatchCard({ p }: { p: MatchPrediction }) {
 
   return (
     <div
-      className={`card-lift surface rounded-2xl p-4 space-y-3.5 flex flex-col justify-between transition-all border border-border/70 shadow-sm ${
-        isBarca ? "barca-stripes" : "bg-card"
+      className={`card-lift surface rounded-2xl p-4 space-y-3.5 flex flex-col justify-between transition-all border shadow-sm ${
+        isBarca ? "barca-stripes text-white border-white/20" : "bg-card border-border/70"
       }`}
     >
       {/* Top Header: League, Round, Live Badge or Date */}
@@ -75,9 +75,9 @@ export function PredictionMatchCard({ p }: { p: MatchPrediction }) {
           {tournamentId ? (
             <LeagueCrest tournamentId={tournamentId} name={p.league} size={20} />
           ) : (
-            <span className="stat-label text-xs font-semibold">{LEAGUE_ABBR[p.league] ?? p.league}</span>
+            <span className={`stat-label text-xs font-semibold ${isBarca ? "!text-white/85" : ""}`}>{LEAGUE_ABBR[p.league] ?? p.league}</span>
           )}
-          <span className="stat-label text-xs">R{p.round}</span>
+          <span className={`stat-label text-xs ${isBarca ? "!text-white/75" : ""}`}>R{p.round}</span>
         </div>
 
         {isLive ? (
@@ -91,7 +91,7 @@ export function PredictionMatchCard({ p }: { p: MatchPrediction }) {
             </span>
           </div>
         ) : (
-          <span className="stat-label text-xs ml-auto">
+          <span className={`stat-label text-xs ml-auto ${isBarca ? "!text-white/75" : ""}`}>
             {formatDateIST(`${p.date}T12:00:00Z`)}
           </span>
         )}
@@ -104,7 +104,7 @@ export function PredictionMatchCard({ p }: { p: MatchPrediction }) {
       >
         {/* Home Team */}
         <span className="flex items-center gap-2 justify-end min-w-0">
-          <span className="text-[0.92rem] font-semibold truncate group-hover:text-[var(--pitch)] transition-colors">
+          <span className={`text-[0.92rem] font-semibold truncate transition-colors ${isBarca ? "text-white group-hover:text-[var(--pitch)]" : "text-foreground group-hover:text-[var(--pitch)]"}`}>
             {p.home}
           </span>
           {p.home_id && <TeamCrest teamId={p.home_id} name={p.home} size={24} className="shrink-0" />}
@@ -113,7 +113,7 @@ export function PredictionMatchCard({ p }: { p: MatchPrediction }) {
         {/* Scoreline Hub: Live Score, Settled Score, or VS */}
         <span className="px-2 flex flex-col items-center justify-center min-w-[56px] shrink-0">
           {isSettled ? (
-            <span className="font-mono font-black text-lg tabular-nums text-foreground">
+            <span className={`font-mono font-black text-lg tabular-nums ${isBarca ? "text-white" : "text-foreground"}`}>
               {p.homeGoals} &ndash; {p.awayGoals}
             </span>
           ) : isLive ? (
@@ -123,14 +123,14 @@ export function PredictionMatchCard({ p }: { p: MatchPrediction }) {
               </span>
             </span>
           ) : (
-            <span className="stat-label text-xs font-semibold px-2">vs</span>
+            <span className={`stat-label text-xs font-semibold px-2 ${isBarca ? "!text-white/75" : ""}`}>vs</span>
           )}
         </span>
 
         {/* Away Team */}
         <span className="flex items-center gap-2 min-w-0">
           {p.away_id && <TeamCrest teamId={p.away_id} name={p.away} size={24} className="shrink-0" />}
-          <span className="text-[0.92rem] font-semibold truncate group-hover:text-[var(--pitch)] transition-colors">
+          <span className={`text-[0.92rem] font-semibold truncate transition-colors ${isBarca ? "text-white group-hover:text-[var(--pitch)]" : "text-foreground group-hover:text-[var(--pitch)]"}`}>
             {p.away}
           </span>
         </span>
@@ -146,9 +146,9 @@ export function PredictionMatchCard({ p }: { p: MatchPrediction }) {
                 className="w-2 h-2 rounded-full shrink-0"
                 style={{ background: OUTCOME_COLORS[k] }}
               />
-              <span className="stat-label text-[0.7rem]">
+              <span className={`stat-label text-[0.7rem] ${isBarca ? "!text-white/80" : ""}`}>
                 {OUTCOME_LABELS[k]}{" "}
-                <span className="text-foreground font-medium tabular-nums">
+                <span className={`font-medium tabular-nums ${isBarca ? "text-white" : "text-foreground"}`}>
                   {k === "home" ? p.homeWin : k === "draw" ? p.draw : p.awayWin}%
                 </span>
               </span>
@@ -158,9 +158,9 @@ export function PredictionMatchCard({ p }: { p: MatchPrediction }) {
       </div>
 
       {/* Bottom Footer: Predicted Outcome & Watch Now CTA */}
-      <div className="flex items-center justify-between gap-2 pt-2.5 border-t border-white/10">
+      <div className={`flex items-center justify-between gap-2 pt-2.5 border-t ${isBarca ? "border-white/15" : "border-border/60"}`}>
         <div className="text-xs">
-          <span className="stat-label text-[0.75rem]">Pred: </span>
+          <span className={`stat-label text-[0.75rem] ${isBarca ? "!text-white/75" : ""}`}>Pred: </span>
           <span className="font-semibold" style={{ color: OUTCOME_COLORS[p.predicted] }}>
             {p.predicted === "home" ? p.home : p.predicted === "away" ? p.away : "Draw"}
           </span>

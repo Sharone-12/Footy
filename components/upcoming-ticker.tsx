@@ -62,13 +62,14 @@ export function UpcomingTicker({ matches }: { matches: UpcomingMatch[] }) {
 
   const m = matches[i]
   const tid = LEAGUE_TOURNAMENT_ID[m.league]
+  const isBarca = m.home === "FC Barcelona" || m.away === "FC Barcelona"
 
   return (
     <section
-      className={`surface rounded-2xl overflow-hidden ${
-        m.home === "FC Barcelona" || m.away === "FC Barcelona"
-          ? "barca-stripes"
-          : "bg-card"
+      className={`surface rounded-2xl overflow-hidden border shadow-sm ${
+        isBarca
+          ? "barca-stripes text-white border-white/20"
+          : "bg-card border-border/70"
       }`}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
@@ -81,7 +82,7 @@ export function UpcomingTicker({ matches }: { matches: UpcomingMatch[] }) {
           This week
         </h2>
         <div className="flex items-center gap-2">
-          <span className="stat-label text-xs tabular-nums">
+          <span className={`stat-label text-xs tabular-nums ${isBarca ? "!text-white/80" : ""}`}>
             {i + 1} / {matches.length}
           </span>
           <div className="flex items-center gap-0.5 ml-1">
@@ -91,7 +92,11 @@ export function UpcomingTicker({ matches }: { matches: UpcomingMatch[] }) {
               onClick={() =>
                 setI((x) => (x - 1 + matches.length) % matches.length)
               }
-              className="inline-flex items-center justify-center size-6 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              className={`inline-flex items-center justify-center size-6 rounded-full transition-colors ${
+                isBarca
+                  ? "text-white/80 hover:text-white hover:bg-white/15"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              }`}
             >
               <ChevronLeftIcon className="size-4" />
             </button>
@@ -99,7 +104,11 @@ export function UpcomingTicker({ matches }: { matches: UpcomingMatch[] }) {
               type="button"
               aria-label="Next match"
               onClick={() => setI((x) => (x + 1) % matches.length)}
-              className="inline-flex items-center justify-center size-6 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              className={`inline-flex items-center justify-center size-6 rounded-full transition-colors ${
+                isBarca
+                  ? "text-white/80 hover:text-white hover:bg-white/15"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              }`}
             >
               <ChevronRightIcon className="size-4" />
             </button>
@@ -115,7 +124,7 @@ export function UpcomingTicker({ matches }: { matches: UpcomingMatch[] }) {
           className="card-lift animate-in fade-in slide-in-from-right-3 duration-500 flex flex-col justify-center gap-3 px-4 py-4 rounded-xl h-full"
         >
           <div className="flex items-center justify-between gap-3">
-            <span className="stat-label text-xs">{formatWhen(m.date)}</span>
+            <span className={`stat-label text-xs ${isBarca ? "!text-white/80" : ""}`}>{formatWhen(m.date)}</span>
             {tid && <LeagueCrest tournamentId={tid} name={m.league} size={20} />}
           </div>
           <div className="flex items-center gap-4">
@@ -123,16 +132,16 @@ export function UpcomingTicker({ matches }: { matches: UpcomingMatch[] }) {
               {m.home_id != null && (
                 <TeamCrest teamId={m.home_id} name={m.home} size={32} />
               )}
-              <span className="truncate font-semibold text-[0.95rem]">{m.home}</span>
+              <span className={`truncate font-semibold text-[0.95rem] ${isBarca ? "text-white" : "text-foreground"}`}>{m.home}</span>
             </div>
             <span
-              className="stat-figure text-xl text-muted-foreground shrink-0"
+              className="stat-figure text-xl shrink-0"
               style={{ color: "var(--pitch)" }}
             >
               vs
             </span>
             <div className="flex-1 min-w-0 flex items-center gap-2.5 justify-end text-right">
-              <span className="truncate font-semibold text-[0.95rem]">{m.away}</span>
+              <span className={`truncate font-semibold text-[0.95rem] ${isBarca ? "text-white" : "text-foreground"}`}>{m.away}</span>
               {m.away_id != null && (
                 <TeamCrest teamId={m.away_id} name={m.away} size={32} />
               )}

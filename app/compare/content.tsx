@@ -209,8 +209,8 @@ export default function CompareContent() {
           {players.map((p, i) => (
             <div
               key={p.slug as string}
-              className={`surface relative rounded-xl overflow-hidden ${
-                p.team === "FC Barcelona" ? "barca-stripes" : "bg-card"
+              className={`surface relative rounded-xl overflow-hidden border ${
+                p.team === "FC Barcelona" ? "barca-stripes text-white border-white/20" : "bg-card border-border/70"
               }`}
               style={{ borderTop: `2px solid ${PLAYER_COLORS[i]}` }}
             >
@@ -237,7 +237,7 @@ export default function CompareContent() {
                   >
                     {p.player as string}
                   </p>
-                  <p className="text-sm text-foreground/80 truncate mt-0.5 flex items-center gap-1.5">
+                  <p className={`text-sm truncate mt-0.5 flex items-center gap-1.5 ${p.team === "FC Barcelona" ? "text-white/80" : "text-foreground/80"}`}>
                     <TeamCrest
                       teamId={p.team_id as number}
                       name={p.team as string}

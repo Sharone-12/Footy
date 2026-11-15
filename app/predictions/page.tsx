@@ -169,40 +169,42 @@ function UclRatings({ model, ids }: { model: UclModel; ids: Map<string, number> 
       </header>
 
       <div className="px-3 pb-4 space-y-1">
-        {five.map((t, i) => (
-          <div
-            key={t.team}
-            className={`flex items-center gap-4 px-4 py-3 rounded-xl ${
-              t.team === "FC Barcelona" ? "barca-stripes" : ""
-            }`}
-          >
-            <span
-              className="stat-figure text-2xl w-8 text-center shrink-0"
-              style={{ color: POWER_COLORS[i], fontFamily: "var(--font-condensed)" }}
+        {five.map((t, i) => {
+          const isBarca = t.team === "FC Barcelona"
+          return (
+            <div
+              key={t.team}
+              className={`flex items-center gap-4 px-4 py-3 rounded-xl ${
+                isBarca ? "barca-stripes text-white border border-white/20" : ""
+              }`}
             >
-              {i + 1}
-            </span>
+              <span
+                className="stat-figure text-2xl w-8 text-center shrink-0"
+                style={{ color: POWER_COLORS[i], fontFamily: "var(--font-condensed)" }}
+              >
+                {i + 1}
+              </span>
 
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                {ids.get(t.team) != null && (
-                  <TeamCrest teamId={ids.get(t.team)!} name={t.team} size={22} />
-                )}
-                <span className="font-semibold text-[0.95rem] truncate">{t.team}</span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  {ids.get(t.team) != null && (
+                    <TeamCrest teamId={ids.get(t.team)!} name={t.team} size={22} />
+                  )}
+                  <span className={`font-semibold text-[0.95rem] truncate ${isBarca ? "text-white" : "text-foreground"}`}>{t.team}</span>
+                </div>
+                <div className="flex items-center gap-2.5 mt-1.5">
+                  <span className="flex h-[5px] w-20 sm:w-24 rounded-full overflow-hidden bg-white/5 shrink-0">
+                    <span
+                      style={{
+                        width: `${(Math.abs(t.rating) / top) * 100}%`,
+                        background: POWER_COLORS[i],
+                        opacity: 0.8,
+                      }}
+                    />
+                  </span>
+                  <span className={`stat-label truncate ${isBarca ? "!text-white/80" : ""}`}>{basis(t)}</span>
+                </div>
               </div>
-              <div className="flex items-center gap-2.5 mt-1.5">
-                <span className="flex h-[5px] w-20 sm:w-24 rounded-full overflow-hidden bg-white/5 shrink-0">
-                  <span
-                    style={{
-                      width: `${(Math.abs(t.rating) / top) * 100}%`,
-                      background: POWER_COLORS[i],
-                      opacity: 0.8,
-                    }}
-                  />
-                </span>
-                <span className="stat-label truncate">{basis(t)}</span>
-              </div>
-            </div>
 
             <div className="flex items-center gap-4 shrink-0">
               <div className="text-right">
@@ -225,7 +227,8 @@ function UclRatings({ model, ids }: { model: UclModel; ids: Map<string, number> 
               </div>
             </div>
           </div>
-        ))}
+        )
+      })}
       </div>
       <p className="stat-label px-5 pb-4">
         Clubs from leagues we don&apos;t track are rated on Champions League games
