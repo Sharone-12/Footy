@@ -723,11 +723,35 @@ html:not(.dark) .barca-stripes-tight {
 /* Champions League fixtures in a mixed list wear the UCL wallpaper itself —
    no scrim, no inset highlight, so the banner reads as the banner. In UCL
    mode the rows drop it: the page already wears the wallpaper behind them. */
-.ucl-row {
-  background-color: var(--card);
-  background-image: url(/ucl-bg.png);
-  background-size: cover;
-  background-position: center;
+.ucl-row,
+html:not(.dark) .ucl-row,
+html:not(.dark) .surface.ucl-row {
+  background-color: #0b1437 !important;
+  background-image: url(/ucl-bg.png) !important;
+  background-size: cover !important;
+  background-position: center !important;
+  border: 1px solid oklch(0.80 0.10 250 / 30%) !important;
+  box-shadow: 0 4px 20px -2px rgba(11, 20, 55, 0.5) !important;
+  color: #ffffff !important;
+}
+
+.ucl-row .stat-label,
+html:not(.dark) .ucl-row .stat-label {
+  color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.ucl-row .stat-figure,
+html:not(.dark) .ucl-row .stat-figure {
+  color: #ffffff !important;
+}
+
+.ucl-row .text-muted-foreground,
+html:not(.dark) .ucl-row .text-muted-foreground {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.ucl-row span:not([style*="background"]) {
+  color: #ffffff;
 }
 
 /* Yamal backdrop — full-viewport photo with a dark overlay so the UI stays
@@ -827,35 +851,123 @@ html:not(.dark) .barca-stripes-tight {
   transition: opacity 0.7s ease;
 }
 
-body:has(.ucl-bg[data-on="true"]) .nav-fade {
-  opacity: 0;
+body:has(.ucl-bg) .nav-fade {
+  opacity: 0 !important;
 }
 
 /* UCL skin. Flat black surfaces read as holes punched in the wallpaper, so
    retint every themed surface to translucent navy glass that sits on top of
-   it. Overriding the tokens on <body> beats .dark on <html> by inheritance. */
-body:has(.ucl-bg[data-on="true"]) {
-  --card: oklch(0.25 0.075 266 / 70%);
-  --popover: oklch(0.23 0.07 266 / 90%);
-  --secondary: oklch(0.34 0.09 266 / 65%);
-  --muted: oklch(0.30 0.06 266 / 55%);
-  --accent: oklch(0.38 0.10 266 / 70%);
-  --border: oklch(0.80 0.10 250 / 20%);
+   it. Ensure luminous, crisp white and starry-silver typography across both
+   dark mode and light mode. */
+body:has(.ucl-bg) {
+  color-scheme: dark !important;
+  --foreground: oklch(0.97 0 0) !important;
+  --muted-foreground: oklch(0.72 0.02 250) !important;
+  --card: oklch(0.25 0.075 266 / 70%) !important;
+  --card-foreground: oklch(0.97 0 0) !important;
+  --popover: oklch(0.23 0.07 266 / 90%) !important;
+  --popover-foreground: oklch(0.97 0 0) !important;
+  --secondary: oklch(0.34 0.09 266 / 65%) !important;
+  --secondary-foreground: oklch(0.97 0 0) !important;
+  --muted: oklch(0.30 0.06 266 / 55%) !important;
+  --accent: oklch(0.38 0.10 266 / 70%) !important;
+  --border: oklch(0.80 0.10 250 / 20%) !important;
+  color: oklch(0.97 0 0) !important;
 }
 
-body:has(.ucl-bg[data-on="true"]) :is(.bg-card, .bg-popover, .nav-pill, .segment) {
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
+body:has(.ucl-bg) :is(.bg-card, .bg-popover, .nav-pill, .segment) {
+  backdrop-filter: blur(16px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
 }
 
-body:has(.ucl-bg[data-on="true"]) :is(.bg-card, .bg-popover) {
+body:has(.ucl-bg) :is(.bg-card, .bg-popover) {
+  background-color: oklch(0.25 0.075 266 / 70%) !important;
+  color: oklch(0.97 0 0) !important;
+  border-color: oklch(0.80 0.10 250 / 20%) !important;
   box-shadow:
     inset 0 1px 0 oklch(0.9 0.09 250 / 18%),
-    0 20px 44px -24px oklch(0 0 0 / 70%);
+    0 20px 44px -24px oklch(0 0 0 / 70%) !important;
 }
 
-body:has(.ucl-bg[data-on="true"]) .nav-pill {
-  background: oklch(0.26 0.08 266 / 62%);
+body:has(.ucl-bg) .surface,
+html:not(.dark) body:has(.ucl-bg) .surface {
+  background-color: oklch(0.25 0.075 266 / 70%) !important;
+  background-image: linear-gradient(to bottom, oklch(1 0 0 / 5%) 0%, transparent 38%) !important;
+  border: 1px solid oklch(0.80 0.10 250 / 20%) !important;
+  box-shadow:
+    inset 0 1px 0 oklch(0.9 0.09 250 / 18%),
+    0 20px 44px -24px oklch(0 0 0 / 70%) !important;
+  color: oklch(0.97 0 0) !important;
+}
+
+body:has(.ucl-bg) .surface-raised,
+html:not(.dark) body:has(.ucl-bg) .surface-raised {
+  background-color: oklch(0.28 0.08 266 / 80%) !important;
+  background-image: linear-gradient(to bottom, oklch(1 0 0 / 7%) 0%, transparent 45%) !important;
+  border: 1px solid oklch(0.80 0.10 250 / 25%) !important;
+  box-shadow:
+    inset 0 1px 0 oklch(0.9 0.09 250 / 18%),
+    0 24px 50px -20px oklch(0 0 0 / 75%) !important;
+  color: oklch(0.97 0 0) !important;
+}
+
+body:has(.ucl-bg) .segment,
+html:not(.dark) body:has(.ucl-bg) .segment,
+body:has(.ucl-bg) .nav-pill,
+html:not(.dark) body:has(.ucl-bg) .nav-pill {
+  background: oklch(0.26 0.08 266 / 62%) !important;
+  border: 1px solid oklch(0.80 0.10 250 / 20%) !important;
+  color: oklch(0.97 0 0) !important;
+  box-shadow:
+    inset 0 1px 0 oklch(0.9 0.09 250 / 18%),
+    0 10px 28px -14px oklch(0 0 0 / 55%) !important;
+}
+
+body:has(.ucl-bg) .nav-pill:hover,
+html:not(.dark) body:has(.ucl-bg) .nav-pill:hover {
+  background: oklch(0.30 0.09 266 / 75%) !important;
+  box-shadow:
+    inset 0 1px 0 oklch(0.9 0.09 250 / 25%),
+    0 12px 32px -12px oklch(0 0 0 / 65%) !important;
+}
+
+body:has(.ucl-bg) .segment [data-active],
+html:not(.dark) body:has(.ucl-bg) .segment [data-active],
+body:has(.ucl-bg) .segment [aria-pressed="true"],
+html:not(.dark) body:has(.ucl-bg) .segment [aria-pressed="true"] {
+  color: #ffffff !important;
+}
+
+body:has(.ucl-bg) .segment span[aria-hidden],
+html:not(.dark) body:has(.ucl-bg) .segment span[aria-hidden] {
+  background: rgba(255, 255, 255, 0.16) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+
+body:has(.ucl-bg) .card-lift:hover,
+html:not(.dark) body:has(.ucl-bg) .card-lift:hover {
+  transform: translateY(-8px) !important;
+  z-index: 10;
+  box-shadow:
+    inset 0 1px 0 oklch(0.9 0.09 250 / 30%),
+    0 8px 18px oklch(0 0 0 / 50%),
+    0 36px 70px -16px oklch(0 0 0 / 70%) !important;
+}
+
+body:has(.ucl-bg) :is(h1, h2, h3, h4, h5, h6) {
+  color: oklch(0.97 0 0) !important;
+}
+
+body:has(.ucl-bg) .text-muted-foreground {
+  color: oklch(0.72 0.02 250) !important;
+}
+
+body:has(.ucl-bg) .stat-label {
+  color: oklch(0.75 0.03 250) !important;
+}
+
+body:has(.ucl-bg) .stat-figure {
+  color: oklch(0.97 0 0) !important;
 }
 
 /* Squad cards and fixture rows keep the lift but not card-lift's chasing

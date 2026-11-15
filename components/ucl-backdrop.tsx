@@ -22,12 +22,12 @@ export function UclBackdrop() {
   return (
     <div
       aria-hidden
-      data-on
+      data-on="true"
       className="ucl-bg animate-fade-in fixed inset-0 -z-10 bg-cover bg-center"
       style={{ backgroundImage: "url(/ucl-bg.png)" }}
     >
-      {/* Just enough to keep body text readable over the bright blue. */}
-      <div className="absolute inset-0 bg-background/35" />
+      {/* Just enough to keep body text readable over the cosmic blue, without milking out the stars in light mode. */}
+      <div className="absolute inset-0 bg-black/35" />
     </div>
   )
 }

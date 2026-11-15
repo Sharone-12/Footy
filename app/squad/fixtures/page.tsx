@@ -54,11 +54,13 @@ function FixtureRow({ m, banner }: { m: Row; banner: boolean }) {
   const opponent = atHome ? m.away : m.home
   const opponentId = atHome ? m.away_id : m.home_id
   const tid = LEAGUE_TOURNAMENT_ID[m.league]
+  const isUcl = banner && m.league === UCL
   return (
     <Link
       href={`/predictions/match?id=${m.event_id}`}
-      className={`card-lift fixture-row surface rounded-2xl px-4 py-3.5 flex items-center gap-4 ${banner && m.league === UCL ? "ucl-row" : "bg-card"
-        }`}
+      className={`card-lift fixture-row surface rounded-2xl px-4 py-3.5 flex items-center gap-4 ${
+        isUcl ? "ucl-row text-white" : "bg-card"
+      }`}
     >
       <span className="flex flex-col leading-none w-24 shrink-0">
         <span className="stat-label text-xs">{formatDate(m.date, m.kickoff)}</span>
@@ -119,7 +121,15 @@ function detailLine(stats: Record<string, [string, string]> | undefined, atHome:
   return parts.length ? parts.join(" \u00b7 ") : null
 }
 
-function ResultRow({ m, detail }: { m: Result; detail?: Record<string, [string, string]> }) {
+function ResultRow({
+  m,
+  banner,
+  detail,
+}: {
+  m: Result
+  banner?: boolean
+  detail?: Record<string, [string, string]>
+}) {
   const atHome = m.home_id === BARCA_ID
   const opponent = atHome ? m.away : m.home
   const opponentId = atHome ? m.away_id : m.home_id
@@ -129,11 +139,14 @@ function ResultRow({ m, detail }: { m: Result; detail?: Record<string, [string, 
     ? [m.home_goals, m.away_goals]
     : [m.away_goals, m.home_goals]
   const line = detailLine(detail, atHome)
+  const isUcl = banner && m.league === UCL
 
   return (
     <Link
       href={`/predictions/match?id=${m.event_id}`}
-      className="card-lift fixture-row surface bg-card rounded-2xl px-4 py-3.5 flex items-center gap-4"
+      className={`card-lift fixture-row surface rounded-2xl px-4 py-3.5 flex items-center gap-4 ${
+        isUcl ? "ucl-row text-white" : "bg-card"
+      }`}
     >
       <span className="flex items-center gap-2.5 w-20 shrink-0">
         {outcome && (
@@ -227,7 +240,12 @@ async function Results({
   return (
     <div className="flex flex-col gap-2.5 stagger">
       {rows.map((m) => (
-        <ResultRow key={m.event_id} m={m} detail={detail.get(m.event_id)} />
+        <ResultRow
+          key={m.event_id}
+          m={m}
+          banner={scope !== "ucl"}
+          detail={detail.get(m.event_id)}
+        />
       ))}
     </div>
   )
