@@ -1179,11 +1179,7 @@ export function WatchStudio({
                       key={`slot0-override-${slot0Override.streamUrl}-${reloadKey}`}
                       src={slot0Override.streamUrl}
                       title={slot0Override.title}
-                      className={`border-0 bg-black block ${
-                        slot0Override.providerId === "matchora"
-                          ? "absolute top-0 left-0 w-[calc(100%+112px)] max-w-none h-full"
-                          : "w-full h-full"
-                      }`}
+                      className="w-full h-full border-0 bg-black block"
                       allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                       allowFullScreen
                       referrerPolicy={slot0Override.providerId === "daddylive" ? "no-referrer" : "no-referrer-when-downgrade"}
@@ -1352,9 +1348,7 @@ export function WatchStudio({
                                 ? "w-full h-full scale-[1.035] origin-center"
                                 : currentProvider?.id === "daddylive" && daddyLiveClean
                                   ? "absolute top-0 inset-x-0 w-full h-[calc(100%+62px)] max-h-none"
-                                  : currentProvider?.id === "matchora"
-                                    ? "absolute top-0 left-0 w-[calc(100%+112px)] max-w-none h-full"
-                                    : "w-full h-full"
+                                  : "w-full h-full"
                             }`}
                             allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                             allowFullScreen
@@ -1510,11 +1504,7 @@ export function WatchStudio({
                               key={`slot0-override-${slot0Override.streamUrl}-${reloadKey}`}
                               src={slot0Override.streamUrl}
                               title={slot0Override.title}
-                              className={`border-0 bg-black block ${
-                                slot0Override.providerId === "matchora"
-                                  ? "absolute top-0 left-0 w-[calc(100%+112px)] max-w-none h-full"
-                                  : "w-full h-full"
-                              }`}
+                              className="w-full h-full border-0 bg-black block"
                               allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                               allowFullScreen
                               referrerPolicy={currentProvider?.id === "daddylive" ? "no-referrer" : "no-referrer-when-downgrade"}
@@ -1555,9 +1545,7 @@ export function WatchStudio({
                                       ? "w-full h-full scale-[1.035] origin-center"
                                       : currentProvider?.id === "daddylive" && daddyLiveClean
                                         ? "absolute top-0 inset-x-0 w-full h-[calc(100%+62px)] max-h-none"
-                                        : currentProvider?.id === "matchora"
-                                          ? "absolute top-0 left-0 w-[calc(100%+112px)] max-w-none h-full"
-                                          : "w-full h-full"
+                                        : "w-full h-full"
                                   }`}
                                   allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                                   allowFullScreen

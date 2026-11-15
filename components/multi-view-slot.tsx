@@ -759,8 +759,6 @@ export function MultiViewSlotPlayer({
               ? "w-full h-full scale-[1.035] origin-center"
               : slotData.providerId === "daddylive" && daddyLiveClean
               ? "absolute top-0 inset-x-0 w-full h-[calc(100%+62px)] max-h-none"
-              : slotData.providerId === "matchora"
-              ? "absolute top-0 left-0 w-[calc(100%+112px)] max-w-none h-full"
               : "w-full h-full"
           }`}
           allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
