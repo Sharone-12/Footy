@@ -65,8 +65,8 @@ export function PredictionMatchCard({ p }: { p: MatchPrediction }) {
 
   return (
     <div
-      className={`card-lift surface rounded-2xl p-4 space-y-3.5 flex flex-col justify-between transition-all border shadow-sm ${
-        isBarca ? "barca-stripes text-white border-white/20" : "bg-card border-border/70"
+      className={`card-lift surface rounded-2xl p-4 space-y-3.5 flex flex-col justify-between transition-all ${
+        isBarca ? "barca-stripes text-white" : "bg-card border border-border/70 shadow-sm"
       }`}
     >
       {/* Top Header: League, Round, Live Badge or Date */}

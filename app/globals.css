@@ -141,15 +141,9 @@
   body {
     @apply bg-background text-foreground;
     background-image:
-      radial-gradient(ellipse 90% 55% at 50% -5%, oklch(0.92 0 0 / 30%) 0%, transparent 65%),
-      linear-gradient(to bottom, transparent 55%, var(--deep) 100%);
-    background-attachment: fixed;
-  }
-
-  .dark body {
-    background-image:
       radial-gradient(ellipse 90% 55% at 50% -5%, oklch(0.25 0 0) 0%, transparent 65%),
       linear-gradient(to bottom, transparent 55%, var(--deep) 100%);
+    background-attachment: fixed;
   }
 
   html {
@@ -193,13 +187,6 @@
 
 /* Lit-from-above surfaces: top edge catches light, body falls off, shadow pools below. */
 .surface {
-  background-color: var(--card);
-  border: 1px solid var(--border);
-  box-shadow: 0 1px 3px 0 oklch(0 0 0 / 4%), 0 6px 20px -4px oklch(0 0 0 / 5%);
-}
-
-.dark .surface {
-  background-color: transparent;
   background-image: linear-gradient(to bottom,
       oklch(1 0 0 / 5%) 0%,
       transparent 38%);
@@ -211,13 +198,6 @@
 }
 
 .surface-raised {
-  background-color: var(--card);
-  border: 1px solid var(--border);
-  box-shadow: 0 2px 6px 0 oklch(0 0 0 / 5%), 0 12px 28px -6px oklch(0 0 0 / 7%);
-}
-
-.dark .surface-raised {
-  background-color: transparent;
   background-image: linear-gradient(to bottom,
       oklch(1 0 0 / 7%) 0%,
       transparent 45%);
@@ -229,16 +209,9 @@
 
 /* Segmented control — the pill group from the reference. */
 .segment {
-  background: oklch(1 0 0 / 88%);
+  background: oklch(0.185 0 0 / 72%);
   backdrop-filter: blur(14px) saturate(140%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
-  border: 1px solid oklch(0 0 0 / 8%);
-  box-shadow: 0 2px 10px -2px oklch(0 0 0 / 6%), 0 1px 2px oklch(0 0 0 / 4%);
-}
-
-.dark .segment {
-  background: oklch(0.185 0 0 / 72%);
-  border: none;
   box-shadow:
     inset 0 1px 0 oklch(1 0 0 / 10%),
     inset 0 -1px 0 oklch(0 0 0 / 30%),
@@ -250,41 +223,63 @@
   box-shadow: inset 0 1px 0 oklch(1 0 0 / 12%);
 }
 
-.dark .segment-item {
-  box-shadow: inset 0 1px 0 oklch(1 0 0 / 12%);
-}
-
 /* Floating nav pill — same glass treatment as .segment, rounded for logo etc. */
 .nav-pill {
-  background: oklch(1 0 0 / 88%);
+  background: oklch(0.185 0 0 / 72%);
   backdrop-filter: blur(14px) saturate(140%);
   -webkit-backdrop-filter: blur(14px) saturate(140%);
-  border: 1px solid oklch(0 0 0 / 8%);
   border-radius: 999px;
-  box-shadow: 0 2px 10px -2px oklch(0 0 0 / 6%), 0 1px 2px oklch(0 0 0 / 4%);
-  transition: box-shadow 220ms ease, transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
-}
-
-.dark .nav-pill {
-  background: oklch(0.185 0 0 / 72%);
-  border: none;
   box-shadow:
     inset 0 1px 0 oklch(1 0 0 / 10%),
     inset 0 -1px 0 oklch(0 0 0 / 30%),
     0 1px 2px oklch(0 0 0 / 35%),
     0 10px 28px -14px oklch(0 0 0 / 55%);
+  transition: box-shadow 220ms ease, transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .nav-pill:hover {
-  box-shadow: 0 4px 16px -2px oklch(0 0 0 / 10%), 0 2px 4px oklch(0 0 0 / 6%);
-}
-
-.dark .nav-pill:hover {
   box-shadow:
     inset 0 1px 0 oklch(1 0 0 / 14%),
     inset 0 -1px 0 oklch(0 0 0 / 30%),
     0 2px 4px oklch(0 0 0 / 40%),
     0 16px 36px -14px oklch(0 0 0 / 65%);
+}
+
+/* Light mode overrides */
+html:not(.dark) body {
+  background-image:
+    radial-gradient(ellipse 90% 55% at 50% -5%, oklch(0.92 0 0 / 30%) 0%, transparent 65%),
+    linear-gradient(to bottom, transparent 55%, var(--deep) 100%);
+}
+
+html:not(.dark) .surface {
+  background-color: var(--card);
+  background-image: none;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px 0 oklch(0 0 0 / 4%), 0 6px 20px -4px oklch(0 0 0 / 5%);
+}
+
+html:not(.dark) .surface-raised {
+  background-color: var(--card);
+  background-image: none;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 6px 0 oklch(0 0 0 / 5%), 0 12px 28px -6px oklch(0 0 0 / 7%);
+}
+
+html:not(.dark) .segment {
+  background: oklch(1 0 0 / 88%);
+  border: 1px solid oklch(0 0 0 / 8%);
+  box-shadow: 0 2px 10px -2px oklch(0 0 0 / 6%), 0 1px 2px oklch(0 0 0 / 4%);
+}
+
+html:not(.dark) .nav-pill {
+  background: oklch(1 0 0 / 88%);
+  border: 1px solid oklch(0 0 0 / 8%);
+  box-shadow: 0 2px 10px -2px oklch(0 0 0 / 6%), 0 1px 2px oklch(0 0 0 / 4%);
+}
+
+html:not(.dark) .nav-pill:hover {
+  box-shadow: 0 4px 16px -2px oklch(0 0 0 / 10%), 0 2px 4px oklch(0 0 0 / 6%);
 }
 
 .stat-label {
@@ -360,9 +355,8 @@
 .card-lift {
   position: relative;
   transition:
-    transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 220ms ease;
+    transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .card-lift::before {
@@ -392,22 +386,20 @@
 }
 
 .card-lift:hover {
+  transform: translateY(-8px);
+  box-shadow:
+    inset 0 1px 0 oklch(1 0 0 / 22%),
+    0 8px 18px oklch(0 0 0 / 50%),
+    0 36px 70px -16px oklch(0 0 0 / 70%);
+}
+
+html:not(.dark) .card-lift:hover {
   transform: translateY(-3px);
   z-index: 5;
   box-shadow:
     0 12px 24px -4px oklch(0 0 0 / 7%),
     0 4px 10px -2px oklch(0 0 0 / 4%);
   border-color: oklch(0 0 0 / 14%);
-}
-
-.dark .card-lift:hover {
-  transform: translateY(-3px);
-  z-index: 5;
-  box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 18%),
-    0 12px 28px -6px oklch(0 0 0 / 55%),
-    0 4px 12px -2px oklch(0 0 0 / 40%);
-  border-color: oklch(1 0 0 / 16%);
 }
 
 .card-lift:hover::before {
@@ -436,12 +428,13 @@
 }
 
 .row-item:hover {
-  box-shadow: inset 0 0 0 1px oklch(0 0 0 / 10%);
+  box-shadow: inset 0 0 0 1px oklch(1 0 0 / 14%);
   transform: translateX(1px);
 }
 
-.dark .row-item:hover {
-  box-shadow: inset 0 0 0 1px oklch(1 0 0 / 14%);
+html:not(.dark) .row-item:hover {
+  box-shadow: inset 0 0 0 1px oklch(0 0 0 / 10%);
+  transform: translateX(1px);
 }
 
 /* Top-3 rank badge: medal gradient, pitch-tinted for the leader. */
@@ -456,6 +449,12 @@
   font-size: 0.78rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+  background: oklch(1 0 0 / 5%);
+  box-shadow: inset 0 1px 0 oklch(1 0 0 / 8%);
+}
+
+html:not(.dark) .rank-badge {
   color: var(--muted-foreground);
   background: var(--muted);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15);
@@ -593,7 +592,48 @@
       oklch(0.22 0.10 265) 42px 70px,
       oklch(0.32 0.18 10) 70px 110px,
       oklch(0.55 0.22 25) 110px 150px,
-      oklch(0.32 0.18 10) 150px 180px);
+      oklch(0.32 0.18 10) 150px 180px) !important;
+}
+
+.barca-stripes-tight {
+  background-image:
+    linear-gradient(oklch(0.15 0 0 / 70%), oklch(0.15 0 0 / 78%)),
+    repeating-linear-gradient(
+      90deg,
+      oklch(0.44 0.24 265) 0 10.5px,
+      oklch(0.22 0.10 265) 10.5px 17.5px,
+      oklch(0.32 0.18 10)  17.5px 27.5px,
+      oklch(0.55 0.22 25)  27.5px 37.5px,
+      oklch(0.32 0.18 10)  37.5px 45px
+    ) !important;
+}
+
+/* Light mode Barca widgets: Vibrant Blaugrana stripes, rich & saturated, never washed out */
+html:not(.dark) .barca-stripes {
+  background-color: #004D98 !important;
+  background-image:
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(0, 0, 0, 0.25)),
+    repeating-linear-gradient(90deg,
+      #004D98 0 42px,
+      #003366 42px 70px,
+      #7B0032 70px 110px,
+      #A50044 110px 150px,
+      #7B0032 150px 180px) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(0, 77, 152, 0.25) !important;
+  box-shadow: 0 4px 18px -2px rgba(0, 77, 152, 0.35), 0 2px 6px -1px rgba(165, 0, 68, 0.25) !important;
+}
+
+html:not(.dark) .barca-stripes-tight {
+  background-color: #004D98 !important;
+  background-image:
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(0, 0, 0, 0.25)),
+    repeating-linear-gradient(90deg,
+      #004D98 0 10.5px,
+      #003366 10.5px 17.5px,
+      #7B0032 17.5px 27.5px,
+      #A50044 27.5px 37.5px,
+      #7B0032 37.5px 45px) !important;
   color: #ffffff !important;
 }
 
@@ -610,12 +650,12 @@
 
 .barca-stripes .stat-label,
 .barca-stripes-tight .stat-label {
-  color: rgba(255, 255, 255, 0.78) !important;
+  color: rgba(255, 255, 255, 0.82) !important;
 }
 
 .barca-stripes .text-muted-foreground,
 .barca-stripes-tight .text-muted-foreground {
-  color: rgba(255, 255, 255, 0.78) !important;
+  color: rgba(255, 255, 255, 0.82) !important;
 }
 
 .barca-stripes h1,

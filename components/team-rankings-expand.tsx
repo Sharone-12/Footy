@@ -107,7 +107,7 @@ export function TeamRankingsExpand({
               const tid = LEAGUE_TOURNAMENT_ID[t.league]
               const isBarca = t.team === "FC Barcelona"
               const className = `row-item flex items-center gap-3 px-3 py-2.5 rounded-xl ${
-                isBarca ? "barca-stripes text-white border border-white/20" : ""
+                isBarca ? "barca-stripes text-white" : ""
               }`
               const body = (
                 <>

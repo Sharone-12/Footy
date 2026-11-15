@@ -223,8 +223,8 @@ async function PlayerContent({
           return (
             <div
               key={s.label}
-              className={`surface rounded-2xl px-4 py-5 text-center border shadow-sm ${
-                isBarca ? "barca-stripes text-white border-white/20" : "bg-card border-border/70"
+              className={`surface rounded-2xl px-4 py-5 text-center ${
+                isBarca ? "barca-stripes text-white" : "bg-card border border-border/70 shadow-sm"
               }`}
             >
               <div

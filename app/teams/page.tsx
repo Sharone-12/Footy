@@ -77,7 +77,7 @@ function LeagueTable({
               key={t.team}
               href={link(t.team)}
               className={`group grid grid-cols-[1.25rem_1fr_1.75rem_2.25rem_2.25rem] sm:grid-cols-[1.5rem_1fr_2rem_4.5rem_2.5rem_2.25rem] gap-1.5 sm:gap-2 items-center px-2.5 sm:px-3 py-2 rounded-xl hover:bg-muted/50 transition-colors duration-150 ${
-                isBarca ? "barca-stripes text-white border border-white/20" : ""
+                isBarca ? "barca-stripes text-white" : ""
               }`}
             >
               <span
@@ -307,7 +307,7 @@ function PowerRankings({
               key={t.team}
               href={link(t.team)}
               className={`group relative flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-muted/50 transition-colors ${
-                isBarca ? "barca-stripes text-white border border-white/20" : ""
+                isBarca ? "barca-stripes text-white" : ""
               }`}
             >
               <span

@@ -209,8 +209,8 @@ export default function CompareContent() {
           {players.map((p, i) => (
             <div
               key={p.slug as string}
-              className={`surface relative rounded-xl overflow-hidden border ${
-                p.team === "FC Barcelona" ? "barca-stripes text-white border-white/20" : "bg-card border-border/70"
+              className={`surface relative rounded-xl overflow-hidden ${
+                p.team === "FC Barcelona" ? "barca-stripes text-white" : "bg-card border border-border/70"
               }`}
               style={{ borderTop: `2px solid ${PLAYER_COLORS[i]}` }}
             >

@@ -927,7 +927,7 @@ export function WatchStudio({
         return (
           <section
             className={`surface bg-card rounded-2xl px-3 sm:px-4 py-2 sm:py-2.5 transition-all relative overflow-hidden border border-border/70 shadow-md ${
-              isBarcaMatch ? "barca-stripes text-white border-white/20" : ""
+              isBarcaMatch ? "barca-stripes text-white" : ""
             }`}
           >
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-2.5 md:gap-4">

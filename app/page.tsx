@@ -355,7 +355,7 @@ async function Content({
               key={s.label}
               href={s.slug ? `/player/${s.slug}${scope}` : "/"}
               className={`card-lift surface-raised rounded-2xl px-4 py-3.5 sm:px-5 sm:py-4 flex items-center gap-3 sm:gap-4 transition-all ${
-                isBarca ? "barca-stripes text-white border border-white/20" : "bg-card"
+                isBarca ? "barca-stripes text-white" : "bg-card"
               }`}
             >
               <span style={{ color: "var(--pitch)" }} className="shrink-0">{s.icon}</span>

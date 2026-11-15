@@ -66,10 +66,10 @@ export function UpcomingTicker({ matches }: { matches: UpcomingMatch[] }) {
 
   return (
     <section
-      className={`surface rounded-2xl overflow-hidden border shadow-sm ${
+      className={`surface rounded-2xl overflow-hidden ${
         isBarca
-          ? "barca-stripes text-white border-white/20"
-          : "bg-card border-border/70"
+          ? "barca-stripes text-white"
+          : "bg-card border border-border/70 shadow-sm"
       }`}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}

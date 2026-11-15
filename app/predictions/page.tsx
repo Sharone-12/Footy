@@ -175,7 +175,7 @@ function UclRatings({ model, ids }: { model: UclModel; ids: Map<string, number> 
             <div
               key={t.team}
               className={`flex items-center gap-4 px-4 py-3 rounded-xl ${
-                isBarca ? "barca-stripes text-white border border-white/20" : ""
+                isBarca ? "barca-stripes text-white" : ""
               }`}
             >
               <span

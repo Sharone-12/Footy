@@ -452,10 +452,10 @@ async function Content({
       </Link>
 
       <section
-        className={`spark surface rounded-2xl px-5 py-6 mb-6 text-center border shadow-sm ${
+        className={`spark surface rounded-2xl px-5 py-6 mb-6 text-center ${
           match.home === "FC Barcelona" || match.away === "FC Barcelona"
-            ? "barca-stripes text-white border-white/20"
-            : "bg-card border-border/70"
+            ? "barca-stripes text-white"
+            : "bg-card border border-border/70 shadow-sm"
         }`}
       >
         <div className="stat-label mb-2 flex items-center justify-center gap-2">
