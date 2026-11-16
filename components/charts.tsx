@@ -27,15 +27,16 @@ export function PlayerRadar({
   return (
     <ResponsiveContainer width="100%" height={320}>
       <RadarChart data={data} cx="50%" cy="50%" outerRadius="68%">
-        <PolarGrid stroke="oklch(1 0 0 / 8%)" />
+        <PolarGrid stroke="var(--chart-grid, var(--border))" />
         <PolarAngleAxis
           dataKey="stat"
-          tick={{ fill: "oklch(0.65 0 0)", fontSize: 11 }}
+          tick={{ fill: "var(--muted-foreground, oklch(0.65 0 0))", fontSize: 11 }}
         />
         <PolarRadiusAxis
           angle={90}
+          stroke="var(--chart-grid, var(--border))"
           domain={resolvedDomain}
-          tick={domain === "auto" ? false : { fill: "oklch(0.5 0 0)", fontSize: 10 }}
+          tick={domain === "auto" ? false : { fill: "var(--muted-foreground, oklch(0.5 0 0))", fontSize: 10 }}
           tickCount={5}
         />
         {players.map((name, i) => (
@@ -82,7 +83,7 @@ export function StatBarChart({
 
         return (
           <div key={row.stat as string}>
-            <div className="text-[0.7rem] text-[oklch(0.55_0_0)] uppercase tracking-wider mb-1.5">
+            <div className="text-[0.7rem] text-muted-foreground uppercase tracking-wider mb-1.5">
               {row.stat}
             </div>
             <div className="space-y-1">
@@ -91,7 +92,7 @@ export function StatBarChart({
                 const pct = Math.min(100, (v / max) * 100)
                 return (
                   <div key={name} className="flex items-center gap-2">
-                    <div className="flex-1 h-[10px] rounded-full overflow-hidden bg-white/[0.04]">
+                    <div className="flex-1 h-[10px] rounded-full overflow-hidden bg-black/5 dark:bg-white/[0.04]">
                       <div
                         className="h-full rounded-full transition-all duration-500"
                         style={{
@@ -125,14 +126,14 @@ export function StatBarChart({
       })}
 
       {players.length > 1 && (
-        <div className="flex items-center gap-4 pt-2 border-t border-white/[0.04]">
+        <div className="flex items-center gap-4 pt-2 border-t border-border/60">
           {players.map((name, i) => (
             <div key={name} className="flex items-center gap-1.5">
               <span
                 className="w-2.5 h-2.5 rounded-full shrink-0"
                 style={{ background: PLAYER_COLORS[i % PLAYER_COLORS.length] }}
               />
-              <span className="text-[0.65rem] text-[oklch(0.6_0_0)] truncate">{name}</span>
+              <span className="text-[0.65rem] text-muted-foreground truncate">{name}</span>
             </div>
           ))}
         </div>

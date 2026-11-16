@@ -71,6 +71,7 @@
   --accent-foreground: oklch(0.14 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0 0 0 / 8%);
+  --chart-grid: oklch(0 0 0 / 16%);
   --input: oklch(0 0 0 / 10%);
   --ring: oklch(0.45 0 0);
   --chart-1: oklch(0.52 0.20 148);
@@ -115,6 +116,7 @@
   --accent-foreground: oklch(0.97 0 0);
   --destructive: oklch(0.63 0.21 25);
   --border: oklch(1 0 0 / 9%);
+  --chart-grid: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 12%);
   --ring: oklch(0.70 0 0);
   --chart-1: oklch(0.80 0.19 150);
@@ -1061,3 +1063,17 @@ html:not(.dark) .squad-card [class*="text-muted-foreground"] {
 html:not(.dark) .squad-card span.stat-label {
   color: rgba(255, 255, 255, 0.75) !important;
 }
+
+/* Radar chart spider web grid visibility across light and dark modes */
+.recharts-polar-grid line,
+.recharts-polar-grid path,
+.recharts-polar-grid-concentric-polygon,
+.recharts-polar-grid-angle line {
+  stroke: var(--chart-grid, var(--border)) !important;
+}
+
+.recharts-polar-angle-axis text,
+.recharts-polar-angle-axis-tick text {
+  fill: var(--muted-foreground) !important;
+}
+
