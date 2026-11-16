@@ -20,7 +20,7 @@ export type MatchInfoProps = {
 export function MatchInfo({ summaryData, fixture, isLoading }: MatchInfoProps) {
   if (isLoading) {
     return (
-      <div className="py-14 flex flex-col items-center justify-center gap-3 text-white/50">
+      <div className="py-14 flex flex-col items-center justify-center gap-3 text-muted-foreground">
         <div className="size-8 rounded-full border-2 border-emerald-500/20 border-t-emerald-500 animate-spin" />
         <span className="text-xs font-medium tracking-wide">Loading match info...</span>
       </div>
@@ -35,22 +35,22 @@ export function MatchInfo({ summaryData, fixture, isLoading }: MatchInfoProps) {
     <div className="space-y-5">
       {/* MATCH INFO Section Header */}
       <div>
-        <h3 className="text-xs font-bold uppercase tracking-wider text-white/50 mb-3">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
           Match Info
         </h3>
 
-        <div className="divide-y divide-white/5 rounded-xl bg-neutral-900/60 border border-white/10 overflow-hidden text-xs sm:text-sm">
+        <div className="divide-y divide-border/40 dark:divide-white/5 rounded-xl bg-card dark:bg-neutral-900/60 border border-border dark:border-white/10 overflow-hidden text-xs sm:text-sm">
           {/* Referee */}
           {referee?.name ? (
-            <div className="flex items-center gap-3.5 p-3.5 sm:p-4 hover:bg-white/[0.02] transition-colors">
-              <div className="size-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-white/70">
+            <div className="flex items-center gap-3.5 p-3.5 sm:p-4 hover:bg-muted/50 dark:hover:bg-white/[0.02] transition-colors">
+              <div className="size-9 rounded-lg bg-muted dark:bg-white/5 border border-border dark:border-white/10 flex items-center justify-center shrink-0 text-muted-foreground dark:text-white/70">
                 <UserCheckIcon className="size-4.5 text-[var(--pitch)]" />
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-[11px] font-semibold text-white/40 uppercase tracking-wide">Referee</span>
-                <span className="font-bold text-white/95">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Referee</span>
+                <span className="font-bold text-foreground">
                   {referee.name}
-                  {referee.country && <span className="text-white/45 font-normal ml-1.5">({referee.country})</span>}
+                  {referee.country && <span className="text-muted-foreground font-normal ml-1.5">({referee.country})</span>}
                 </span>
               </div>
             </div>
@@ -58,15 +58,15 @@ export function MatchInfo({ summaryData, fixture, isLoading }: MatchInfoProps) {
 
           {/* Stadium / Venue */}
           {venue?.name ? (
-            <div className="flex items-center gap-3.5 p-3.5 sm:p-4 hover:bg-white/[0.02] transition-colors">
-              <div className="size-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-white/70">
-                <MapPinIcon className="size-4.5 text-sky-400" />
+            <div className="flex items-center gap-3.5 p-3.5 sm:p-4 hover:bg-muted/50 dark:hover:bg-white/[0.02] transition-colors">
+              <div className="size-9 rounded-lg bg-muted dark:bg-white/5 border border-border dark:border-white/10 flex items-center justify-center shrink-0 text-muted-foreground dark:text-white/70">
+                <MapPinIcon className="size-4.5 text-sky-500 dark:text-sky-400" />
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-[11px] font-semibold text-white/40 uppercase tracking-wide">Venue</span>
-                <span className="font-bold text-white/95">{venue.name}</span>
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Venue</span>
+                <span className="font-bold text-foreground">{venue.name}</span>
                 {venue.city && (
-                  <span className="text-xs text-white/50">
+                  <span className="text-xs text-muted-foreground">
                     {venue.city}
                     {venue.country ? `, ${venue.country}` : ""}
                   </span>
@@ -77,13 +77,13 @@ export function MatchInfo({ summaryData, fixture, isLoading }: MatchInfoProps) {
 
           {/* Attendance / Capacity */}
           {venue?.capacity ? (
-            <div className="flex items-center gap-3.5 p-3.5 sm:p-4 hover:bg-white/[0.02] transition-colors">
-              <div className="size-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-white/70">
-                <UsersIcon className="size-4.5 text-amber-400" />
+            <div className="flex items-center gap-3.5 p-3.5 sm:p-4 hover:bg-muted/50 dark:hover:bg-white/[0.02] transition-colors">
+              <div className="size-9 rounded-lg bg-muted dark:bg-white/5 border border-border dark:border-white/10 flex items-center justify-center shrink-0 text-muted-foreground dark:text-white/70">
+                <UsersIcon className="size-4.5 text-amber-500 dark:text-amber-400" />
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-[11px] font-semibold text-white/40 uppercase tracking-wide">Capacity</span>
-                <span className="font-mono font-bold text-white/95">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Capacity</span>
+                <span className="font-mono font-bold text-foreground">
                   {venue.capacity.toLocaleString()} spectators
                 </span>
               </div>
@@ -92,34 +92,34 @@ export function MatchInfo({ summaryData, fixture, isLoading }: MatchInfoProps) {
 
           {/* Competition & Round */}
           {(matchInfo?.competition || matchInfo?.round || fixture.league) && (
-            <div className="flex items-center gap-3.5 p-3.5 sm:p-4 hover:bg-white/[0.02] transition-colors">
-              <div className="size-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-white/70">
-                <TrophyIcon className="size-4.5 text-yellow-400" />
+            <div className="flex items-center gap-3.5 p-3.5 sm:p-4 hover:bg-muted/50 dark:hover:bg-white/[0.02] transition-colors">
+              <div className="size-9 rounded-lg bg-muted dark:bg-white/5 border border-border dark:border-white/10 flex items-center justify-center shrink-0 text-muted-foreground dark:text-white/70">
+                <TrophyIcon className="size-4.5 text-yellow-500 dark:text-yellow-400" />
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-[11px] font-semibold text-white/40 uppercase tracking-wide">Competition</span>
-                <span className="font-bold text-white/95">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Competition</span>
+                <span className="font-bold text-foreground">
                   {matchInfo?.competition || fixture.league}
                 </span>
                 {matchInfo?.round && (
-                  <span className="text-xs text-white/50">{matchInfo.round}</span>
+                  <span className="text-xs text-muted-foreground">{matchInfo.round}</span>
                 )}
               </div>
             </div>
           )}
 
           {/* Kick-off / Status */}
-          <div className="flex items-center gap-3.5 p-3.5 sm:p-4 hover:bg-white/[0.02] transition-colors">
-            <div className="size-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-white/70">
-              <ClockIcon className="size-4.5 text-emerald-400" />
+          <div className="flex items-center gap-3.5 p-3.5 sm:p-4 hover:bg-muted/50 dark:hover:bg-white/[0.02] transition-colors">
+            <div className="size-9 rounded-lg bg-muted dark:bg-white/5 border border-border dark:border-white/10 flex items-center justify-center shrink-0 text-muted-foreground dark:text-white/70">
+              <ClockIcon className="size-4.5 text-emerald-500 dark:text-emerald-400" />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-[11px] font-semibold text-white/40 uppercase tracking-wide">Match Status</span>
-              <span className="font-bold text-white/95">
+              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Match Status</span>
+              <span className="font-bold text-foreground">
                 {matchInfo?.status || fixture.status}
               </span>
               {fixture.kickoff && (
-                <span className="text-xs text-white/50">
+                <span className="text-xs text-muted-foreground">
                   Kick-off: {fixture.kickoff}
                 </span>
               )}

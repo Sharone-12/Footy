@@ -83,8 +83,8 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
 
   if (isLoading) {
     return (
-      <div className="h-96 flex flex-col items-center justify-center gap-3 bg-neutral-950/50 rounded-2xl border border-white/10">
-        <div className="size-8 rounded-full border-2 border-white/10 border-t-[var(--pitch)] animate-spin" />
+      <div className="h-96 flex flex-col items-center justify-center gap-3 bg-muted/40 dark:bg-neutral-950/50 rounded-2xl border border-border dark:border-white/10">
+        <div className="size-8 rounded-full border-2 border-border dark:border-white/10 border-t-[var(--pitch)] animate-spin" />
         <span className="text-xs text-muted-foreground font-mono">LOADING LINE-UPS & FORMATIONS...</span>
       </div>
     )
@@ -92,9 +92,9 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
 
   if (!lineups?.hasLineups) {
     return (
-      <div className="p-8 text-center bg-neutral-950/40 rounded-2xl border border-white/10 flex flex-col items-center gap-2">
-        <UsersIcon className="size-8 text-white/20 mb-1" />
-        <h4 className="text-sm font-bold text-white/80">LINE-UPS NOT YET ANNOUNCED</h4>
+      <div className="p-8 text-center bg-muted/30 dark:bg-neutral-950/40 rounded-2xl border border-border dark:border-white/10 flex flex-col items-center gap-2">
+        <UsersIcon className="size-8 text-muted-foreground/40 mb-1" />
+        <h4 className="text-sm font-bold text-foreground">LINE-UPS NOT YET ANNOUNCED</h4>
         <p className="text-xs text-muted-foreground max-w-sm">
           Official starting formations and squads will automatically sync as soon as they are submitted prior to kickoff.
         </p>
@@ -110,37 +110,37 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
   return (
     <div className="flex flex-col gap-4">
       {/* Header Bar: Formations & View Toggle */}
-      <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-2 bg-neutral-900/80 rounded-xl border border-white/10 text-xs">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-2 bg-muted/50 dark:bg-neutral-900/80 rounded-xl border border-border dark:border-white/10 text-xs">
         {/* Formations Badge */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1.5 font-bold">
             {fixture.home_id && <TeamCrest teamId={fixture.home_id} name={fixture.home} size={18} />}
-            <span className="text-white/90">{fixture.home}</span>
+            <span className="text-foreground">{fixture.home}</span>
             {homeFormation && (
               <span className="px-1.5 py-0.5 rounded bg-[var(--pitch)]/20 text-[var(--pitch)] font-mono text-[10px] font-bold border border-[var(--pitch)]/30">
                 {homeFormation}
               </span>
             )}
           </div>
-          <span className="text-white/30 font-bold select-none">vs</span>
+          <span className="text-muted-foreground/40 font-bold select-none">vs</span>
           <div className="flex items-center gap-1.5 font-bold">
             {awayFormation && (
-              <span className="px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-400 font-mono text-[10px] font-bold border border-sky-500/30">
+              <span className="px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-500 dark:text-sky-400 font-mono text-[10px] font-bold border border-sky-500/30">
                 {awayFormation}
               </span>
             )}
-            <span className="text-white/90">{fixture.away}</span>
+            <span className="text-foreground">{fixture.away}</span>
             {fixture.away_id && <TeamCrest teamId={fixture.away_id} name={fixture.away} size={18} />}
           </div>
         </div>
 
         {/* View Switcher Pills */}
-        <div className="flex items-center p-0.5 bg-black/60 rounded-lg border border-white/10">
+        <div className="flex items-center p-0.5 bg-muted dark:bg-black/60 rounded-lg border border-border dark:border-white/10">
           <button
             type="button"
             onClick={() => setViewMode("both")}
             className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all ${
-              viewMode === "both" ? "bg-[var(--pitch)] text-black font-bold shadow-xs" : "text-white/60 hover:text-white"
+              viewMode === "both" ? "bg-[var(--pitch)] text-black font-bold shadow-xs" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Full Pitch
@@ -149,7 +149,7 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
             type="button"
             onClick={() => setViewMode("home")}
             className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all ${
-              viewMode === "home" ? "bg-[var(--pitch)] text-black font-bold shadow-xs" : "text-white/60 hover:text-white"
+              viewMode === "home" ? "bg-[var(--pitch)] text-black font-bold shadow-xs" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             {fixture.home}
@@ -158,7 +158,7 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
             type="button"
             onClick={() => setViewMode("away")}
             className={`px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all ${
-              viewMode === "away" ? "bg-sky-500 text-black font-bold shadow-xs" : "text-white/60 hover:text-white"
+              viewMode === "away" ? "bg-sky-500 text-black font-bold shadow-xs" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             {fixture.away}
@@ -282,26 +282,26 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
       {/* Substitutes Bench Lists */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
         {/* Home Substitutes */}
-        <div className="p-3 bg-neutral-900/60 rounded-xl border border-white/10">
-          <div className="flex items-center gap-1.5 mb-2.5 pb-2 border-b border-white/10 text-xs font-bold text-white/90">
+        <div className="p-3 bg-muted/40 dark:bg-neutral-900/60 rounded-xl border border-border dark:border-white/10">
+          <div className="flex items-center gap-1.5 mb-2.5 pb-2 border-b border-border dark:border-white/10 text-xs font-bold text-foreground">
             {fixture.home_id && <TeamCrest teamId={fixture.home_id} name={fixture.home} size={16} />}
             <span>{fixture.home} Substitutes</span>
-            <span className="text-white/40 text-[10px] ml-auto">({homeSubs.length})</span>
+            <span className="text-muted-foreground text-[10px] ml-auto">({homeSubs.length})</span>
           </div>
 
           <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
             {homeSubs.map((sub, i) => (
-              <div key={`h-sub-${i}`} className="flex items-center gap-2 p-1.5 rounded-lg bg-black/40 border border-white/5 text-xs">
+              <div key={`h-sub-${i}`} className="flex items-center gap-2 p-1.5 rounded-lg bg-card dark:bg-black/40 border border-border/60 dark:border-white/5 text-xs">
                 {sub.playerId ? (
                   <PlayerAvatar playerId={sub.playerId} name={sub.name} size={28} />
                 ) : (
-                  <span className="size-7 rounded-full bg-white/10 font-bold text-[10px] flex items-center justify-center text-white/70">
+                  <span className="size-7 rounded-full bg-muted dark:bg-white/10 font-bold text-[10px] flex items-center justify-center text-muted-foreground dark:text-white/70">
                     {sub.jerseyNumber ?? "SUB"}
                   </span>
                 )}
                 <div className="flex flex-col min-w-0">
-                  <span className="font-semibold text-white/90 truncate text-[11px]">{sub.shortName || sub.name}</span>
-                  <span className="text-[10px] text-white/40 font-mono">#{sub.jerseyNumber ?? "-"} · {sub.positionName}</span>
+                  <span className="font-semibold text-foreground truncate text-[11px]">{sub.shortName || sub.name}</span>
+                  <span className="text-[10px] text-muted-foreground font-mono">#{sub.jerseyNumber ?? "-"} · {sub.positionName}</span>
                 </div>
               </div>
             ))}
@@ -309,26 +309,26 @@ export function PitchLineup({ lineups, fixture, isLoading }: PitchLineupProps) {
         </div>
 
         {/* Away Substitutes */}
-        <div className="p-3 bg-neutral-900/60 rounded-xl border border-white/10">
-          <div className="flex items-center gap-1.5 mb-2.5 pb-2 border-b border-white/10 text-xs font-bold text-white/90">
+        <div className="p-3 bg-muted/40 dark:bg-neutral-900/60 rounded-xl border border-border dark:border-white/10">
+          <div className="flex items-center gap-1.5 mb-2.5 pb-2 border-b border-border dark:border-white/10 text-xs font-bold text-foreground">
             {fixture.away_id && <TeamCrest teamId={fixture.away_id} name={fixture.away} size={16} />}
             <span>{fixture.away} Substitutes</span>
-            <span className="text-white/40 text-[10px] ml-auto">({awaySubs.length})</span>
+            <span className="text-muted-foreground text-[10px] ml-auto">({awaySubs.length})</span>
           </div>
 
           <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto pr-1">
             {awaySubs.map((sub, i) => (
-              <div key={`a-sub-${i}`} className="flex items-center gap-2 p-1.5 rounded-lg bg-black/40 border border-white/5 text-xs">
+              <div key={`a-sub-${i}`} className="flex items-center gap-2 p-1.5 rounded-lg bg-card dark:bg-black/40 border border-border/60 dark:border-white/5 text-xs">
                 {sub.playerId ? (
                   <PlayerAvatar playerId={sub.playerId} name={sub.name} size={28} ring="#38bdf8" />
                 ) : (
-                  <span className="size-7 rounded-full bg-sky-950 font-bold text-[10px] flex items-center justify-center text-sky-400">
+                  <span className="size-7 rounded-full bg-sky-100 dark:bg-sky-950 font-bold text-[10px] flex items-center justify-center text-sky-600 dark:text-sky-400">
                     {sub.jerseyNumber ?? "SUB"}
                   </span>
                 )}
                 <div className="flex flex-col min-w-0">
-                  <span className="font-semibold text-white/90 truncate text-[11px]">{sub.shortName || sub.name}</span>
-                  <span className="text-[10px] text-white/40 font-mono">#{sub.jerseyNumber ?? "-"} · {sub.positionName}</span>
+                  <span className="font-semibold text-foreground truncate text-[11px]">{sub.shortName || sub.name}</span>
+                  <span className="text-[10px] text-muted-foreground font-mono">#{sub.jerseyNumber ?? "-"} · {sub.positionName}</span>
                 </div>
               </div>
             ))}

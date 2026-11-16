@@ -50,21 +50,21 @@ function StatRow({
   const isEqual = homeVal === awayVal
 
   return (
-    <div className="flex flex-col gap-1.5 py-1.5 sm:py-2 border-b border-white/[0.04] last:border-b-0">
+    <div className="flex flex-col gap-1.5 py-1.5 sm:py-2 border-b border-border/40 last:border-b-0">
       <div className="flex items-center justify-between text-xs sm:text-sm">
         <span
           className={`font-mono font-bold tabular-nums min-w-[36px] text-left ${
-            isHomeLeading ? "text-white font-black" : "text-white/60"
+            isHomeLeading ? "text-foreground font-black" : "text-muted-foreground font-medium"
           }`}
         >
           {formatVal(homeVal)}
         </span>
-        <span className="text-[11px] sm:text-xs font-semibold text-white/50 text-center tracking-tight truncate px-2 select-none">
+        <span className="text-[11px] sm:text-xs font-semibold text-muted-foreground text-center tracking-tight truncate px-2 select-none">
           {label}
         </span>
         <span
           className={`font-mono font-bold tabular-nums min-w-[36px] text-right ${
-            isAwayLeading ? "text-white font-black" : "text-white/60"
+            isAwayLeading ? "text-foreground font-black" : "text-muted-foreground font-medium"
           }`}
         >
           {formatVal(awayVal)}
@@ -81,28 +81,28 @@ function StatRow({
         className="grid grid-cols-2 gap-2 h-1.5 sm:h-2"
       >
         {/* Left Team Bar (anchored to outer left under home stat) */}
-        <div className="h-full bg-white/[0.08] rounded-full overflow-hidden flex justify-start">
+        <div className="h-full bg-muted dark:bg-white/[0.08] rounded-full overflow-hidden flex justify-start">
           <div
             className={`h-full rounded-full transition-all duration-500 motion-reduce:transition-none ${
               isHomeLeading
                 ? "bg-[var(--pitch)] shadow-[0_0_8px_rgba(34,197,94,0.4)]"
                 : isEqual && total > 0
                 ? "bg-[var(--pitch)]/60"
-                : "bg-white/20"
+                : "bg-border dark:bg-white/20"
             }`}
             style={{ width: `${total === 0 ? 0 : homePct}%` }}
           />
         </div>
 
         {/* Right Team Bar (anchored to outer right under away stat) */}
-        <div className="h-full bg-white/[0.08] rounded-full overflow-hidden flex justify-end">
+        <div className="h-full bg-muted dark:bg-white/[0.08] rounded-full overflow-hidden flex justify-end">
           <div
             className={`h-full rounded-full transition-all duration-500 motion-reduce:transition-none ${
               isAwayLeading
                 ? "bg-[var(--pitch)] shadow-[0_0_8px_rgba(34,197,94,0.4)]"
                 : isEqual && total > 0
                 ? "bg-[var(--pitch)]/60"
-                : "bg-white/20"
+                : "bg-border dark:bg-white/20"
             }`}
             style={{ width: `${total === 0 ? 0 : awayPct}%` }}
           />
@@ -245,7 +245,7 @@ export function WatchLiveStatsCard({ fixture, liveScore, summaryData }: WatchLiv
       className="surface rounded-2xl bg-card p-3.5 sm:p-4 md:p-5 border border-border/70 shadow-sm transition-all animate-fade-in"
     >
       {/* Big Team Crests directly over their side & numbers */}
-      <div className="grid grid-cols-3 items-start pt-2 pb-5 px-3 mb-3 border-b border-white/10 select-none">
+      <div className="grid grid-cols-3 items-start pt-2 pb-5 px-3 mb-3 border-b border-border select-none">
         {/* Home Team & Crest directly over left numbers */}
         <div className="flex flex-col items-start sm:items-center text-left sm:text-center gap-1.5 min-w-0">
           {fixture.home_id ? (
@@ -256,11 +256,11 @@ export function WatchLiveStatsCard({ fixture, liveScore, summaryData }: WatchLiv
               className="drop-shadow-lg"
             />
           ) : (
-            <div className="size-14 rounded-full bg-white/10 flex items-center justify-center font-bold text-base text-white/70">
+            <div className="size-14 rounded-full bg-muted dark:bg-white/10 flex items-center justify-center font-bold text-base text-foreground dark:text-white/70">
               {fixture.home.slice(0, 2)}
             </div>
           )}
-          <span className="font-bold text-xs sm:text-sm text-white max-w-[130px] sm:max-w-[180px] truncate leading-tight">
+          <span className="font-bold text-xs sm:text-sm text-foreground max-w-[130px] sm:max-w-[180px] truncate leading-tight">
             {fixture.home}
           </span>
 
@@ -270,12 +270,12 @@ export function WatchLiveStatsCard({ fixture, liveScore, summaryData }: WatchLiv
               {homeGoals.map((g, idx) => (
                 <div
                   key={`h-goal-${idx}`}
-                  className="flex items-center gap-1.5 text-[11px] text-white/80 justify-start sm:justify-center"
+                  className="flex items-center gap-1.5 text-[11px] text-muted-foreground justify-start sm:justify-center"
                 >
-                  <span className="font-semibold text-white/95 truncate max-w-[95px] sm:max-w-[130px]">
+                  <span className="font-semibold text-foreground truncate max-w-[95px] sm:max-w-[130px]">
                     {g.player}
                   </span>
-                  <span className="text-[10px] text-white/45 font-mono">
+                  <span className="text-[10px] text-muted-foreground/60 font-mono">
                     {g.minDisplay}
                     {g.type === "penalty" ? " (P)" : g.type === "own-goal" ? " (OG)" : ""}
                   </span>
@@ -287,9 +287,9 @@ export function WatchLiveStatsCard({ fixture, liveScore, summaryData }: WatchLiv
 
         {/* Center: Live Scoreline & Time */}
         <div className="flex flex-col items-center justify-center text-center pt-2">
-          <div className="font-mono font-black text-2xl sm:text-3xl tracking-wider text-white tabular-nums drop-shadow-md">
+          <div className="font-mono font-black text-2xl sm:text-3xl tracking-wider text-foreground tabular-nums drop-shadow-sm">
             <span>{liveScore?.homeGoals ?? 0}</span>
-            <span className="text-white/30 mx-2">-</span>
+            <span className="text-muted-foreground/40 mx-2">-</span>
             <span>{liveScore?.awayGoals ?? 0}</span>
           </div>
           <div className="mt-1 flex items-center gap-2">
@@ -300,7 +300,7 @@ export function WatchLiveStatsCard({ fixture, liveScore, summaryData }: WatchLiv
               type="button"
               onClick={() => fetchStats(true)}
               disabled={isRefreshing}
-              className="p-1 rounded-md text-white/40 hover:text-white transition-colors hover:bg-white/10 focus:outline-none"
+              className="p-1 rounded-md text-muted-foreground hover:text-foreground transition-colors hover:bg-muted dark:hover:bg-white/10 focus:outline-none"
               title="Refresh live stats"
               aria-label="Refresh live stats"
             >
@@ -319,11 +319,11 @@ export function WatchLiveStatsCard({ fixture, liveScore, summaryData }: WatchLiv
               className="drop-shadow-lg"
             />
           ) : (
-            <div className="size-14 rounded-full bg-white/10 flex items-center justify-center font-bold text-base text-white/70">
+            <div className="size-14 rounded-full bg-muted dark:bg-white/10 flex items-center justify-center font-bold text-base text-foreground dark:text-white/70">
               {fixture.away.slice(0, 2)}
             </div>
           )}
-          <span className="font-bold text-xs sm:text-sm text-white max-w-[130px] sm:max-w-[180px] truncate leading-tight">
+          <span className="font-bold text-xs sm:text-sm text-foreground max-w-[130px] sm:max-w-[180px] truncate leading-tight">
             {fixture.away}
           </span>
 
@@ -333,12 +333,12 @@ export function WatchLiveStatsCard({ fixture, liveScore, summaryData }: WatchLiv
               {awayGoals.map((g, idx) => (
                 <div
                   key={`a-goal-${idx}`}
-                  className="flex items-center gap-1.5 text-[11px] text-white/80 justify-end sm:justify-center"
+                  className="flex items-center gap-1.5 text-[11px] text-muted-foreground justify-end sm:justify-center"
                 >
-                  <span className="font-semibold text-white/95 truncate max-w-[95px] sm:max-w-[130px]">
+                  <span className="font-semibold text-foreground truncate max-w-[95px] sm:max-w-[130px]">
                     {g.player}
                   </span>
-                  <span className="text-[10px] text-white/45 font-mono">
+                  <span className="text-[10px] text-muted-foreground/60 font-mono">
                     {g.minDisplay}
                     {g.type === "penalty" ? " (P)" : g.type === "own-goal" ? " (OG)" : ""}
                   </span>

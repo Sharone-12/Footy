@@ -189,7 +189,7 @@ function WatchWinProbabilityCard({
             {o.teamId ? (
               <TeamCrest teamId={o.teamId} name={o.label} size={26} className="shrink-0 drop-shadow-sm" />
             ) : (
-              <div className="size-[26px] rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-[11px] font-bold text-muted-foreground font-mono">
+              <div className="size-[26px] rounded-full bg-muted dark:bg-white/5 border border-border dark:border-white/10 flex items-center justify-center text-[11px] font-bold text-muted-foreground font-mono">
                 VS
               </div>
             )}

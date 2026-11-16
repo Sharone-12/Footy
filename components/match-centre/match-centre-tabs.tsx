@@ -162,12 +162,12 @@ export function MatchCentreTabs({
   return (
     <section aria-label="Match Centre Live Data" className="flex flex-col gap-3">
       {/* Tab Navigation Bar - Stats first, then Summary, Table, Line-ups, H2H, and Info last */}
-      <div className="flex items-center gap-1 sm:gap-2 border-b border-white/10 pb-1 overflow-x-auto no-scrollbar select-none">
+      <div className="flex items-center gap-1 sm:gap-2 border-b border-border dark:border-white/10 pb-1 overflow-x-auto no-scrollbar select-none">
         <button
           type="button"
           onClick={() => setActiveTab("stats")}
           className={`relative px-3 sm:px-4.5 py-2 text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-            activeTab === "stats" ? "text-white" : "text-white/50 hover:text-white/80"
+            activeTab === "stats" ? "text-foreground font-bold" : "text-muted-foreground hover:text-foreground"
           }`}
         >
           <BarChart3Icon className="size-3.5 sm:size-4" />
@@ -181,7 +181,7 @@ export function MatchCentreTabs({
           type="button"
           onClick={() => setActiveTab("summary")}
           className={`relative px-3 sm:px-4.5 py-2 text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-            activeTab === "summary" ? "text-white" : "text-white/50 hover:text-white/80"
+            activeTab === "summary" ? "text-foreground font-bold" : "text-muted-foreground hover:text-foreground"
           }`}
         >
           <ActivityIcon className="size-3.5 sm:size-4" />
@@ -195,7 +195,7 @@ export function MatchCentreTabs({
           type="button"
           onClick={() => setActiveTab("table")}
           className={`relative px-3 sm:px-4.5 py-2 text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-            activeTab === "table" ? "text-white" : "text-white/50 hover:text-white/80"
+            activeTab === "table" ? "text-foreground font-bold" : "text-muted-foreground hover:text-foreground"
           }`}
         >
           <TrophyIcon className="size-3.5 sm:size-4" />
@@ -209,7 +209,7 @@ export function MatchCentreTabs({
           type="button"
           onClick={() => setActiveTab("lineups")}
           className={`relative px-3 sm:px-4.5 py-2 text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-            activeTab === "lineups" ? "text-white" : "text-white/50 hover:text-white/80"
+            activeTab === "lineups" ? "text-foreground font-bold" : "text-muted-foreground hover:text-foreground"
           }`}
         >
           <UsersIcon className="size-3.5 sm:size-4" />
@@ -223,7 +223,7 @@ export function MatchCentreTabs({
           type="button"
           onClick={() => setActiveTab("h2h")}
           className={`relative px-3 sm:px-4.5 py-2 text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-            activeTab === "h2h" ? "text-white" : "text-white/50 hover:text-white/80"
+            activeTab === "h2h" ? "text-foreground font-bold" : "text-muted-foreground hover:text-foreground"
           }`}
         >
           <HistoryIcon className="size-3.5 sm:size-4" />
@@ -237,7 +237,7 @@ export function MatchCentreTabs({
           type="button"
           onClick={() => setActiveTab("info")}
           className={`relative px-3 sm:px-4.5 py-2 text-xs sm:text-sm font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
-            activeTab === "info" ? "text-white" : "text-white/50 hover:text-white/80"
+            activeTab === "info" ? "text-foreground font-bold" : "text-muted-foreground hover:text-foreground"
           }`}
         >
           <InfoIcon className="size-3.5 sm:size-4" />
