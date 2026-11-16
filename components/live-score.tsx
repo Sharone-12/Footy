@@ -236,6 +236,31 @@ export function LiveFixtureMark({
   return <LiveMark score={score} className={className} />
 }
 
+/**
+ * Counts up each time the watched match's score rises, and says which side
+ * scored. Nothing fires on first sight of a match or on switching to another
+ * one: only a goal that lands while it is being watched.
+ */
+export function useGoalFlash(score: LiveScore | null): { flash: number; side: "home" | "away" } {
+  const id = score?.id ?? null
+  const home = score?.homeGoals ?? 0
+  const away = score?.awayGoals ?? 0
+  const [seen, setSeen] = useState({ id, home, away })
+  const [flash, setFlash] = useState(0)
+  const [side, setSide] = useState<"home" | "away">("home")
+  if (id !== seen.id) {
+    setSeen({ id, home, away })
+  } else if (home !== seen.home || away !== seen.away) {
+    setSeen({ id, home, away })
+    // A score going down is a VAR correction, not something to celebrate.
+    if (home + away > seen.home + seen.away) {
+      setSide(home > seen.home ? "home" : "away")
+      setFlash((f) => f + 1)
+    }
+  }
+  return { flash, side }
+}
+
 function LiveMark({ score, className }: { score: LiveScore; className: string }) {
   const now = useLiveNow()
   const clock = matchClock(score, now)
@@ -243,17 +268,7 @@ function LiveMark({ score, className }: { score: LiveScore; className: string })
   // flash animation runs once. Nothing flashes on first sight of a match.
   const home = score.homeGoals ?? 0
   const away = score.awayGoals ?? 0
-  const [seen, setSeen] = useState({ home, away })
-  const [flash, setFlash] = useState(0)
-  const [side, setSide] = useState<"home" | "away">("home")
-  if (home !== seen.home || away !== seen.away) {
-    setSeen({ home, away })
-    // A score going down is a VAR correction, not something to celebrate.
-    if (home + away > seen.home + seen.away) {
-      setSide(home > seen.home ? "home" : "away")
-      setFlash((f) => f + 1)
-    }
-  }
+  const { flash, side } = useGoalFlash(score)
   // Tell the page-wide banner. Read at the moment of the goal on purpose:
   // the effect is keyed on the flash alone so a clock tick can't re-announce.
   useEffect(() => {

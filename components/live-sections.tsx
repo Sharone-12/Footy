@@ -16,7 +16,8 @@ import type { MatchedLive24 } from "@/lib/live24/types"
 import type { MatchedMatchora } from "@/lib/matchora/types"
 import { isProviderEnabled } from "@/lib/streaming/config"
 import { UnifiedPlayer } from "@/components/unified-player"
-import { formatKickoffIST } from "@/lib/time"
+import { formatKickoffIST, formatDateIST, formatTimeIST, IST_TIMEZONE } from "@/lib/time"
+import { LiveCard } from "@/components/live-card"
 import { LiveBadge, KickoffCountdown } from "@/components/live-signal"
 import { LiveFixtureMark } from "@/components/live-score"
 
@@ -36,6 +37,30 @@ export type LiveFixture = Timed & {
 
 function formatKickoff(m: LiveFixture) {
   return formatKickoffIST(m.kickoff, m.date)
+}
+
+const dayKey = (ms: number) => new Date(ms).toLocaleDateString("en-CA", { timeZone: IST_TIMEZONE })
+
+/**
+ * Fixtures bucketed by the day they kick off, in the same timezone the times
+ * are shown in, so a 01:15 kickoff sits under the day it reads as.
+ */
+function groupByDay(rows: LiveFixture[], now: number) {
+  const today = dayKey(now)
+  const tomorrow = dayKey(now + 86_400_000)
+  const days: { key: string; label: string; rows: LiveFixture[] }[] = []
+  for (const m of rows) {
+    const start = startOf(m)
+    const key = dayKey(start)
+    let day = days.find((d) => d.key === key)
+    if (!day) {
+      const date = formatDateIST(start, { weekday: "long", day: "numeric", month: "short" })
+      day = { key, label: key === today ? `Today · ${date}` : key === tomorrow ? `Tomorrow · ${date}` : date, rows: [] }
+      days.push(day)
+    }
+    day.rows.push(m)
+  }
+  return days
 }
 
 type ActivePlayerState = {
@@ -176,10 +201,13 @@ function Row({
   matchedCinevid,
   matchedLive24,
   onWatch,
+  timeOnly,
 }: {
   m: LiveFixture
   now: number
   live: boolean
+  /** Under a day header the date is already said; show the time alone. */
+  timeOnly?: boolean
   matchedMatchora?: MatchedMatchora
   matchedStream?: MatchedStream
   matchedZLive?: MatchedZLive
@@ -216,14 +244,14 @@ function Row({
           "L…" and "Tott…" on a 2000px display. */}
       <div className="flex items-center gap-3 sm:gap-4">
         <FixtureLink eventId={m.event_id} league={m.league}>
-          <span className="flex flex-col leading-none w-20 sm:w-24 shrink-0">
+          <span className={`flex flex-col leading-none shrink-0 ${timeOnly ? "w-12 sm:w-14" : "w-20 sm:w-24"}`}>
             {live ? (
               <LiveBadge />
             ) : isUnderAnHour ? (
               <KickoffCountdown msLeft={left} />
             ) : (
               <span className="stat-figure text-sm text-muted-foreground font-medium">
-                {formatKickoff(m)}
+                {timeOnly ? (m.kickoff ? formatTimeIST(m.kickoff) : "TBC") : formatKickoff(m)}
               </span>
             )}
           </span>
@@ -622,53 +650,97 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
   // Before mount there is no clock, so nothing can be bucketed yet.
   const { live, soon, upcoming } = splitFixtures(filteredMatches, now ?? 0)
 
+  const maps = { matchoraMap, streamMap, zliveMap, daddyliveMap, damitvMap, cinevidMap, live24Map }
+  const matched = (m: LiveFixture) => ({
+    matchedMatchora: matchoraMap[m.event_id],
+    matchedStream: streamMap[m.event_id],
+    matchedZLive: zliveMap[m.event_id],
+    matchedDaddyLive: daddyliveMap[m.event_id],
+    matchedDamiTv: damitvMap[m.event_id],
+    matchedCinevid: cinevidMap[m.event_id],
+    matchedLive24: live24Map[m.event_id],
+  })
+  const ready = now != null
+  const days = ready ? groupByDay(upcoming, now) : []
+  const next = soon[0] ?? upcoming[0]
+
   return (
     <div className="flex flex-col gap-8 relative">
-      {/* 1. Matches: Live Now */}
-      <Section
-        title="Live Now"
-        rows={now == null ? [] : live}
-        now={now ?? 0}
-        live
-        empty="No matches in play."
-        matchoraMap={matchoraMap}
-        streamMap={streamMap}
-        zliveMap={zliveMap}
-        daddyliveMap={daddyliveMap}
-        damitvMap={damitvMap}
-        cinevidMap={cinevidMap}
-        live24Map={live24Map}
-      />
+      {/* 1. In play: big cards, and only when something is. */}
+      {ready && live.length > 0 && (
+        <section>
+          <div className="flex items-center justify-between mb-2.5">
+            <h2
+              className="text-lg font-semibold tracking-tight uppercase"
+              style={{ fontFamily: "var(--font-condensed)" }}
+            >
+              Live Now
+            </h2>
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {live.length} match{live.length === 1 ? "" : "es"}
+            </span>
+          </div>
+          <div className="grid md:grid-cols-2 gap-3 stagger">
+            {live.map((m) => {
+              const mm = matched(m)
+              return (
+                <LiveCard
+                  key={m.event_id}
+                  m={m}
+                  watchable={Boolean(
+                    mm.matchedMatchora || mm.matchedStream || mm.matchedZLive?.isConfirmedMatch ||
+                    mm.matchedDaddyLive || mm.matchedDamiTv || mm.matchedCinevid || mm.matchedLive24,
+                  )}
+                  pills={providerPills(mm)}
+                />
+              )
+            })}
+          </div>
+        </section>
+      )}
 
-      {/* 2. Matches: Starting Soon */}
-      <Section
-        title="Starting Soon"
-        rows={now == null ? [] : soon}
-        now={now ?? 0}
-        empty="Nothing kicking off in the next three hours."
-        matchoraMap={matchoraMap}
-        streamMap={streamMap}
-        zliveMap={zliveMap}
-        daddyliveMap={daddyliveMap}
-        damitvMap={damitvMap}
-        cinevidMap={cinevidMap}
-        live24Map={live24Map}
-      />
+      {/* With nothing on, one line says so and points at what is next,
+          rather than two empty sections pushing the fixtures down. */}
+      {ready && live.length === 0 && soon.length === 0 && (
+        <p className="surface bg-card rounded-2xl px-4 py-3 text-sm text-muted-foreground">
+          No match in play right now.
+          {next && (
+            <>
+              {" "}Next up: <b className="text-foreground">{next.home} v {next.away}</b>, {formatKickoff(next)}.
+            </>
+          )}
+        </p>
+      )}
 
-      {/* 3. Matches: Upcoming Fixtures */}
-      <Section
-        title="Upcoming Matches"
-        rows={now == null ? [] : upcoming}
-        now={now ?? 0}
-        empty="No upcoming fixtures."
-        matchoraMap={matchoraMap}
-        streamMap={streamMap}
-        zliveMap={zliveMap}
-        daddyliveMap={daddyliveMap}
-        damitvMap={damitvMap}
-        cinevidMap={cinevidMap}
-        live24Map={live24Map}
-      />
+      {/* 2. Kicking off within three hours */}
+      {ready && soon.length > 0 && (
+        <Section title="Starting Soon" rows={soon} now={now} empty="" {...maps} />
+      )}
+
+      {/* 3. Everything later, a day at a time under a header that stays put. */}
+      {days.map((day) => (
+        <section key={day.key}>
+          <div className="day-header sticky top-[6.75rem] md:top-[4.75rem] z-10 flex items-center justify-between mb-2.5 py-1.5">
+            <h2
+              className="nav-pill px-3.5 py-1 text-sm font-semibold tracking-tight uppercase"
+              style={{ fontFamily: "var(--font-condensed)" }}
+            >
+              {day.label}
+            </h2>
+            <span className="text-xs text-muted-foreground tabular-nums">
+              {day.rows.length} match{day.rows.length === 1 ? "" : "es"}
+            </span>
+          </div>
+          <div className="flex flex-col gap-2.5">
+            {day.rows.map((m) => (
+              <Row key={m.event_id} m={m} now={now ?? 0} live={false} timeOnly {...matched(m)} />
+            ))}
+          </div>
+        </section>
+      ))}
+      {ready && days.length === 0 && live.length === 0 && soon.length === 0 && (
+        <p className="text-muted-foreground text-sm">No upcoming fixtures.</p>
+      )}
 
       {/* 4. 24/7 Football TV Channels (ZLive) - Pushed below matches */}
       {genericChannels.length > 0 && (

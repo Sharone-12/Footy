@@ -15,6 +15,7 @@ import {
   SparklesIcon,
 } from "lucide-react"
 import { TeamCrest } from "@/components/player-avatar"
+import { GoalPulse } from "@/components/score-bug"
 import type { LiveFixture } from "@/components/live-sections"
 import type { ZLiveChannel } from "@/lib/zlive/types"
 import type { StreamingProviderId } from "@/lib/streaming/types"
@@ -647,6 +648,7 @@ export function MultiViewSlotPlayer({
         isFocused ? "border-[var(--pitch)] ring-1 ring-[var(--pitch)]/30" : "border-white/10 hover:border-white/20"
       }`}
     >
+      {slotData.fixture && <GoalPulse fixture={slotData.fixture} />}
       <header className="flex items-center justify-between px-2.5 sm:px-3 py-1.5 bg-gradient-to-b from-neutral-950 via-neutral-950/90 to-neutral-950/70 border-b border-white/[0.08] z-20 shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <span className="px-1.5 py-0.5 rounded-md bg-white/[0.08] text-[var(--pitch)] text-[9px] font-black uppercase tracking-wider shrink-0 flex items-center gap-1">
