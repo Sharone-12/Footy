@@ -11,6 +11,7 @@ import { FixtureCompetitionFilter } from "@/components/fixture-competition-filte
 import { FormStrip, OUTCOME_TONE, OUTCOME_LABEL } from "@/components/form-strip"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { BarcaNav } from "@/components/barca-nav"
+import { Rondo } from "@/components/rondo"
 import { Skeleton } from "@/components/ui/skeleton"
 import { formatDateIST, formatTimeIST } from "@/lib/time"
 import { LiveFixtureMark } from "@/components/live-score"
@@ -366,13 +367,7 @@ export default function BarcaFixturesPage({
           Upcoming
         </h2>
         <Suspense
-          fallback={
-            <div className="flex flex-col gap-2.5">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className="h-[74px] rounded-2xl" />
-              ))}
-            </div>
-          }
+          fallback={<Rondo label="Finding the fixtures" className="h-[300px]" />}
         >
           <Fixtures searchParams={searchParams} />
         </Suspense>

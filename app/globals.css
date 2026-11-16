@@ -922,6 +922,117 @@ html.dark .club-accent {
   }
 }
 
+/* ── Stand mosaic (components/mosaic.tsx) ──
+   Every card starts face down, seat-grey, and turns over to its colour as the
+   wave reaches it. */
+.mosaic {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr);
+  gap: 1px;
+  padding: 1px;
+  background: oklch(0.12 0 0);
+  perspective: 700px;
+}
+
+.mosaic > span {
+  aspect-ratio: 1;
+  background: var(--c);
+  animation: card-up 0.55s cubic-bezier(0.3, 1.2, 0.5, 1) both;
+  animation-delay: calc(var(--d) * 16ms + 150ms);
+}
+
+.mosaic > .b {
+  --c: #1b3f8f;
+}
+
+.mosaic > .r {
+  --c: #a50044;
+}
+
+.mosaic > .g {
+  --c: #edbb00;
+}
+
+@keyframes card-up {
+  from {
+    background: oklch(0.24 0 0);
+    transform: rotateX(88deg);
+  }
+
+  to {
+    background: var(--c);
+    transform: rotateX(0);
+  }
+}
+
+/* ── Squad on the pitch ── */
+.pitch {
+  background:
+    repeating-linear-gradient(to bottom, oklch(0.36 0.09 150) 0 12.5%, oklch(0.32 0.085 150) 12.5% 25%);
+  box-shadow: inset 0 0 80px oklch(0 0 0 / 45%);
+}
+
+.pitch-lines,
+.pitch-lines > span {
+  position: absolute;
+  border: 2px solid oklch(1 0 0 / 38%);
+  pointer-events: none;
+}
+
+.pitch-lines {
+  inset: 3%;
+}
+
+.pitch-half {
+  inset: 50% -2px auto -2px;
+  border-width: 2px 0 0 0;
+}
+
+.pitch-circle {
+  top: 50%;
+  left: 50%;
+  width: 22%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.pitch-box {
+  left: 26%;
+  right: 26%;
+  height: 15%;
+}
+
+.pitch-box-top {
+  top: -2px;
+}
+
+.pitch-box-bottom {
+  bottom: -2px;
+}
+
+/* Arriving cold (no card to walk out from), players drop into place in turn. */
+.pitch-token {
+  animation: token-in 0.5s cubic-bezier(0.3, 1.3, 0.5, 1) both;
+}
+
+@keyframes token-in {
+  from {
+    opacity: 0;
+    transform: translateY(-14px) scale(0.7);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The rondo's moving ball and chaser; under reduced motion the still ones show. */
+.rondo-still {
+  display: none;
+}
+
 /* ── Season scarf: knitted on a stripe at a time, left to right ── */
 .scarf {
   position: relative;
@@ -1308,6 +1419,8 @@ main h1 > span:nth-child(2) {
   .lineup > *,
   .lineup > *::after,
   .flip-digit,
+  .mosaic > span,
+  .pitch-token,
   .scarf-stripe,
   .bar-rise,
   .goal-banner-tag,
@@ -1322,6 +1435,14 @@ main h1 > span:nth-child(2) {
 
   .shirt-inner {
     transition: none;
+  }
+
+  .rondo-move {
+    display: none;
+  }
+
+  .rondo-still {
+    display: inline;
   }
 
   .skeleton-pitch > svg > * {

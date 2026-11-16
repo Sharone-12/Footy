@@ -19,6 +19,7 @@ import {
 } from "@/lib/leaders"
 import { PlayerAvatar, TeamCrest } from "@/components/player-avatar"
 import { BarcaNav } from "@/components/barca-nav"
+import { Rondo } from "@/components/rondo"
 import { Skeleton } from "@/components/ui/skeleton"
 
 const BARCA = "FC Barcelona"
@@ -293,7 +294,8 @@ export default function BarcaLeadersPage({
       <Suspense
         fallback={
           <div className="flex flex-col gap-4">
-            {Array.from({ length: 4 }).map((_, i) => (
+            <Rondo label="Counting the numbers" className="h-56" />
+            {Array.from({ length: 3 }).map((_, i) => (
               <Skeleton key={i} className="h-48 rounded-2xl" />
             ))}
           </div>

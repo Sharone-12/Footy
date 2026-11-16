@@ -1,6 +1,6 @@
 /** Self-check for the Barça season maths: `node lib/barca.test.ts` */
 import assert from "node:assert/strict"
-import { seasonScarf, playedLikeUs, pointsGap, leagueRanks, type SeasonMatch } from "./barca.ts"
+import { seasonScarf, playedLikeUs, pointsGap, leagueRanks, mostUsedXI, type SeasonMatch } from "./barca.ts"
 
 const m = (id: number, date: string, home: string, away: string, hg: number | null, ag: number | null): SeasonMatch =>
   ({ event_id: id, league: "L", round: id, date, home, away, home_goals: hg, away_goals: ag })
@@ -43,5 +43,16 @@ const ranks = leagueRanks(
   [{ key: "gf", label: "Goals", better: "high", fmt: String }, { key: "ga", label: "Conceded", better: "low", fmt: String }],
 )
 assert.deepEqual(ranks.map((r) => [r.label, r.rank, r.of]), [["Goals", 1, 3], ["Conceded", 3, 3]])
+
+// Most minutes per line, wide players on their own side, the rest benched.
+const pl = (name: string, position: string, minutes: number, detailed_position = "") => ({ name, position, minutes, detailed_position })
+const xi = mostUsedXI([
+  pl("rw", "Forward", 900, "RW"), pl("st", "Forward", 800, "ST"), pl("lw", "Forward", 700, "LW"), pl("f4", "Forward", 100, "ST"),
+  pl("m1", "Midfielder", 900), pl("m2", "Midfielder", 800), pl("m3", "Midfielder", 700), pl("m4", "Midfielder", 50),
+  pl("rb", "Defender", 900, "RB"), pl("cb1", "Defender", 890, "CB"), pl("cb2", "Defender", 880, "CB"), pl("lb", "Defender", 870, "LB"), pl("d5", "Defender", 10, "CB"),
+  pl("gk", "Goalkeeper", 900), pl("gk2", "Goalkeeper", 90),
+])
+assert.deepEqual(xi.lines.map((l) => l.players.map((p) => p.name)), [["lw", "st", "rw"], ["m1", "m2", "m3"], ["lb", "cb1", "cb2", "rb"], ["gk"]])
+assert.deepEqual(xi.bench.map((p) => p.name), ["f4", "gk2", "m4", "d5"])
 
 console.log("barca ok")

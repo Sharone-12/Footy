@@ -20,6 +20,10 @@ import { SquadPositionFilter } from "@/components/squad-position-filter"
 import { BarcaNav } from "@/components/barca-nav"
 import { Skeleton } from "@/components/ui/skeleton"
 import { BarcaSeason } from "@/components/barca-season"
+import { Mosaic } from "@/components/mosaic"
+import { Rondo } from "@/components/rondo"
+import { SquadViewToggle } from "@/components/squad-view-toggle"
+import { mostUsedXI } from "@/lib/barca"
 import { loadFingerprints } from "@/components/player-dna"
 import { DNA_KEYS, fingerprint, archetypes } from "@/lib/dna"
 
@@ -147,6 +151,77 @@ function PlayerCard({ p, scope, archetype }: { p: SquadRow; scope: string; arche
   )
 }
 
+/** Where each line stands, top of the pitch to bottom, as a share of its height. */
+const LINE_Y = { fwd: 15, mid: 40, def: 65, gk: 88 } as const
+
+function Token({ p, scope, size, index }: { p: SquadRow; scope: string; size: number; index: number }) {
+  const { last } = splitName(p.player)
+  return (
+    <Link
+      href={`/player/${p.slug}${scope}`}
+      className="pitch-token flex flex-col items-center gap-1 group"
+      style={{ animationDelay: `${index * 45}ms` }}
+    >
+      {/* Same name as the card's portrait, so toggling the view walks each
+          player from the grid to their spot, and on to their own page. */}
+      <ViewTransition name={`player-${p.player_id}`} share="morph" default="none">
+        <span className="rounded-full ring-2 ring-[#EDBB00]/80 shadow-[0_4px_14px_rgba(0,0,0,0.5)] transition-transform duration-200 group-hover:scale-110">
+          <PlayerAvatar playerId={p.player_id} name={p.player} size={size} />
+        </span>
+      </ViewTransition>
+      <span className="rounded-full bg-black/60 px-2 py-0.5 text-[0.65rem] sm:text-xs font-semibold text-white whitespace-nowrap leading-tight">
+        <span className="text-[#EDBB00] tabular-nums mr-1">{SQUAD_PORTRAITS[p.slug]?.n ?? ""}</span>
+        {last}
+      </span>
+    </Link>
+  )
+}
+
+/** The most-used eleven set out in a 4-3-3, attack at the top, bench beneath. */
+function SquadPitch({ squad, scope }: { squad: SquadRow[]; scope: string }) {
+  const { lines, bench } = mostUsedXI(squad)
+  let index = 0
+  return (
+    <div>
+      <div className="pitch relative mx-auto max-w-3xl aspect-[5/6] sm:aspect-[4/3] rounded-2xl overflow-hidden">
+        <div className="pitch-lines" aria-hidden>
+          <span className="pitch-half" />
+          <span className="pitch-circle" />
+          <span className="pitch-box pitch-box-top" />
+          <span className="pitch-box pitch-box-bottom" />
+        </div>
+        {lines.map((line) =>
+          line.players.map((p, i) => (
+            <div
+              key={p.player_id}
+              className="absolute -translate-x-1/2 -translate-y-1/2"
+              style={{
+                top: `${LINE_Y[line.key]}%`,
+                left: `${((i + 1) / (line.players.length + 1)) * 100}%`,
+              }}
+            >
+              <Token p={p} scope={scope} size={54} index={index++} />
+            </div>
+          )),
+        )}
+      </div>
+      <p className="stat-label text-center mt-3">
+        Most-used eleven by minutes, set out 4-3-3 · not a predicted line-up
+      </p>
+      {bench.length > 0 && (
+        <>
+          <h3 className="stat-label mt-6 mb-3 text-center">Bench</h3>
+          <div className="flex flex-wrap justify-center gap-x-5 gap-y-4">
+            {bench.map((p) => (
+              <Token key={p.player_id} p={p} scope={scope} size={44} index={index++} />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 /** The squad for a season, combining all competitions (La Liga + UCL). Cached: changes twice a year. */
 async function loadSquad(season: string) {
   "use cache"
@@ -197,11 +272,12 @@ async function loadSquad(season: string) {
 async function Squad({
   searchParams,
 }: {
-  searchParams: Promise<{ season?: string; pos?: string }>
+  searchParams: Promise<{ season?: string; pos?: string; view?: string }>
 }) {
   const sp = await searchParams
   const season = resolveSeason(sp.season)
-  const pos = resolvePosition(sp.pos)
+  const pitch = sp.view === "pitch"
+  const pos = pitch ? "all" : resolvePosition(sp.pos)
   const scope = sp.season ? `?season=${encodeURIComponent(season)}` : ""
   const [squad, { scale }] = await Promise.all([loadSquad(season), loadFingerprints(season, "league")])
   // Style needs a real sample, and keepers have no outfield style to name.
@@ -223,12 +299,15 @@ async function Squad({
   return (
     <>
       <div className="mb-6 flex flex-wrap items-center gap-3">
-        <SquadPositionFilter active={pos} />
+        <SquadViewToggle active={pitch ? "pitch" : "cards"} />
+        {!pitch && <SquadPositionFilter active={pos} />}
         <span className="text-xs text-muted-foreground">
           {shown.length} player{shown.length === 1 ? "" : "s"} · {season}
         </span>
       </div>
-      {shown.length === 0 ? (
+      {pitch ? (
+        <SquadPitch squad={squad} scope={scope} />
+      ) : shown.length === 0 ? (
         <p className="text-muted-foreground">No players in this position for {season}.</p>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 stagger">
@@ -244,7 +323,7 @@ async function Squad({
 export default function SquadPage({
   searchParams,
 }: {
-  searchParams: Promise<{ season?: string; pos?: string }>
+  searchParams: Promise<{ season?: string; pos?: string; view?: string }>
 }) {
   return (
     <div className="mx-auto max-w-6xl px-3 sm:px-4 py-6 sm:py-14">
@@ -262,12 +341,13 @@ export default function SquadPage({
           </p>
         </div>
       </div>
+      <Mosaic />
       <div className="mb-6">
         <Suspense fallback={<Skeleton className="h-10 w-44 rounded-full" />}>
           <BarcaNav />
         </Suspense>
       </div>
-      <Suspense fallback={<Skeleton className="h-[230px] rounded-2xl mb-8" />}>
+      <Suspense fallback={<Rondo label="Reading the season" className="h-[230px] mb-8" />}>
         <BarcaSeason searchParams={searchParams} />
       </Suspense>
       <Suspense

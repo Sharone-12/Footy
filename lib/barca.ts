@@ -141,3 +141,43 @@ export function leagueRanks(
       return { label: s.label, value: s.fmt(v), rank: ahead + 1, of: rows.length }
     })
 }
+
+export type XiPlayer = { position: string; detailed_position?: string | null; minutes: number }
+
+/** Left to right across a line, from whatever side the detailed position hints at. */
+function side(p: XiPlayer): number {
+  const d = (p.detailed_position ?? "").toUpperCase()
+  const left = /\bL|^L|LW|LB|ML/.test(d)
+  const right = /\bR|^R|RW|RB|MR/.test(d)
+  return left && !right ? -1 : right && !left ? 1 : 0
+}
+
+/**
+ * The most-used eleven in a 4-3-3: the players with the most minutes in each
+ * line, with everyone else on the bench.
+ *
+ * Picked on minutes because that is what the data can vouch for. It is who
+ * has played most, not a predicted line-up, and the page says so.
+ */
+export function mostUsedXI<T extends XiPlayer>(squad: T[]): {
+  lines: { key: "fwd" | "mid" | "def" | "gk"; players: T[] }[]
+  bench: T[]
+} {
+  const take = (bucket: string, n: number) =>
+    squad
+      .filter((p) => p.position === bucket)
+      .sort((a, b) => b.minutes - a.minutes)
+      .slice(0, n)
+      .sort((a, b) => side(a) - side(b))
+  const lines = [
+    { key: "fwd" as const, players: take("Forward", 3) },
+    { key: "mid" as const, players: take("Midfielder", 3) },
+    { key: "def" as const, players: take("Defender", 4) },
+    { key: "gk" as const, players: take("Goalkeeper", 1) },
+  ]
+  const picked = new Set(lines.flatMap((l) => l.players))
+  return {
+    lines,
+    bench: squad.filter((p) => !picked.has(p)).sort((a, b) => b.minutes - a.minutes),
+  }
+}
