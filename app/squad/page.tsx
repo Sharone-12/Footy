@@ -19,6 +19,9 @@ import { squadPortrait } from "@/lib/images"
 import { SquadPositionFilter } from "@/components/squad-position-filter"
 import { BarcaNav } from "@/components/barca-nav"
 import { Skeleton } from "@/components/ui/skeleton"
+import { BarcaSeason } from "@/components/barca-season"
+import { loadFingerprints } from "@/components/player-dna"
+import { DNA_KEYS, fingerprint, archetypes } from "@/lib/dna"
 
 const BARCA = "FC Barcelona"
 
@@ -33,6 +36,7 @@ type SquadRow = {
   appearances: number | null
   goals: number | null
   assists: number | null
+  role?: string | null
 }
 
 function GridSkeleton() {
@@ -45,14 +49,16 @@ function GridSkeleton() {
   )
 }
 
-function PlayerCard({ p, scope }: { p: SquadRow; scope: string }) {
+function PlayerCard({ p, scope, archetype }: { p: SquadRow; scope: string; archetype: string | null }) {
   const { first, last } = splitName(p.player)
   const portrait = SQUAD_PORTRAITS[p.slug]
   return (
     <Link
       href={`/player/${p.slug}${scope}`}
-      className="squad-card card-lift surface bg-card rounded-2xl overflow-hidden flex flex-col group"
+      className="squad-card shirt card-lift surface bg-card rounded-2xl overflow-hidden group"
     >
+      <div className="shirt-inner">
+      <div className="shirt-front flex flex-col h-full">
       <div className="relative aspect-[4/5] overflow-hidden">
         {/* Paired with the avatar on the player page: the portrait flies there. */}
         <ViewTransition name={`player-${p.player_id}`} share="morph" default="none">
@@ -99,6 +105,44 @@ function PlayerCard({ p, scope }: { p: SquadRow; scope: string }) {
         <span>{p.goals ?? 0} G</span>
         <span>{p.assists ?? 0} A</span>
       </div>
+      </div>
+
+      {/* The back of the shirt: turned to on hover, where there is a pointer. */}
+      <div className="shirt-back barca-stripes text-white" aria-hidden>
+        <span
+          className="text-lg font-bold uppercase tracking-[0.08em] leading-none drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
+          style={{ fontFamily: "var(--font-condensed)" }}
+        >
+          {last}
+        </span>
+        <span
+          className="text-[5.5rem] font-bold leading-[0.9] tabular-nums drop-shadow-[0_2px_4px_rgba(0,0,0,0.7)]"
+          style={{ fontFamily: "var(--font-condensed)", color: "#EDBB00" }}
+        >
+          {portrait?.n ?? "–"}
+        </span>
+        {archetype && (
+          <span className="stat-label !text-white rounded-full bg-black/45 px-2.5 py-1 mt-1">
+            {archetype}
+          </span>
+        )}
+        <span className="grid grid-cols-4 gap-x-3 mt-3 text-center tabular-nums drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+          {[
+            [p.appearances ?? 0, "apps"],
+            [p.goals ?? 0, "goals"],
+            [p.assists ?? 0, "assists"],
+            [Math.round(p.minutes ?? 0), "mins"],
+          ].map(([v, label]) => (
+            <span key={label}>
+              <span className="block text-base font-bold leading-none" style={{ fontFamily: "var(--font-condensed)" }}>
+                {v}
+              </span>
+              <span className="block text-[0.55rem] uppercase tracking-wider opacity-80 mt-1">{label}</span>
+            </span>
+          ))}
+        </span>
+      </div>
+      </div>
     </Link>
   )
 }
@@ -111,7 +155,9 @@ async function loadSquad(season: string) {
   const { data } = await supabase
     .from("players")
     .select(
-      "player, slug, player_id, position, detailed_position, league, minutes, appearances, goals, assists",
+      "player, slug, player_id, position, detailed_position, league, minutes, appearances, goals, assists, role, team, team_id, " +
+        // The style stats behind each card's archetype, from the league row.
+        DNA_KEYS.map((k) => k.key).join(", "),
     )
     .eq("team", BARCA)
     .eq("season", season)
@@ -121,7 +167,7 @@ async function loadSquad(season: string) {
   // Combine all competitions so the squad cards show their total goals, assists,
   // appearances, and minutes across the entire season.
   const groups = new Map<number, SquadRow[]>()
-  for (const row of (data || []) as SquadRow[]) {
+  for (const row of (data || []) as unknown as SquadRow[]) {
     const list = groups.get(row.player_id)
     if (list) list.push(row)
     else groups.set(row.player_id, [row])
@@ -157,7 +203,12 @@ async function Squad({
   const season = resolveSeason(sp.season)
   const pos = resolvePosition(sp.pos)
   const scope = sp.season ? `?season=${encodeURIComponent(season)}` : ""
-  const squad = await loadSquad(season)
+  const [squad, { scale }] = await Promise.all([loadSquad(season), loadFingerprints(season, "league")])
+  // Style needs a real sample, and keepers have no outfield style to name.
+  const archetype = (p: SquadRow) =>
+    p.position === "Goalkeeper" || p.minutes < 270
+      ? null
+      : archetypes(fingerprint(p as unknown as Record<string, unknown>, scale))[0].name
   const bucket = bucketFor(pos)
   const shown = bucket ? squad.filter((p) => p.position === bucket) : squad
 
@@ -182,7 +233,7 @@ async function Squad({
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 stagger">
           {shown.map((p) => (
-            <PlayerCard key={p.player_id} p={p} scope={scope} />
+            <PlayerCard key={p.player_id} p={p} scope={scope} archetype={archetype(p)} />
           ))}
         </div>
       )}
@@ -216,6 +267,9 @@ export default function SquadPage({
           <BarcaNav />
         </Suspense>
       </div>
+      <Suspense fallback={<Skeleton className="h-[230px] rounded-2xl mb-8" />}>
+        <BarcaSeason searchParams={searchParams} />
+      </Suspense>
       <Suspense
         fallback={
           <>

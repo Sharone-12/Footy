@@ -373,7 +373,7 @@ export async function fetchTeamData(
   const matchData = await fetchAllRows((from, to) => {
     let query = supabase
       .from("matches")
-      .select("event_id, league, season, round, home, away, status, home_goals, away_goals")
+      .select("event_id, league, season, round, date, home, home_id, away, away_id, status, home_goals, away_goals")
       .eq("season", season)
       .eq("status", "finished")
     if (comp) query = scopeLeague(query, comp)
@@ -382,6 +382,7 @@ export async function fetchTeamData(
 
   const matchRows = (matchData || []) as {
     event_id: number; league: string; season: string; round: number | null
+    date: string | null; home_id: number | null; away_id: number | null
     home: string; away: string; status: string
     home_goals: number | null; away_goals: number | null
   }[]

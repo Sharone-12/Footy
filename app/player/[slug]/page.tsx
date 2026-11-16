@@ -230,8 +230,6 @@ async function PlayerContent({
       className={`relative mx-auto max-w-6xl px-3 sm:px-4 py-6 sm:py-10 ${club ? "club-accent" : ""}`}
       style={club ? ({ "--club": club } as React.CSSProperties) : undefined}
     >
-      {/* Floodlights sweeping across as the player walks out. */}
-      <div className="walkout" aria-hidden />
       {isYamal && <div className="yamal-bg" aria-hidden />}
       {isPedri && <div className="pedri-bg" aria-hidden />}
       <div className="relative z-10">

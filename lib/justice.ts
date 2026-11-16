@@ -8,8 +8,11 @@ export type TableMatch = {
   event_id: number
   league: string
   round: number | null
+  date?: string | null
   home: string
+  home_id?: number | null
   away: string
+  away_id?: number | null
   home_goals: number | null
   away_goals: number | null
 }
@@ -124,4 +127,32 @@ export function tableRace(matches: TableMatch[], league: string): Race | null {
     gd.push([...runGd])
   }
   return { league, teams, rounds, points, gd }
+}
+
+/**
+ * Cumulative expected points per club after each of `race`'s rounds, in the
+ * same [round][team] shape as its points. A match with no xG adds nothing to
+ * either side, so this runs slightly behind the real table rather than
+ * guessing.
+ */
+export function xPointsRace(
+  matches: TableMatch[],
+  xg: Map<number, [number, number]>,
+  race: Race,
+): number[][] {
+  const index = new Map(race.teams.map((t, i) => [t, i]))
+  const run = race.teams.map(() => 0)
+  return race.rounds.map((round) => {
+    for (const m of matches) {
+      if (m.league !== race.league || m.round !== round) continue
+      const x = xg.get(m.event_id)
+      const h = index.get(m.home)
+      const a = index.get(m.away)
+      if (!x || h == null || a == null) continue
+      const [xh, xa] = expectedPoints(x[0], x[1])
+      run[h] += xh
+      run[a] += xa
+    }
+    return [...run]
+  })
 }
