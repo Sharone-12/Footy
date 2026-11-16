@@ -68,8 +68,7 @@ import { matchClock } from "@/lib/livescores"
 import type { MatchPrediction } from "@/lib/predictions"
 import { MatchCentreTabs } from "@/components/match-centre/match-centre-tabs"
 import { PreMatchStudio } from "@/components/pre-match-studio"
-import { ScoreBug, GoalPulse } from "@/components/score-bug"
-import { SourceList } from "@/components/source-list"
+import { GoalPulse } from "@/components/score-bug"
 import type { MatchSummaryResponse } from "@/app/api/livescores/summary/route"
 
 export type WatchStudioProps = {
@@ -299,6 +298,7 @@ export function WatchStudio({
 
   const [isFrameLoading, setIsFrameLoading] = useState(true)
   const [hasFrameError, setHasFrameError] = useState(false)
+  const [expandedProviders, setExpandedProviders] = useState<Record<string, boolean>>({})
   const [expandedDirectory, setExpandedDirectory] = useState(false)
 
   // Current wall clock for live match minutes and countdowns
@@ -1375,7 +1375,6 @@ export function WatchStudio({
                               setHasFrameError(true)
                             }}
                           />
-                          {fixture && <ScoreBug fixture={fixture} hidden={hideScore} />}
                           {fixture && <GoalPulse fixture={fixture} />}
                           {/* Matchora shield: blocks clicks on the corner to prevent internal channels popup from expanding */}
                           {currentProvider?.id === "matchora" && (
@@ -2173,24 +2172,141 @@ export function WatchStudio({
                 </h3>
               </div>
               <span className="text-[11px] font-mono font-bold text-muted-foreground">
-                {allSources(providers).length} {allSources(providers).length === 1 ? "stream" : "streams"}
+                {providers.length} {providers.length === 1 ? "source" : "sources"}
               </span>
             </div>
 
-              {providers.length === 0 ? (
-                <div className="py-6 text-center text-xs text-muted-foreground">
-                  <p>
-                    {!isStreamWindowOpen
-                      ? "Streams appear here 15 minutes before kick-off."
-                      : isBundleLoading
-                        ? "Searching for live feeds…"
-                        : "No feed found for this match yet."}
-                  </p>
-                </div>
-              ) : (
-                <SourceList providers={providers} current={currentSource} onPick={selectSource} />
-              )}
-            </div>
+            {providers.length === 0 ? (
+              <div className="py-6 text-center text-xs text-muted-foreground">
+                <p>
+                  {!isStreamWindowOpen
+                    ? "Streams appear here 15 minutes before kick-off."
+                    : isBundleLoading
+                      ? "Searching for live feeds…"
+                      : "No feed found for this match yet."}
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2.5">
+                {providers.map((p) => {
+                  const isSelectedProvider = currentProvider?.id === p.id
+                  return (
+                    <div
+                      key={p.id}
+                      className={`p-3 rounded-2xl border transition-all ${
+                        isSelectedProvider
+                          ? "bg-card border-[var(--pitch)]/80 shadow-[0_0_15px_-3px_rgba(0,255,135,0.15)] ring-1 ring-[var(--pitch)]/30"
+                          : "bg-background/40 hover:bg-background/70 border-border/60"
+                      }`}
+                    >
+                      {/* Provider Header */}
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          {p.id === "streamfree" && <SparklesIcon className="size-3.5 text-cyan-400 shrink-0" />}
+                          {p.id === "damitv" && <MonitorPlayIcon className="size-3.5 text-violet-400 shrink-0" />}
+                          {p.id === "matchora" && <GlobeIcon className="size-3.5 text-blue-400 shrink-0" />}
+                          {p.id === "daddylive" && <TvIcon className="size-3.5 text-amber-400 shrink-0" />}
+                          {p.id === "live24" && <TvIcon className="size-3.5 text-emerald-400 shrink-0" />}
+                          {p.id === "zlive" && <RadioIcon className="size-3.5 text-emerald-400 shrink-0" />}
+                          {p.id === "cinevid" && <TvIcon className="size-3.5 text-rose-400 shrink-0" />}
+                          <span className="font-bold text-xs truncate text-foreground">{p.name}</span>
+                          {p.qualities.length > 0 && (
+                            <div className="flex items-center gap-0.5">
+                              {p.qualities.map((q) => (
+                                <span key={q} className="text-[9px] font-mono font-bold px-1 rounded bg-muted dark:bg-white/10 text-muted-foreground border border-border/40 dark:border-transparent">
+                                  {q}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider shrink-0 ${
+                          p.status === "LIVE"
+                            ? "bg-[var(--pitch)]/15 text-[var(--pitch)] border border-[var(--pitch)]/30"
+                            : "bg-muted text-muted-foreground border border-border/60"
+                        }`}>
+                          {p.status}
+                        </span>
+                      </div>
+
+                      {/* Individual Sources Pills */}
+                      {(() => {
+                        const isExpanded = Boolean(expandedProviders[p.id])
+                        const MAX_SIDEBAR_SOURCES = 8
+                        let visibleSources = p.sources
+                        if (!isExpanded && p.sources.length > MAX_SIDEBAR_SOURCES) {
+                          const activeIdx = p.sources.findIndex((s) => s.key === currentSource?.key)
+                          if (activeIdx >= MAX_SIDEBAR_SOURCES) {
+                            visibleSources = [
+                              p.sources[activeIdx],
+                              ...p.sources.slice(0, MAX_SIDEBAR_SOURCES - 1).filter((s) => s.key !== currentSource?.key),
+                            ]
+                          } else {
+                            visibleSources = p.sources.slice(0, MAX_SIDEBAR_SOURCES)
+                          }
+                        }
+
+                        return (
+                          <div>
+                            <div
+                              className={`flex flex-wrap gap-1.5 pt-0.5 ${
+                                isExpanded ? "max-h-52 overflow-y-auto pr-1" : ""
+                              }`}
+                            >
+                              {visibleSources.map((src) => {
+                                const isCurrent = currentSource?.key === src.key
+                                return (
+                                  <button
+                                    key={src.key}
+                                    type="button"
+                                    onClick={() => selectSource(p.id, src.key)}
+                                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
+                                      isCurrent
+                                        ? "bg-[var(--pitch)] text-black font-bold shadow-sm"
+                                        : "bg-card hover:bg-accent text-muted-foreground hover:text-foreground border border-border/70"
+                                    }`}
+                                  >
+                                    {isCurrent && <CheckCircle2Icon className="size-2.5 stroke-[3]" />}
+                                    <span>{src.label}</span>
+                                  </button>
+                                )
+                              })}
+                            </div>
+
+                            {p.sources.length > MAX_SIDEBAR_SOURCES && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setExpandedProviders((prev) => ({
+                                    ...prev,
+                                    [p.id]: !prev[p.id],
+                                  }))
+                                }
+                                className="mt-1.5 text-[10px] font-bold text-[var(--pitch)] hover:underline inline-flex items-center gap-1 transition-colors"
+                              >
+                                {isExpanded ? (
+                                  <>
+                                    <span>Show Less</span>
+                                    <ChevronUpIcon className="size-2.5" />
+                                  </>
+                                ) : (
+                                  <>
+                                    <span>+ View {p.sources.length - MAX_SIDEBAR_SOURCES} More</span>
+                                    <ChevronDownIcon className="size-2.5" />
+                                  </>
+                                )}
+                              </button>
+                            )}
+                          </div>
+                        )
+                      })()}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
 
             {/* 2. MATCH CENTRE SHORTCUTS PANEL (Compacted) */}
             {fixture && (
