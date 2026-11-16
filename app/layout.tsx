@@ -13,6 +13,7 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { TopProgressBar } from "@/components/top-progress-bar"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { CommandPalette } from "@/components/command-palette"
+import { Spotlight } from "@/components/spotlight"
 import "./globals.css"
 
 const sans = Archivo({
@@ -101,6 +102,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        <Spotlight />
         <Suspense fallback={null}>
           <TopProgressBar />
         </Suspense>

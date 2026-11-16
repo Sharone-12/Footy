@@ -3,6 +3,7 @@ import { cacheLife } from "next/cache"
 import Link from "next/link"
 import { supabase, fetchAllRows } from "@/lib/supabase"
 import { MetricScatter, type ScatterPlayer } from "@/components/metric-scatter"
+import { SCATTER_COLS } from "@/lib/scatter-cols"
 import { resolveSeason, SEASONS } from "@/lib/seasons"
 import {
   resolveCompetition,
@@ -314,10 +315,7 @@ async function loadTotals(season: string): Promise<ScatterPlayer[]> {
       supabase
         .from("players")
         .select(
-          "player, slug, team, league, role, minutes, npxg, xa, goals, assists, dribbles, " +
-            "shots, key_passes, big_chances_created, touches, passes, " +
-            "final_third_passes, crosses, tackles_won, interceptions, recoveries, " +
-            "clearances, aerials_won, dispossessed",
+          SCATTER_COLS.join(", "),
         )
         .eq("season", season)
         .order("player_id", { ascending: true })
@@ -528,7 +526,12 @@ async function Content({
         >
           PLOT ANY TWO
         </h2>
-        <MetricScatter players={totals} />
+        {/* Column names once, then bare rows: 2,400 players each repeating
+            24 key names was most of what was left of this page's weight. */}
+        <MetricScatter
+          cols={SCATTER_COLS}
+          rows={totals.map((p) => SCATTER_COLS.map((c) => p[c]))}
+        />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-5 stagger">

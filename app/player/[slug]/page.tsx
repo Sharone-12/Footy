@@ -1,4 +1,5 @@
-import { Suspense } from "react"
+import { Suspense, ViewTransition } from "react"
+import { cacheLife } from "next/cache"
 import { Reveal } from "@/components/reveal"
 import { CountUp } from "@/components/count-up"
 import { supabase } from "@/lib/supabase"
@@ -28,11 +29,58 @@ import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
 
-function Loading() {
+// The loading state below reads the slug to show the player's face and name at
+// once, so the route waits for that one cached lookup rather than serving a
+// faceless shell. The stats still stream in behind it.
+export const instant = false
+
+/** Who a slug is: all the page header needs before the stats arrive. */
+async function loadIdentity(slug: string) {
+  "use cache"
+  cacheLife("days")
+  const { data } = await supabase
+    .from("players")
+    .select("player_id, player")
+    .eq("slug", slug)
+    .order("season", { ascending: false })
+    .limit(1)
+  return (data?.[0] as { player_id: number; player: string } | undefined) ?? null
+}
+
+/**
+ * The loading state, but with the real face and name already in place.
+ *
+ * It sits where the finished header will, under the same transition name as
+ * the squad card's portrait, so arriving from the squad page the portrait
+ * travels here instead of the page cutting to a grey box.
+ */
+async function Loading({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const who = await loadIdentity(slug)
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10">
-      <Skeleton className="h-10 w-72 mb-3" />
-      <Skeleton className="h-4 w-48 mb-10" />
+    <div className="mx-auto max-w-6xl px-3 sm:px-4 py-6 sm:py-10">
+      <div className="mb-8 sm:mb-10 flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-5">
+        {who ? (
+          <ViewTransition name={`player-${who.player_id}`} share="morph" default="none">
+            <PlayerAvatar playerId={who.player_id} name={who.player} size={76} />
+          </ViewTransition>
+        ) : (
+          <Skeleton className="size-[76px] rounded-full" />
+        )}
+        <div className="min-w-0">
+          {who ? (
+            <h1
+              className="text-3xl sm:text-5xl font-bold tracking-[-0.035em] leading-none mb-3"
+              style={{ fontFamily: "var(--font-condensed)" }}
+            >
+              {who.player}
+            </h1>
+          ) : (
+            <Skeleton className="h-10 w-72 mb-3" />
+          )}
+          <Skeleton className="h-4 w-48" />
+        </div>
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
         {Array.from({ length: 4 }).map((_, i) => (
           <Skeleton key={i} className="h-28 rounded-xl" />
@@ -178,11 +226,13 @@ async function PlayerContent({
       {isPedri && <div className="pedri-bg" aria-hidden />}
       <div className="relative z-10">
       <div className="mb-8 sm:mb-10 animate-fade-in flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left gap-4 sm:gap-5">
-        <PlayerAvatar
-          playerId={player.player_id as number}
-          name={name}
-          size={76}
-        />
+        <ViewTransition name={`player-${player.player_id}`} share="morph" default="none">
+          <PlayerAvatar
+            playerId={player.player_id as number}
+            name={name}
+            size={76}
+          />
+        </ViewTransition>
         <div className="min-w-0">
           <div className="flex items-center justify-center sm:justify-start gap-2.5 sm:gap-3 mb-2 flex-wrap">
             <h1
@@ -294,7 +344,7 @@ export default function PlayerPage({
   searchParams: Promise<{ season?: string; comp?: string }>
 }) {
   return (
-    <Reveal fallback={<Loading />}>
+    <Reveal fallback={<Loading params={params} />}>
       <PlayerContent params={params} searchParams={searchParams} />
     </Reveal>
   )

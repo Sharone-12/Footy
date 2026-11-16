@@ -1,4 +1,4 @@
-import { Suspense } from "react"
+import { Suspense, ViewTransition } from "react"
 import { cacheLife } from "next/cache"
 import Link from "next/link"
 import Image from "next/image"
@@ -54,6 +54,8 @@ function PlayerCard({ p, scope }: { p: SquadRow; scope: string }) {
       className="squad-card card-lift surface bg-card rounded-2xl overflow-hidden flex flex-col group"
     >
       <div className="relative aspect-[4/5] overflow-hidden">
+        {/* Paired with the avatar on the player page: the portrait flies there. */}
+        <ViewTransition name={`player-${p.player_id}`} share="morph" default="none">
         {portrait ? (
           /* next/image, unlike the headshots elsewhere: these are ~700 KB
              PNGs and the optimizer serves a ~25 KB webp at card size. */
@@ -70,6 +72,7 @@ function PlayerCard({ p, scope }: { p: SquadRow; scope: string }) {
             <PlayerAvatar playerId={p.player_id} name={p.player} size={104} />
           </div>
         )}
+        </ViewTransition>
       </div>
       <div className="border-t border-border px-3.5 py-3 flex items-center gap-3">
         <span

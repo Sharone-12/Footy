@@ -137,8 +137,8 @@ export async function PlayerDna({
       <div className="grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] gap-6 p-5">
         <div className="min-w-0">
           <div
-            className="text-3xl sm:text-4xl font-bold tracking-[-0.03em] leading-none uppercase"
-            style={{ fontFamily: "var(--font-condensed)", color: "var(--pitch)" }}
+            className="shimmer-text w-fit text-3xl sm:text-4xl font-bold tracking-[-0.03em] leading-none uppercase"
+            style={{ fontFamily: "var(--font-condensed)" }}
           >
             {primary.name}
           </div>

@@ -164,7 +164,17 @@ const LABEL_PX_Y = 17
 /** Fourteen names suit a wide plot; a phone has room for half that. */
 const labelCount = (plotWidth: number) => (plotWidth < 520 ? 7 : 14)
 
-export function MetricScatter({ players }: { players: ScatterPlayer[] }) {
+export function MetricScatter({
+  cols,
+  rows,
+}: {
+  cols: readonly string[]
+  rows: (string | number | null)[][]
+}) {
+  const players = useMemo(
+    () => rows.map((r) => Object.fromEntries(cols.map((c, i) => [c, r[i]])) as ScatterPlayer),
+    [cols, rows],
+  )
   const [xKey, setXKey] = useState("dribbles")
   const [yKey, setYKey] = useState("npxg_xa")
   const [floor, setFloor] = useState(450)
