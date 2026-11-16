@@ -37,10 +37,15 @@ export function LiveCard({
   const clock = score ? matchClock(score, now) : null
   const [stats, setStats] = useState<Stats | null>(null)
 
+  // Keyed on the feed's own event id, which the score already carries: the
+  // server then skips a fixture lookup, and the URL is the same one the watch
+  // page polls, so the CDN serves both from one entry. No score, no stats.
+  const eid = score?.id ?? null
   useEffect(() => {
+    if (!eid) return
     let alive = true
     const load = () =>
-      fetch(`/api/livescores/stats?fixture_id=${m.event_id}`)
+      fetch(`/api/livescores/stats?eid=${encodeURIComponent(eid)}`)
         .then((r) => (r.ok ? r.json() : null))
         .then((s: Stats | null) => alive && s?.hasStats && setStats(s))
         .catch(() => {})
@@ -50,7 +55,7 @@ export function LiveCard({
       alive = false
       clearInterval(t)
     }
-  }, [m.event_id])
+  }, [eid])
 
   const tid = getLeagueTournamentId(m.league)
   const homeTone = clubColor(m.home) ?? "var(--pitch)"

@@ -83,6 +83,7 @@ async function fetchStatsForEid(eid: string): Promise<LiveMatchStatsResponse> {
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         },
         cache: "no-store",
+        signal: AbortSignal.timeout(8_000),
       })
 
       if (!res.ok) {
@@ -173,20 +174,23 @@ export async function GET(request: Request) {
   const eidParam = searchParams.get("eid")
   const fixtureIdParam = searchParams.get("fixture_id")
 
-  const matchEvent = await resolveLiveScoreEvent(eidParam, fixtureIdParam)
-  if (!matchEvent?.eid) {
+  // Stats need only the eid. Resolving via fixture_id costs a Supabase round
+  // trip plus a walk over the day feed, so it is only done when the client
+  // has nothing better; the live cards and watch page already hold the eid.
+  const eid = eidParam?.trim() || (await resolveLiveScoreEvent(null, fixtureIdParam))?.eid
+  if (!eid) {
     return NextResponse.json(
       { error: "Missing eid or active live match" },
-      { status: 400, headers: { "Cache-Control": "no-cache, no-store, must-revalidate" } },
+      { status: 400, headers: { "Cache-Control": "public, s-maxage=30" } },
     )
   }
 
-  const stats = await fetchStatsForEid(matchEvent.eid)
+  const stats = await fetchStatsForEid(eid)
 
+  // Every live card and the watch page poll this at 15s, so the CDN must
+  // absorb those polls: same window as the in-memory TTL above.
   return NextResponse.json(stats, {
-    headers: {
-      "Cache-Control": "no-cache, no-store, must-revalidate",
-    },
+    headers: { "Cache-Control": "public, s-maxage=15, stale-while-revalidate=30" },
   })
 }
 

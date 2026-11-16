@@ -139,10 +139,12 @@ export function WatchLiveStatsCard({ fixture, liveScore, summaryData }: WatchLiv
     if (isManual) setIsRefreshing(true)
 
     try {
-      const queryParts: string[] = []
-      if (eid) queryParts.push(`eid=${encodeURIComponent(eid)}`)
-      if (fixtureId) queryParts.push(`fixture_id=${encodeURIComponent(fixtureId)}`)
-      const resStats = await fetch(`/api/livescores/stats?${queryParts.join("&")}`, { cache: "no-store" })
+      // One param, not both: the eid alone is the same URL the live cards
+      // poll, so the CDN entry is shared, and the server skips resolution.
+      const query = eid
+        ? `eid=${encodeURIComponent(eid)}`
+        : `fixture_id=${encodeURIComponent(fixtureId!)}`
+      const resStats = await fetch(`/api/livescores/stats?${query}`)
       if (resStats.ok) {
         const data = (await resStats.json()) as LiveMatchStatsResponse
         if (data && data.hasStats) {

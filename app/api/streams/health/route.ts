@@ -141,7 +141,8 @@ export async function GET(request: Request) {
     },
     {
       headers: {
-        "Cache-Control": "public, s-maxage=120, stale-while-revalidate=300",
+        // Seven upstream pings per miss; a status panel can be five minutes old.
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
       },
     },
   )

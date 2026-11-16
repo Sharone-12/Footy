@@ -304,6 +304,9 @@ async function fetchFeed(date?: Date): Promise<unknown> {
   const response = await fetch(feedUrl(date), {
     headers: { Accept: "application/json" },
     cache: "no-store",
+    // A hung upstream must not hold the function open; the route serves its
+    // last snapshot on failure anyway.
+    signal: AbortSignal.timeout(8_000),
   })
   if (!response.ok) throw new Error(`live feed ${response.status}`)
   return response.json()
@@ -346,10 +349,13 @@ export async function fetchDaySnapshot(date?: Date): Promise<DaySnapshot> {
   const task = (async () => {
     try {
       const payload = await fetchFeed(date)
+      // One walk over the ~420 KB payload, not three: the subsets are filters
+      // of the same rows, and this is the CPU-heaviest thing the live routes do.
+      const all = normalizeAll(payload)
       const data: DaySnapshot = {
-        live: normalizeLive(payload),
-        final: normalizeFinal(payload),
-        all: normalizeAll(payload),
+        live: all.filter((s) => !NOT_IN_PLAY.has(s.status)),
+        final: all.filter((s) => FINAL_STATUSES.has(s.status)),
+        all,
       }
       snapshots.set(key, { at: Date.now(), data })
       return data

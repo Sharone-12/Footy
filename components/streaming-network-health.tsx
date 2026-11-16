@@ -117,7 +117,7 @@ export function StreamingNetworkHealth() {
       if (typeof document !== "undefined" && document.visibilityState === "visible") {
         pingProviders()
       }
-    }, 180_000)
+    }, 300_000) // matches the route's s-maxage, so repeat pings are CDN hits
 
     return () => clearInterval(timer)
   }, [])

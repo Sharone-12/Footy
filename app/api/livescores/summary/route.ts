@@ -3,7 +3,14 @@ import { resolveLiveScoreEvent, fetchScoreboard } from "@/lib/livescores-resolve
 
 const INCIDENTS_API = "https://prod-public-api.livescore.com/v1/api/app/incidents/soccer"
 const INFO_API = "https://prod-public-api.livescore.com/v1/api/app/info/soccer"
-const CACHE_TTL_MS = 2_000
+// Same as the CDN window below: a 2s TTL meant nearly every CDN miss paid
+// three upstream fetches again.
+const CACHE_TTL_MS = 15_000
+const UPSTREAM_HEADERS = {
+  Accept: "application/json",
+  "User-Agent":
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+}
 
 type CachedSummary = {
   timestamp: number
@@ -103,20 +110,14 @@ export async function GET(request: Request) {
   try {
     const [incidentsRes, infoRes, scoreboard] = await Promise.all([
       fetch(`${INCIDENTS_API}/${encodeURIComponent(eid)}`, {
-        headers: {
-          Accept: "application/json",
-          "User-Agent":
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        },
+        headers: UPSTREAM_HEADERS,
         cache: "no-store",
+        signal: AbortSignal.timeout(8_000),
       }).catch(() => null),
       fetch(`${INFO_API}/${encodeURIComponent(eid)}`, {
-        headers: {
-          Accept: "application/json",
-          "User-Agent":
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
-        },
+        headers: UPSTREAM_HEADERS,
         cache: "no-store",
+        signal: AbortSignal.timeout(8_000),
       }).catch(() => null),
       fetchScoreboard(eid),
     ])

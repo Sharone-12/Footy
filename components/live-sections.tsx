@@ -15,6 +15,7 @@ import type { MatchedCinevid } from "@/lib/cinevid/types"
 import type { MatchedLive24 } from "@/lib/live24/types"
 import type { MatchedMatchora } from "@/lib/matchora/types"
 import { isProviderEnabled } from "@/lib/streaming/config"
+import type { LiveStreams } from "@/lib/streaming/live-streams"
 import { UnifiedPlayer } from "@/components/unified-player"
 import { formatKickoffIST, formatDateIST, formatTimeIST, IST_TIMEZONE } from "@/lib/time"
 import { LiveCard } from "@/components/live-card"
@@ -378,15 +379,30 @@ function Section({
   )
 }
 
+type StreamMaps = {
+  matchoraMap: Record<number, MatchedMatchora>
+  streamMap: Record<number, MatchedStream>
+  zliveMap: Record<number, MatchedZLive>
+  daddyliveMap: Record<number, MatchedDaddyLive>
+  damitvMap: Record<number, MatchedDamiTv>
+  cinevidMap: Record<number, MatchedCinevid>
+  live24Map: Record<number, MatchedLive24>
+}
+
+const EMPTY_MAPS: StreamMaps = {
+  matchoraMap: {}, streamMap: {}, zliveMap: {}, daddyliveMap: {},
+  damitvMap: {}, cinevidMap: {}, live24Map: {},
+}
+
+const byId = <T extends { event_id: number }>(rows: T[] | undefined): Record<number, T> =>
+  Object.fromEntries((rows ?? []).map((r) => [r.event_id, r]))
+
+/** Matches the route's s-maxage, so a re-poll is a CDN hit, not a fan-out. */
+const STREAMS_EVERY_MS = 60_000
+
 export function LiveSections({ matches }: { matches: LiveFixture[] }) {
   const [now, setNow] = useState<number | null>(null)
-  const [matchoraMap, setMatchoraMap] = useState<Record<number, MatchedMatchora>>({})
-  const [streamMap, setStreamMap] = useState<Record<number, MatchedStream>>({})
-  const [zliveMap, setZliveMap] = useState<Record<number, MatchedZLive>>({})
-  const [daddyliveMap, setDaddyliveMap] = useState<Record<number, MatchedDaddyLive>>({})
-  const [damitvMap, setDamitvMap] = useState<Record<number, MatchedDamiTv>>({})
-  const [cinevidMap, setCinevidMap] = useState<Record<number, MatchedCinevid>>({})
-  const [live24Map, setLive24Map] = useState<Record<number, MatchedLive24>>({})
+  const [loadedMaps, setMaps] = useState<StreamMaps>(EMPTY_MAPS)
   const [genericChannels, setGenericChannels] = useState<ZLiveChannel[]>([])
   const [activePlayer, setActivePlayer] = useState<ActivePlayerState | null>(null)
 
@@ -412,227 +428,56 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
       .join(",")
   }, [matches, now])
 
-  // Fetch Matchora stream matches when within 15 mins of kickoff
+  // Every provider in one request, only while a match is live or within 15
+  // minutes of kickoff. This was seven routes, each with its own Supabase
+  // query and matching pass; the server now does that once and the CDN holds
+  // it for the re-poll window, so pills appear as sources come online.
   useEffect(() => {
-    if (!isProviderEnabled("matchora") || !streamEligibleKey) {
-      setMatchoraMap({})
-      return
-    }
+    if (!streamEligibleKey) return
     let unmounted = false
-    async function loadMatchora() {
+    async function load() {
       try {
-        const res = await fetch("/api/streams/matchora")
+        const res = await fetch("/api/streams/live")
         if (!res.ok) return
-        const data = await res.json()
-        if (data?.streams && Array.isArray(data.streams) && !unmounted) {
-          const map: Record<number, MatchedMatchora> = {}
-          for (const s of data.streams) {
-            if (s.event_id) map[s.event_id] = s
-          }
-          setMatchoraMap(map)
-        }
+        const data = (await res.json()) as LiveStreams
+        if (unmounted) return
+        setMaps({
+          matchoraMap: byId(data.matchora),
+          streamMap: byId(data.streamfree),
+          zliveMap: byId(data.zlive),
+          daddyliveMap: byId(data.daddylive),
+          damitvMap: byId(data.damitv),
+          cinevidMap: byId(data.cinevid),
+          live24Map: byId(data.live24),
+        })
       } catch (err) {
-        console.warn("[live] Could not load Matchora streams:", err)
+        console.warn("[live] Could not load streams:", err)
       }
     }
-    loadMatchora()
+    load()
+    const t = setInterval(() => {
+      if (document.visibilityState === "visible") load()
+    }, STREAMS_EVERY_MS)
     return () => {
       unmounted = true
+      clearInterval(t)
     }
   }, [streamEligibleKey])
 
-  // Fetch StreamFree stream matches when within 15 mins of kickoff
+  // The 24/7 channel directory sits below the fixtures whatever is on.
   useEffect(() => {
-    if (!isProviderEnabled("streamfree") || !streamEligibleKey) {
-      setStreamMap({})
-      return
-    }
+    if (!isProviderEnabled("zlive")) return
     let unmounted = false
-    async function loadStreamFree() {
-      try {
-        const res = await fetch("/api/streamfree")
-        if (!res.ok) return
-        const data = await res.json()
-        if (data?.streams && Array.isArray(data.streams) && !unmounted) {
-          const map: Record<number, MatchedStream> = {}
-          for (const s of data.streams) {
-            if (s.event_id) map[s.event_id] = s
-          }
-          setStreamMap(map)
-        }
-      } catch (err) {
-        console.warn("[live] Could not load StreamFree streams:", err)
-      }
-    }
-    loadStreamFree()
+    fetch("/api/zlive?generic=1")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!unmounted && Array.isArray(data?.channels)) setGenericChannels(data.channels)
+      })
+      .catch((err) => console.warn("[live] Could not load ZLive channels:", err))
     return () => {
       unmounted = true
     }
-  }, [streamEligibleKey])
-
-  // Fetch DAMITV stream matches when within 15 mins of kickoff
-  useEffect(() => {
-    if (!isProviderEnabled("damitv") || !streamEligibleKey) {
-      setDamitvMap({})
-      return
-    }
-    let unmounted = false
-    async function loadDamiTv() {
-      try {
-        const res = await fetch("/api/streams/damitv")
-        if (!res.ok) return
-        const data = await res.json()
-        if (data?.streams && Array.isArray(data.streams) && !unmounted) {
-          const map: Record<number, MatchedDamiTv> = {}
-          for (const s of data.streams) {
-            if (s.event_id) map[s.event_id] = s
-          }
-          setDamitvMap(map)
-        }
-      } catch (err) {
-        console.warn("[live] Could not load DAMITV streams:", err)
-      }
-    }
-    loadDamiTv()
-    return () => {
-      unmounted = true
-    }
-  }, [streamEligibleKey])
-
-  // Fetch Cinevid stream matches when within 15 mins of kickoff
-  useEffect(() => {
-    if (!isProviderEnabled("cinevid") || !streamEligibleKey) {
-      setCinevidMap({})
-      return
-    }
-    let unmounted = false
-    async function loadCinevid() {
-      try {
-        const res = await fetch("/api/streams/cinevid")
-        if (!res.ok) return
-        const data = await res.json()
-        if (data?.streams && Array.isArray(data.streams) && !unmounted) {
-          const map: Record<number, MatchedCinevid> = {}
-          for (const s of data.streams) {
-            if (s.event_id) map[s.event_id] = s
-          }
-          setCinevidMap(map)
-        }
-      } catch (err) {
-        console.warn("[live] Could not load Cinevid streams:", err)
-      }
-    }
-    loadCinevid()
-    return () => {
-      unmounted = true
-    }
-  }, [streamEligibleKey])
-
-  // Fetch Live24 stream matches when within 15 mins of kickoff
-  useEffect(() => {
-    if (!isProviderEnabled("live24") || !streamEligibleKey) {
-      setLive24Map({})
-      return
-    }
-    let unmounted = false
-    async function loadLive24() {
-      try {
-        const res = await fetch("/api/streams/live24")
-        if (!res.ok) return
-        const data = await res.json()
-        if (data?.streams && Array.isArray(data.streams) && !unmounted) {
-          const map: Record<number, MatchedLive24> = {}
-          for (const s of data.streams) {
-            if (s.event_id) map[s.event_id] = s
-          }
-          setLive24Map(map)
-        }
-      } catch (err) {
-        console.warn("[live] Could not load Live24 streams:", err)
-      }
-    }
-    loadLive24()
-    return () => {
-      unmounted = true
-    }
-  }, [streamEligibleKey])
-
-  // Fetch DaddyLive stream matches when within 15 mins of kickoff
-  useEffect(() => {
-    if (!isProviderEnabled("daddylive") || !streamEligibleKey) {
-      setDaddyliveMap({})
-      return
-    }
-    let unmounted = false
-    async function loadDaddyLive() {
-      try {
-        const res = await fetch("/api/streams/daddylive")
-        if (!res.ok) return
-        const data = await res.json()
-        if (data?.streams && Array.isArray(data.streams) && !unmounted) {
-          const map: Record<number, MatchedDaddyLive> = {}
-          for (const s of data.streams) {
-            if (s.event_id) map[s.event_id] = s
-          }
-          setDaddyliveMap(map)
-        }
-      } catch (err) {
-        console.warn("[live] Could not load DaddyLive streams:", err)
-      }
-    }
-    loadDaddyLive()
-    return () => {
-      unmounted = true
-    }
-  }, [streamEligibleKey])
-
-  // Fetch ZLive stream matches and generic channels when within 15 mins of kickoff
-  useEffect(() => {
-    if (!isProviderEnabled("zlive")) {
-      setZliveMap({})
-      setGenericChannels([])
-      return
-    }
-    let unmounted = false
-    async function loadZLive() {
-      try {
-        const promises: Promise<Response>[] = [fetch("/api/zlive?generic=1")]
-        if (streamEligibleKey) {
-          promises.push(fetch("/api/zlive"))
-        }
-
-        const results = await Promise.allSettled(promises)
-        const genericRes = results[0]
-        const matchesRes = streamEligibleKey ? results[1] : null
-
-        if (genericRes?.status === "fulfilled" && genericRes.value.ok) {
-          const data = await genericRes.value.json()
-          if (data?.channels && Array.isArray(data.channels) && !unmounted) {
-            setGenericChannels(data.channels)
-          }
-        }
-
-        if (matchesRes && matchesRes.status === "fulfilled" && matchesRes.value.ok) {
-          const data = await matchesRes.value.json()
-          if (data?.channels && Array.isArray(data.channels) && !unmounted) {
-            const map: Record<number, MatchedZLive> = {}
-            for (const item of data.channels) {
-              if (item.event_id) map[item.event_id] = item
-            }
-            setZliveMap(map)
-          }
-        } else if (!streamEligibleKey) {
-          setZliveMap({})
-        }
-      } catch (err) {
-        console.warn("[live] Could not load ZLive data:", err)
-      }
-    }
-    loadZLive()
-    return () => {
-      unmounted = true
-    }
-  }, [streamEligibleKey])
+  }, [])
 
   // Close player with Esc key
   useEffect(() => {
@@ -650,15 +495,16 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
   // Before mount there is no clock, so nothing can be bucketed yet.
   const { live, soon, upcoming } = splitFixtures(filteredMatches, now ?? 0)
 
-  const maps = { matchoraMap, streamMap, zliveMap, daddyliveMap, damitvMap, cinevidMap, live24Map }
+  // Nothing in the window means nothing to show, whatever an earlier load held.
+  const maps = streamEligibleKey ? loadedMaps : EMPTY_MAPS
   const matched = (m: LiveFixture) => ({
-    matchedMatchora: matchoraMap[m.event_id],
-    matchedStream: streamMap[m.event_id],
-    matchedZLive: zliveMap[m.event_id],
-    matchedDaddyLive: daddyliveMap[m.event_id],
-    matchedDamiTv: damitvMap[m.event_id],
-    matchedCinevid: cinevidMap[m.event_id],
-    matchedLive24: live24Map[m.event_id],
+    matchedMatchora: maps.matchoraMap[m.event_id],
+    matchedStream: maps.streamMap[m.event_id],
+    matchedZLive: maps.zliveMap[m.event_id],
+    matchedDaddyLive: maps.daddyliveMap[m.event_id],
+    matchedDamiTv: maps.damitvMap[m.event_id],
+    matchedCinevid: maps.cinevidMap[m.event_id],
+    matchedLive24: maps.live24Map[m.event_id],
   })
   const ready = now != null
   const days = ready ? groupByDay(upcoming, now) : []

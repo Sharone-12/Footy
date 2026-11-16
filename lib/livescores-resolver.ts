@@ -37,6 +37,7 @@ export async function fetchScoreboard(eid: string): Promise<any | null> {
             "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
         },
         cache: "no-store",
+        signal: AbortSignal.timeout(8_000),
       })
 
       if (!res.ok) return null

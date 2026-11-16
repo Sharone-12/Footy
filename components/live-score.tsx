@@ -16,8 +16,14 @@ import { LiveSignal } from "@/components/live-signal"
  * - Teardown is debounced so page transitions keep cached data and stay hot without flickering.
  */
 
+/**
+ * Both poll windows match their route's CDN s-maxage, so every tab and every
+ * user polling in the same window is served one function invocation.
+ */
 const POLL_SCORES_MS = 15_000
-const POLL_STREAMS_MS = 30_000
+/** Nothing in play means no goal can land; back off and let the CDN absorb it. */
+const POLL_IDLE_MS = 60_000
+const POLL_STREAMS_MS = 60_000
 const TICK_MS = 1_000
 const TEARDOWN_DELAY_MS = 10_000
 
@@ -40,7 +46,8 @@ let snapshot: Snapshot = {
 }
 
 const listeners = new Set<() => void>()
-let scoresTimer: ReturnType<typeof setInterval> | null = null
+let scoresTimer: ReturnType<typeof setTimeout> | null = null
+let scoresBusy = false
 let streamsTimer: ReturnType<typeof setInterval> | null = null
 let tickTimer: ReturnType<typeof setInterval> | null = null
 let teardownTimer: ReturnType<typeof setTimeout> | null = null
@@ -50,7 +57,25 @@ function publish(next: Partial<Snapshot>) {
   for (const listener of listeners) listener()
 }
 
+/**
+ * The next score poll, chosen after each result rather than fixed at start:
+ * a `setInterval` picked at subscribe time saw an empty snapshot and locked
+ * in the idle cadence for the whole session, even once matches were on.
+ */
+function scheduleScores() {
+  if (scoresTimer) clearTimeout(scoresTimer)
+  scoresTimer = null
+  if (listeners.size === 0 || !isDocumentVisible()) return
+  const delay = snapshot.scores.length > 0 ? POLL_SCORES_MS : POLL_IDLE_MS
+  scoresTimer = setTimeout(() => {
+    scoresTimer = null
+    void pollScores()
+  }, delay)
+}
+
 async function pollScores() {
+  if (scoresBusy) return
+  scoresBusy = true
   try {
     const res = await fetch("/api/livescores")
     if (!res.ok) return
@@ -66,6 +91,9 @@ async function pollScores() {
     }
   } catch {
     // Offline or network blip: preserve existing snapshot
+  } finally {
+    scoresBusy = false
+    scheduleScores()
   }
 }
 
@@ -102,20 +130,17 @@ function startPolling() {
   // Only poll if document is currently visible
   if (!isDocumentVisible()) return
 
-  if (!scoresTimer) {
-    void pollScores()
-    const interval = snapshot.scores.length > 0 ? POLL_SCORES_MS : 60_000
-    scoresTimer = setInterval(pollScores, interval)
-  }
+  // A poll in flight will schedule the next one itself.
+  if (!scoresTimer && !scoresBusy) void pollScores()
 
   if (!streamsTimer) {
     void pollStreams()
-    streamsTimer = setInterval(pollStreams, 60_000)
+    streamsTimer = setInterval(pollStreams, POLL_STREAMS_MS)
   }
 }
 
 function pausePolling() {
-  if (scoresTimer) clearInterval(scoresTimer)
+  if (scoresTimer) clearTimeout(scoresTimer)
   if (streamsTimer) clearInterval(streamsTimer)
   if (tickTimer) clearInterval(tickTimer)
   scoresTimer = streamsTimer = tickTimer = null
@@ -154,12 +179,7 @@ function syncTick() {
 function stopPollingWithDelay() {
   if (teardownTimer) clearTimeout(teardownTimer)
   teardownTimer = setTimeout(() => {
-    if (listeners.size === 0) {
-      if (scoresTimer) clearInterval(scoresTimer)
-      if (streamsTimer) clearInterval(streamsTimer)
-      if (tickTimer) clearInterval(tickTimer)
-      scoresTimer = streamsTimer = tickTimer = null
-    }
+    if (listeners.size === 0) pausePolling()
     teardownTimer = null
   }, TEARDOWN_DELAY_MS)
 }
