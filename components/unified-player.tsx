@@ -567,7 +567,7 @@ export function UnifiedPlayer({
       </div>
 
       {/* Video Viewport Container */}
-      <div className="relative aspect-video w-full bg-black flex items-center justify-center overflow-hidden">
+      <div className="relative aspect-video w-full bg-black flex items-center justify-center overflow-hidden [contain:paint_layout] [isolation:isolate] transform-gpu">
         {isLoading && !hasError && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/85 z-10 text-muted-foreground">
             <RefreshCwIcon className="size-8 animate-spin text-[var(--pitch)] motion-reduce:hidden" />
@@ -633,11 +633,11 @@ export function UnifiedPlayer({
               setIsLoading(false)
               setHasError(true)
             }}
-            loading="lazy"
+            loading="eager"
             referrerPolicy={selectedProvider === "daddylive" ? "no-referrer" : "no-referrer-when-downgrade"}
             allow="autoplay; fullscreen; picture-in-picture; encrypted-media"
             allowFullScreen
-            style={{ border: 0 }}
+            style={{ border: 0, contain: "paint layout", isolation: "isolate" }}
             className={`border-0 transition-all ${
               selectedProvider === "daddylive" && daddyLiveClean
                 ? "absolute top-0 inset-x-0 w-full h-[calc(100%+62px)] max-h-none"

@@ -155,7 +155,7 @@ function Board({
 /** The week's fixtures. Cached on the date pair, so it is fetched once a day. */
 async function loadUpcoming(from: string, to: string) {
   "use cache"
-  cacheLife("minutes")
+  cacheLife("hours")
 
   const { data } = await supabase
     .from("matches")
@@ -189,7 +189,7 @@ async function Upcoming() {
  */
 async function loadBoards(season: string, comp: Competition) {
   "use cache"
-  cacheLife("minutes")
+  cacheLife("hours")
 
   if (comp === "all") {
     const [dScorers, uclScorers, dAssists, uclAssists] = await Promise.all([

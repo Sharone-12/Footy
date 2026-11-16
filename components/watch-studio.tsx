@@ -1175,12 +1175,13 @@ export function WatchStudio({
                 : "w-full h-auto overflow-visible"
             }`}>
               {viewMode === "single" ? (
-                <div className="relative w-full h-full flex items-center justify-center">
+                <div className="relative w-full h-full flex items-center justify-center [contain:paint_layout] [isolation:isolate] transform-gpu">
                   {slot0Override ? (
                     <iframe
                       key={`slot0-override-${slot0Override.streamUrl}-${reloadKey}`}
                       src={slot0Override.streamUrl}
                       title={slot0Override.title}
+                      style={{ border: 0, contain: "paint layout", isolation: "isolate" }}
                       className="w-full h-full border-0 bg-black block"
                       allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                       allowFullScreen
@@ -1357,6 +1358,7 @@ export function WatchStudio({
                             key={`${currentSource.key}-${reloadKey}`}
                             src={currentSource.url}
                             title={`${fixture?.home ?? "Live"} vs ${fixture?.away ?? "Match"} — ${currentSource.label}`}
+                            style={{ border: 0, contain: "paint layout", isolation: "isolate" }}
                             className={`border-0 bg-black block transition-all ${
                               currentProvider?.id === "zlive"
                                 ? "w-full h-full scale-[1.035] origin-center"

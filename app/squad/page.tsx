@@ -225,7 +225,7 @@ function SquadPitch({ squad, scope }: { squad: SquadRow[]; scope: string }) {
 /** The squad for a season, combining all competitions (La Liga + UCL). Cached: changes twice a year. */
 async function loadSquad(season: string) {
   "use cache"
-  cacheLife("minutes")
+  cacheLife("days")
 
   const { data } = await supabase
     .from("players")

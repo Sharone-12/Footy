@@ -170,24 +170,24 @@
 @keyframes slide-up {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translate3d(0, 12px, 0);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
 @keyframes slide-down {
   from {
     opacity: 0;
-    transform: translateY(-8px);
+    transform: translate3d(0, -8px, 0);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 
@@ -359,7 +359,8 @@ html:not(.dark) :is(
 }
 
 .stagger>* {
-  animation: slide-up 0.4s ease-out both;
+  animation: slide-up 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  will-change: transform, opacity;
 }
 
 .stagger>*:nth-child(1) {
@@ -610,13 +611,14 @@ html:not(.dark) .rank-badge {
     0 0 10px oklch(0.80 0.19 150 / 85%),
     0 0 22px oklch(0.80 0.19 150 / 55%);
   opacity: 0;
-  transform: translateX(-100%);
+  will-change: transform;
+  transform: translate3d(-100%, 0, 0);
   animation: spark-sweep 5s linear infinite;
 }
 
 @keyframes spark-sweep {
   0% {
-    transform: translateX(-100%);
+    transform: translate3d(-100%, 0, 0);
     opacity: 0;
   }
 
@@ -625,17 +627,17 @@ html:not(.dark) .rank-badge {
   }
 
   80% {
-    transform: translateX(220%);
+    transform: translate3d(220%, 0, 0);
     opacity: 1;
   }
 
   90% {
-    transform: translateX(260%);
+    transform: translate3d(260%, 0, 0);
     opacity: 0;
   }
 
   100% {
-    transform: translateX(260%);
+    transform: translate3d(260%, 0, 0);
     opacity: 0;
   }
 }
@@ -1336,64 +1338,38 @@ main h1 > span:nth-child(2) {
   }
 }
 
-/* Cards further down the page rise in as they scroll into view. Scroll-driven,
-   so it costs no JavaScript; browsers without it just show the card. Cards in
-   a .stagger group keep their own entrance. */
-@supports (animation-timeline: view()) {
-  main section.surface:not(.stagger > *) {
-    animation: scroll-rise linear both;
-    animation-timeline: view();
-    animation-range: entry 0% entry 45%;
-  }
-}
-
-@keyframes scroll-rise {
-  from {
-    opacity: 0;
-    transform: translateY(28px) scale(0.985);
-  }
-
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
 /* A squad portrait travelling to the player page avatar. */
 ::view-transition-group(.morph) {
-  animation-duration: 450ms;
+  animation-duration: 350ms;
   animation-timing-function: cubic-bezier(0.3, 0.9, 0.3, 1);
 }
 
-/* Skeleton hands over to content (components/reveal.tsx): the placeholder
-   leaves quickly, the content arrives a beat later and more gently. */
+/* Skeleton hands over to content (components/reveal.tsx): clean GPU fade & rise. */
 ::view-transition-old(.slide-down) {
-  animation: 150ms ease-out both vt-fade reverse, 150ms ease-out both vt-rise reverse;
+  animation: 120ms ease-out both vt-fade reverse, 120ms ease-out both vt-rise reverse;
 }
 
 ::view-transition-new(.slide-up) {
-  animation: 210ms ease-in 150ms both vt-fade, 400ms ease-out both vt-rise;
+  animation: 160ms ease-in 100ms both vt-fade, 300ms cubic-bezier(0.2, 0.8, 0.2, 1) both vt-rise;
 }
 
 @keyframes vt-fade {
   from {
     opacity: 0;
-    filter: blur(3px);
   }
 
   to {
     opacity: 1;
-    filter: blur(0);
   }
 }
 
 @keyframes vt-rise {
   from {
-    transform: translateY(10px);
+    transform: translate3d(0, 8px, 0);
   }
 
   to {
-    transform: translateY(0);
+    transform: translate3d(0, 0, 0);
   }
 }
 

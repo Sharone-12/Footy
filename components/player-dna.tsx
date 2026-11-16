@@ -20,7 +20,7 @@ import {
  */
 export async function loadFingerprints(season: string, comp: "league" | "ucl") {
   "use cache"
-  cacheLife("hours")
+  cacheLife("days")
 
   const rows = await fetchAllRows<DnaRow>((from, to) =>
     scopeLeague(

@@ -146,7 +146,6 @@ export function MainNav() {
               itemRefs.current[i] = el
             }}
             href={l.href}
-            prefetch={true}
             onClick={() => setOptimisticIdx(i)}
             onMouseEnter={() => setHoveredIdx(i)}
             onFocus={() => setHoveredIdx(i)}

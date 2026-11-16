@@ -13,14 +13,28 @@ export function TopProgressBar() {
 
   // Complete and hide progress bar whenever route/search changes
   useEffect(() => {
+    if (!visible && progress === 0) return
     setProgress(100)
     // Long enough for the ball to reach the net and the net to ripple.
     const timer = setTimeout(() => {
       setVisible(false)
       setProgress(0)
-    }, 520)
+    }, 400)
     return () => clearTimeout(timer)
   }, [pathname, searchParams])
+
+  // Safety fallback: if navigation takes longer than 2.5s, auto-complete to avoid stuck loading UI
+  useEffect(() => {
+    if (!visible) return
+    const safetyTimer = setTimeout(() => {
+      setProgress(100)
+      setTimeout(() => {
+        setVisible(false)
+        setProgress(0)
+      }, 350)
+    }, 2500)
+    return () => clearTimeout(safetyTimer)
+  }, [visible])
 
   // Listen for clicks on internal navigation links for instant (<16ms) feedback
   useEffect(() => {
@@ -48,9 +62,9 @@ export function TopProgressBar() {
             url.pathname === window.location.pathname &&
             url.search === window.location.search
 
-          if (!isSamePage) {
+          if (!isSamePage && !url.hash) {
             setVisible(true)
-            setProgress(28)
+            setProgress(30)
 
             if (timer) clearInterval(timer)
             timer = setInterval(() => {
@@ -62,11 +76,7 @@ export function TopProgressBar() {
                 const step = (85 - prev) * 0.15
                 return prev + Math.max(step, 1.5)
               })
-            }, 120)
-
-            startTransition(() => {
-              // Mark low priority transition
-            })
+            }, 100)
           }
         }
       } catch {
