@@ -94,7 +94,7 @@ export function StatBarChart({
                   <div key={name} className="flex items-center gap-2">
                     <div className="flex-1 h-[10px] rounded-full overflow-hidden bg-black/5 dark:bg-white/[0.04]">
                       <div
-                        className="h-full rounded-full transition-all duration-500"
+                        className="bar-grow h-full rounded-full transition-all duration-500"
                         style={{
                           width: `${Math.max(pct, 1)}%`,
                           background: PLAYER_COLORS[i % PLAYER_COLORS.length],

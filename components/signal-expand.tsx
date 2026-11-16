@@ -14,14 +14,16 @@ import { Input } from "@/components/ui/input"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
 
-export type SignalExpandRow = {
+export type SignalExpandPlayer = {
   slug: string
   player: string
   team: string
   team_id: number | null
   league: string
-  value: number
 }
+
+/** [index into the shared player directory, value], best first. */
+export type SignalRank = [number, number]
 
 export type SignalFmt = "signed2" | "fixed1" | "fixed2" | "pct1"
 
@@ -63,17 +65,24 @@ function formatValue(v: number, fmt: SignalFmt) {
 export function SignalExpand({
   label,
   formula,
-  rows,
+  dir,
+  ranks,
   fmt,
   scope,
 }: {
   label: string
   formula: string
-  rows: SignalExpandRow[]
+  /** Every rankable player, shared by all boards on the page. */
+  dir: SignalExpandPlayer[]
+  ranks: SignalRank[]
   fmt: SignalFmt
   scope: string
 }) {
   const [q, setQ] = useState("")
+  const rows = useMemo(
+    () => ranks.map(([i, value]) => ({ ...dir[i], value })),
+    [dir, ranks],
+  )
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase()

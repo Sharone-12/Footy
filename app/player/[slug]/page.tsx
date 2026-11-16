@@ -1,4 +1,6 @@
 import { Suspense } from "react"
+import { Reveal } from "@/components/reveal"
+import { CountUp } from "@/components/count-up"
 import { supabase } from "@/lib/supabase"
 import { resolveSeason } from "@/lib/seasons"
 import {
@@ -15,6 +17,7 @@ import { notFound } from "next/navigation"
 import { RADAR_STATS, STAT_GROUPS, percentileRank } from "@/lib/stats"
 import { PlayerRadar, StatBarChart } from "@/components/charts"
 import { PlayerAvatar, TeamCrest } from "@/components/player-avatar"
+import { PlayerDna } from "@/components/player-dna"
 import {
   Card,
   CardContent,
@@ -141,22 +144,26 @@ async function PlayerContent({
   const keyStats = [
     {
       label: "Goals",
-      value: String(player.goals),
+      value: Number(player.goals) || 0,
+      decimals: 0,
       sub: `${Number(player.goals_p90).toFixed(2)} per 90`,
     },
     {
       label: "Assists",
-      value: String(player.assists),
+      value: Number(player.assists) || 0,
+      decimals: 0,
       sub: `${Number(player.assists_p90).toFixed(2)} per 90`,
     },
     {
       label: "xG",
-      value: Number(player.xg).toFixed(1),
+      value: Number(player.xg) || 0,
+      decimals: 1,
       sub: `${Number(player.xg_p90).toFixed(2)} per 90`,
     },
     {
       label: "Minutes",
-      value: String(player.minutes),
+      value: Number(player.minutes) || 0,
+      decimals: 0,
       sub: `${player.appearances} appearances`,
     },
   ]
@@ -231,7 +238,7 @@ async function PlayerContent({
                 className="stat-figure text-4xl"
                 style={{ color: "var(--pitch)" }}
               >
-                {s.value}
+                <CountUp value={s.value} decimals={s.decimals} />
               </div>
               <div className={`stat-label mt-2 ${isBarca ? "!text-white/80" : ""}`}>{s.label}</div>
               <div className={`text-xs mt-1 ${isBarca ? "text-white/70" : "text-muted-foreground/60"}`}>{s.sub}</div>
@@ -254,6 +261,10 @@ async function PlayerContent({
           <PlayerRadar data={radarData} players={[name]} />
         </CardContent>
       </Card>
+
+      <Suspense fallback={<Skeleton className="h-[300px] rounded-2xl mb-10" />}>
+        <PlayerDna player={player} season={player.season as string} comp={comp} shown={shown} />
+      </Suspense>
 
       <div className="grid md:grid-cols-2 gap-6 stagger">
         {barData.map((group) => (
@@ -283,8 +294,8 @@ export default function PlayerPage({
   searchParams: Promise<{ season?: string; comp?: string }>
 }) {
   return (
-    <Suspense fallback={<Loading />}>
+    <Reveal fallback={<Loading />}>
       <PlayerContent params={params} searchParams={searchParams} />
-    </Suspense>
+    </Reveal>
   )
 }

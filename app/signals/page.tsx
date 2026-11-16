@@ -3,7 +3,7 @@ import { cacheLife } from "next/cache"
 import Link from "next/link"
 import { supabase, fetchAllRows } from "@/lib/supabase"
 import { MetricScatter, type ScatterPlayer } from "@/components/metric-scatter"
-import { resolveSeason } from "@/lib/seasons"
+import { resolveSeason, SEASONS } from "@/lib/seasons"
 import {
   resolveCompetition,
   scopeLeague,
@@ -14,10 +14,11 @@ import {
 import { CompetitionToggle } from "@/components/competition-toggle"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
-import { confidence, confidenceK, type Row } from "@/lib/rank"
+import { confidence, confidenceK, rankPlayers, ROLE_PROFILES, type Row } from "@/lib/rank"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Reveal } from "@/components/reveal"
 import { SignalInfo } from "@/components/signal-info"
-import { SignalExpand, type SignalExpandRow, type SignalFmt } from "@/components/signal-expand"
+import { SignalExpand, type SignalExpandPlayer, type SignalRank, type SignalFmt } from "@/components/signal-expand"
 
 type PlayerRow = {
   player: string
@@ -179,13 +180,15 @@ function LeagueTag({ league }: { league: string }) {
 function SignalBoard({
   signal,
   rows,
-  allRows,
+  dir,
+  ranks,
   scope,
   ranked,
 }: {
   signal: Signal
   rows: Array<PlayerRow & { value: number }>
-  allRows: SignalExpandRow[]
+  dir: SignalExpandPlayer[]
+  ranks: SignalRank[]
   scope: string
   ranked: number
 }) {
@@ -210,7 +213,8 @@ function SignalBoard({
             <SignalExpand
               label={signal.label}
               formula={signal.formula}
-              rows={allRows}
+              dir={dir}
+              ranks={ranks}
               fmt={signal.fmtKey}
               scope={scope}
             />
@@ -321,6 +325,136 @@ async function loadTotals(season: string): Promise<ScatterPlayer[]> {
   )
 }
 
+type Mover = {
+  slug: string
+  player: string
+  team: string
+  team_id: number | null
+  role: string
+  before: number
+  now: number
+  delta: number
+}
+
+const MOVER_COLS =
+  "slug, player, team, team_id, league, role, minutes, season, " +
+  [...new Set(Object.values(ROLE_PROFILES).flatMap((p) => p.map((w) => w.key)))].join(", ")
+
+/** One season's role scores: every player ranked inside their own role. */
+async function roleScores(season: string, comp: "league" | "ucl") {
+  const rows = await fetchAllRows<Row>((from, to) =>
+    scopeLeague(
+      supabase.from("players").select(MOVER_COLS).eq("season", season).order("player_id", { ascending: true }),
+      comp,
+    ).range(from, to) as unknown as PromiseLike<{ data: Row[] | null }>,
+  )
+  const most = Math.max(0, ...rows.map((r) => Number(r.minutes) || 0))
+  const teamIds = new Map(rows.map((r) => [String(r.slug), r.team_id == null ? null : Number(r.team_id)]))
+  const scored = Object.keys(ROLE_PROFILES).flatMap((role) =>
+    rankPlayers(rows.filter((r) => r.role === role), role),
+  )
+  return { scored, most, teamIds }
+}
+
+/**
+ * Who moved most between two seasons, by role score.
+ *
+ * Both scores are already shrunk toward 50 for thin samples, but shrinkage
+ * alone would still call a ten-game cameo against a full season a "decline",
+ * so both seasons also need a real share of the minutes. That keeps an early
+ * season honest too: the floor scales with how much has been played.
+ */
+async function loadMovers(season: string, prev: string, comp: "league" | "ucl") {
+  "use cache"
+  cacheLife("hours")
+
+  const [now, before] = await Promise.all([roleScores(season, comp), roleScores(prev, comp)])
+  const past = new Map(
+    before.scored.filter((s) => s.minutes >= before.most * 0.4).map((s) => [s.slug, s]),
+  )
+  const movers: Mover[] = []
+  for (const s of now.scored) {
+    const was = past.get(s.slug)
+    if (!was || s.minutes < Math.max(300, now.most * 0.4)) continue
+    movers.push({
+      slug: s.slug,
+      player: s.player,
+      team: s.team,
+      team_id: now.teamIds.get(s.slug) ?? null,
+      role: s.position,
+      before: was.score,
+      now: s.score,
+      delta: Math.round((s.score - was.score) * 10) / 10,
+    })
+  }
+  movers.sort((a, b) => b.delta - a.delta)
+  return { up: movers.slice(0, 10), down: movers.slice(-10).reverse() }
+}
+
+function MoverBoard({
+  title,
+  hint,
+  rows,
+  scope,
+  prev,
+}: {
+  title: string
+  hint: string
+  rows: Mover[]
+  scope: string
+  prev: string
+}) {
+  return (
+    <section className="surface rounded-2xl bg-card overflow-hidden">
+      <header className="px-5 pt-5 pb-3">
+        <h3
+          className="text-lg font-semibold tracking-tight uppercase"
+          style={{ fontFamily: "var(--font-condensed)" }}
+        >
+          {title}
+        </h3>
+        <p className="text-xs text-muted-foreground mt-1">{hint}</p>
+      </header>
+      <div className="px-2 pb-2">
+        {rows.map((p, i) => {
+          const up = p.delta >= 0
+          const tone = up ? "var(--pitch)" : "oklch(0.65 0.14 25)"
+          return (
+            <Link
+              key={p.slug}
+              href={`/player/${p.slug}${scope}`}
+              className="row-item flex items-center gap-3 px-3 py-2.5 rounded-xl"
+            >
+              <span className="rank-badge" data-rank={i + 1}>
+                {i + 1}
+              </span>
+              <span className="flex-1 min-w-0">
+                <span className="block text-[0.9rem] font-medium leading-tight truncate">
+                  {p.player}
+                </span>
+                <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  {p.team_id != null && <TeamCrest teamId={p.team_id} name={p.team} size={14} />}
+                  <span className="truncate">{p.team} · {p.role}</span>
+                </span>
+              </span>
+              <span
+                className="stat-label tabular-nums hidden min-[400px]:block"
+                title={`Role score ${prev} → now`}
+              >
+                {p.before.toFixed(0)} → {p.now.toFixed(0)}
+              </span>
+              <span className="stat-figure text-xl w-16 text-right" style={{ color: tone }}>
+                {up ? "+" : ""}
+                {p.delta.toFixed(1)}
+              </span>
+            </Link>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 async function Content({
   searchParams,
 }: {
@@ -344,8 +478,20 @@ async function Content({
   // Half-trust point, from the same helper the player rankings use.
   const k = confidenceK(eligible as unknown as Row[])
 
+  // Who each expand dialog can show, sent to the browser once. Every board
+  // used to carry its own copy of these names and clubs — five copies of the
+  // same 1,300 players, which is most of what made this page 4.4 MB.
+  const dir: SignalExpandPlayer[] = eligible.map((p) => ({
+    slug: p.slug,
+    player: p.player,
+    team: p.team,
+    team_id: p.team_id,
+    league: p.league,
+  }))
+  const indexed = eligible.map((p, i) => ({ ...p, i }))
+
   const boards = SIGNALS.map((s) => {
-    const pool = s.eligible ? eligible.filter(s.eligible) : eligible
+    const pool = s.eligible ? indexed.filter(s.eligible) : indexed
     const raw = pool
       .map((p) => ({ ...p, raw: s.compute(p) }))
       .filter((p) => Number.isFinite(p.raw))
@@ -359,17 +505,15 @@ async function Content({
       value: mean + confidence(Number(p.minutes) || 0, k) * (p.raw - mean),
     }))
     scored.sort((a, b) => (s.higherIsBetter ? b.value - a.value : a.value - b.value))
-    // Slim shape sent to the client expand dialog — drops the raw p90 columns.
-    const allRows: SignalExpandRow[] = scored.map((p) => ({
-      slug: p.slug,
-      player: p.player,
-      team: p.team,
-      team_id: p.team_id,
-      league: p.league,
-      value: p.value,
-    }))
-    return { signal: s, rows: scored.slice(0, 10), allRows, ranked: scored.length }
+    // The full ranking as [index into dir, value], rounded to what is shown.
+    const ranks: SignalRank[] = scored.map((p) => [p.i, Math.round(p.value * 1000) / 1000])
+    return { signal: s, rows: scored.slice(0, 10), ranks, ranked: scored.length }
   })
+
+  const prevSeason = SEASONS[SEASONS.indexOf(season) + 1]
+  const movers = prevSeason
+    ? await loadMovers(season, prevSeason, comp === "ucl" ? "ucl" : "league")
+    : null
 
   return (
     <>
@@ -394,11 +538,31 @@ async function Content({
             signal={b.signal}
             rows={b.rows}
             ranked={b.ranked}
-            allRows={b.allRows}
+            dir={dir}
+            ranks={b.ranks}
             scope={scope}
           />
         ))}
       </div>
+
+      {movers && movers.up.length > 0 && (
+        <div className="mt-10">
+          <h2
+            className="text-lg sm:text-xl font-bold tracking-tight"
+            style={{ fontFamily: "var(--font-condensed)" }}
+          >
+            BREAKOUTS &amp; DECLINES
+          </h2>
+          <p className="stat-label mt-1 mb-3">
+            Role score this season against {prevSeason} · each season scored within
+            its own role cohort · regulars in both
+          </p>
+          <div className="grid lg:grid-cols-2 gap-5 stagger">
+            <MoverBoard title="Breakouts" hint="Biggest jump on last season" rows={movers.up} scope={scope} prev={prevSeason!} />
+            <MoverBoard title="Declines" hint="Furthest off last season's level" rows={movers.down} scope={scope} prev={prevSeason!} />
+          </div>
+        </div>
+      )}
     </>
   )
 }
@@ -441,9 +605,11 @@ export default function SignalsPage({
         </Suspense>
       </div>
 
-      <Suspense fallback={<BoardsSkeleton />}>
-        <Content searchParams={searchParams} />
-      </Suspense>
+      <Reveal fallback={<BoardsSkeleton />}>
+        <div>
+          <Content searchParams={searchParams} />
+        </div>
+      </Reveal>
     </div>
   )
 }

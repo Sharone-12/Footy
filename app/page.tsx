@@ -1,4 +1,5 @@
 import { Suspense } from "react"
+import { Reveal } from "@/components/reveal"
 import { connection } from "next/server"
 import { cacheLife } from "next/cache"
 import { supabase } from "@/lib/supabase"
@@ -427,18 +428,20 @@ export default function Home({
         </Suspense>
       </div>
 
-      <Suspense
+      <Reveal
         fallback={
-          <>
+          <div>
             <div className="mb-5">
               <HeadlineSkeleton />
             </div>
             <BoardSkeleton />
-          </>
+          </div>
         }
       >
-        <Content searchParams={searchParams} />
-      </Suspense>
+        <div>
+          <Content searchParams={searchParams} />
+        </div>
+      </Reveal>
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import { scopeLeague, type Competition } from "@/lib/competition"
 import { fetchAllRows } from "@/lib/supabase"
+import type { TableMatch } from "@/lib/justice"
 
 export const CURRENT_SEASON = "2026/27"
 
@@ -365,14 +366,14 @@ export async function fetchTeamData(
   wantedStats: string[],
   /** Omit for every competition (predictions need all of them). */
   comp?: Competition,
-): Promise<{ table: TeamTableRow[]; stats: SeasonStatRow[]; xg: MatchXg }> {
+): Promise<{ table: TeamTableRow[]; stats: SeasonStatRow[]; xg: MatchXg; matches: TableMatch[] }> {
   // Paged: 25/26 alone holds 1895 finished matches, and a single request
   // would come back silently truncated at 1000, building a standings table
   // from half a season.
   const matchData = await fetchAllRows((from, to) => {
     let query = supabase
       .from("matches")
-      .select("event_id, league, season, home, away, status, home_goals, away_goals")
+      .select("event_id, league, season, round, home, away, status, home_goals, away_goals")
       .eq("season", season)
       .eq("status", "finished")
     if (comp) query = scopeLeague(query, comp)
@@ -380,7 +381,7 @@ export async function fetchTeamData(
   })
 
   const matchRows = (matchData || []) as {
-    event_id: number; league: string; season: string
+    event_id: number; league: string; season: string; round: number | null
     home: string; away: string; status: string
     home_goals: number | null; away_goals: number | null
   }[]
@@ -497,7 +498,13 @@ export async function fetchTeamData(
     if (h != null && a != null) xg.set(rs.event_id, [h, a])
   }
 
-  return { table, stats, xg }
+  // Finished matches in the clubs' own competitions, for views that replay or
+  // re-score the season match by match.
+  const matches: TableMatch[] = matchRows.filter(
+    (m) => allowed(m.home, m.league) && allowed(m.away, m.league),
+  )
+
+  return { table, stats, xg, matches }
 }
 
 /** event_id -> [home xG, away xG]. */

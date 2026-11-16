@@ -24,6 +24,9 @@ import { resolveCompetition, inCompetition, scopeQuery, UCL, type Competition } 
 import { CompetitionToggle } from "@/components/competition-toggle"
 import { LeagueCrest, TeamCrest } from "@/components/player-avatar"
 import { TeamRankingsExpand } from "@/components/team-rankings-expand"
+import { TableRace } from "@/components/table-race"
+import { Reveal } from "@/components/reveal"
+import { justiceTable, tableRace, type JusticeRow, type Race } from "@/lib/justice"
 
 const POWER_STAT = { stat: "Expected goals", label: "xG" } as TeamStat
 
@@ -41,11 +44,13 @@ function LeagueTable({
   rows,
   link,
   teamIds,
+  justice,
 }: {
   league: string
   rows: TeamTableRow[]
   link: (team: string) => string
   teamIds: Map<string, number>
+  justice: Map<string, JusticeRow>
 }) {
   const topPoints = rows[0]?.points || 1
   return (
@@ -61,22 +66,31 @@ function LeagueTable({
       </header>
 
       <div className="px-2 pb-3">
-        <div className="grid grid-cols-[1.25rem_1fr_1.75rem_2.25rem_2.25rem] sm:grid-cols-[1.5rem_1fr_2rem_4.5rem_2.5rem_2.25rem] gap-1.5 sm:gap-2 px-2.5 sm:px-3 pb-2 border-b border-white/5">
+        <div className="grid grid-cols-[1.25rem_1fr_1.75rem_2.25rem_2.25rem] sm:grid-cols-[1.5rem_1fr_2rem_4.5rem_2.5rem_2.25rem_3.5rem] gap-1.5 sm:gap-2 px-2.5 sm:px-3 pb-2 border-b border-white/5">
           <span className="stat-label text-right">#</span>
           <span className="stat-label">Team</span>
           <span className="stat-label text-right">P</span>
           <span className="stat-label hidden sm:block text-center">W/D/L</span>
           <span className="stat-label text-right">GD</span>
           <span className="stat-label text-right">Pts</span>
+          <span
+            className="stat-label hidden sm:block text-right"
+            title="Expected points: what each match's chances (xG) were worth. The arrow is how many places higher or lower the club would sit on those."
+          >
+            xPts
+          </span>
         </div>
 
         {rows.map((t, i) => {
           const isBarca = t.team === "FC Barcelona"
+          const j = justice.get(`${t.league}|${t.team}`)
+          // Positive: the chances say this club should be that many places higher.
+          const owed = j ? j.rank - j.xRank : 0
           return (
             <Link
               key={t.team}
               href={link(t.team)}
-              className={`group grid grid-cols-[1.25rem_1fr_1.75rem_2.25rem_2.25rem] sm:grid-cols-[1.5rem_1fr_2rem_4.5rem_2.5rem_2.25rem] gap-1.5 sm:gap-2 items-center px-2.5 sm:px-3 py-2 rounded-xl hover:bg-muted/50 transition-colors duration-150 ${
+              className={`group grid grid-cols-[1.25rem_1fr_1.75rem_2.25rem_2.25rem] sm:grid-cols-[1.5rem_1fr_2rem_4.5rem_2.5rem_2.25rem_3.5rem] gap-1.5 sm:gap-2 items-center px-2.5 sm:px-3 py-2 rounded-xl hover:bg-muted/50 transition-colors duration-150 ${
                 isBarca ? "barca-stripes text-white" : ""
               }`}
             >
@@ -146,6 +160,19 @@ function LeagueTable({
                     opacity: 0.3,
                   }}
                 />
+              </span>
+
+              <span className={`hidden sm:flex items-baseline justify-end gap-1 stat-figure text-xs ${isBarca ? "text-white/80" : "text-muted-foreground"}`}>
+                {j ? j.xPoints.toFixed(1) : "—"}
+                {owed !== 0 && (
+                  <span
+                    className="text-[0.6rem]"
+                    style={{ color: isBarca ? "#ffffff" : owed > 0 ? "var(--pitch)" : "oklch(0.65 0.14 25)" }}
+                  >
+                    {owed > 0 ? "▲" : "▼"}
+                    {Math.abs(owed)}
+                  </span>
+                )}
               </span>
             </Link>
           )
@@ -389,6 +416,71 @@ function PowerRankings({
   )
 }
 
+function JusticeBoard({
+  rows,
+  link,
+  teamIds,
+}: {
+  rows: JusticeRow[]
+  link: (team: string) => string
+  teamIds: Map<string, number>
+}) {
+  // A couple of matches of luck is just a couple of matches.
+  const pool = rows.filter((r) => r.played >= 5)
+  if (pool.length < 10) return null
+  const sorted = [...pool].sort((a, b) => b.luck - a.luck)
+  const sides = [
+    { title: "Running hot", hint: "more points than their chances were worth", rows: sorted.slice(0, 5), tone: "oklch(0.80 0.15 75)" },
+    { title: "Owed points", hint: "the chances say they deserve more", rows: sorted.slice(-5).reverse(), tone: "var(--pitch)" },
+  ]
+  return (
+    <section className="surface rounded-2xl bg-card overflow-hidden">
+      <header className="px-5 pt-5 pb-3">
+        <h2
+          className="text-lg font-semibold tracking-tight uppercase"
+          style={{ fontFamily: "var(--font-condensed)" }}
+        >
+          Justice Table
+        </h2>
+        <p className="stat-label mt-1">
+          Real points against expected points — each match re-scored from its xG
+        </p>
+      </header>
+      <div className="grid md:grid-cols-2 gap-x-4 px-3 pb-4">
+        {sides.map((side) => (
+          <div key={side.title}>
+            <div className="px-3 pb-1.5 flex items-baseline justify-between gap-2">
+              <span className="stat-label" style={{ color: side.tone }}>{side.title}</span>
+              <span className="stat-label truncate">{side.hint}</span>
+            </div>
+            {side.rows.map((r) => (
+              <Link
+                key={`${r.league}|${r.team}`}
+                href={link(r.team)}
+                className="row-item flex items-center gap-3 px-3 py-2 rounded-xl"
+              >
+                {teamIds.get(r.team) != null && (
+                  <TeamCrest teamId={teamIds.get(r.team)!} name={r.team} size={22} />
+                )}
+                <span className="flex-1 min-w-0">
+                  <span className="block text-[0.9rem] font-medium leading-tight truncate">{r.team}</span>
+                  <span className="stat-label">
+                    {LEAGUE_ABBR[r.league] ?? r.league} · {r.points} pts · {r.xPoints.toFixed(1)} expected
+                  </span>
+                </span>
+                <span className="stat-figure text-xl w-14 text-right" style={{ color: side.tone }}>
+                  {r.luck > 0 ? "+" : ""}
+                  {r.luck.toFixed(1)}
+                </span>
+              </Link>
+            ))}
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 function computePowerRankings(
   table: TeamTableRow[],
   stats: SeasonStatRow[],
@@ -461,11 +553,17 @@ async function loadTables(season: string, comp: Competition) {
   "use cache"
   cacheLife("minutes")
 
-  const [{ table, stats }, teamIds] = await Promise.all([
+  const [{ table, stats, xg, matches }, teamIds] = await Promise.all([
     fetchTeamData(supabase, season, WANTED_STATS, comp),
     fetchTeamIdMap(supabase, season),
   ])
-  return { table, stats, teamIds }
+  // Derived here rather than per request: both are pure functions of the
+  // season's results, and the raw matches never need to leave the cache.
+  const justice = justiceTable(matches, xg)
+  const races = FULL_LEAGUES.map((lg) => tableRace(matches, lg)).filter(
+    (r): r is Race => r !== null,
+  )
+  return { table, stats, teamIds, justice, races }
 }
 
 async function Tables({
@@ -476,7 +574,8 @@ async function Tables({
   const sp = await searchParams
   const season = resolveSeason(sp.season)
   const comp: Competition = resolveCompetition(sp.comp)
-  const { table: all, stats, teamIds } = await loadTables(season, comp)
+  const { table: all, stats, teamIds, justice, races } = await loadTables(season, comp)
+  const justiceByKey = new Map(justice.map((j) => [`${j.league}|${j.team}`, j]))
   const clubStats = indexStats(stats)
   const ranked = computePowerRankings(primaryRows(all), stats)
   const link = (team: string) => `/teams/compare${scopeQuery(season, comp, { teams: team })}`
@@ -486,6 +585,10 @@ async function Tables({
     <div className="stagger space-y-5">
       <PowerRankings ranked={ranked} link={link} teamIds={teamIds} />
 
+      {races.length > 0 && <TableRace races={races} teamIds={teamIds} />}
+
+      <JusticeBoard rows={justice} link={link} teamIds={teamIds} />
+
       <div className="grid lg:grid-cols-2 gap-5">
         {FULL_LEAGUES.filter((lg) => inCompetition(lg, comp)).map((lg) => (
           <LeagueTable
@@ -494,6 +597,7 @@ async function Tables({
             rows={all.filter((t) => t.league === lg)}
             link={link}
             teamIds={teamIds}
+            justice={justiceByKey}
           />
         ))}
       </div>
@@ -552,7 +656,7 @@ export default function TeamsPage({
         </div>
       </div>
 
-      <Suspense
+      <Reveal
         fallback={
           <div className="grid lg:grid-cols-2 gap-5">
             <Skeleton className="h-[640px] rounded-2xl" />
@@ -561,7 +665,7 @@ export default function TeamsPage({
         }
       >
         <Tables searchParams={searchParams} />
-      </Suspense>
+      </Reveal>
     </div>
   )
 }

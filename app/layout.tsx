@@ -12,6 +12,7 @@ import { UclBackdrop } from "@/components/ucl-backdrop"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { TopProgressBar } from "@/components/top-progress-bar"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { CommandPalette } from "@/components/command-palette"
 import "./globals.css"
 
 const sans = Archivo({
@@ -145,6 +146,7 @@ export default function RootLayout({
                 </Link>
                 <NextBarcaGame />
                 <ThemeToggle />
+                <CommandPalette />
               </div>
 
               <div className="pointer-events-auto flex items-center gap-2 shrink-0">

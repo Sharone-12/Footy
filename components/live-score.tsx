@@ -1,6 +1,6 @@
 "use client"
 
-import { useSyncExternalStore } from "react"
+import { useState, useSyncExternalStore } from "react"
 import { findLive, matchClock, type FixtureLike, type LiveScore } from "@/lib/livescores"
 import { LiveSignal } from "@/components/live-signal"
 
@@ -237,9 +237,19 @@ export function LiveFixtureMark({
 function LiveMark({ score, className }: { score: LiveScore; className: string }) {
   const now = useLiveNow()
   const clock = matchClock(score, now)
+  // A goal since the last poll: remount the pill under a new key so its
+  // flash animation runs once. Nothing flashes on first sight of a match.
+  const goals = (score.homeGoals ?? 0) + (score.awayGoals ?? 0)
+  const [seen, setSeen] = useState(goals)
+  const [flash, setFlash] = useState(0)
+  if (goals !== seen) {
+    setSeen(goals)
+    if (goals > seen) setFlash((f) => f + 1)
+  }
   return (
     <span
-      className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-xl bg-black/40 border border-white/10 shrink-0 shadow-sm ${className}`}
+      key={flash}
+      className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-xl bg-black/40 border border-white/10 shrink-0 shadow-sm ${flash ? "goal-flash" : ""} ${className}`}
       title={`Live: ${score.home} ${score.homeGoals ?? "-"}-${score.awayGoals ?? "-"} ${score.away}, ${clock.display}`}
     >
       <span className="font-mono font-bold text-xs sm:text-sm tabular-nums text-foreground">

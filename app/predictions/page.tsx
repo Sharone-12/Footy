@@ -1,4 +1,4 @@
-import { Suspense } from "react"
+import { Reveal } from "@/components/reveal"
 import { cacheLife } from "next/cache"
 import Link from "next/link"
 import { supabase, fetchAllRows } from "@/lib/supabase"
@@ -27,6 +27,7 @@ import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { PredictionsLeagueToggle } from "@/components/predictions-league-toggle"
 import { TeamRankingsExpand } from "@/components/team-rankings-expand"
 import { PredictionMatchCard } from "@/components/prediction-match-card"
+import { calibration, type Calibration } from "@/lib/calibration"
 import { formatDateIST } from "@/lib/time"
 
 const OUTCOME_COLORS = {
@@ -39,7 +40,7 @@ const OUTCOME_LABELS = { home: "Home", draw: "Draw", away: "Away" } as const
 
 
 
-function AccuracyCard({ acc }: { acc: AccuracyStats }) {
+function AccuracyCard({ acc, cal }: { acc: AccuracyStats; cal: Calibration }) {
   if (acc.total === 0) return null
   const ring = (correct: number, total: number) => {
     const pct = total > 0 ? (correct / total) * 100 : 0
@@ -100,6 +101,49 @@ function AccuracyCard({ acc }: { acc: AccuracyStats }) {
           ))}
         </div>
       </div>
+
+      {cal.count >= 20 && (
+        <div className="mt-5 pt-4 border-t border-white/5">
+          <div className="flex items-baseline justify-between gap-3 pb-3">
+            <h3 className="stat-label">Is it honest about confidence?</h3>
+            <span
+              className="stat-label"
+              title={`Brier score ${cal.brier} against ${cal.coinFlip} for always saying a third each. Lower is better.`}
+            >
+              {cal.skill > 0 ? `${cal.skill}% better than a coin flip` : "no better than a coin flip"}
+            </span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {cal.buckets.filter((b) => b.count > 0).map((b) => (
+              <div key={b.label}>
+                <div className="flex items-baseline justify-between">
+                  <span className="stat-label">said {b.label}</span>
+                  <span className="stat-label">{b.count}</span>
+                </div>
+                <div className="relative h-[10px] mt-1.5 rounded-full bg-black/5 dark:bg-white/[0.05]">
+                  <span
+                    className="bar-grow absolute inset-y-0 left-0 rounded-full"
+                    style={{ width: `${b.hit}%`, background: OUTCOME_COLORS.home, opacity: 0.85 }}
+                  />
+                  {/* Where the bar would end if the model were perfectly calibrated. */}
+                  <span
+                    className="absolute -inset-y-0.5 w-[2px] rounded-full bg-foreground/70"
+                    style={{ left: `${b.said}%` }}
+                    title={`Said ${b.said}% on average`}
+                  />
+                </div>
+                <div className="stat-figure text-sm mt-1.5">
+                  right {b.hit}%
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground/70 mt-3">
+            The tick is how sure the model said it was; the bar is how often it was right.
+            Bar past the tick means it undersold itself, short of it means overconfident.
+          </p>
+        </div>
+      )}
     </section>
   )
 }
@@ -354,7 +398,7 @@ async function Content({
   return (
     <>
       <PredictionsLeagueToggle active={leagueFilter} />
-      <AccuracyCard acc={accuracy} />
+      <AccuracyCard acc={accuracy} cal={calibration(filtered)} />
       {uclModel && <UclRatings model={uclModel} ids={uclIds} />}
 
       {nextRoundPredictions.length > 0 && (
@@ -431,7 +475,7 @@ export default function PredictionsPage({
         </p>
       </div>
 
-      <Suspense
+      <Reveal
         fallback={
           <div className="space-y-5">
             <Skeleton className="h-[120px] rounded-2xl" />
@@ -446,7 +490,7 @@ export default function PredictionsPage({
         <div className="space-y-8">
           <Content searchParams={searchParams} />
         </div>
-      </Suspense>
+      </Reveal>
     </div>
   )
 }

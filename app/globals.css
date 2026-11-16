@@ -869,10 +869,116 @@ html:not(.dark) .ucl-row .text-muted-foreground {
 .feed-bar-1 { animation-delay: 0.25s; }
 .feed-bar-2 { animation-delay: 0.5s; }
 
+/* Skeleton hands over to content (components/reveal.tsx): the placeholder
+   leaves quickly, the content arrives a beat later and more gently. */
+::view-transition-old(.slide-down) {
+  animation: 150ms ease-out both vt-fade reverse, 150ms ease-out both vt-rise reverse;
+}
+
+::view-transition-new(.slide-up) {
+  animation: 210ms ease-in 150ms both vt-fade, 400ms ease-out both vt-rise;
+}
+
+@keyframes vt-fade {
+  from {
+    opacity: 0;
+    filter: blur(3px);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes vt-rise {
+  from {
+    transform: translateY(10px);
+  }
+
+  to {
+    transform: translateY(0);
+  }
+}
+
+/* Live score pill, once, when a goal lands. */
+.goal-flash {
+  animation: goal-flash 1.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes goal-flash {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 oklch(0.80 0.19 150 / 70%);
+  }
+
+  18% {
+    transform: scale(1.18);
+    box-shadow: 0 0 0 6px oklch(0.80 0.19 150 / 45%);
+  }
+
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 16px oklch(0.80 0.19 150 / 0%);
+  }
+}
+
+/* Bars that draw themselves in from the left on first paint. */
+.bar-grow {
+  transform-origin: left;
+  animation: bar-grow 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Table race: rows trade places and bars fill as the rounds advance. */
+.race-row {
+  transition: transform 0.7s cubic-bezier(0.3, 0.9, 0.3, 1);
+  will-change: transform;
+}
+
+.race-bar {
+  transition: width 0.7s cubic-bezier(0.3, 0.9, 0.3, 1), opacity 0.4s ease;
+}
+
+/* Player DNA barcode: each bar grows out from the centre line in turn. */
+.dna-bar {
+  animation: dna-grow 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes dna-grow {
+  from {
+    transform: scaleY(0);
+  }
+
+  to {
+    transform: scaleY(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+
 
   .stagger>*,
   .stat-pop,
+  .dna-bar,
+  .goal-flash,
+  .bar-grow,
+  .race-row,
+  .race-bar,
   .shimmer-text,
   .card-lift,
   .row-item,
