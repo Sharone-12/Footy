@@ -150,7 +150,7 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
           {match ? `${match.home ? "vs" : "at"} ${match.opponent}` : following.name}
         </span>
         <span
-          className="stat-figure text-[0.85rem] sm:text-[0.95rem] mt-0.5"
+          className="stat-figure text-[0.8rem] sm:text-[0.95rem] mt-0.5"
           style={{ color: "var(--pitch)" }}
         >
           {waiting ? (
@@ -187,7 +187,7 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
 
   return (
     <span
-      className={`pointer-events-auto nav-pill flex items-center gap-1 sm:gap-1.5 pl-2 pr-1.5 sm:pr-2 py-1 sm:py-1.5 shrink-0 transition-all ${
+      className={`pointer-events-auto nav-pill flex items-center gap-1 sm:gap-1.5 pl-1.5 sm:pl-2 pr-1 sm:pr-2 py-1 sm:py-1.5 shrink min-w-0 transition-all ${
         isLive ? "border-[var(--pitch)]/60 shadow-[0_0_12px_-4px_var(--pitch)]" : ""
       }`}
       title={label}

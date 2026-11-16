@@ -24,7 +24,7 @@ const LINKS = [
  * nothing on screen to say they were there. Wrapping shows all seven.
  */
 const STRIP_CLASS =
-  "segment relative flex flex-wrap md:flex-nowrap justify-center gap-0.5 rounded-2xl md:rounded-full p-1 whitespace-nowrap max-w-full"
+  "segment relative inline-flex items-center gap-0.5 rounded-full p-1 whitespace-nowrap shrink-0"
 
 function isActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/"
@@ -106,6 +106,7 @@ export function MainNav() {
       return
     }
     measure(container, el, setPill)
+    el.scrollIntoView?.({ behavior: "smooth", block: "nearest", inline: "nearest" })
   }, [targetIdx, pathname, optimisticIdx])
 
   useLayoutEffect(() => {

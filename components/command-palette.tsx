@@ -79,7 +79,7 @@ export function CommandPalette() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="pointer-events-auto nav-pill size-[34px] sm:size-[38px] flex items-center justify-center shrink-0 text-foreground/80 hover:text-foreground transition-all duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring select-none"
+        className="pointer-events-auto nav-pill size-[36px] sm:size-[38px] flex items-center justify-center shrink-0 text-foreground/80 hover:text-foreground transition-all duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring select-none"
         aria-label="Search players and pages"
         title="Search (⌘K)"
       >

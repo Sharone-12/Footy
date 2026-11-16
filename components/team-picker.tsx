@@ -87,7 +87,7 @@ export function TeamPicker({ current }: { current: PreferredTeam | null }) {
       <DialogTrigger
         aria-label="Change which team the countdown follows"
         title="Change team"
-        className="pointer-events-auto shrink-0 inline-flex items-center justify-center size-5 rounded-full text-muted-foreground hover:text-[var(--pitch)] hover:bg-white/[0.08] transition-colors"
+        className="pointer-events-auto shrink-0 inline-flex items-center justify-center size-6 sm:size-5 rounded-full text-muted-foreground hover:text-[var(--pitch)] hover:bg-black/5 dark:hover:bg-white/[0.08] transition-colors"
       >
         <PencilIcon className="size-3" />
       </DialogTrigger>
