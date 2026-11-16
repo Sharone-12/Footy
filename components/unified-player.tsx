@@ -291,7 +291,7 @@ export function UnifiedPlayer({
           {/* Provider selector pill */}
           {(hasMatchora || hasStreamFree || hasZLive || hasDaddyLive || hasDamiTv || hasCinevid) && (
             <div
-              className="flex items-center bg-black/50 rounded-xl p-0.5 border border-border/60 text-xs shadow-inner overflow-x-auto no-scrollbar max-w-full"
+              className="flex items-center bg-muted/80 dark:bg-black/50 rounded-xl p-0.5 border border-border/60 text-xs shadow-inner overflow-x-auto no-scrollbar max-w-full"
               role="tablist"
               aria-label="Streaming Provider"
             >
@@ -304,7 +304,7 @@ export function UnifiedPlayer({
                 onClick={() => handleProviderSwitch("cinevid")}
                 className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[0.7rem] font-bold transition-all ${
                   selectedProvider === "cinevid"
-                    ? "bg-white/20 text-white shadow-sm"
+                    ? "bg-card text-foreground shadow-xs border border-border/80 dark:border-transparent dark:bg-white/20 dark:text-white"
                     : hasCinevid
                     ? "text-muted-foreground hover:text-foreground"
                     : "opacity-35 cursor-not-allowed text-muted-foreground"
@@ -322,7 +322,7 @@ export function UnifiedPlayer({
                 onClick={() => handleProviderSwitch("damitv")}
                 className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[0.7rem] font-bold transition-all ${
                   selectedProvider === "damitv"
-                    ? "bg-white/20 text-white shadow-sm"
+                    ? "bg-card text-foreground shadow-xs border border-border/80 dark:border-transparent dark:bg-white/20 dark:text-white"
                     : hasDamiTv
                     ? "text-muted-foreground hover:text-foreground"
                     : "opacity-35 cursor-not-allowed text-muted-foreground"
@@ -340,7 +340,7 @@ export function UnifiedPlayer({
                 onClick={() => handleProviderSwitch("matchora")}
                 className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[0.7rem] font-bold transition-all ${
                   selectedProvider === "matchora"
-                    ? "bg-white/20 text-white shadow-sm"
+                    ? "bg-card text-foreground shadow-xs border border-border/80 dark:border-transparent dark:bg-white/20 dark:text-white"
                     : hasMatchora
                     ? "text-muted-foreground hover:text-foreground"
                     : "opacity-35 cursor-not-allowed text-muted-foreground"
@@ -358,7 +358,7 @@ export function UnifiedPlayer({
                 onClick={() => handleProviderSwitch("daddylive")}
                 className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[0.7rem] font-bold transition-all ${
                   selectedProvider === "daddylive"
-                    ? "bg-white/20 text-white shadow-sm"
+                    ? "bg-card text-foreground shadow-xs border border-border/80 dark:border-transparent dark:bg-white/20 dark:text-white"
                     : hasDaddyLive
                     ? "text-muted-foreground hover:text-foreground"
                     : "opacity-35 cursor-not-allowed text-muted-foreground"
@@ -376,7 +376,7 @@ export function UnifiedPlayer({
                 onClick={() => handleProviderSwitch("live24")}
                 className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[0.7rem] font-bold transition-all ${
                   selectedProvider === "live24"
-                    ? "bg-white/20 text-white shadow-sm"
+                    ? "bg-card text-foreground shadow-xs border border-border/80 dark:border-transparent dark:bg-white/20 dark:text-white"
                     : hasLive24
                     ? "text-muted-foreground hover:text-foreground"
                     : "opacity-35 cursor-not-allowed text-muted-foreground"
@@ -394,7 +394,7 @@ export function UnifiedPlayer({
                 onClick={() => handleProviderSwitch("zlive")}
                 className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[0.7rem] font-bold transition-all ${
                   selectedProvider === "zlive"
-                    ? "bg-white/20 text-white shadow-sm"
+                    ? "bg-card text-foreground shadow-xs border border-border/80 dark:border-transparent dark:bg-white/20 dark:text-white"
                     : hasZLive
                     ? "text-muted-foreground hover:text-foreground"
                     : "opacity-35 cursor-not-allowed text-muted-foreground"
@@ -412,7 +412,7 @@ export function UnifiedPlayer({
                 onClick={() => handleProviderSwitch("streamfree")}
                 className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-[0.7rem] font-bold transition-all ${
                   selectedProvider === "streamfree"
-                    ? "bg-white/20 text-white shadow-sm"
+                    ? "bg-card text-foreground shadow-xs border border-border/80 dark:border-transparent dark:bg-white/20 dark:text-white"
                     : hasStreamFree
                     ? "text-muted-foreground hover:text-foreground"
                     : "opacity-35 cursor-not-allowed text-muted-foreground"
@@ -426,7 +426,7 @@ export function UnifiedPlayer({
 
           {/* DAMITV Source Variants selector */}
           {selectedProvider === "damitv" && damiTv?.stream?.sources && damiTv.stream.sources.length > 1 && (
-            <div className="flex items-center bg-black/40 rounded-lg p-0.5 border border-border/50 text-xs">
+            <div className="flex items-center bg-muted/80 dark:bg-black/40 rounded-lg p-0.5 border border-border/50 text-xs">
               {damiTv.stream.sources.map((src) => {
                 const isSelected = src.id === (activeDamiSource?.id || "")
                 const badge = src.hd ? "HD" : src.sd ? "SD" : null
@@ -605,7 +605,7 @@ export function UnifiedPlayer({
               <button
                 type="button"
                 onClick={handleRetry}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-foreground transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-muted hover:bg-muted/80 text-xs font-semibold text-foreground transition-colors border border-border"
               >
                 <RefreshCwIcon className="size-3.5" />
                 Retry
@@ -676,7 +676,7 @@ export function UnifiedPlayer({
               className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold border transition-colors ${
                 daddyLiveClean
                   ? "bg-[var(--pitch)]/10 text-[var(--pitch)] border-[var(--pitch)]/30 hover:bg-[var(--pitch)]/20"
-                  : "bg-white/5 text-muted-foreground border-white/10 hover:text-foreground hover:bg-white/10"
+                  : "bg-muted dark:bg-white/5 text-muted-foreground border-border dark:border-white/10 hover:text-foreground hover:bg-muted/80 dark:hover:bg-white/10"
               }`}
               title={
                 daddyLiveClean

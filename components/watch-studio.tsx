@@ -956,12 +956,12 @@ export function WatchStudio({
                 {/* Prominent Score Hub (or VS Badge pre-match) */}
                 <div className="flex flex-col items-center justify-center shrink-0 px-1 sm:px-2">
                   {hasScore ? (
-                    <div className="inline-flex items-stretch h-8 sm:h-9 rounded-xl bg-black/80 border border-white/15 shadow-md backdrop-blur-md overflow-hidden">
+                    <div className="inline-flex items-stretch h-8 sm:h-9 rounded-xl bg-card dark:bg-black/80 border border-border dark:border-white/15 shadow-sm backdrop-blur-md overflow-hidden">
                       {hideScore ? (
                         <button
                           type="button"
                           onClick={toggleHideScore}
-                          className="flex items-center justify-center px-2.5 sm:px-3 text-amber-400 hover:text-amber-300 hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--pitch)]"
+                          className="flex items-center justify-center px-2.5 sm:px-3 text-amber-500 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 hover:bg-muted dark:hover:bg-white/10 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--pitch)]"
                           title="Show scoreline"
                           aria-label="Show scoreline"
                         >
@@ -972,7 +972,7 @@ export function WatchStudio({
                           <button
                             type="button"
                             onClick={toggleHideScore}
-                            className="p-1 rounded-md text-white/40 hover:text-white transition-colors hover:bg-white/10 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--pitch)]"
+                            className="p-1 rounded-md text-muted-foreground hover:text-foreground transition-colors hover:bg-muted dark:hover:bg-white/10 focus:outline-none focus-visible:ring-1 focus-visible:ring-[var(--pitch)]"
                             title="Hide scoreline"
                             aria-label="Hide scoreline"
                           >
@@ -983,18 +983,18 @@ export function WatchStudio({
                             className="cursor-pointer flex items-center gap-2 sm:gap-2.5 select-none"
                             title="Hide scoreline"
                           >
-                            <span className="font-mono text-xl sm:text-2xl font-black text-white tabular-nums tracking-tight leading-none">
+                            <span className="font-mono text-xl sm:text-2xl font-black text-foreground dark:text-white tabular-nums tracking-tight leading-none">
                               {homeScore}
                             </span>
-                            <span className="text-white/40 font-mono text-base sm:text-lg font-bold leading-none">:</span>
-                            <span className="font-mono text-xl sm:text-2xl font-black text-white tabular-nums tracking-tight leading-none">
+                            <span className="text-muted-foreground/50 dark:text-white/40 font-mono text-base sm:text-lg font-bold leading-none">:</span>
+                            <span className="font-mono text-xl sm:text-2xl font-black text-foreground dark:text-white tabular-nums tracking-tight leading-none">
                               {awayScore}
                             </span>
                           </div>
                         </div>
                       )}
                       {liveClock ? (
-                        <div className="flex items-center gap-1 px-2.5 border-l border-white/10 bg-[var(--pitch)]/10">
+                        <div className="flex items-center gap-1 px-2.5 border-l border-border dark:border-white/10 bg-[var(--pitch)]/10">
                           <span className="relative flex size-1.5">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[var(--pitch)] opacity-75 motion-reduce:hidden" />
                             <span className="relative inline-flex rounded-full size-1.5 bg-[var(--pitch)]" />
@@ -1004,8 +1004,8 @@ export function WatchStudio({
                           </span>
                         </div>
                       ) : isMatchFinished ? (
-                        <div className="flex items-center gap-1 px-2.5 border-l border-white/10 bg-white/5">
-                          <span className="font-mono font-bold text-[10px] sm:text-[11px] uppercase tracking-wider text-white/70 leading-none">
+                        <div className="flex items-center gap-1 px-2.5 border-l border-border dark:border-white/10 bg-muted/60 dark:bg-white/5">
+                          <span className="font-mono font-bold text-[10px] sm:text-[11px] uppercase tracking-wider text-muted-foreground dark:text-white/70 leading-none">
                             FT
                           </span>
                         </div>
@@ -1013,7 +1013,7 @@ export function WatchStudio({
                     </div>
                   ) : (
                     <span
-                      className="px-2.5 py-1 rounded-full text-[11px] font-black tracking-widest bg-black/60 border border-white/10 text-muted-foreground shadow-sm"
+                      className="px-2.5 py-1 rounded-full text-[11px] font-black tracking-widest bg-muted/80 dark:bg-black/60 border border-border dark:border-white/10 text-muted-foreground shadow-sm"
                       style={{ fontFamily: "var(--font-condensed)" }}
                     >
                       VS
@@ -1112,22 +1112,22 @@ export function WatchStudio({
           {/* Video Container Card with Ambient Depth Glow */}
           <div
             ref={playerContainerRef}
-            className={`group relative rounded-2xl overflow-hidden border border-white/10 bg-[#060606] flex flex-col transition-all duration-300 ${
+            className={`group relative rounded-2xl overflow-hidden border border-border dark:border-white/10 bg-card dark:bg-[#060606] flex flex-col transition-all duration-300 ${
               isFullscreen
                 ? "fixed inset-0 z-50 rounded-none w-screen h-screen border-none"
                 : isCinemaMode
                 ? "shadow-[0_25px_70px_-15px_rgba(0,0,0,0.95),0_0_50px_-20px_rgba(0,255,135,0.12)] ring-1 ring-[var(--pitch)]/30"
-                : "shadow-[0_20px_60px_-15px_rgba(0,0,0,0.9),0_0_40px_-20px_rgba(0,255,135,0.06)] ring-1 ring-white/5"
+                : "shadow-xl dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.9),0_0_40px_-20px_rgba(0,255,135,0.06)] ring-1 ring-border/50 dark:ring-white/5"
             }`}
           >
             {/* Top Video Header Overlay with subtle gradient */}
             <div
-              className={`flex items-center justify-between px-3 sm:px-4 py-1.5 bg-gradient-to-b from-black/95 via-black/80 to-transparent backdrop-blur-md border-b border-white/[0.08] z-20 shrink-0 transition-all ${
+              className={`flex items-center justify-between px-3 sm:px-4 py-1.5 bg-card/95 dark:bg-gradient-to-b dark:from-black/95 dark:via-black/80 dark:to-transparent backdrop-blur-md border-b border-border dark:border-white/[0.08] z-20 shrink-0 transition-all ${
                 isFullscreen ? "hidden" : ""
               }`}
             >
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/[0.06] border border-white/10">
+                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-muted/80 dark:bg-white/[0.06] border border-border dark:border-white/10">
                   <span className="size-1.5 rounded-full bg-[var(--pitch)] inline-block shadow-[0_0_8px_var(--pitch)] animate-pulse" />
                   <span
                     className="font-black text-[11px] uppercase tracking-wider text-foreground"
@@ -1136,7 +1136,7 @@ export function WatchStudio({
                     {viewMode === "single" ? "FOOTYY LIVE" : `MULTI-VIEW (${viewMode === "dual" ? "2 FEEDS" : "4 FEEDS"})`}
                   </span>
                 </div>
-                <span className="text-white/20 text-xs">/</span>
+                <span className="text-muted-foreground/40 dark:text-white/20 text-xs">/</span>
                 <span className="text-xs text-muted-foreground truncate max-w-[180px] sm:max-w-xs font-medium">
                   {fixture ? `${fixture.home} vs ${fixture.away}` : "Broadcast Feed"}
                 </span>
@@ -1144,7 +1144,7 @@ export function WatchStudio({
 
               <div className="flex items-center gap-2">
                 {currentProvider && currentSource && (
-                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/[0.06] text-white/90 border border-white/10 shadow-sm">
+                  <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-muted/80 dark:bg-white/[0.06] text-foreground dark:text-white/90 border border-border dark:border-white/10 shadow-sm">
                     <span className="size-1.5 rounded-full bg-[var(--pitch)] animate-pulse" />
                     <span className="text-muted-foreground font-medium">{currentProvider.name}:</span>
                     <strong className="text-foreground">{currentSource.label}</strong>
@@ -1423,16 +1423,16 @@ export function WatchStudio({
                       onClick={() => setFocusedSlot(0)}
                       className={`relative ${
                         isFullscreen ? "w-full h-full min-h-0" : "aspect-video w-full"
-                      } rounded-2xl overflow-hidden bg-black border flex flex-col group transition-all duration-200 ${
-                        focusedSlot === 0 ? "border-[var(--pitch)] ring-1 ring-[var(--pitch)]/30" : "border-white/10 hover:border-white/20"
+                      } rounded-2xl overflow-hidden bg-card dark:bg-black border flex flex-col group transition-all duration-200 ${
+                        focusedSlot === 0 ? "border-[var(--pitch)] ring-1 ring-[var(--pitch)]/30" : "border-border dark:border-white/10 hover:border-border/80 dark:hover:border-white/20"
                       }`}
                     >
                       {(slot0Override?.fixture ?? fixture) && (
                         <GoalPulse fixture={(slot0Override?.fixture ?? fixture)!} />
                       )}
-                      <header className="flex items-center justify-between px-2.5 sm:px-3 py-1.5 bg-gradient-to-b from-neutral-950 via-neutral-950/90 to-neutral-950/70 border-b border-white/[0.08] z-20 shrink-0">
+                      <header className="flex items-center justify-between px-2.5 sm:px-3 py-1.5 bg-card/95 dark:bg-gradient-to-b dark:from-neutral-950 dark:via-neutral-950/90 dark:to-neutral-950/70 border-b border-border dark:border-white/[0.08] z-20 shrink-0">
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="px-1.5 py-0.5 rounded-md bg-white/[0.08] text-[var(--pitch)] text-[9px] font-black uppercase tracking-wider shrink-0 flex items-center gap-1">
+                          <span className="px-1.5 py-0.5 rounded-md bg-muted dark:bg-white/[0.08] text-[var(--pitch)] text-[9px] font-black uppercase tracking-wider shrink-0 flex items-center gap-1">
                             <span className="size-1.5 rounded-full bg-[var(--pitch)] inline-block shadow-[0_0_6px_var(--pitch)] animate-pulse" />
                             FEED 1
                           </span>
@@ -1645,7 +1645,7 @@ export function WatchStudio({
             <div className={
               isFullscreen
                 ? "absolute bottom-0 inset-x-0 z-30 flex items-center justify-between px-3 sm:px-4 py-2 bg-neutral-950/80 backdrop-blur-md border-t border-white/10 text-xs transition-opacity duration-300 opacity-0 group-hover:opacity-100"
-                : "flex items-center justify-between px-3 sm:px-4 py-1.5 sm:py-2 bg-neutral-900/90 border-t border-border/50 text-xs shrink-0"
+                : "flex items-center justify-between px-3 sm:px-4 py-1.5 sm:py-2 bg-card dark:bg-neutral-900/90 border-t border-border text-xs shrink-0"
             }>
               <div className="flex items-center gap-2.5">
                 {currentSource ? (
@@ -1664,7 +1664,7 @@ export function WatchStudio({
                         className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold tracking-tight transition-all border ${
                           daddyLiveClean
                             ? "bg-[var(--pitch)]/10 text-[var(--pitch)] border-[var(--pitch)]/30 hover:bg-[var(--pitch)]/20"
-                            : "bg-white/5 text-muted-foreground border-white/10 hover:text-foreground hover:bg-white/10"
+                            : "bg-muted dark:bg-white/5 text-muted-foreground border-border dark:border-white/10 hover:text-foreground hover:bg-muted/80 dark:hover:bg-white/10"
                         }`}
                         title={
                           daddyLiveClean
@@ -1677,7 +1677,7 @@ export function WatchStudio({
                       </button>
                     )}
                     {currentSource.quality && (
-                      <span className="px-2 py-0.5 rounded-md bg-white/10 text-foreground font-mono text-[10px] font-bold">
+                      <span className="px-2 py-0.5 rounded-md bg-muted dark:bg-white/10 text-foreground font-mono text-[10px] font-bold border border-border/60 dark:border-transparent">
                         {currentSource.quality}
                       </span>
                     )}
@@ -1693,7 +1693,7 @@ export function WatchStudio({
                     href={currentSource.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
+                    className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted dark:hover:bg-white/10 transition-colors"
                     title="Open Stream in New Tab (Direct Feed)"
                   >
                     <ExternalLinkIcon className="size-4" />
@@ -1703,7 +1703,7 @@ export function WatchStudio({
                 <button
                   type="button"
                   onClick={reloadStream}
-                  className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
+                  className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted dark:hover:bg-white/10 transition-colors"
                   title="Reload Stream Feed"
                 >
                   <RefreshCwIcon className="size-4" />
@@ -1757,7 +1757,7 @@ export function WatchStudio({
                   className={`p-1.5 rounded-lg transition-colors ${
                     isCinemaMode
                       ? "text-[var(--pitch)] bg-[var(--pitch)]/15"
-                      : "text-muted-foreground hover:text-foreground hover:bg-white/10"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted dark:hover:bg-white/10"
                   }`}
                   title={isCinemaMode ? "Exit Cinema Mode (Switch to 16:9)" : "Cinema Mode (21:9 Widescreen)"}
                 >
@@ -1767,7 +1767,7 @@ export function WatchStudio({
                 <button
                   type="button"
                   onClick={toggleFullscreen}
-                  className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors"
+                  className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted dark:hover:bg-white/10 transition-colors"
                   title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
                 >
                   {isFullscreen ? <Minimize2Icon className="size-4" /> : <Maximize2Icon className="size-4" />}
@@ -1941,7 +1941,7 @@ export function WatchStudio({
                     </div>
                     <div className="flex items-center gap-2">
                       {currentSource.quality && (
-                        <span className="px-2.5 py-1 rounded-lg bg-black/70 text-[var(--pitch)] font-mono text-xs font-bold border border-[var(--pitch)]/30">
+                        <span className="px-2.5 py-1 rounded-lg bg-card dark:bg-black/70 text-[var(--pitch)] font-mono text-xs font-bold border border-[var(--pitch)]/30">
                           {currentSource.quality}
                         </span>
                       )}
@@ -2053,7 +2053,7 @@ export function WatchStudio({
                                   ACTIVE
                                 </span>
                               ) : ch.quality ? (
-                                <span className="text-[9px] px-1 rounded bg-black/40 text-muted-foreground font-mono">
+                                <span className="text-[9px] px-1 rounded bg-muted dark:bg-black/40 text-muted-foreground font-mono border border-border/50 dark:border-transparent">
                                   {ch.quality}
                                 </span>
                               ) : null}

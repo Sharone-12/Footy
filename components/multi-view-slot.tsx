@@ -644,14 +644,14 @@ export function MultiViewSlotPlayer({
       onClick={onFocus}
       className={`relative ${
         isFullscreen ? "w-full h-full min-h-0" : "aspect-video w-full"
-      } rounded-2xl overflow-hidden bg-black border flex flex-col group transition-all duration-200 ${
-        isFocused ? "border-[var(--pitch)] ring-1 ring-[var(--pitch)]/30" : "border-white/10 hover:border-white/20"
+      } rounded-2xl overflow-hidden bg-card dark:bg-black border flex flex-col group transition-all duration-200 ${
+        isFocused ? "border-[var(--pitch)] ring-1 ring-[var(--pitch)]/30" : "border-border dark:border-white/10 hover:border-border/80 dark:hover:border-white/20"
       }`}
     >
       {slotData.fixture && <GoalPulse fixture={slotData.fixture} />}
-      <header className="flex items-center justify-between px-2.5 sm:px-3 py-1.5 bg-gradient-to-b from-neutral-950 via-neutral-950/90 to-neutral-950/70 border-b border-white/[0.08] z-20 shrink-0">
+      <header className="flex items-center justify-between px-2.5 sm:px-3 py-1.5 bg-card/95 dark:bg-gradient-to-b dark:from-neutral-950 dark:via-neutral-950/90 dark:to-neutral-950/70 border-b border-border dark:border-white/[0.08] z-20 shrink-0">
         <div className="flex items-center gap-2 min-w-0">
-          <span className="px-1.5 py-0.5 rounded-md bg-white/[0.08] text-[var(--pitch)] text-[9px] font-black uppercase tracking-wider shrink-0 flex items-center gap-1">
+          <span className="px-1.5 py-0.5 rounded-md bg-muted dark:bg-white/[0.08] text-[var(--pitch)] text-[9px] font-black uppercase tracking-wider shrink-0 flex items-center gap-1">
             <span className="size-1.5 rounded-full bg-[var(--pitch)] inline-block shadow-[0_0_6px_var(--pitch)] animate-pulse" />
             {feedLabel}
           </span>
