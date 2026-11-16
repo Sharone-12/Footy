@@ -1021,3 +1021,43 @@ body:has(.ucl-bg) .stat-figure {
   content-visibility: auto;
   contain-intrinsic-size: auto 420px;
 }
+
+/* Light mode squad cards: Rich Barca Blaugrana backdrop (Deep Navy to Garnet)
+   Completely eliminates the janky dark shadow halo around player cutouts in light mode
+   while giving each card an authentic, premium club presentation. */
+html:not(.dark) .squad-card {
+  background: radial-gradient(circle at 50% 28%, #0d2454 0%, #081636 52%, #260719 100%) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 20, 60, 0.22), 0 4px 10px -2px rgba(165, 0, 68, 0.14) !important;
+  color: #ffffff !important;
+}
+
+html:not(.dark) .squad-card:hover {
+  transform: translateY(-5px) !important;
+  border-color: rgba(255, 255, 255, 0.28) !important;
+  box-shadow: 0 18px 36px -6px rgba(0, 25, 75, 0.32), 0 6px 14px -2px rgba(165, 0, 68, 0.22) !important;
+}
+
+html:not(.dark) .squad-card .border-t {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+html:not(.dark) .squad-card span {
+  color: #ffffff;
+}
+
+html:not(.dark) .squad-card .stat-label {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
+
+html:not(.dark) .squad-card .text-muted-foreground {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+html:not(.dark) .squad-card [class*="text-muted-foreground"] {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+html:not(.dark) .squad-card span.stat-label {
+  color: rgba(255, 255, 255, 0.75) !important;
+}
