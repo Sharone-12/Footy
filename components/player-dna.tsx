@@ -1,8 +1,7 @@
-import Link from "next/link"
 import { cacheLife } from "next/cache"
 import { supabase, fetchAllRows } from "@/lib/supabase"
 import { scopeLeague, scopeQuery, type Competition } from "@/lib/competition"
-import { TeamCrest } from "@/components/player-avatar"
+import { DnaPanel } from "@/components/dna-panel"
 import {
   DNA_KEYS,
   cohortScale,
@@ -19,7 +18,7 @@ import {
  * Cached: it is the same ~1,200 vectors for every player page, and the page
  * itself only needs one of them plus a sort.
  */
-async function loadFingerprints(season: string, comp: "league" | "ucl") {
+export async function loadFingerprints(season: string, comp: "league" | "ucl") {
   "use cache"
   cacheLife("hours")
 
@@ -46,48 +45,6 @@ async function loadFingerprints(season: string, comp: "league" | "ucl") {
   const pool = outfield.filter((r) => (Number(r.minutes) || 0) >= Math.max(300, most * 0.3))
   const scale = cohortScale(pool)
   return { scale, pool: pool.map((r) => fingerprint(r, scale)) }
-}
-
-/**
- * The fingerprint drawn as a barcode: one bar per stat, up for more than the
- * average outfielder and down for less. Two players who play alike have
- * barcodes that look alike, which is the whole point of drawing it.
- */
-function Barcode({ z, height = 56, animate = false }: { z: number[]; height?: number; animate?: boolean }) {
-  const half = height / 2
-  return (
-    <div
-      className="flex items-center gap-[2px]"
-      style={{ height }}
-      role="img"
-      aria-label="Style fingerprint"
-    >
-      {z.map((v, i) => {
-        const len = Math.max(2, (Math.abs(v) / 3) * half)
-        return (
-          <span
-            key={DNA_KEYS[i].key}
-            title={`${DNA_KEYS[i].label}: ${v > 0 ? "+" : ""}${v.toFixed(1)}σ`}
-            className="relative flex-1 min-w-[2px]"
-            style={{ height }}
-          >
-            <span
-              className={`absolute inset-x-0 rounded-[1px] ${animate ? "dna-bar" : ""}`}
-              style={{
-                height: len,
-                ...(v >= 0
-                  ? { bottom: half, transformOrigin: "bottom" }
-                  : { top: half, transformOrigin: "top" }),
-                background: v >= 0 ? "var(--pitch)" : "var(--muted-foreground)",
-                opacity: v >= 0 ? 0.35 + Math.min(1, v / 2) * 0.65 : 0.45,
-                animationDelay: animate ? `${i * 28}ms` : undefined,
-              }}
-            />
-          </span>
-        )
-      })}
-    </div>
-  )
 }
 
 export async function PlayerDna({
@@ -134,93 +91,15 @@ export async function PlayerDna({
         </span>
       </header>
 
-      <div className="grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] gap-6 p-5">
-        <div className="min-w-0">
-          <div
-            className="shimmer-text w-fit text-3xl sm:text-4xl font-bold tracking-[-0.03em] leading-none uppercase"
-            style={{ fontFamily: "var(--font-condensed)" }}
-          >
-            {primary.name}
-          </div>
-          <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{primary.blurb}</p>
-
-          <div className="mt-5">
-            <Barcode z={me.z} height={72} animate />
-            <div className="flex justify-between stat-label mt-1.5">
-              <span>attack</span>
-              <span>build-up</span>
-              <span>defence</span>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-1.5 mt-4">
-            {rest.slice(0, 2).filter((a) => a.fit > 0).map((a) => (
-              <span
-                key={a.name}
-                title={a.blurb}
-                className="stat-label rounded-full px-2.5 py-1 border border-border/70"
-              >
-                also {a.name}
-              </span>
-            ))}
-            {thin && (
-              <span className="stat-label rounded-full px-2.5 py-1 border border-border/70">
-                thin sample · {Math.round(me.minutes)} min
-              </span>
-            )}
-          </div>
-        </div>
-
-        <div className="min-w-0">
-          <h3 className="stat-label mb-1.5">Plays like</h3>
-          <div className="-mx-2">
-            {top.map((m) => (
-              <Link
-                key={m.slug}
-                href={href(m.slug)}
-                className="row-item flex items-center gap-3 px-2 py-2 rounded-xl"
-              >
-                <span className="flex-1 min-w-0">
-                  <span className="block text-[0.9rem] font-medium leading-tight truncate">
-                    {m.player}
-                  </span>
-                  <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    {m.team_id != null && <TeamCrest teamId={m.team_id} name={m.team} size={14} />}
-                    <span className="truncate">{m.team} · {m.role}</span>
-                  </span>
-                </span>
-                <span className="w-20 sm:w-24 shrink-0 hidden min-[400px]:block">
-                  <Barcode z={m.z} height={26} />
-                </span>
-                <span className="stat-figure text-lg w-12 text-right shrink-0">
-                  {m.similarity}
-                  <span className="text-xs text-muted-foreground">%</span>
-                </span>
-              </Link>
-            ))}
-          </div>
-
-          {abroad.length > 0 && (
-            <>
-              <h3 className="stat-label mt-4 mb-2">Nearest match in other leagues</h3>
-              <div className="flex flex-wrap gap-1.5">
-                {abroad.map((m) => (
-                  <Link
-                    key={m.slug}
-                    href={href(m.slug)}
-                    title={`${m.league} · ${m.similarity}% alike`}
-                    className="inline-flex items-center gap-1.5 rounded-full border border-border/70 px-2.5 py-1 text-xs hover:bg-muted/50 transition-colors"
-                  >
-                    {m.team_id != null && <TeamCrest teamId={m.team_id} name={m.team} size={14} />}
-                    <span className="truncate max-w-[9rem]">{m.player}</span>
-                    <span className="text-muted-foreground tabular-nums">{m.similarity}%</span>
-                  </Link>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
-      </div>
+      <DnaPanel
+        name={me.player}
+        z={me.z}
+        primary={primary}
+        also={rest.slice(0, 2).filter((a) => a.fit > 0)}
+        thinMinutes={thin ? Math.round(me.minutes) : null}
+        matches={top.map((m) => ({ ...m, href: href(m.slug) }))}
+        abroad={abroad.map((m) => ({ ...m, href: href(m.slug) }))}
+      />
     </section>
   )
 }

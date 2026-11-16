@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import { PauseIcon, PlayIcon } from "lucide-react"
 import { LeagueCrest, TeamCrest } from "@/components/player-avatar"
 import { SlidingSegment } from "@/components/sliding-segment"
+import { Flip } from "@/components/flip"
 import { LEAGUE_ABBR, LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
 import type { Race } from "@/lib/justice"
 
@@ -121,7 +122,7 @@ export function TableRace({
         />
         <span className="stat-figure text-xl w-24 text-right tabular-nums">
           <span className="stat-label mr-1.5">Round</span>
-          {race.rounds[at]}
+          <Flip value={race.rounds[at]} />
         </span>
       </div>
 
@@ -161,7 +162,9 @@ export function TableRace({
                   }}
                 />
               </span>
-              <span className="stat-figure text-sm w-7 text-right shrink-0 tabular-nums">{pts}</span>
+              <span className="stat-figure text-sm w-7 flex justify-end shrink-0 tabular-nums">
+                <Flip value={pts} />
+              </span>
             </div>
           )
         })}

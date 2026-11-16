@@ -1,5 +1,6 @@
 "use client"
 
+import { Flip } from "@/components/flip"
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
@@ -166,9 +167,9 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
           ) : !match.kickoff ? (
             `${t.d}d`
           ) : t.d > 0 ? (
-            `${t.d}d ${pad(t.h)}:${pad(t.m)}:${pad(t.s)}`
+            <Flip value={`${t.d}d ${pad(t.h)}:${pad(t.m)}:${pad(t.s)}`} />
           ) : (
-            `${pad(t.h)}:${pad(t.m)}:${pad(t.s)}`
+            <Flip value={`${pad(t.h)}:${pad(t.m)}:${pad(t.s)}`} />
           )}
         </span>
       </span>

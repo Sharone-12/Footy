@@ -1,6 +1,8 @@
 "use client"
 
-import { useState, useSyncExternalStore } from "react"
+import { useEffect, useState, useSyncExternalStore } from "react"
+import { Flip } from "@/components/flip"
+import { GOAL_EVENT, type GoalDetail } from "@/components/goal-banner"
 import { findLive, matchClock, type FixtureLike, type LiveScore } from "@/lib/livescores"
 import { LiveSignal } from "@/components/live-signal"
 
@@ -239,13 +241,34 @@ function LiveMark({ score, className }: { score: LiveScore; className: string })
   const clock = matchClock(score, now)
   // A goal since the last poll: remount the pill under a new key so its
   // flash animation runs once. Nothing flashes on first sight of a match.
-  const goals = (score.homeGoals ?? 0) + (score.awayGoals ?? 0)
-  const [seen, setSeen] = useState(goals)
+  const home = score.homeGoals ?? 0
+  const away = score.awayGoals ?? 0
+  const [seen, setSeen] = useState({ home, away })
   const [flash, setFlash] = useState(0)
-  if (goals !== seen) {
-    setSeen(goals)
-    if (goals > seen) setFlash((f) => f + 1)
+  const [side, setSide] = useState<"home" | "away">("home")
+  if (home !== seen.home || away !== seen.away) {
+    setSeen({ home, away })
+    // A score going down is a VAR correction, not something to celebrate.
+    if (home + away > seen.home + seen.away) {
+      setSide(home > seen.home ? "home" : "away")
+      setFlash((f) => f + 1)
+    }
   }
+  // Tell the page-wide banner. Read at the moment of the goal on purpose:
+  // the effect is keyed on the flash alone so a clock tick can't re-announce.
+  useEffect(() => {
+    if (!flash) return
+    const detail: GoalDetail = {
+      home: score.home,
+      away: score.away,
+      homeGoals: home,
+      awayGoals: away,
+      side,
+      clock: clock.display,
+    }
+    window.dispatchEvent(new CustomEvent(GOAL_EVENT, { detail }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flash])
   return (
     <span
       key={flash}
@@ -253,7 +276,11 @@ function LiveMark({ score, className }: { score: LiveScore; className: string })
       title={`Live: ${score.home} ${score.homeGoals ?? "-"}-${score.awayGoals ?? "-"} ${score.away}, ${clock.display}`}
     >
       <span className="font-mono font-bold text-xs sm:text-sm tabular-nums text-foreground">
-        {score.homeGoals ?? "–"}&ndash;{score.awayGoals ?? "–"}
+        <span className="inline-flex items-center">
+          {score.homeGoals == null ? "–" : <Flip value={score.homeGoals} />}
+          &ndash;
+          {score.awayGoals == null ? "–" : <Flip value={score.awayGoals} />}
+        </span>
       </span>
       <span className="inline-flex items-center gap-1.5">
         <LiveSignal size={8} />

@@ -15,10 +15,13 @@ export function PlayerRadar({
   data,
   players,
   domain,
+  colors = PLAYER_COLORS,
 }: {
   data: Record<string, string | number>[]
   players: string[]
   domain?: [number, number] | "auto"
+  /** One per player; the player page passes its club colour. */
+  colors?: string[]
 }) {
   const resolvedDomain: [number, number] = domain === "auto"
     ? [0, Math.ceil(Math.max(...data.flatMap((row) => players.map((p) => Number(row[p]) || 0))) * 1.15) || 1]
@@ -44,8 +47,8 @@ export function PlayerRadar({
             key={name}
             name={name}
             dataKey={name}
-            stroke={PLAYER_COLORS[i % PLAYER_COLORS.length]}
-            fill={PLAYER_COLORS[i % PLAYER_COLORS.length]}
+            stroke={colors[i % colors.length]}
+            fill={colors[i % colors.length]}
             fillOpacity={0.15}
             strokeWidth={2}
           />
@@ -63,6 +66,7 @@ export function StatBarChart({
   data,
   players,
   scale,
+  colors = PLAYER_COLORS,
 }: {
   data: Record<string, string | number>[]
   players: string[]
@@ -74,6 +78,7 @@ export function StatBarChart({
    * positional cohort's spread instead.
    */
   scale?: Record<string, number>
+  colors?: string[]
 }) {
   return (
     <div className="space-y-3">
@@ -97,7 +102,7 @@ export function StatBarChart({
                         className="bar-grow h-full rounded-full transition-all duration-500"
                         style={{
                           width: `${Math.max(pct, 1)}%`,
-                          background: PLAYER_COLORS[i % PLAYER_COLORS.length],
+                          background: colors[i % colors.length],
                           // Dimming is a comparison cue: it marks the bars
                           // that are not the longest in their row. With one
                           // player there is nothing to lose to, so every bar
