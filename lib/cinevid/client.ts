@@ -10,7 +10,12 @@ import type {
   CinevidStatus,
 } from "./types"
 
-export const CINEVID_BASE_URL = "https://cinevid.st"
+// cinevid.st dropped off DNS in November 2026; the same API answers at
+// cinevid.sbs. Env-overridable so the next move is a config change.
+export const CINEVID_BASE_URL = process.env.CINEVID_BASE_URL || "https://cinevid.sbs"
+
+/** Hosts an event may link to: the current one, plus the old one while the API still emits it. */
+const CINEVID_HOSTS = [new URL(CINEVID_BASE_URL).hostname, "cinevid.st"]
 const EVENTS_CACHE_TTL_MS = 60_000 // 60 seconds
 const HEALTH_CACHE_TTL_MS = 30_000 // 30 seconds
 const REQUEST_TIMEOUT_MS = 16_000 // 16 seconds (Cinevid API can take 8-12s under peak load)
@@ -47,14 +52,14 @@ export function resolveCinevidUrl(rawUrl: string | null | undefined): string | n
     return `${CINEVID_BASE_URL}${trimmed}`
   }
 
-  // Absolute URL: verify host matches cinevid.st
+  // Absolute URL: verify host is a Cinevid one
   try {
     const parsed = new URL(trimmed)
     if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
       return null
     }
     const host = parsed.hostname.toLowerCase()
-    if (host === "cinevid.st" || host.endsWith(".cinevid.st")) {
+    if (CINEVID_HOSTS.some((h) => host === h || host.endsWith(`.${h}`))) {
       return parsed.toString()
     }
     // Reject untrusted origin

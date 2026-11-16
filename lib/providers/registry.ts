@@ -107,8 +107,8 @@ export const DIRECTORY: DirectoryEntry[] = [
     // verified. Until they are, this stays a link out under GATEWAY_NOTE and
     // gets no adapter and no embedded player.
     name: "Cinevid",
-    domain: "cinevid.st",
-    url: "https://cinevid.st",
+    domain: "cinevid.sbs",
+    url: "https://cinevid.sbs",
     category: "gateway",
     enabled: true,
   },

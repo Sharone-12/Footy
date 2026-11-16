@@ -1,10 +1,10 @@
 import type { DiscoveredEvent, Fixture, ProviderAdapter } from "./types"
-import { fetchCinevidEvents } from "@/lib/cinevid/client"
+import { CINEVID_BASE_URL, fetchCinevidEvents } from "@/lib/cinevid/client"
 import { matchFixtureToCinevid } from "@/lib/cinevid/matcher"
 
 export const cinevidAdapter: ProviderAdapter = {
   name: "Cinevid",
-  baseUrl: "https://cinevid.st",
+  baseUrl: CINEVID_BASE_URL,
   async discover(fixture: Fixture, _signal: AbortSignal): Promise<DiscoveredEvent[]> {
     const events = await fetchCinevidEvents()
     const matched = matchFixtureToCinevid(fixture, events)

@@ -20,13 +20,18 @@ async function runTests() {
   // 1. URL Normalization
   assert.equal(
     resolveCinevidUrl("/embed/live/064505804/example"),
-    "https://cinevid.st/embed/live/064505804/example",
+    `${CINEVID_BASE_URL}/embed/live/064505804/example`,
     "Relative embed URL should resolve against CINEVID_BASE_URL",
   )
   assert.equal(
     resolveCinevidUrl("/api/public/img/badge123"),
-    "https://cinevid.st/api/public/img/badge123",
+    `${CINEVID_BASE_URL}/api/public/img/badge123`,
     "Relative image URL should resolve against CINEVID_BASE_URL",
+  )
+  assert.equal(
+    resolveCinevidUrl("https://cinevid.sbs/embed/live/12345"),
+    "https://cinevid.sbs/embed/live/12345",
+    "Absolute URL on the current host should be preserved",
   )
   assert.equal(
     resolveCinevidUrl("https://cinevid.st/embed/live/12345"),
@@ -121,8 +126,8 @@ async function runTests() {
   assert.equal(normalized.away, "Rangers")
   assert.equal(normalized.status, "LIVE")
   assert.equal(normalized.isLive, true)
-  assert.equal(normalized.playerUrl, "https://cinevid.st/embed/live/002993891")
-  assert.equal(normalized.homeTeamImage, "https://cinevid.st/api/public/img/st-mirren")
+  assert.equal(normalized.playerUrl, `${CINEVID_BASE_URL}/embed/live/002993891`)
+  assert.equal(normalized.homeTeamImage, `${CINEVID_BASE_URL}/api/public/img/st-mirren`)
   assert.equal(normalized.kickoffIso, "2026-11-07T20:00:00.000Z", "UTC date and time parsed to ISO")
   assert.equal(normalized.kickoffTimestampMs, new Date("2026-11-07T20:00:00.000Z").getTime())
 
