@@ -65,6 +65,27 @@ def _digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _dedupe_upcoming_matches(cur):
+    """Prune obsolete/duplicate upcoming fixtures caused by rescheduling."""
+    q = """
+        DELETE FROM matches
+        WHERE event_id IN (
+            SELECT m1.event_id
+            FROM matches m1
+            JOIN matches m2 ON m1.home = m2.home AND m1.away = m2.away AND m1.event_id != m2.event_id
+            WHERE m1.status = 'upcoming' AND m2.status = 'upcoming'
+              AND (
+                (m1.kickoff IS NULL AND m2.kickoff IS NOT NULL)
+                OR (m1.kickoff IS NOT NULL AND m2.kickoff IS NOT NULL AND m1.kickoff < m2.kickoff)
+                OR (m1.kickoff IS NULL AND m2.kickoff IS NULL AND m1.event_id < m2.event_id)
+              )
+        )
+    """
+    cur.execute(q)
+    if cur.rowcount > 0:
+        print(f"  pruned {cur.rowcount} duplicate/obsolete upcoming matches", flush=True)
+
+
 def sync(force: bool = False):
     """Upsert every processed CSV whose contents changed since the last sync.
 
@@ -100,6 +121,8 @@ def sync(force: bool = False):
             # Recorded per file, so a crash halfway only re-syncs what is left.
             done[f.name] = digests[f.name]
             _write_state(done)
+        _dedupe_upcoming_matches(cur)
+        conn.commit()
     finally:
         cur.close()
         conn.close()

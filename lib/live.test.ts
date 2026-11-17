@@ -41,4 +41,22 @@ assert.deepEqual(ordered.upcoming.map((r) => r.kickoff), [
   "2026-11-20T12:00:00Z",
 ])
 
+// Deduplication drops duplicate/phantom fixtures when rescheduled
+const duplicateMatchA = {
+  home: "Argentina",
+  away: "Costa Rica",
+  kickoff: "2026-11-08T22:00:00Z", // old scheduled time (90m away -> soon)
+  date: "2026-11-08",
+}
+const duplicateMatchB = {
+  home: "Argentina",
+  away: "Costa Rica",
+  kickoff: "2026-11-09T03:00:00Z", // rescheduled later time (upcoming)
+  date: "2026-11-09",
+}
+const dedupedResult = splitFixtures([duplicateMatchA, duplicateMatchB], now)
+assert.equal(dedupedResult.soon.length, 0)
+assert.equal(dedupedResult.upcoming.length, 1)
+assert.equal(dedupedResult.upcoming[0].kickoff, "2026-11-09T03:00:00Z")
+
 console.log("live: all assertions passed")

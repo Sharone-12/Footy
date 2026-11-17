@@ -3,6 +3,7 @@ import { connection } from "next/server"
 import { cookies } from "next/headers"
 import { supabase } from "@/lib/supabase"
 import { isTop10FifaMatch } from "@/lib/teams"
+import { dedupeFixtures } from "@/lib/live"
 import { LiveSections, type LiveFixture } from "@/components/live-sections"
 import { Skeleton } from "@/components/ui/skeleton"
 import { LivePasswordLock } from "@/components/live-password-lock"
@@ -36,12 +37,14 @@ async function Fixtures() {
   let { data } = await q(`${COLS}, kickoff`)
   if (!data) ({ data } = await q(COLS))
 
-  const matches = ((data || []) as unknown as LiveFixture[])
+  const rawMatches = ((data || []) as unknown as LiveFixture[])
     .map((m) => ({
       ...m,
       kickoff: m.kickoff ?? null,
     }))
     .filter(isTop10FifaMatch)
+
+  const matches = dedupeFixtures(rawMatches)
 
   return <LiveSections matches={matches} />
 }

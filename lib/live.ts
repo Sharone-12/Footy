@@ -26,14 +26,65 @@ export const startOf = (m: Timed) =>
 
 export type Buckets<T> = { live: T[]; soon: T[]; upcoming: T[] }
 
+export type MatchIdentity = {
+  home?: string | null
+  away?: string | null
+  home_id?: number | null
+  away_id?: number | null
+  league?: string | null
+}
+
+/**
+ * Deduplicate fixtures that represent the same match (e.g. rescheduled event
+ * where an old event_id lingered in the database alongside a newly scheduled one).
+ * If two entries match teams within 72 hours, we prefer the one with a confirmed
+ * kickoff time, or the later rescheduled kickoff.
+ */
+export function dedupeFixtures<T extends Timed & MatchIdentity>(rows: T[]): T[] {
+  const result: T[] = []
+  for (const m of rows) {
+    if (!m.home || !m.away) {
+      result.push(m)
+      continue
+    }
+    const matchTime = startOf(m)
+    const duplicateIdx = result.findIndex((other) => {
+      const sameTeams =
+        (other.home === m.home && other.away === m.away) ||
+        (other.home_id != null && m.home_id != null && other.home_id === m.home_id && other.away_id === m.away_id)
+      if (!sameTeams) return false
+      const otherTime = startOf(other)
+      if (Number.isNaN(matchTime) || Number.isNaN(otherTime)) return true
+      // Within 72 hours of each other -> duplicate / rescheduled entry
+      return Math.abs(matchTime - otherTime) < 72 * 3600 * 1000
+    })
+
+    if (duplicateIdx === -1) {
+      result.push(m)
+    } else {
+      const existing = result[duplicateIdx]
+      // Pick the better fixture: prefer one with an explicit kickoff over null,
+      // or if both have kickoff, prefer the later one (postponed / rescheduled matches move later)
+      const preferCurrent =
+        (!existing.kickoff && m.kickoff) ||
+        (Boolean(existing.kickoff && m.kickoff) && startOf(m) > startOf(existing))
+      if (preferCurrent) {
+        result[duplicateIdx] = m
+      }
+    }
+  }
+  return result
+}
+
 /**
  * Bucket fixtures against `now`. A fixture lands in exactly one bucket, and
  * anything already past its playing window is dropped — the scraper will flip
  * it to `finished` on the next refresh.
  */
-export function splitFixtures<T extends Timed>(rows: T[], now: number): Buckets<T> {
+export function splitFixtures<T extends Timed & MatchIdentity>(rows: T[], now: number): Buckets<T> {
+  const deduped = dedupeFixtures(rows)
   const out: Buckets<T> = { live: [], soon: [], upcoming: [] }
-  for (const row of rows) {
+  for (const row of deduped) {
     const start = startOf(row)
     if (Number.isNaN(start)) continue
     const left = start - now
