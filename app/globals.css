@@ -1508,8 +1508,34 @@ main h1 > span:nth-child(2) {
    Seven columns, the final in the middle, each half mirrored. Ties sit in
    slots; a slot draws its line out towards the centre, a pair draws the
    vertical joining two slots, and the next column's slot draws the line in. */
+.ucl-simulator {
+  position: relative;
+  background-color: #04091a !important;
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(13, 27, 72, 0.78) 0%, rgba(4, 9, 26, 0.94) 55%, #030713 100%),
+    linear-gradient(180deg, rgba(6, 12, 33, 0.88) 0%, rgba(4, 9, 26, 0.92) 50%, rgba(2, 5, 16, 0.97) 100%),
+    url(/ucl-bg.png) !important;
+  background-size: 100% 100%, 100% 100%, cover !important;
+  background-position: center top !important;
+  border: 1px solid rgba(25, 183, 255, 0.28) !important;
+  box-shadow: 0 16px 48px -12px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}
+
+.ucl-simulator .stat-label {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.ucl-simulator .stat-figure {
+  color: #ffffff !important;
+}
+
+.ucl-simulator .text-muted-foreground {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
 .bracket {
-  --bk-line: oklch(0.80 0.10 250 / 35%);
+  --bk-line: rgba(56, 189, 248, 0.45);
   --bk-glow: #19b7ff;
   display: grid;
   grid-template-columns: repeat(7, minmax(150px, 1fr));
@@ -1571,26 +1597,31 @@ main h1 > span:nth-child(2) {
 /* A decided tie lights its line out. */
 .bk-slot[data-done]::after {
   border-color: var(--bk-glow);
-  box-shadow: 0 0 8px var(--bk-glow);
+  box-shadow: 0 0 10px var(--bk-glow);
 }
 
 .bk-tie {
-  background: oklch(0.20 0.07 266 / 85%);
-  border: 1px solid oklch(0.80 0.10 250 / 25%);
-  backdrop-filter: blur(8px);
-  transition: border-color 0.4s ease;
+  background: rgba(8, 18, 46, 0.92);
+  border: 1px solid rgba(25, 183, 255, 0.28);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+}
+
+.bk-tie:hover {
+  border-color: rgba(25, 183, 255, 0.55);
 }
 
 .bk-tie[data-done] {
-  border-color: oklch(0.80 0.10 250 / 45%);
+  border-color: rgba(25, 183, 255, 0.45);
 }
 
 .bk-row + .bk-row {
-  border-top: 1px solid oklch(1 0 0 / 8%);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .bk-row.bk-win {
-  background: linear-gradient(90deg, oklch(0.72 0.16 230 / 55%), oklch(0.72 0.16 230 / 15%));
+  background: linear-gradient(90deg, rgba(25, 183, 255, 0.35), rgba(25, 183, 255, 0.08));
   animation: bk-win 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 
