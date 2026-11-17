@@ -520,6 +520,7 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16421121,La Liga,2026/27,14,2026-11-29,Celta Vigo,2821,Villarreal,2819,upcoming,,,2026-11-29T17:30:00Z
 16462479,La Liga,2026/27,14,2026-11-29,Real Sociedad,2824,Sevilla,2833,upcoming,,,2026-11-29T20:00:00Z
 16421122,La Liga,2026/27,14,2026-11-30,Espanyol,2814,Getafe,2859,upcoming,,,2026-11-30T20:00:00Z
+16462485,La Liga,2026/27,15,2026-12-04,Deportivo Alavés,2885,Espanyol,2814,upcoming,,,2026-12-04T20:00:00Z
 16462504,La Liga,2026/27,15,2026-12-05,Real Racing Club,2835,Deportivo de A Coruña,2832,upcoming,,,2026-12-05T13:00:00Z
 16462508,La Liga,2026/27,15,2026-12-05,Rayo Vallecano,2818,Levante UD,2849,upcoming,,,2026-12-05T15:15:00Z
 16462514,La Liga,2026/27,15,2026-12-05,Villarreal,2819,Real Sociedad,2824,upcoming,,,2026-12-05T17:30:00Z
@@ -527,7 +528,6 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16462501,La Liga,2026/27,15,2026-12-06,Osasuna,2820,Elche,2846,upcoming,,,2026-12-06T13:00:00Z
 16462488,La Liga,2026/27,15,2026-12-06,Athletic Club,2825,Real Madrid,2829,upcoming,,,2026-12-06T15:15:00Z
 16462498,La Liga,2026/27,15,2026-12-06,Getafe,2859,Valencia,2828,upcoming,,,2026-12-06T17:30:00Z
-16462485,La Liga,2026/27,15,2026-12-06,Deportivo Alavés,2885,Espanyol,2814,upcoming,,,2026-12-06T19:00:00Z
 16462491,La Liga,2026/27,15,2026-12-06,Atlético Madrid,2836,Real Betis,2816,upcoming,,,2026-12-06T20:00:00Z
 16462511,La Liga,2026/27,15,2026-12-07,Sevilla,2833,Málaga CF,2830,upcoming,,,2026-12-07T20:00:00Z
 16462517,La Liga,2026/27,16,2026-12-13,Atlético Madrid,2836,Valencia,2828,upcoming,,,2026-12-13T19:00:00Z
@@ -1269,11 +1269,11 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16311047,Ligue 1,2026/27,15,2027-01-02,Stade Brestois,1715,Olympique de Marseille,1641,upcoming,,,2027-01-02T16:00:00Z
 16311052,Ligue 1,2026/27,15,2027-01-02,AS Monaco,1653,OGC Nice,1661,upcoming,,,2027-01-02T20:00:00Z
 16311051,Ligue 1,2026/27,15,2027-01-02,Lorient,1656,AJ Auxerre,1646,upcoming,,,2027-01-02T20:00:00Z
-16311053,Ligue 1,2026/27,15,2027-01-02,Paris FC,6070,Le Havre,1662,upcoming,,,2027-01-02T20:00:00Z
 16311054,Ligue 1,2026/27,15,2027-01-02,Toulouse,1681,Angers,1684,upcoming,,,2027-01-02T20:00:00Z
 16311055,Ligue 1,2026/27,15,2027-01-02,Troyes,1652,Stade Rennais,1658,upcoming,,,2027-01-02T20:00:00Z
 16311048,Ligue 1,2026/27,15,2027-01-03,Le Mans,1672,Olympique Lyonnais,1649,upcoming,,,2027-01-03T14:00:00Z
 16311050,Ligue 1,2026/27,15,2027-01-03,LOSC Lille,1643,RC Strasbourg,1659,upcoming,,,2027-01-03T16:15:00Z
+16311053,Ligue 1,2026/27,15,2027-01-03,Paris FC,6070,Le Havre,1662,upcoming,,,2027-01-03T16:15:00Z
 16311049,Ligue 1,2026/27,15,2027-01-03,RC Lens,1648,Paris Saint-Germain,1644,upcoming,,,2027-01-03T19:45:00Z
 16311059,Ligue 1,2026/27,16,2027-01-15,Olympique de Marseille,1641,LOSC Lille,1643,upcoming,,,2027-01-15T19:45:00Z
 16311056,Ligue 1,2026/27,16,2027-01-16,Angers,1684,Paris Saint-Germain,1644,upcoming,,,2027-01-16T16:15:00Z
@@ -1896,13 +1896,11 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16938915,Champions League,2026/27,8,2027-01-27,Shakhtar Donetsk,3313,Real Madrid,2829,upcoming,,,2027-01-27T20:00:00Z
 16938923,Champions League,2026/27,8,2027-01-27,Villarreal,2819,Manchester United,35,upcoming,,,2027-01-27T20:00:00Z
 16939038,Champions League,2026/27,8,2027-01-27,ŠK Slovan Bratislava,2404,Inter,2697,upcoming,,,2027-01-27T20:00:00Z
-17184820,International Friendly Games,2026/27,0,2026-10-03,India,4828,Brazil,4748,finished,0.0,4.0,2026-10-03T14:00:00Z
-15534087,UEFA Nations League,2026/27,0,2026-10-03,Croatia,4715,England,4713,finished,0.0,7.0,2026-10-03T16:00:00Z
 15534085,UEFA Nations League,2026/27,0,2026-10-03,Spain,4698,Czechia,4714,finished,3.0,1.0,2026-10-03T18:45:00Z
 17167377,International Friendly Games,2026/27,0,2026-10-04,Argentina,4819,Burkina Faso,4749,finished,7.0,0.0,2026-10-04T00:00:00Z
-15534095,UEFA Nations League,2026/27,0,2026-10-04,Portugal,4704,Norway,4475,finished,2.0,1.0,2026-10-04T18:45:00Z
-15534067,UEFA Nations League,2026/27,0,2026-10-04,Netherlands,4705,Serbia,6355,finished,2.0,1.0,2026-10-04T18:45:00Z
 15534061,UEFA Nations League,2026/27,0,2026-10-04,Greece,4710,Germany,4711,finished,0.0,0.0,2026-10-04T18:45:00Z
+15534067,UEFA Nations League,2026/27,0,2026-10-04,Netherlands,4705,Serbia,6355,finished,2.0,1.0,2026-10-04T18:45:00Z
+15534095,UEFA Nations League,2026/27,0,2026-10-04,Portugal,4704,Norway,4475,finished,2.0,1.0,2026-10-04T18:45:00Z
 15534027,UEFA Nations League,2026/27,0,2026-10-05,France,4481,Belgium,4717,finished,4.0,1.0,2026-10-05T18:45:00Z
 15534050,UEFA Nations League,2026/27,0,2026-10-05,Italy,4707,Türkiye,4700,finished,3.0,1.0,2026-10-05T18:45:00Z
 15534082,UEFA Nations League,2026/27,0,2026-10-06,Croatia,4715,Spain,4698,finished,1.0,2.0,2026-10-06T18:45:00Z
@@ -1912,15 +1910,15 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 15534030,UEFA Nations League,2026/27,0,2026-11-12,Italy,4707,France,4481,finished,3.0,1.0,2026-11-12T19:45:00Z
 15534088,UEFA Nations League,2026/27,0,2026-11-12,England,4713,Croatia,4715,finished,2.0,1.0,2026-11-12T19:45:00Z
 15534086,UEFA Nations League,2026/27,0,2026-11-12,Czechia,4714,Spain,4698,finished,0.0,2.0,2026-11-12T19:45:00Z
-15534059,UEFA Nations League,2026/27,0,2026-11-13,Serbia,6355,Germany,4711,finished,1.0,3.0,2026-11-13T19:45:00Z
 15534069,UEFA Nations League,2026/27,0,2026-11-13,Netherlands,4705,Greece,4710,finished,7.0,0.0,2026-11-13T19:45:00Z
+15534059,UEFA Nations League,2026/27,0,2026-11-13,Serbia,6355,Germany,4711,finished,1.0,3.0,2026-11-13T19:45:00Z
 17497151,International Friendly Games,2026/27,0,2026-11-13,Argentina,4819,Uruguay,4725,finished,1.0,2.0,2026-11-13T23:00:00Z
 17485338,International Friendly Games,2026/27,0,2026-11-14,Japan,4770,Brazil,4748,finished,3.0,2.0,2026-11-14T10:15:00Z
 15534093,UEFA Nations League,2026/27,0,2026-11-14,Portugal,4704,Denmark,4476,finished,1.0,4.0,2026-11-14T19:45:00Z
-15534083,UEFA Nations League,2026/27,0,2026-11-15,Spain,4698,England,4713,finished,2.0,3.0,2026-11-15T19:45:00Z
-15534036,UEFA Nations League,2026/27,0,2026-11-15,Belgium,4717,Italy,4707,finished,4.0,1.0,2026-11-15T19:45:00Z
 15534029,UEFA Nations League,2026/27,0,2026-11-15,France,4481,Türkiye,4700,finished,2.0,1.0,2026-11-15T19:45:00Z
+15534036,UEFA Nations League,2026/27,0,2026-11-15,Belgium,4717,Italy,4707,finished,4.0,1.0,2026-11-15T19:45:00Z
+15534083,UEFA Nations League,2026/27,0,2026-11-15,Spain,4698,England,4713,finished,2.0,3.0,2026-11-15T19:45:00Z
 15534056,UEFA Nations League,2026/27,0,2026-11-16,Germany,4711,Netherlands,4705,finished,5.0,0.0,2026-11-16T19:45:00Z
-17551098,International Friendly Games,2026/27,0,2026-11-17,Singapore,4738,Brazil,4748,upcoming,,,2026-11-17T10:00:00Z
+17551098,International Friendly Games,2026/27,0,2026-11-17,Singapore,4738,Brazil,4748,finished,0.0,7.0,2026-11-17T10:00:00Z
 15534098,UEFA Nations League,2026/27,0,2026-11-17,Wales,4702,Portugal,4704,upcoming,,,2026-11-17T19:45:00Z
-17485286,International Friendly Games,2026/27,0,2026-11-17,Argentina,4819,Costa Rica,4756,upcoming,,,2026-11-17T21:00:00Z
+17485286,International Friendly Games,2026/27,0,2026-11-17,Argentina,4819,Costa Rica,4756,upcoming,,,2026-11-17T23:00:00Z
