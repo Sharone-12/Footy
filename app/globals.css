@@ -245,10 +245,8 @@
 
 .nav-pill:hover {
   box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 14%),
-    inset 0 -1px 0 oklch(0 0 0 / 30%),
-    0 2px 4px oklch(0 0 0 / 40%),
-    0 16px 36px -14px oklch(0 0 0 / 65%);
+    inset 0 1px 0 oklch(1 0 0 / 12%),
+    0 2px 6px oklch(0 0 0 / 30%);
 }
 
 /* Light mode overrides */
@@ -403,79 +401,32 @@ html:not(.dark) :is(
   animation-delay: 540ms;
 }
 
-/* Interactive card: lifts, and a bright pitch-green beam sweeps around the
-   full perimeter on hover using a rotating conic gradient. The mask leaves
-   only a thin border visible. */
-@property --card-lift-angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
-
+/* Clean, subtle card hover — no chasing colored glow beams */
 .card-lift {
   position: relative;
   transition:
-    transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1),
-    box-shadow 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 200ms ease,
+    border-color 200ms ease;
 }
 
 .card-lift::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1.5px;
-  pointer-events: none;
-  background: conic-gradient(from var(--card-lift-angle),
-      transparent 0%,
-      oklch(0.95 0.17 150 / 0%) 65%,
-      oklch(0.95 0.17 150 / 95%) 80%,
-      oklch(0.95 0.17 150 / 0%) 95%,
-      transparent 100%);
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  opacity: 0;
-  transition: opacity 160ms ease;
-  filter: drop-shadow(0 0 4px oklch(0.80 0.19 150 / 70%));
+  content: none !important;
+  display: none !important;
 }
 
 .card-lift:hover {
-  transform: translateY(-8px);
-  box-shadow:
-    inset 0 1px 0 oklch(1 0 0 / 22%),
-    0 8px 18px oklch(0 0 0 / 50%),
-    0 36px 70px -16px oklch(0 0 0 / 70%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.15);
 }
 
 html:not(.dark) .card-lift:hover {
-  transform: translateY(-3px);
-  z-index: 5;
-  box-shadow:
-    0 12px 24px -4px oklch(0 0 0 / 7%),
-    0 4px 10px -2px oklch(0 0 0 / 4%);
-  border-color: oklch(0 0 0 / 14%);
-}
-
-.card-lift:hover::before {
-  opacity: 1;
-  animation: card-lift-spin 1.6s linear infinite;
-}
-
-@keyframes card-lift-spin {
-  to {
-    --card-lift-angle: 360deg;
-  }
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px -2px rgba(0, 0, 0, 0.08);
 }
 
 .card-lift:active {
-  transform: translateY(-1px);
-  transition-duration: 100ms;
+  transform: translateY(0);
 }
 
 /* Row item: hairline outline rises on hover — monochrome, premium, no fill. */
@@ -1578,7 +1529,6 @@ html:not(.dark) .ucl-simulator .sim-card:hover {
 html:not(.dark) .ucl-simulator .sim-card-active {
   background-color: rgba(18, 34, 84, 0.90) !important;
   border: 1px solid #19b7ff !important;
-  box-shadow: 0 0 16px rgba(25, 183, 255, 0.25) !important;
   color: #ffffff !important;
 }
 
@@ -1587,14 +1537,13 @@ html:not(.dark) .ucl-simulator .sim-card-active {
   background: rgba(0, 0, 0, 0.06);
   color: var(--foreground);
   border: 1px solid rgba(0, 0, 0, 0.12);
-  backdrop-filter: blur(8px);
 }
 .dark .sim-btn-secondary,
 .ucl-simulator .sim-btn-secondary,
 html:not(.dark) .ucl-simulator .sim-btn-secondary {
   background: rgba(255, 255, 255, 0.14) !important;
   color: #ffffff !important;
-  border: 1px solid rgba(255, 255, 255, 0.24) !important;
+  border: 1px solid rgba(255, 255, 255, 0.20) !important;
 }
 .sim-btn-secondary:hover:not(:disabled) {
   background: rgba(0, 0, 0, 0.10);
@@ -1602,8 +1551,8 @@ html:not(.dark) .ucl-simulator .sim-btn-secondary {
 .dark .sim-btn-secondary:hover:not(:disabled),
 .ucl-simulator .sim-btn-secondary:hover:not(:disabled),
 html:not(.dark) .ucl-simulator .sim-btn-secondary:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.24) !important;
-  border-color: rgba(255, 255, 255, 0.38) !important;
+  background: rgba(255, 255, 255, 0.20) !important;
+  border-color: rgba(255, 255, 255, 0.30) !important;
   color: #ffffff !important;
 }
 
@@ -1832,10 +1781,8 @@ html:not(.dark) body:has(.ucl-bg) .nav-pill {
 
 body:has(.ucl-bg) .nav-pill:hover,
 html:not(.dark) body:has(.ucl-bg) .nav-pill:hover {
-  background: oklch(0.30 0.09 266 / 75%) !important;
-  box-shadow:
-    inset 0 1px 0 oklch(0.9 0.09 250 / 25%),
-    0 12px 32px -12px oklch(0 0 0 / 65%) !important;
+  background: oklch(0.26 0.08 266 / 72%) !important;
+  box-shadow: 0 2px 6px oklch(0 0 0 / 30%) !important;
 }
 
 body:has(.ucl-bg) .segment [data-active],
@@ -1848,17 +1795,12 @@ html:not(.dark) body:has(.ucl-bg) .segment [aria-pressed="true"] {
 body:has(.ucl-bg) .segment span[aria-hidden],
 html:not(.dark) body:has(.ucl-bg) .segment span[aria-hidden] {
   background: rgba(255, 255, 255, 0.16) !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
 }
 
 body:has(.ucl-bg) .card-lift:hover,
 html:not(.dark) body:has(.ucl-bg) .card-lift:hover {
-  transform: translateY(-8px) !important;
-  z-index: 10;
-  box-shadow:
-    inset 0 1px 0 oklch(0.9 0.09 250 / 30%),
-    0 8px 18px oklch(0 0 0 / 50%),
-    0 36px 70px -16px oklch(0 0 0 / 70%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.3) !important;
 }
 
 body:has(.ucl-bg) :is(h1, h2, h3, h4, h5, h6) {
@@ -1903,9 +1845,9 @@ html:not(.dark) .squad-card {
 }
 
 html:not(.dark) .squad-card:hover {
-  transform: translateY(-5px) !important;
-  border-color: rgba(255, 255, 255, 0.28) !important;
-  box-shadow: 0 18px 36px -6px rgba(0, 25, 75, 0.32), 0 6px 14px -2px rgba(165, 0, 68, 0.22) !important;
+  transform: translateY(-2px) !important;
+  border-color: rgba(255, 255, 255, 0.20) !important;
+  box-shadow: 0 10px 20px -4px rgba(0, 20, 60, 0.16) !important;
 }
 
 html:not(.dark) .squad-card .border-t {

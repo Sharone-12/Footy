@@ -80,7 +80,6 @@ export function MainNav() {
   const containerRef = useRef<HTMLDivElement>(null)
   const itemRefs = useRef<Array<HTMLAnchorElement | null>>([])
   const [pill, setPill] = useState<Pill | null>(null)
-  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
   const [optimisticIdx, setOptimisticIdx] = useState<number | null>(null)
   const [canHover, setCanHover] = useState(false)
 
@@ -94,7 +93,7 @@ export function MainNav() {
 
   const activeIdx = LINKS.findIndex((l) => isActive(pathname, l.href))
   const effectiveActiveIdx = optimisticIdx ?? activeIdx
-  const targetIdx = hoveredIdx ?? (effectiveActiveIdx >= 0 ? effectiveActiveIdx : 0)
+  const targetIdx = effectiveActiveIdx >= 0 ? effectiveActiveIdx : 0
 
   // Measure after layout so the pill lands on the right item on first paint
   // and re-measures on route change or window resize.
@@ -123,7 +122,6 @@ export function MainNav() {
     <div
       ref={containerRef}
       className={STRIP_CLASS}
-      onMouseLeave={() => setHoveredIdx(null)}
     >
       {pill && (
         <span
@@ -147,9 +145,6 @@ export function MainNav() {
             }}
             href={l.href}
             onClick={() => setOptimisticIdx(i)}
-            onMouseEnter={() => setHoveredIdx(i)}
-            onFocus={() => setHoveredIdx(i)}
-            onBlur={() => setHoveredIdx(null)}
             data-active={active || undefined}
             className={`relative z-10 px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 shrink-0 ${
               isBarca

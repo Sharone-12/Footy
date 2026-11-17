@@ -290,7 +290,7 @@ function BracketView({ b, ids }: { b: Bracket; ids: Record<string, number> }) {
         <div className="bk-col bk-final">
           <div className="bk-pair">
             <div className="bk-trophy" aria-hidden>
-              <div className="size-11 rounded-full bg-white flex items-center justify-center ring-2 ring-[#19b7ff] shadow-[0_0_20px_rgba(25,183,255,0.7)] p-1">
+              <div className="size-11 rounded-full bg-white flex items-center justify-center ring-1 ring-border shadow-sm p-1">
                 <LeagueCrest tournamentId={LEAGUE_TOURNAMENT_ID[UCL]} name={UCL} size={32} variant="transparent" />
               </div>
             </div>

@@ -32,7 +32,6 @@ export function SlidingSegment({
   const containerRef = useRef<HTMLDivElement>(null)
   const itemRefs = useRef<Array<HTMLElement | null>>([])
   const [pill, setPill] = useState<{ x: number; w: number } | null>(null)
-  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null)
   // Optimistic selection: a click sets this immediately so the pill doesn't
   // snap back to the old position during the router.push → re-render window.
   // Cleared when the real prop catches up.
@@ -43,7 +42,7 @@ export function SlidingSegment({
 
   const effectiveKey = optimisticKey ?? activeKey
   const activeIdx = items.findIndex((it) => it.key === effectiveKey)
-  const targetIdx = hoveredIdx ?? (activeIdx >= 0 ? activeIdx : 0)
+  const targetIdx = activeIdx >= 0 ? activeIdx : 0
 
   useLayoutEffect(() => {
     const container = containerRef.current
@@ -76,7 +75,6 @@ export function SlidingSegment({
       className="segment relative inline-flex rounded-full p-1 gap-0.5 max-w-full overflow-x-auto no-scrollbar whitespace-nowrap"
       role="group"
       aria-label={ariaLabel}
-      onMouseLeave={() => setHoveredIdx(null)}
     >
       {pill && (
         <span
@@ -91,9 +89,6 @@ export function SlidingSegment({
           ref: (el: HTMLButtonElement | HTMLAnchorElement | null) => {
             itemRefs.current[i] = el as HTMLElement | null
           },
-          onMouseEnter: () => setHoveredIdx(i),
-          onFocus: () => setHoveredIdx(i),
-          onBlur: () => setHoveredIdx(null),
           onClick: () => {
             if (!it.href) {
               setOptimisticKey(it.key)
