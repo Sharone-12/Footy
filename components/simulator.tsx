@@ -60,7 +60,7 @@ function Button({
       className={`inline-flex items-center gap-1.5 rounded-full px-3.5 h-8 text-xs font-semibold tracking-wide uppercase transition-all disabled:opacity-30 disabled:cursor-not-allowed hover:-translate-y-px active:translate-y-0 ${
         primary
           ? "shadow-sm"
-          : "bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/15 border border-black/5 dark:border-white/10 backdrop-blur-sm text-foreground/90 dark:text-white"
+          : "sim-btn-secondary"
       }`}
       style={primary ? { background: "var(--sim-accent)", color: "#050b1d", fontFamily: "var(--font-condensed)" } : { fontFamily: "var(--font-condensed)" }}
     >
@@ -107,10 +107,8 @@ function BarcaFixture({
   return (
     <li
       data-latest={latest || undefined}
-      className={`rounded-xl px-4 py-3 transition-[background,box-shadow,opacity] duration-300 border ${
-        latest
-          ? "bg-black/[0.04] dark:bg-[#122254]/85 border-[var(--sim-accent)] ring-1 ring-[var(--sim-accent)]/50 shadow-[0_0_14px_rgba(25,183,255,0.2)]"
-          : "bg-black/[0.02] dark:bg-black/35 hover:dark:bg-black/45 border-black/5 dark:border-white/10"
+      className={`rounded-xl px-4 py-3 transition-[background,box-shadow,opacity] duration-300 ${
+        latest ? "sim-card-active" : "sim-card"
       } ${result ? "" : "opacity-70"}`}
     >
       <div className="flex items-center gap-3">
@@ -166,7 +164,7 @@ function LiveTable({ rows, comp, ids }: { rows: SimRow[]; comp: Comp; ids: Recor
   const ZONE = { r16: "var(--pitch)", playoff: "var(--tone-amber)", out: "var(--tone-red)", mid: "transparent" }
   const cols = "grid-cols-[1.5rem_1fr_2rem_2.25rem_2.5rem]"
   return (
-    <div className="rounded-xl border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-black/35 backdrop-blur-sm p-3">
+    <div className="sim-card rounded-xl p-3">
       <div className={`grid ${cols} gap-x-1 px-2 stat-label text-[0.6rem] font-semibold tracking-wider uppercase mb-1.5 opacity-80`}>
         <span>#</span><span>Club</span><span className="text-right">P</span><span className="text-right">GD</span><span className="text-right">Pts</span>
       </div>
@@ -213,20 +211,20 @@ function TieRow({
   ids: Record<string, number>; pens?: boolean
 }) {
   return (
-    <div className={`bk-row flex items-center gap-1.5 px-2 h-8 min-w-0 ${win ? "bk-win" : ""}`} style={{ opacity: lose ? 0.45 : 1 }}>
+    <div className={`bk-row flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 h-7 sm:h-8 min-w-0 ${win ? "bk-win" : ""}`} style={{ opacity: lose ? 0.45 : 1 }}>
       {team ? (
         <>
-          {ids[team] != null && <TeamCrest teamId={ids[team]} name={team} size={16} />}
-          <span key={team} className="animate-slide-up truncate text-[0.72rem] font-semibold flex-1">{team}</span>
+          {ids[team] != null && <TeamCrest teamId={ids[team]} name={team} size={15} />}
+          <span key={team} className="animate-slide-up truncate text-[0.68rem] sm:text-[0.72rem] font-semibold flex-1 text-white">{team}</span>
           {score != null && (
-            <span className="stat-pop stat-figure text-sm tabular-nums">
+            <span className="stat-pop stat-figure text-xs sm:text-sm font-bold tabular-nums text-white">
               {score}
               {win && pens && <span className="text-[0.55rem] ml-0.5 align-top">p</span>}
             </span>
           )}
         </>
       ) : (
-        <span className="stat-label text-[0.55rem] opacity-60 truncate">{placeholder}</span>
+        <span className="stat-label text-[0.52rem] sm:text-[0.58rem] font-medium opacity-85 truncate text-white/80">{placeholder}</span>
       )}
     </div>
   )
@@ -243,7 +241,7 @@ function TieCard({ t, ids, slotA, slotB }: { t: Tie; ids: Record<string, number>
     <div className="bk-tie rounded-lg overflow-hidden" data-done={t.winner ? "" : undefined}>
       <TieRow team={t.a} score={t.agg?.[0]} win={!!t.a && t.winner === t.a} lose={!!t.winner && t.winner !== t.a} placeholder={slotA} ids={ids} pens={t.pens} />
       <TieRow team={t.b} score={t.agg?.[1]} win={!!t.b && t.winner === t.b} lose={!!t.winner && t.winner !== t.b} placeholder={slotB} ids={ids} pens={t.pens} />
-      {t.legs.length > 0 && <div className="stat-label text-[0.55rem] px-2 pb-1 opacity-80 truncate">{legLine(t)}</div>}
+      {t.legs.length > 0 && <div className="stat-label text-[0.52rem] sm:text-[0.55rem] px-1.5 sm:px-2 pb-1 opacity-80 truncate text-white/70">{legLine(t)}</div>}
     </div>
   )
 }
@@ -286,16 +284,18 @@ function Half({ b, side, ids }: { b: Bracket; side: 0 | 1; ids: Record<string, n
 function BracketView({ b, ids }: { b: Bracket; ids: Record<string, number> }) {
   const final = b.final[0]
   return (
-    <div className="overflow-x-auto no-scrollbar -mx-5 px-5">
+    <div className="overflow-x-auto no-scrollbar">
       <div className="bracket">
         <div className="bk-l contents"><Half b={b} side={0} ids={ids} /></div>
         <div className="bk-col bk-final">
           <div className="bk-pair">
             <div className="bk-trophy" aria-hidden>
-              <LeagueCrest tournamentId={LEAGUE_TOURNAMENT_ID[UCL]} name={UCL} size={44} variant="transparent" />
+              <div className="size-11 rounded-full bg-white flex items-center justify-center ring-2 ring-[#19b7ff] shadow-[0_0_20px_rgba(25,183,255,0.7)] p-1">
+                <LeagueCrest tournamentId={LEAGUE_TOURNAMENT_ID[UCL]} name={UCL} size={32} variant="transparent" />
+              </div>
             </div>
             <Slot done={!!final.winner}>
-              <div className="stat-label text-[0.55rem] text-center mb-1">Final</div>
+              <div className="stat-label text-[0.58rem] text-center mb-1 font-semibold uppercase tracking-wider text-white">Final</div>
               <TieCard t={final} ids={ids} slotA="SF winner" slotB="SF winner" />
             </Slot>
           </div>
@@ -513,7 +513,7 @@ export function Simulator({ nav }: { nav: ReactNode }) {
                     ))}
                   </ul>
                   {lastRound && (
-                    <div className="mt-4 rounded-xl border border-black/5 dark:border-white/10 bg-black/[0.02] dark:bg-black/35 backdrop-blur-sm p-3">
+                    <div className="mt-4 sim-card rounded-xl p-3">
                       <h3 className="stat-label text-xs uppercase tracking-wider font-semibold mb-2 opacity-80">
                         Matchday {lastRound.round} elsewhere
                       </h3>
@@ -521,7 +521,7 @@ export function Simulator({ nav }: { nav: ReactNode }) {
                         {lastRound.results.filter((m) => m.home !== BARCA && m.away !== BARCA).map((m) => (
                           <li key={m.event_id} className="flex items-center gap-1.5 min-w-0 py-1 px-2 rounded-lg bg-black/[0.02] dark:bg-white/[0.04]">
                             <span className="truncate flex-1 text-right opacity-85 font-medium">{m.home}</span>
-                            <span className="stat-figure text-xs font-semibold tabular-nums w-11 text-center bg-black/5 dark:bg-[#13224f] text-foreground dark:text-[#7dd3fc] border border-black/5 dark:border-white/10 rounded px-1.5 py-0.5">
+                            <span className="stat-figure text-xs font-semibold tabular-nums w-11 text-center bg-[#13224f] text-[#7dd3fc] border border-white/10 rounded px-1.5 py-0.5">
                               {m.hg}–{m.ag}
                             </span>
                             <span className="truncate flex-1 opacity-85 font-medium">{m.away}</span>
@@ -537,7 +537,7 @@ export function Simulator({ nav }: { nav: ReactNode }) {
                   {(leaders.scorer || leaders.assister || leagueDone) && (
                     <div className="grid grid-cols-2 gap-2.5 mb-4">
                       {leagueDone && (
-                        <div className="col-span-2 rounded-xl px-3.5 py-2.5 bg-black/[0.03] dark:bg-black/40 border border-black/10 dark:border-[var(--sim-accent)]/30 backdrop-blur-sm shadow-sm">
+                        <div className="col-span-2 sim-card rounded-xl px-3.5 py-2.5 shadow-sm">
                           <span className="stat-label text-[0.65rem] uppercase tracking-wider block opacity-75">{comp === "ucl" ? "League phase" : "Final table"}</span>
                           <span
                             className="stat-pop block text-lg font-bold uppercase leading-tight mt-0.5"
@@ -554,9 +554,9 @@ export function Simulator({ nav }: { nav: ReactNode }) {
                         </div>
                       )}
                       {leaders.scorer && (
-                        <div className="rounded-xl px-3.5 py-2.5 bg-black/[0.03] dark:bg-black/35 border border-black/5 dark:border-white/10 backdrop-blur-sm shadow-sm min-w-0">
+                        <div className="sim-card rounded-xl px-3.5 py-2.5 shadow-sm min-w-0">
                           <span className="stat-label text-[0.65rem] uppercase tracking-wider block opacity-75">Top scorer</span>
-                          <span className="block text-sm font-semibold truncate text-foreground dark:text-white mt-0.5">{leaders.scorer.name}</span>
+                          <span className="block text-sm font-semibold truncate text-white mt-0.5">{leaders.scorer.name}</span>
                           <div className="flex items-baseline gap-1.5 mt-0.5">
                             <span className="stat-figure text-base font-bold" style={{ color: "var(--sim-accent)" }}>
                               <Flip value={leaders.scorer.sim} />
@@ -566,9 +566,9 @@ export function Simulator({ nav }: { nav: ReactNode }) {
                         </div>
                       )}
                       {leaders.assister && (
-                        <div className="rounded-xl px-3.5 py-2.5 bg-black/[0.03] dark:bg-black/35 border border-black/5 dark:border-white/10 backdrop-blur-sm shadow-sm min-w-0">
+                        <div className="sim-card rounded-xl px-3.5 py-2.5 shadow-sm min-w-0">
                           <span className="stat-label text-[0.65rem] uppercase tracking-wider block opacity-75">Top assister</span>
-                          <span className="block text-sm font-semibold truncate text-foreground dark:text-white mt-0.5">{leaders.assister.name}</span>
+                          <span className="block text-sm font-semibold truncate text-white mt-0.5">{leaders.assister.name}</span>
                           <div className="flex items-baseline gap-1.5 mt-0.5">
                             <span className="stat-figure text-base font-bold" style={{ color: "var(--sim-accent)" }}>
                               <Flip value={leaders.assister.sim} />
@@ -626,7 +626,7 @@ export function Simulator({ nav }: { nav: ReactNode }) {
 
                   {bracket && (
                     <>
-                      <div className="mb-6 rounded-xl border border-white/10 bg-black/30 backdrop-blur-sm p-3.5">
+                      <div className="mb-6 sim-card rounded-xl p-3.5">
                         <h4 className="stat-label text-xs uppercase tracking-wider font-semibold opacity-80 mb-3">{KO_LABEL.playoffs}</h4>
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                           {bracket.playoffs.map((t) => (
@@ -634,7 +634,7 @@ export function Simulator({ nav }: { nav: ReactNode }) {
                           ))}
                         </div>
                       </div>
-                      <div className="rounded-xl border border-white/10 bg-black/30 backdrop-blur-sm p-3.5">
+                      <div className="sim-card rounded-xl p-2 sm:p-3.5">
                         <BracketView b={bracket} ids={ready.ids} />
                       </div>
                     </>

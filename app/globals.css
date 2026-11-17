@@ -1508,8 +1508,10 @@ main h1 > span:nth-child(2) {
    Seven columns, the final in the middle, each half mirrored. Ties sit in
    slots; a slot draws its line out towards the centre, a pair draws the
    vertical joining two slots, and the next column's slot draws the line in. */
-.ucl-simulator {
+.ucl-simulator,
+html:not(.dark) .ucl-simulator {
   position: relative;
+  color-scheme: dark !important;
   background-color: #04091a !important;
   background-image:
     radial-gradient(circle at 50% 0%, rgba(13, 27, 72, 0.78) 0%, rgba(4, 9, 26, 0.94) 55%, #030713 100%),
@@ -1520,27 +1522,104 @@ main h1 > span:nth-child(2) {
   border: 1px solid rgba(25, 183, 255, 0.28) !important;
   box-shadow: 0 16px 48px -12px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
   color: #ffffff !important;
+  --foreground: #ffffff !important;
+  --muted-foreground: rgba(255, 255, 255, 0.72) !important;
 }
 
-.ucl-simulator .stat-label {
-  color: rgba(255, 255, 255, 0.7) !important;
-}
-
-.ucl-simulator .stat-figure {
+.ucl-simulator :is(h1, h2, h3, h4, h5, h6),
+html:not(.dark) .ucl-simulator :is(h1, h2, h3, h4, h5, h6) {
   color: #ffffff !important;
 }
 
-.ucl-simulator .text-muted-foreground {
-  color: rgba(255, 255, 255, 0.65) !important;
+.ucl-simulator .stat-label,
+html:not(.dark) .ucl-simulator .stat-label {
+  color: rgba(255, 255, 255, 0.78) !important;
+}
+
+.ucl-simulator .stat-figure,
+html:not(.dark) .ucl-simulator .stat-figure {
+  color: #ffffff !important;
+}
+
+.ucl-simulator .text-muted-foreground,
+html:not(.dark) .ucl-simulator .text-muted-foreground {
+  color: rgba(255, 255, 255, 0.70) !important;
+}
+
+/* Simulator cards and surfaces */
+.sim-card {
+  background-color: rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: inherit;
+}
+.dark .sim-card,
+.ucl-simulator .sim-card,
+html:not(.dark) .ucl-simulator .sim-card {
+  background-color: rgba(8, 16, 42, 0.75) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+.sim-card:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+.dark .sim-card:hover,
+.ucl-simulator .sim-card:hover,
+html:not(.dark) .ucl-simulator .sim-card:hover {
+  background-color: rgba(12, 24, 60, 0.85) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+.sim-card-active {
+  background-color: rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--sim-accent);
+}
+.dark .sim-card-active,
+.ucl-simulator .sim-card-active,
+html:not(.dark) .ucl-simulator .sim-card-active {
+  background-color: rgba(18, 34, 84, 0.90) !important;
+  border: 1px solid #19b7ff !important;
+  box-shadow: 0 0 16px rgba(25, 183, 255, 0.25) !important;
+  color: #ffffff !important;
+}
+
+/* Simulator secondary buttons */
+.sim-btn-secondary {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--foreground);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(8px);
+}
+.dark .sim-btn-secondary,
+.ucl-simulator .sim-btn-secondary,
+html:not(.dark) .ucl-simulator .sim-btn-secondary {
+  background: rgba(255, 255, 255, 0.14) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.24) !important;
+}
+.sim-btn-secondary:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.10);
+}
+.dark .sim-btn-secondary:hover:not(:disabled),
+.ucl-simulator .sim-btn-secondary:hover:not(:disabled),
+html:not(.dark) .ucl-simulator .sim-btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.24) !important;
+  border-color: rgba(255, 255, 255, 0.38) !important;
+  color: #ffffff !important;
 }
 
 .bracket {
   --bk-line: rgba(56, 189, 248, 0.45);
   --bk-glow: #19b7ff;
   display: grid;
-  grid-template-columns: repeat(7, minmax(150px, 1fr));
-  min-width: 1080px;
-  min-height: 420px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  width: 100%;
+  min-height: 440px;
+}
+
+@media (max-width: 768px) {
+  .bracket {
+    min-width: 720px;
+  }
 }
 
 .bk-col {
@@ -1574,7 +1653,13 @@ main h1 > span:nth-child(2) {
 
 .bk-slot {
   position: relative;
-  padding: 6px 14px;
+  padding: 4px 6px;
+}
+
+@media (min-width: 1024px) {
+  .bk-slot {
+    padding: 6px 10px;
+  }
 }
 
 .bk-slot::before,
@@ -1582,8 +1667,15 @@ main h1 > span:nth-child(2) {
   content: "";
   position: absolute;
   top: 50%;
-  width: 14px;
+  width: 6px;
   border-top: 2px solid var(--bk-line);
+}
+
+@media (min-width: 1024px) {
+  .bk-slot::before,
+  .bk-slot::after {
+    width: 10px;
+  }
 }
 
 .bk-slot::after { right: 0; }
@@ -1601,23 +1693,33 @@ main h1 > span:nth-child(2) {
 }
 
 .bk-tie {
-  background: rgba(8, 18, 46, 0.92);
-  border: 1px solid rgba(25, 183, 255, 0.28);
+  background: rgba(8, 18, 46, 0.94);
+  border: 1px solid rgba(25, 183, 255, 0.32);
   backdrop-filter: blur(12px);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
   transition: all 0.3s ease;
 }
 
 .bk-tie:hover {
-  border-color: rgba(25, 183, 255, 0.55);
+  border-color: rgba(25, 183, 255, 0.65);
 }
 
 .bk-tie[data-done] {
   border-color: rgba(25, 183, 255, 0.45);
 }
 
+.bk-row,
+html:not(.dark) .bk-row {
+  color: #ffffff !important;
+}
+
 .bk-row + .bk-row {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.bk-tie .stat-label,
+html:not(.dark) .bk-tie .stat-label {
+  color: rgba(255, 255, 255, 0.78) !important;
 }
 
 .bk-row.bk-win {
