@@ -23,6 +23,7 @@ import { BarcaSeason } from "@/components/barca-season"
 import { Mosaic } from "@/components/mosaic"
 import { Rondo } from "@/components/rondo"
 import { SquadViewToggle } from "@/components/squad-view-toggle"
+import { Simulator } from "@/components/simulator"
 import { mostUsedXI } from "@/lib/barca"
 import { loadFingerprints } from "@/components/player-dna"
 import { DNA_KEYS, fingerprint, archetypes } from "@/lib/dna"
@@ -342,11 +343,13 @@ export default function SquadPage({
         </div>
       </div>
       <Mosaic />
-      <div className="mb-6">
-        <Suspense fallback={<Skeleton className="h-10 w-44 rounded-full" />}>
-          <BarcaNav />
-        </Suspense>
-      </div>
+      <Simulator
+        nav={
+          <Suspense fallback={<Skeleton className="h-10 w-44 rounded-full" />}>
+            <BarcaNav />
+          </Suspense>
+        }
+      />
       <Suspense fallback={<Rondo label="Reading the season" className="h-[230px] mb-8" />}>
         <BarcaSeason searchParams={searchParams} />
       </Suspense>

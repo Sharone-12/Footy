@@ -58,7 +58,7 @@ const UCL_DOMESTIC_WEIGHT = 0.75
 /** Pseudo-games of an exactly average side mixed into every rating. */
 const UCL_PRIOR_GAMES = 4
 /** Home goals 1.93 vs away 1.45 per match in 2025/26: sqrt of the ratio each way. */
-const UCL_HOME_MULT = 1.15
+export const UCL_HOME_MULT = 1.15
 /** Goals per team-match before any are played (2025/26 league phase: 1.69). */
 const UCL_PRIOR_AVG = 1.69
 /** Ligue 1 / Bundesliga average: we hold only PSG's and Bayern's games there. */
@@ -306,23 +306,30 @@ const PREDICTION_STATS = [
 
 export { PREDICTION_STATS }
 
-export function predictMatches(
-  upcoming: {
-    event_id: number
-    league: string
-    round: number
-    date: string
-    kickoff?: string | null
-    home: string
-    home_id: number | null
-    away: string
-    away_id: number | null
-  }[],
+type Fixture = {
+  event_id: number
+  league: string
+  round: number
+  date: string
+  kickoff?: string | null
+  home: string
+  home_id: number | null
+  away: string
+  away_id: number | null
+}
+
+/**
+ * Expected goals for each side of every fixture, event_id -> [home, away].
+ * The one rating the predictions and the season simulator share: the odds
+ * are these through a Poisson, a simulated scoreline is a draw from it.
+ */
+export function expectedGoals(
+  upcoming: Fixture[],
   finished: FinishedMatch[],
   table: TeamTableRow[],
   stats?: SeasonStatRow[],
   xg?: MatchXg,
-): MatchPrediction[] {
+): Map<number, [number, number]> {
   // A club has one row per competition, so look it up in the match's own.
   const teamMap = new Map(table.map((t) => [`${t.league}|${t.team}`, t]))
   const byKey = stats ? indexStats(stats) : new Map<string, SeasonStatRow>()
@@ -371,7 +378,8 @@ export function predictMatches(
     return model
   }
 
-  return upcoming.map((m) => {
+  const out = new Map<number, [number, number]>()
+  for (const m of upcoming) {
     const homeTeam = teamMap.get(`${m.league}|${m.home}`)
     const awayTeam = teamMap.get(`${m.league}|${m.away}`)
     const avg = leagueAvg.get(m.league) ?? { goals: 1.3, sot: 4, bc: 1, sib: 5 }
@@ -417,10 +425,24 @@ export function predictMatches(
       awayExpected = aa * hd * avg.goals
     }
 
-    const probs = matchProbabilities(
-      Math.max(0.3, homeExpected),
-      Math.max(0.3, awayExpected),
-    )
+    out.set(m.event_id, [Math.max(0.3, homeExpected), Math.max(0.3, awayExpected)])
+  }
+  return out
+}
+
+export function predictMatches(
+  upcoming: Fixture[],
+  finished: FinishedMatch[],
+  table: TeamTableRow[],
+  stats?: SeasonStatRow[],
+  xg?: MatchXg,
+): MatchPrediction[] {
+  const finishedMap = new Map(finished.map((m) => [m.event_id, m]))
+  const lambdas = expectedGoals(upcoming, finished, table, stats, xg)
+
+  return upcoming.map((m) => {
+    const [homeExpected, awayExpected] = lambdas.get(m.event_id) ?? [1, 1]
+    const probs = matchProbabilities(homeExpected, awayExpected)
 
     const predicted =
       probs.homeWin >= probs.draw && probs.homeWin >= probs.awayWin
