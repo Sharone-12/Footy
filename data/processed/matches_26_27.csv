@@ -199,16 +199,16 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16363775,Premier League,2026/27,20,2027-01-06,Ipswich Town,32,Coventry City,11,upcoming,,,2027-01-06T19:30:00Z
 16363776,Premier League,2026/27,20,2027-01-06,Leeds United,34,Manchester City,17,upcoming,,,2027-01-06T20:15:00Z
 16363777,Premier League,2026/27,20,2027-01-07,Manchester United,35,Newcastle United,39,upcoming,,,2027-01-07T20:00:00Z
-16363665,Premier League,2026/27,21,2027-01-16,Aston Villa,40,Manchester United,35,upcoming,,,2027-01-16T15:00:00Z
-16363674,Premier League,2026/27,21,2027-01-16,Bournemouth,60,Ipswich Town,32,upcoming,,,2027-01-16T15:00:00Z
+16363704,Premier League,2026/27,21,2027-01-16,Coventry City,11,Everton,48,upcoming,,,2027-01-16T12:30:00Z
 16363684,Premier League,2026/27,21,2027-01-16,Brentford,50,Brighton & Hove Albion,30,upcoming,,,2027-01-16T15:00:00Z
 16363697,Premier League,2026/27,21,2027-01-16,Chelsea,38,Sunderland,41,upcoming,,,2027-01-16T15:00:00Z
-16363704,Premier League,2026/27,21,2027-01-16,Coventry City,11,Everton,48,upcoming,,,2027-01-16T15:00:00Z
 16363711,Premier League,2026/27,21,2027-01-16,Hull City,96,Arsenal,42,upcoming,,,2027-01-16T15:00:00Z
 16363718,Premier League,2026/27,21,2027-01-16,Liverpool FC,44,Crystal Palace,7,upcoming,,,2027-01-16T15:00:00Z
 16363725,Premier League,2026/27,21,2027-01-16,Manchester City,17,Nottingham Forest,14,upcoming,,,2027-01-16T15:00:00Z
 16363732,Premier League,2026/27,21,2027-01-16,Newcastle United,39,Fulham,43,upcoming,,,2027-01-16T15:00:00Z
-16363739,Premier League,2026/27,21,2027-01-16,Tottenham Hotspur,33,Leeds United,34,upcoming,,,2027-01-16T15:00:00Z
+16363665,Premier League,2026/27,21,2027-01-16,Aston Villa,40,Manchester United,35,upcoming,,,2027-01-16T17:30:00Z
+16363674,Premier League,2026/27,21,2027-01-17,Bournemouth,60,Ipswich Town,32,upcoming,,,2027-01-17T14:00:00Z
+16363739,Premier League,2026/27,21,2027-01-17,Tottenham Hotspur,33,Leeds United,34,upcoming,,,2027-01-17T16:30:00Z
 16363746,Premier League,2026/27,22,2027-01-23,Arsenal,42,Newcastle United,39,upcoming,,,2027-01-23T15:00:00Z
 16363751,Premier League,2026/27,22,2027-01-23,Brighton & Hove Albion,30,Manchester City,17,upcoming,,,2027-01-23T15:00:00Z
 16363757,Premier League,2026/27,22,2027-01-23,Crystal Palace,7,Tottenham Hotspur,33,upcoming,,,2027-01-23T15:00:00Z
