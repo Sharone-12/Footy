@@ -25,11 +25,13 @@ const CIRCUMFERENCE = 2 * Math.PI * R
  */
 export function LiveCard({
   m,
-  watchable,
+  watchable = true,
+  loadingStreams = false,
   pills,
 }: {
   m: LiveFixture
-  watchable: boolean
+  watchable?: boolean
+  loadingStreams?: boolean
   pills?: ReactNode
 }) {
   const score = useLiveScore(m)
@@ -142,11 +144,25 @@ export function LiveCard({
 
       {watchable && (
         <footer className="flex items-center justify-between gap-3 flex-wrap pt-3 border-t border-border/50">
-          <div className="flex items-center gap-1.5 flex-wrap min-w-0">{pills}</div>
+          <div className="flex items-center gap-1.5 flex-wrap min-w-0">
+            {pills && (Array.isArray(pills) ? pills.length > 0 : true) ? (
+              pills
+            ) : loadingStreams ? (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium bg-muted/60 text-muted-foreground border border-border/40 animate-pulse">
+                <span className="size-1.5 rounded-full bg-emerald-500 animate-ping" />
+                Finding streams...
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
+                <span className="size-1.5 rounded-full bg-emerald-500" />
+                Live Broadcast
+              </span>
+            )}
+          </div>
           <Link
             href={`/live/watch?id=${m.event_id}`}
             aria-label={`Watch ${m.home} vs ${m.away}`}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#16a34a] text-white dark:bg-[var(--pitch)] dark:text-black hover:brightness-110 font-bold text-xs shadow-md transition-all hover:scale-[1.03] shrink-0"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#16a34a] text-white dark:bg-[var(--pitch)] dark:text-black hover:brightness-110 font-bold text-xs shadow-md transition-all hover:scale-[1.03] shrink-0 cursor-pointer"
           >
             <PlayIcon className="size-3 fill-current" />
             Watch Now

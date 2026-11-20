@@ -173,6 +173,13 @@ const ALIASES: Record<string, string[]> = {
   ...INTERNATIONAL_ALIASES,
 }
 
+// Pre-normalize alias groups once at module load
+const PRECOMPUTED_ALIASES: string[][] = Object.entries(ALIASES).map(([canon, aliases]) => {
+  const canonNorm = normalise(canon)
+  const all = [canonNorm, ...aliases.map(normalise)].filter((a) => a && a.length >= 3)
+  return all
+})
+
 export function normalise(text: string | null | undefined): string {
   if (!text) return ""
   return text
@@ -226,14 +233,17 @@ export function teamSimilarity(fixtureTeam: string, eventTeam: string): number {
   if (!normA || !normB) return 0
   if (normA === normB) return 1.0
 
-  // 1. Check alias dictionary
-  for (const [canon, aliases] of Object.entries(ALIASES)) {
-    const canonNorm = normalise(canon)
-    const all = [canonNorm, ...aliases.map(normalise)].filter((a) => a && a.length >= 3)
-    const matchesA = all.some((a) => matchesAliasTarget(normA, a))
-    const matchesB = all.some((b) => matchesAliasTarget(normB, b))
-    if (matchesA && matchesB) {
-      return 0.98
+  // 1. Check precomputed alias dictionary
+  for (let i = 0; i < PRECOMPUTED_ALIASES.length; i++) {
+    const all = PRECOMPUTED_ALIASES[i]
+    let matchesA = false
+    let matchesB = false
+    for (let j = 0; j < all.length; j++) {
+      if (!matchesA && matchesAliasTarget(normA, all[j])) matchesA = true
+      if (!matchesB && matchesAliasTarget(normB, all[j])) matchesB = true
+      if (matchesA && matchesB) {
+        return 0.98
+      }
     }
   }
 
@@ -299,6 +309,12 @@ export function computeMatchScore(
   fixture: Fixture,
   event: MatchoraParsedEvent,
 ): { confidence: number; isConfirmed: boolean } {
+  // Check timing first — fast rejection for wrong day/time
+  const timeInfo = timeProximityScore(fixture.kickoff, fixture.date, event)
+  if (!timeInfo.dateMatch) {
+    return { confidence: 0, isConfirmed: false }
+  }
+
   // 1. Team similarities (support standard & inverted/swapped home-away)
   const homeSim = teamSimilarity(fixture.home, event.home)
   const awaySim = teamSimilarity(fixture.away, event.away)
@@ -340,11 +356,6 @@ export function computeMatchScore(
     }
     effectiveHomeSim = 0.8
     effectiveAwaySim = 0.8
-  }
-
-  const timeInfo = timeProximityScore(fixture.kickoff, fixture.date, event)
-  if (!timeInfo.dateMatch) {
-    return { confidence: 0, isConfirmed: false }
   }
 
   const lgSim = leagueSimilarity(fixture.league, event.league)

@@ -201,6 +201,7 @@ function Row({
   matchedDamiTv,
   matchedCinevid,
   matchedLive24,
+  loadingStreams,
   onWatch,
   timeOnly,
 }: {
@@ -216,6 +217,7 @@ function Row({
   matchedDamiTv?: MatchedDamiTv
   matchedCinevid?: MatchedCinevid
   matchedLive24?: MatchedLive24
+  loadingStreams?: boolean
   onWatch?: (state: ActivePlayerState) => void
 }) {
   const tid = getLeagueTournamentId(m.league)
@@ -232,10 +234,8 @@ function Row({
   const left = start - now
   const isUnderAnHour = left > 0 && left <= 3600_000
 
-  // Watch CTA & stream badges are only available when the match is LIVE or within 15 minutes of kickoff
-  const isWatchable =
-    hasStream &&
-    (live || (left <= 15 * 60_000 && now - start < PLAYING_MS))
+  // Watch CTA & stream badges are available when the match is LIVE or within 15 minutes of kickoff
+  const isWatchable = live || (left <= 15 * 60_000 && now - start < PLAYING_MS)
 
   return (
     <div className="card-lift fixture-row surface bg-card rounded-2xl px-4 py-3.5 flex flex-col gap-3 transition-all">
@@ -278,27 +278,37 @@ function Row({
         </div>
       </div>
 
-      {/* Line 2 — sources and the CTA. Only rendered when the match is live
-          or within 15 minutes, so a row with nothing to watch keeps its
-          original height and the section does not grow for no reason. */}
+      {/* Line 2 — sources and the CTA. Rendered when the match is live or within 15 minutes */}
       {isWatchable && (
         <div className="flex items-center justify-between gap-3 flex-wrap pt-2.5 border-t border-border/50">
           <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-            {providerPills({
-              matchedMatchora,
-              matchedDamiTv,
-              matchedCinevid,
-              matchedLive24,
-              matchedStream,
-              matchedZLive,
-              matchedDaddyLive,
-            })}
+            {hasStream ? (
+              providerPills({
+                matchedMatchora,
+                matchedDamiTv,
+                matchedCinevid,
+                matchedLive24,
+                matchedStream,
+                matchedZLive,
+                matchedDaddyLive,
+              })
+            ) : loadingStreams ? (
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-muted/60 text-muted-foreground border border-border/40 animate-pulse">
+                <span className="size-1.5 rounded-full bg-emerald-500 animate-ping" />
+                Finding streams...
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold border bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20">
+                <span className="size-1.5 rounded-full bg-emerald-500" />
+                Live Broadcast
+              </span>
+            )}
           </div>
 
           <Link
             href={`/live/watch?id=${m.event_id}`}
             aria-label={`Watch stream for ${m.home} vs ${m.away}`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#16a34a] text-white dark:bg-[var(--pitch)] dark:text-black hover:bg-[#15803d] dark:hover:brightness-110 font-bold text-xs shadow-md transition-all hover:scale-[1.03] shrink-0"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#16a34a] text-white dark:bg-[var(--pitch)] dark:text-black hover:bg-[#15803d] dark:hover:brightness-110 font-bold text-xs shadow-md transition-all hover:scale-[1.03] shrink-0 cursor-pointer"
           >
             <PlayIcon className="size-3 fill-current" />
             Watch Now
@@ -322,6 +332,7 @@ function Section({
   damitvMap,
   cinevidMap,
   live24Map,
+  loadingStreams,
   onWatch,
 }: {
   title: string
@@ -336,6 +347,7 @@ function Section({
   damitvMap: Record<number, MatchedDamiTv>
   cinevidMap: Record<number, MatchedCinevid>
   live24Map: Record<number, MatchedLive24>
+  loadingStreams?: boolean
   onWatch?: (state: ActivePlayerState) => void
 }) {
   return (
@@ -370,6 +382,7 @@ function Section({
               matchedDamiTv={damitvMap[m.event_id]}
               matchedCinevid={cinevidMap[m.event_id]}
               matchedLive24={live24Map[m.event_id]}
+              loadingStreams={loadingStreams}
               onWatch={onWatch}
             />
           ))}
@@ -403,6 +416,7 @@ const STREAMS_EVERY_MS = 60_000
 export function LiveSections({ matches }: { matches: LiveFixture[] }) {
   const [now, setNow] = useState<number | null>(null)
   const [loadedMaps, setMaps] = useState<StreamMaps>(EMPTY_MAPS)
+  const [loadingStreams, setLoadingStreams] = useState<boolean>(true)
   const [genericChannels, setGenericChannels] = useState<ZLiveChannel[]>([])
   const [activePlayer, setActivePlayer] = useState<ActivePlayerState | null>(null)
 
@@ -433,8 +447,12 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
   // query and matching pass; the server now does that once and the CDN holds
   // it for the re-poll window, so pills appear as sources come online.
   useEffect(() => {
-    if (!streamEligibleKey) return
+    if (!streamEligibleKey) {
+      setLoadingStreams(false)
+      return
+    }
     let unmounted = false
+    setLoadingStreams(true)
     async function load() {
       try {
         const res = await fetch("/api/streams/live")
@@ -452,6 +470,8 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
         })
       } catch (err) {
         console.warn("[live] Could not load streams:", err)
+      } finally {
+        if (!unmounted) setLoadingStreams(false)
       }
     }
     load()
@@ -533,10 +553,8 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
                 <LiveCard
                   key={m.event_id}
                   m={m}
-                  watchable={Boolean(
-                    mm.matchedMatchora || mm.matchedStream || mm.matchedZLive?.isConfirmedMatch ||
-                    mm.matchedDaddyLive || mm.matchedDamiTv || mm.matchedCinevid || mm.matchedLive24,
-                  )}
+                  watchable={true}
+                  loadingStreams={loadingStreams}
                   pills={providerPills(mm)}
                 />
               )
@@ -560,7 +578,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
 
       {/* 2. Kicking off within three hours */}
       {ready && soon.length > 0 && (
-        <Section title="Starting Soon" rows={soon} now={now} empty="" {...maps} />
+        <Section title="Starting Soon" rows={soon} now={now} empty="" loadingStreams={loadingStreams} {...maps} />
       )}
 
       {/* 3. Everything later, a day at a time under a header that stays put. */}
@@ -579,7 +597,7 @@ export function LiveSections({ matches }: { matches: LiveFixture[] }) {
           </div>
           <div className="flex flex-col gap-2.5">
             {day.rows.map((m) => (
-              <Row key={m.event_id} m={m} now={now ?? 0} live={false} timeOnly {...matched(m)} />
+              <Row key={m.event_id} m={m} now={now ?? 0} live={false} timeOnly loadingStreams={loadingStreams} {...matched(m)} />
             ))}
           </div>
         </section>

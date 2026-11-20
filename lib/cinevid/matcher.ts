@@ -198,6 +198,13 @@ export function normalise(text: string | null | undefined): string {
     .join(" ")
 }
 
+// Pre-normalize alias groups once at module load
+const PRECOMPUTED_ALIASES: string[][] = Object.entries(ALIASES).map(([canon, aliases]) => {
+  const canonNorm = normalise(canon)
+  const all = [canonNorm, ...aliases.map(normalise)].filter((a) => a && a.length >= 3)
+  return all
+})
+
 /**
  * Computes Sørensen-Dice similarity coefficient on bigrams (0.0 to 1.0).
  */
@@ -239,13 +246,16 @@ export function teamSimilarity(fixtureTeam: string, eventTeam: string): number {
   if (normA === normB) return 1.0
 
   // 1. Check alias dictionary
-  for (const [canon, aliases] of Object.entries(ALIASES)) {
-    const canonNorm = normalise(canon)
-    const all = [canonNorm, ...aliases.map(normalise)].filter((a) => a && a.length >= 3)
-    const matchesA = all.some((a) => matchesAliasTarget(normA, a))
-    const matchesB = all.some((b) => matchesAliasTarget(normB, b))
-    if (matchesA && matchesB) {
-      return 0.98
+  for (let i = 0; i < PRECOMPUTED_ALIASES.length; i++) {
+    const all = PRECOMPUTED_ALIASES[i]
+    let matchesA = false
+    let matchesB = false
+    for (let j = 0; j < all.length; j++) {
+      if (!matchesA && matchesAliasTarget(normA, all[j])) matchesA = true
+      if (!matchesB && matchesAliasTarget(normB, all[j])) matchesB = true
+      if (matchesA && matchesB) {
+        return 0.98
+      }
     }
   }
 

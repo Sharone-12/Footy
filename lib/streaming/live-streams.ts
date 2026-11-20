@@ -39,7 +39,7 @@ import type { MatchedMatchora } from "@/lib/matchora/types"
 
 /** Matches the CDN s-maxage on the routes that serve this. */
 export const LIVE_STREAMS_TTL_MS = 60_000
-const PROVIDER_TIMEOUT_MS = 3_500
+const PROVIDER_TIMEOUT_MS = 5_000
 
 /** Streams unlock 15 minutes before kickoff and stay through a late finish. */
 const PRE_KICKOFF_MS = 15 * 60_000

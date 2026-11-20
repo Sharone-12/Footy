@@ -168,6 +168,13 @@ export function cleanTeamName(name: string): string {
     .trim()
 }
 
+// Pre-normalize aliases once at module load
+const PRECOMPUTED_ALIASES: string[][] = Object.entries(ALIASES).map(([canon, aliases]) => {
+  const canonNorm = cleanTeamName(canon)
+  const all = [canonNorm, ...aliases.map(cleanTeamName)].filter((a) => a && a.length >= 3)
+  return all
+})
+
 export function levenshteinDistance(a: string, b: string): number {
   if (a === b) return 0
   if (a.length === 0) return b.length
@@ -201,10 +208,14 @@ export function areAliases(nameA: string, nameB: string): boolean {
   const normB = cleanTeamName(nameB)
   if (normA === normB) return true
 
-  for (const [canonical, aliasList] of Object.entries(ALIASES)) {
-    const group = [canonical, ...aliasList].map(cleanTeamName)
-    if (group.some((a) => matchesAliasTarget(normA, a)) && group.some((b) => matchesAliasTarget(normB, b))) {
-      return true
+  for (let i = 0; i < PRECOMPUTED_ALIASES.length; i++) {
+    const group = PRECOMPUTED_ALIASES[i]
+    let matchesA = false
+    let matchesB = false
+    for (let j = 0; j < group.length; j++) {
+      if (!matchesA && matchesAliasTarget(normA, group[j])) matchesA = true
+      if (!matchesB && matchesAliasTarget(normB, group[j])) matchesB = true
+      if (matchesA && matchesB) return true
     }
   }
   return false

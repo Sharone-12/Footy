@@ -139,6 +139,13 @@ const ALIASES: Record<string, string[]> = {
   ...INTERNATIONAL_ALIASES,
 }
 
+// Pre-normalize alias groups once at module load
+const PRECOMPUTED_ALIASES: string[][] = Object.entries(ALIASES).map(([canon, aliases]) => {
+  const canonNorm = normalise(canon)
+  const all = [canonNorm, ...aliases.map(normalise)].filter((a) => a && a.length >= 3)
+  return all
+})
+
 /** Check if two team names match (via direct equality, substring, aliases, or fuzzy similarity) */
 function teamSimilarity(fixtureTeam: string, streamTeam: string): number {
   const normA = normalise(fixtureTeam)
@@ -148,12 +155,15 @@ function teamSimilarity(fixtureTeam: string, streamTeam: string): number {
   if (normA === normB) return 1.0
 
   // Check alias dictionary
-  for (const [canon, aliases] of Object.entries(ALIASES)) {
-    const canonNorm = normalise(canon)
-    const all = [canonNorm, ...aliases.map(normalise)]
-    const matchesA = all.some((a) => matchesAliasTarget(normA, a))
-    const matchesB = all.some((b) => matchesAliasTarget(normB, b))
-    if (matchesA && matchesB) return 0.98
+  for (let i = 0; i < PRECOMPUTED_ALIASES.length; i++) {
+    const all = PRECOMPUTED_ALIASES[i]
+    let matchesA = false
+    let matchesB = false
+    for (let j = 0; j < all.length; j++) {
+      if (!matchesA && matchesAliasTarget(normA, all[j])) matchesA = true
+      if (!matchesB && matchesAliasTarget(normB, all[j])) matchesB = true
+      if (matchesA && matchesB) return 0.98
+    }
   }
 
   // Token inclusion (e.g. "Macarthur FC" vs "Macarthur")
@@ -180,7 +190,32 @@ export function matchFixtureToDamiTv(
   let highestScore = 0
 
   for (const stream of streams) {
-    // 1. Evaluate team similarities (standard vs swapped order)
+    // 1. Proximity & timestamp verification first (fast filter)
+    let proximityMultiplier = 1.0
+
+    if (fixture.kickoff && stream.startsAt > 0) {
+      const fixTime = new Date(fixture.kickoff).getTime() / 1000
+      const diffHours = Math.abs(fixTime - stream.startsAt) / 3600
+
+      if (diffHours <= 1.5) {
+        proximityMultiplier = 1.0
+      } else if (diffHours <= 3.5) {
+        proximityMultiplier = 0.92
+      } else if (diffHours <= 6.0) {
+        proximityMultiplier = 0.80
+      } else {
+        // More than 6 hours difference -> reject match
+        continue
+      }
+    } else if (fixture.date && stream.kickoffIso) {
+      const fixDate = fixture.date.slice(0, 10)
+      const streamDate = stream.kickoffIso.slice(0, 10)
+      if (fixDate !== streamDate) {
+        proximityMultiplier = 0.82
+      }
+    }
+
+    // 2. Evaluate team similarities (standard vs swapped order)
     const homeSim = teamSimilarity(fixture.home, stream.home)
     const awaySim = teamSimilarity(fixture.away, stream.away)
 
@@ -211,31 +246,6 @@ export function matchFixtureToDamiTv(
     const teamScore = standardBoth
       ? (homeSim + awaySim) / 2
       : (homeSwappedSim + awaySwappedSim) / 2
-
-    // 2. Proximity & timestamp verification
-    let proximityMultiplier = 1.0
-
-    if (fixture.kickoff && stream.startsAt > 0) {
-      const fixTime = new Date(fixture.kickoff).getTime() / 1000
-      const diffHours = Math.abs(fixTime - stream.startsAt) / 3600
-
-      if (diffHours <= 1.5) {
-        proximityMultiplier = 1.0
-      } else if (diffHours <= 3.5) {
-        proximityMultiplier = 0.92
-      } else if (diffHours <= 6.0) {
-        proximityMultiplier = 0.80
-      } else {
-        // More than 6 hours difference -> reject match
-        continue
-      }
-    } else if (fixture.date && stream.kickoffIso) {
-      const fixDate = fixture.date.slice(0, 10)
-      const streamDate = stream.kickoffIso.slice(0, 10)
-      if (fixDate !== streamDate) {
-        proximityMultiplier = 0.82
-      }
-    }
 
     // 3. League / competition bonus
     let leagueBonus = 0

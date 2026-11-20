@@ -139,6 +139,13 @@ const ALIASES: Record<string, string[]> = {
   ...INTERNATIONAL_ALIASES,
 }
 
+// Pre-normalize alias groups once at module load
+const PRECOMPUTED_ALIASES: string[][] = Object.entries(ALIASES).map(([canon, aliases]) => {
+  const canonNorm = normalise(canon)
+  const all = [canonNorm, ...aliases.map(normalise)].filter((a) => a && a.length >= 3)
+  return all
+})
+
 /** Check if two team names match (via direct equality, substring, aliases, or fuzzy dice similarity) */
 function teamSimilarity(fixtureTeam: string, eventTeam: string): number {
   const normA = normalise(fixtureTeam)
@@ -148,12 +155,15 @@ function teamSimilarity(fixtureTeam: string, eventTeam: string): number {
   if (normA === normB) return 1.0
 
   // Check alias dictionary
-  for (const [canon, aliases] of Object.entries(ALIASES)) {
-    const canonNorm = normalise(canon)
-    const all = [canonNorm, ...aliases.map(normalise)]
-    const matchesA = all.some((a) => matchesAliasTarget(normA, a))
-    const matchesB = all.some((b) => matchesAliasTarget(normB, b))
-    if (matchesA && matchesB) return 0.98
+  for (let i = 0; i < PRECOMPUTED_ALIASES.length; i++) {
+    const all = PRECOMPUTED_ALIASES[i]
+    let matchesA = false
+    let matchesB = false
+    for (let j = 0; j < all.length; j++) {
+      if (!matchesA && matchesAliasTarget(normA, all[j])) matchesA = true
+      if (!matchesB && matchesAliasTarget(normB, all[j])) matchesB = true
+      if (matchesA && matchesB) return 0.98
+    }
   }
 
   // Token inclusion (e.g. "Atletico Madrid" vs "Atletico")
@@ -181,7 +191,33 @@ export function matchFixtureToDaddyLive(
   let highestScore = 0
 
   for (const ev of events) {
-    // 1. Evaluate home and away similarity (standard order)
+    // 1. Kickoff proximity weighting first (fast rejection)
+    let proximityMultiplier = 1.0
+    if (fixture.kickoff && ev.kickoffIso) {
+      const fixTime = new Date(fixture.kickoff).getTime()
+      const evTime = new Date(ev.kickoffIso).getTime()
+      const diffHours = Math.abs(fixTime - evTime) / 3_600_000
+
+      if (diffHours <= 1.5) {
+        proximityMultiplier = 1.0
+      } else if (diffHours <= 3.0) {
+        proximityMultiplier = 0.92
+      } else if (diffHours <= 6.0) {
+        proximityMultiplier = 0.80
+      } else {
+        // Discrepancy > 6 hours on the same fixture -> reject
+        continue
+      }
+    } else if (fixture.date && ev.kickoffIso) {
+      // Verify same date
+      const fixDate = fixture.date.slice(0, 10)
+      const evDate = ev.kickoffIso.slice(0, 10)
+      if (fixDate !== evDate) {
+        proximityMultiplier = 0.82
+      }
+    }
+
+    // 2. Evaluate home and away similarity (standard order)
     const homeSim = teamSimilarity(fixture.home, ev.home)
     const awaySim = teamSimilarity(fixture.away, ev.away)
 
@@ -211,32 +247,6 @@ export function matchFixtureToDaddyLive(
     const teamScore = standardBoth
       ? (homeSim + awaySim) / 2
       : (homeSwappedSim + awaySwappedSim) / 2
-
-    // 2. Kickoff proximity weighting
-    let proximityMultiplier = 1.0
-    if (fixture.kickoff && ev.kickoffIso) {
-      const fixTime = new Date(fixture.kickoff).getTime()
-      const evTime = new Date(ev.kickoffIso).getTime()
-      const diffHours = Math.abs(fixTime - evTime) / 3_600_000
-
-      if (diffHours <= 1.5) {
-        proximityMultiplier = 1.0
-      } else if (diffHours <= 3.0) {
-        proximityMultiplier = 0.92
-      } else if (diffHours <= 6.0) {
-        proximityMultiplier = 0.80
-      } else {
-        // Discrepancy > 6 hours on the same fixture -> reject
-        continue
-      }
-    } else if (fixture.date && ev.kickoffIso) {
-      // Verify same date
-      const fixDate = fixture.date.slice(0, 10)
-      const evDate = ev.kickoffIso.slice(0, 10)
-      if (fixDate !== evDate) {
-        proximityMultiplier = 0.82
-      }
-    }
 
     // Compute final confidence on 0-100 scale
     const rawConfidence = teamScore * proximityMultiplier * 100
