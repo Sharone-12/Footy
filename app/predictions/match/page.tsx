@@ -25,6 +25,7 @@ import {
   MatchLiveBadge,
   MatchWatchStreamCTA,
 } from "@/components/prediction-match-card"
+import { PredictionStatCompare } from "@/components/prediction-stat-compare"
 import { formatDateIST } from "@/lib/time"
 
 const TEAM_COLORS = ["#4ade80", "#60a5fa"]
@@ -164,121 +165,6 @@ function FormCard({
   )
 }
 
-function StatCompare({
-  home,
-  away,
-  homeId,
-  awayId,
-  byKey,
-  allTeams,
-}: {
-  home: string
-  away: string
-  homeId: number | null
-  awayId: number | null
-  byKey: Map<string, SeasonStatRow>
-  allTeams: TeamTableRow[]
-}) {
-  return (
-    <section className="surface rounded-2xl bg-card overflow-hidden">
-      <header className="px-5 pt-5 pb-3">
-        <h2
-          className="text-lg font-semibold tracking-tight uppercase"
-          style={{ fontFamily: "var(--font-condensed)" }}
-        >
-          Stat Comparison
-        </h2>
-        <p className="stat-label mt-1">Per-match averages this season</p>
-        <div className="flex items-center justify-between mt-3 px-2">
-          <div className="flex items-center gap-2">
-            {homeId && <TeamCrest teamId={homeId} name={home} size={20} />}
-            <span className="text-sm font-medium" style={{ color: TEAM_COLORS[0] }}>{home}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium" style={{ color: TEAM_COLORS[1] }}>{away}</span>
-            {awayId && <TeamCrest teamId={awayId} name={away} size={20} />}
-          </div>
-        </div>
-      </header>
-
-      <div className="px-3 pb-4">
-        {TEAM_STAT_GROUPS.map((group) => {
-          const visibleStats = group.stats.filter(
-            (spec) =>
-              byKey.has(`${home}|${spec.stat}`) || byKey.has(`${away}|${spec.stat}`),
-          )
-          if (visibleStats.length === 0) return null
-
-          return (
-            <div key={group.label} className="mb-4 last:mb-0">
-              <div
-                className="stat-label px-2 py-2"
-                style={{ color: "var(--pitch)" }}
-              >
-                {group.label}
-              </div>
-              {visibleStats.map((spec) => {
-                const hv = statValue(byKey.get(`${home}|${spec.stat}`), spec)
-                const av = statValue(byKey.get(`${away}|${spec.stat}`), spec)
-                const max = Math.max(hv, av, 0.01)
-                const hBetter = hv > av
-                const aBetter = av > hv
-
-                return (
-                  <div key={spec.stat} className="px-2 py-2.5 border-b border-white/[0.04] last:border-0">
-                    <div className="text-center stat-label mb-2">{spec.label}</div>
-                    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-                      <div className="flex items-center gap-2 justify-end">
-                        <span
-                          className="stat-figure text-[0.95rem]"
-                          style={{ color: hBetter ? TEAM_COLORS[0] : "var(--muted-foreground)" }}
-                        >
-                          {hv.toFixed(spec.pct ? 1 : 2)}{spec.pct ? "%" : ""}
-                        </span>
-                        <div className="w-24 h-2 rounded-full bg-white/[0.06] overflow-hidden flex justify-end">
-                          <div
-                            className="h-full rounded-full"
-                            style={{
-                              width: `${(hv / max) * 100}%`,
-                              background: TEAM_COLORS[0],
-                              opacity: hBetter ? 0.8 : 0.3,
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      <span className="text-muted-foreground text-xs">vs</span>
-
-                      <div className="flex items-center gap-2">
-                        <div className="w-24 h-2 rounded-full bg-white/[0.06] overflow-hidden">
-                          <div
-                            className="h-full rounded-full"
-                            style={{
-                              width: `${(av / max) * 100}%`,
-                              background: TEAM_COLORS[1],
-                              opacity: aBetter ? 0.8 : 0.3,
-                            }}
-                          />
-                        </div>
-                        <span
-                          className="stat-figure text-[0.95rem]"
-                          style={{ color: aBetter ? TEAM_COLORS[1] : "var(--muted-foreground)" }}
-                        >
-                          {av.toFixed(spec.pct ? 1 : 2)}{spec.pct ? "%" : ""}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          )
-        })}
-      </div>
-    </section>
-  )
-}
-
 function H2HResults({
   home,
   away,
@@ -363,7 +249,7 @@ async function Content({
     )
   }
 
-  const [{ table, stats, xg }, allMatchData] = await Promise.all([
+  const [{ table, stats, xg }, allMatchData, matchStatsResult] = await Promise.all([
     fetchTeamData(supabase, season, ALL_STATS),
     fetchAllRows((from, to) =>
       supabase
@@ -373,7 +259,16 @@ async function Content({
         .order("event_id", { ascending: true })
         .range(from, to),
     ),
+    supabase
+      .from("match_stats")
+      .select("stat, home, away")
+      .eq("event_id", eventId),
   ])
+
+  const matchStatsMap: Record<string, { home: string; away: string }> = {}
+  for (const r of (matchStatsResult?.data || [])) {
+    matchStatsMap[r.stat] = { home: r.home, away: r.away }
+  }
 
   const allMatches = (allMatchData || []) as {
     event_id: number; league: string; season: string; round: number
@@ -432,6 +327,10 @@ async function Content({
   const awayRow = table.find((t) => t.team === match.away && t.league === match.league)
 
   const byKey = indexStats(stats)
+  const byKeyObject: Record<string, SeasonStatRow> = {}
+  for (const [k, v] of byKey.entries()) {
+    byKeyObject[k] = v
+  }
   const isSettled = match.status === "finished" && match.home_goals != null
 
   const leagueLabel = LEAGUE_ABBR[match.league] ?? match.league
@@ -569,13 +468,14 @@ async function Content({
       </div>
 
       <div className="mb-6">
-        <StatCompare
+        <PredictionStatCompare
           home={match.home}
           away={match.away}
           homeId={match.home_id}
           awayId={match.away_id}
-          byKey={byKey}
-          allTeams={table}
+          byKey={byKeyObject}
+          matchStats={matchStatsMap}
+          isSettled={isSettled}
         />
       </div>
 
