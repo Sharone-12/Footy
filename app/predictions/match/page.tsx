@@ -26,6 +26,7 @@ import {
   MatchWatchStreamCTA,
 } from "@/components/prediction-match-card"
 import { PredictionStatCompare } from "@/components/prediction-stat-compare"
+import { getUnifiedMatchStats } from "@/lib/livescores-stats"
 import { formatDateIST } from "@/lib/time"
 
 const TEAM_COLORS = ["#4ade80", "#60a5fa"]
@@ -249,7 +250,7 @@ async function Content({
     )
   }
 
-  const [{ table, stats, xg }, allMatchData, matchStatsResult] = await Promise.all([
+  const [{ table, stats, xg }, allMatchData, matchStatsMap] = await Promise.all([
     fetchTeamData(supabase, season, ALL_STATS),
     fetchAllRows((from, to) =>
       supabase
@@ -259,16 +260,8 @@ async function Content({
         .order("event_id", { ascending: true })
         .range(from, to),
     ),
-    supabase
-      .from("match_stats")
-      .select("stat, home, away")
-      .eq("event_id", eventId),
+    getUnifiedMatchStats(eventId, supabase),
   ])
-
-  const matchStatsMap: Record<string, { home: string; away: string }> = {}
-  for (const r of (matchStatsResult?.data || [])) {
-    matchStatsMap[r.stat] = { home: r.home, away: r.away }
-  }
 
   const allMatches = (allMatchData || []) as {
     event_id: number; league: string; season: string; round: number

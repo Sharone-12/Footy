@@ -21,6 +21,30 @@ export interface PredictionStatCompareProps {
   isSettled?: boolean
 }
 
+const MATCH_EXTRA_GROUP: { label: string; stats: TeamStat[] } = {
+  label: "Set Pieces & Discipline",
+  stats: [
+    { stat: "Corner kicks", label: "Corner Kicks" },
+    { stat: "Crosses", label: "Crosses" },
+    { stat: "Offsides", label: "Offsides" },
+    { stat: "Yellow cards", label: "Yellow Cards" },
+    { stat: "Red cards", label: "Red Cards" },
+    { stat: "Free kicks", label: "Free Kicks" },
+    { stat: "Throw-ins", label: "Throw-ins" },
+    { stat: "Goal kicks", label: "Goal Kicks" },
+  ],
+}
+
+const LOWER_IS_BETTER_STATS = new Set([
+  "Fouls",
+  "Yellow cards",
+  "Red cards",
+  "Offsides",
+  "Errors lead to a shot",
+  "Errors lead to a goal",
+  "Dispossessed",
+])
+
 /**
  * Parses raw strings from match_stats (e.g. "2.21", "19", "61%", "29/51 (57%)", "107.9 km").
  * Returns a numeric representation for proportional bars and the display string.
@@ -67,13 +91,17 @@ export function PredictionStatCompare({
 }: PredictionStatCompareProps) {
   const hasMatchStats = Object.keys(matchStats).length > 0
   const [mode, setMode] = useState<"match" | "season">(
-    isSettled && hasMatchStats ? "match" : "season",
+    (isSettled || hasMatchStats) && hasMatchStats ? "match" : "season",
   )
+
+  const groupsToDisplay = mode === "match"
+    ? [...TEAM_STAT_GROUPS, MATCH_EXTRA_GROUP]
+    : TEAM_STAT_GROUPS
 
   return (
     <section className="surface rounded-2xl bg-card overflow-hidden">
-      <header className="px-5 pt-5 pb-3">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <header className="px-6 pt-6 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h2
               className="text-lg font-semibold tracking-tight uppercase"
@@ -83,7 +111,7 @@ export function PredictionStatCompare({
             </h2>
             <p className="stat-label mt-1 text-xs text-muted-foreground">
               {mode === "match"
-                ? "Actual 90-minute match statistics"
+                ? "Actual match statistics"
                 : "Per-match season averages (used for prediction)"}
             </p>
           </div>
@@ -141,8 +169,8 @@ export function PredictionStatCompare({
         </div>
       </header>
 
-      <div className="px-3 pb-4">
-        {TEAM_STAT_GROUPS.map((group) => {
+      <div className="px-4 pb-6">
+        {groupsToDisplay.map((group) => {
           const visibleStats = group.stats.filter((spec) => {
             if (mode === "match") {
               return matchStats[spec.stat] != null
@@ -181,16 +209,17 @@ export function PredictionStatCompare({
                 }
 
                 const max = Math.max(Math.abs(hv), Math.abs(av), 0.01)
-                const hBetter = hv > av
-                const aBetter = av > hv
+                const isLowerBetter = LOWER_IS_BETTER_STATS.has(spec.stat)
+                const hBetter = isLowerBetter ? (hv < av && hv !== 0) : hv > av
+                const aBetter = isLowerBetter ? (av < hv && av !== 0) : av > hv
 
                 return (
                   <div
                     key={spec.stat}
-                    className="px-2 py-2.5 border-b border-border/40 last:border-0"
+                    className="px-2 py-2 border-b border-border/40 last:border-0"
                   >
                     <div className="text-center stat-label mb-2">{spec.label}</div>
-                    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+                    <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-4">
                       {/* Home team */}
                       <div className="flex items-center gap-2 justify-end">
                         <span
@@ -201,7 +230,7 @@ export function PredictionStatCompare({
                         </span>
                         <div className="w-20 sm:w-24 h-2 rounded-full bg-muted/60 overflow-hidden flex justify-end">
                           <div
-                            className="h-full rounded-full transition-all duration-300"
+                            className="h-full rounded-full transition-all duration-300 motion-reduce:transition-none"
                             style={{
                               width: `${Math.min(100, Math.max(4, (Math.abs(hv) / max) * 100))}%`,
                               background: TEAM_COLORS[0],
@@ -217,7 +246,7 @@ export function PredictionStatCompare({
                       <div className="flex items-center gap-2">
                         <div className="w-20 sm:w-24 h-2 rounded-full bg-muted/60 overflow-hidden">
                           <div
-                            className="h-full rounded-full transition-all duration-300"
+                            className="h-full rounded-full transition-all duration-300 motion-reduce:transition-none"
                             style={{
                               width: `${Math.min(100, Math.max(4, (Math.abs(av) / max) * 100))}%`,
                               background: TEAM_COLORS[1],
