@@ -1,4 +1,7 @@
 import { TargetIcon, LayersIcon } from "lucide-react"
+import type { BestBet } from "@/lib/markets"
+
+export type { BestBet }
 
 /**
  * The model's view of a fixture's markets.
@@ -8,19 +11,6 @@ import { TargetIcon, LayersIcon } from "lucide-react"
  * kicked off; afterwards the card has a result and these stop being a
  * forecast.
  */
-export type BestBet = {
-  /** The safest single selection worth showing, capped below the trivial ones. */
-  top: { label: string; prob: number } | null
-  /** Two selections from different markets, with their exact joint chance. */
-  double: { labels: [string, string]; prob: number } | null
-  /** A handful of standard markets, for context around the pick. */
-  markets: { label: string; prob: number }[]
-  /** Likeliest scorer and the chance they get one. */
-  scorer: { player: string; slug: string; team: string; prob: number } | null
-  /** Likeliest exact scoreline. */
-  score: { home: number; away: number; prob: number } | null
-}
-
 const pct = (p: number) => `${Math.round(p * 100)}%`
 
 /** Green for a strong call, amber in the middle, grey when it is a coin toss. */

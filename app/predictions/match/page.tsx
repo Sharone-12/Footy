@@ -17,6 +17,10 @@ import {
 } from "@/lib/teams"
 import { predictMatches } from "@/lib/predictions"
 import { loadModelFit } from "@/lib/fitted-model"
+import { scoreGrid } from "@/lib/learn"
+import { UCL } from "@/lib/competition"
+import { buildBestBet } from "@/lib/markets"
+import { BestBetPanel } from "@/components/best-bet"
 import { withFrozenPredictions } from "@/lib/predictions-freeze"
 import { percentileRank } from "@/lib/stats"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -299,6 +303,7 @@ async function Content({
 
   const finished = allMatches.filter((m) => m.status === "finished")
 
+  const fit = await loadModelFit(season)
   const computed = predictMatches(
     [{
       event_id: match.event_id,
@@ -314,9 +319,57 @@ async function Content({
     table,
     stats,
     xg,
-    (await loadModelFit(season)).params,
+    fit.params,
   )
   const [pred] = await withFrozenPredictions(computed)
+
+  // Markets for a fixture still to come. Only the two clubs here, so this is
+  // a handful of rows rather than the league-wide read the card version did.
+  let bet = null
+  if (pred && pred.actual === null) {
+    const { data: squads } = await supabase
+      .from("players")
+      .select("player, slug, team, goals")
+      .eq("season", season)
+      .in("team", [match.home, match.away])
+      .gte("goals", 1)
+      .order("goals", { ascending: false })
+
+    const teamGoals = new Map<string, number>()
+    const leader = new Map<string, { player: string; slug: string; goals: number }>()
+    for (const r of (squads ?? []) as {
+      player: string
+      slug: string
+      team: string
+      goals: number
+    }[]) {
+      const goals = Number(r.goals) || 0
+      teamGoals.set(r.team, (teamGoals.get(r.team) ?? 0) + goals)
+      // Highest first, so the first seen for a club leads it.
+      if (!leader.has(r.team)) leader.set(r.team, { player: r.player, slug: r.slug, goals })
+    }
+
+    const candidates = (
+      [
+        [match.home, pred.homeExpected],
+        [match.away, pred.awayExpected],
+      ] as const
+    )
+      .map(([team, teamExpected]) => {
+        const top = leader.get(team)
+        return top && { team, ...top, teamGoals: teamGoals.get(team) ?? 0, teamExpected }
+      })
+      .filter((c) => c != null)
+
+    // The Champions League model carries no fitted low-score correction.
+    const rho = match.league === UCL ? 0 : fit.params.rho
+    bet = buildBestBet(
+      scoreGrid(pred.homeExpected, pred.awayExpected, rho),
+      match.home,
+      match.away,
+      candidates,
+    )
+  }
 
   const homeRow = table.find((t) => t.team === match.home && t.league === match.league)
   const awayRow = table.find((t) => t.team === match.away && t.league === match.league)
@@ -443,6 +496,28 @@ async function Content({
           </div>
         )}
       </section>
+
+      {/* Markets, folded away by default so the page opens on the prediction
+          itself. Native details: a toggle that needs no JavaScript. */}
+      {bet && (
+        <details className="surface rounded-2xl bg-card mb-6 group">
+          <summary className="flex items-center justify-between gap-3 px-5 py-3.5 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+            <span
+              className="text-lg font-semibold tracking-tight uppercase"
+              style={{ fontFamily: "var(--font-condensed)" }}
+            >
+              Markets
+            </span>
+            <span className="stat-label text-[0.65rem]">
+              <span className="group-open:hidden">Show</span>
+              <span className="hidden group-open:inline">Hide</span>
+            </span>
+          </summary>
+          <div className="px-5 pb-5">
+            <BestBetPanel bet={bet} />
+          </div>
+        </details>
+      )}
 
       {pred && (!isSettled || pred.frozen) && (
         <div className="mb-6">

@@ -8,7 +8,6 @@ import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
 import { LEAGUE_ABBR, LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
 import { formatDateIST } from "@/lib/time"
 import type { MatchPrediction } from "@/lib/predictions"
-import { BestBetPanel, type BestBet } from "@/components/best-bet"
 
 const OUTCOME_COLORS = {
   home: "oklch(0.80 0.19 150)",
@@ -42,7 +41,7 @@ function ProbBar({ homeWin, draw, awayWin }: { homeWin: number; draw: number; aw
  * Displays real-time live scoreline, live ticking badge, probability distribution,
  * and a "Watch Now" button when an active live stream exists.
  */
-export function PredictionMatchCard({ p, bet }: { p: MatchPrediction; bet?: BestBet }) {
+export function PredictionMatchCard({ p }: { p: MatchPrediction }) {
   const isSettled = p.actual !== null
   const isBarca = p.home === "FC Barcelona" || p.away === "FC Barcelona"
 
@@ -157,10 +156,6 @@ export function PredictionMatchCard({ p, bet }: { p: MatchPrediction; bet?: Best
           ))}
         </div>
       </div>
-
-      {/* Markets the model derives from the same scoreline grid. Upcoming
-          fixtures only: once there is a result these stop being a forecast. */}
-      {bet && !isSettled && !isLive && <BestBetPanel bet={bet} dark={isBarca} />}
 
       {/* Bottom Footer: Predicted Outcome & Watch Now CTA */}
       <div className={`flex items-center justify-between gap-2 pt-2.5 border-t ${isBarca ? "border-white/15" : "border-border/60"}`}>

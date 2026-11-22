@@ -92,6 +92,64 @@ export function scorerChance(
   return 1 - Math.exp(-teamExpectedGoals * share)
 }
 
+/** Markets shown beside the pick, for context. */
+const CONTEXT_MARKETS = ["o2.5", "btts", "1X"]
+
+/** A candidate scorer: their goals, and their club's, to take a share of. */
+export type ScorerInput = {
+  team: string
+  player: string
+  slug: string
+  goals: number
+  teamGoals: number
+  /** Goals the model expects their club to score in this match. */
+  teamExpected: number
+}
+
+/** Everything the markets panel shows for one fixture. */
+export type BestBet = {
+  top: { label: string; prob: number } | null
+  double: { labels: [string, string]; prob: number } | null
+  markets: { label: string; prob: number }[]
+  scorer: { player: string; slug: string; team: string; prob: number } | null
+  score: { home: number; away: number; prob: number } | null
+}
+
+/**
+ * Assemble the markets panel for a fixture.
+ *
+ * Everything comes off one scoreline grid, the same one behind the win/draw/
+ * loss split, so a market can never contradict the headline probabilities.
+ */
+export function buildBestBet(
+  grid: number[][],
+  home: string,
+  away: string,
+  candidates: ScorerInput[] = [],
+): BestBet {
+  const legs = marketsFor(grid, home, away)
+  const top = safestLeg(legs)
+  const double = safestDouble(grid, legs)
+
+  let scorer: BestBet["scorer"] = null
+  for (const c of candidates) {
+    const prob = scorerChance(c.goals, c.teamGoals, c.teamExpected)
+    if (prob > 0 && (!scorer || prob > scorer.prob)) {
+      scorer = { player: c.player, slug: c.slug, team: c.team, prob }
+    }
+  }
+
+  return {
+    top: top && { label: top.label, prob: top.prob },
+    double: double && { labels: [double.legs[0].label, double.legs[1].label], prob: double.prob },
+    markets: CONTEXT_MARKETS.map((k) => legs.find((l) => l.key === k))
+      .filter((l) => l != null)
+      .map((l) => ({ label: l.label, prob: l.prob })),
+    scorer,
+    score: likeliestScore(grid),
+  }
+}
+
 /** At or above this a selection is true nearly always, and says nothing. */
 const CEILING = 0.9
 /** Below this it is not a "safe" pick worth leading with. */
