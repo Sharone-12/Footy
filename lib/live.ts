@@ -24,6 +24,12 @@ export type Timed = { kickoff: string | null; date: string }
 export const startOf = (m: Timed) =>
   new Date(m.kickoff ?? `${m.date}T23:59:59Z`).getTime()
 
+/**
+ * Is the match under way or already over? The moment a prediction stops being
+ * a forecast and becomes a receipt (see lib/predictions-freeze).
+ */
+export const hasKickedOff = (m: Timed, now: number = Date.now()) => startOf(m) <= now
+
 export type Buckets<T> = { live: T[]; soon: T[]; upcoming: T[] }
 
 export type MatchIdentity = {

@@ -1,6 +1,7 @@
 import { after } from "next/server"
 import { supabase } from "@/lib/supabase"
 import { supabaseAdmin } from "@/lib/supabase-admin"
+import { hasKickedOff } from "@/lib/live"
 import type { MatchPrediction } from "@/lib/predictions"
 
 type FrozenRow = {
@@ -37,20 +38,49 @@ async function fetchFrozen(eventIds: number[]): Promise<Map<number, FrozenRow>> 
 export type PredictionWithFreeze = MatchPrediction & { frozen: boolean }
 
 /**
- * Freeze upcoming predictions once (first-write wins) and overlay frozen rows
- * onto the computed list so settled matches always display what was predicted
- * at kickoff, not what the current model would say with hindsight.
+ * Has the match kicked off? Once it has, its prediction is the receipt and
+ * never moves again. A result settles it whatever the clock says; otherwise
+ * the kickoff instant decides, end of day for a fixture with no time yet.
+ */
+export const hasStarted = (
+  p: Pick<MatchPrediction, "actual" | "kickoff" | "date">,
+  now: number = Date.now(),
+) => p.actual !== null || hasKickedOff({ kickoff: p.kickoff ?? null, date: p.date }, now)
+
+const differs = (f: FrozenRow, p: MatchPrediction) =>
+  f.home_win !== p.homeWin ||
+  f.draw !== p.draw ||
+  f.away_win !== p.awayWin ||
+  f.predicted !== p.predicted
+
+/**
+ * Hold every prediction at kickoff, and let it move freely until then.
  *
- * Settled matches without a frozen row carry frozen:false; the UI excludes
- * them from the accuracy tracker since we have no honest kickoff record.
+ * A match that has not started shows what the model says now, and its stored
+ * row is refreshed to match, so anything the model has learnt since reaches
+ * the fixture. At kickoff the row stops being rewritten and becomes what the
+ * page shows forever after — the receipt, free of hindsight.
+ *
+ * It used to freeze on the first view instead, which could be months out;
+ * everything learnt in between then never reached that match.
+ *
+ * Settled matches with no stored row carry frozen:false, and the UI keeps
+ * them out of the accuracy tracker: there is no honest kickoff record.
  */
 export async function withFrozenPredictions(
   computed: MatchPrediction[],
 ): Promise<PredictionWithFreeze[]> {
   const frozen = await fetchFrozen(computed.map((p) => p.event_id))
+  const now = Date.now()
 
+  // Only what is still to come, and only where the number actually moved: in
+  // the steady state this is empty, and after a refit it writes once.
   const toFreeze = computed
-    .filter((p) => p.actual === null && !frozen.has(p.event_id))
+    .filter((p) => {
+      if (hasStarted(p, now)) return false
+      const f = frozen.get(p.event_id)
+      return !f || differs(f, p)
+    })
     .map((p) => ({
       event_id: p.event_id,
       predicted: p.predicted,
@@ -61,15 +91,14 @@ export async function withFrozenPredictions(
 
   if (toFreeze.length > 0) {
     after(async () => {
-      await supabaseAdmin
-        .from("predictions")
-        .upsert(toFreeze, { onConflict: "event_id", ignoreDuplicates: true })
+      await supabaseAdmin.from("predictions").upsert(toFreeze, { onConflict: "event_id" })
     })
   }
 
   return computed.map((p) => {
     const f = frozen.get(p.event_id)
-    if (f) {
+    // Before kickoff the live model wins, even against a stored row.
+    if (f && hasStarted(p, now)) {
       return {
         ...p,
         predicted: f.predicted,

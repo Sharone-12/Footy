@@ -1,6 +1,6 @@
 /** Self-check for fixture bucketing: `node lib/live.test.ts` */
 import assert from "node:assert/strict"
-import { splitFixtures, startOf, PLAYING_MS, SOON_MS } from "./live.ts"
+import { splitFixtures, startOf, hasKickedOff, PLAYING_MS, SOON_MS } from "./live.ts"
 
 const now = Date.parse("2026-11-08T20:30:00Z")
 const at = (iso: string) => ({ kickoff: iso, date: iso.slice(0, 10) })
@@ -58,5 +58,19 @@ const dedupedResult = splitFixtures([duplicateMatchA, duplicateMatchB], now)
 assert.equal(dedupedResult.soon.length, 0)
 assert.equal(dedupedResult.upcoming.length, 1)
 assert.equal(dedupedResult.upcoming[0].kickoff, "2026-11-09T03:00:00Z")
+
+// ── hasKickedOff: when a prediction stops being a forecast ──
+const KO = Date.parse("2026-11-22T18:00:00Z")
+// Still to come, so the model is free to keep moving it.
+assert.equal(hasKickedOff({ kickoff: "2026-11-22T20:00:00Z", date: "2026-11-22" }, KO), false)
+assert.equal(hasKickedOff({ kickoff: "2027-05-02T19:00:00Z", date: "2027-05-02" }, KO), false)
+// Under way or done, so it is locked — the exact kickoff instant included.
+assert.equal(hasKickedOff({ kickoff: "2026-11-22T18:00:00Z", date: "2026-11-22" }, KO), true)
+assert.equal(hasKickedOff({ kickoff: "2026-11-21T20:00:00Z", date: "2026-11-21" }, KO), true)
+// No kickoff time: free through its own day, locked once the day is gone.
+assert.equal(hasKickedOff({ kickoff: null, date: "2026-11-22" }, KO), false)
+assert.equal(hasKickedOff({ kickoff: null, date: "2026-11-21" }, KO), true)
+// Falls back to the real clock rather than throwing.
+assert.equal(hasKickedOff({ kickoff: null, date: "2000-01-01" }), true)
 
 console.log("live: all assertions passed")
