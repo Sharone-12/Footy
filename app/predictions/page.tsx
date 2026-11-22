@@ -493,7 +493,10 @@ type SeasonMatch = {
  */
 async function loadSeason(season: string, params: Params) {
   "use cache"
-  cacheLife("minutes")
+  // Hours, not minutes: the scraper lands results twice a day, so a shorter
+  // life only means more visitors paying the cold read for identical data.
+  // Live scorelines come from the client poll, not from here.
+  cacheLife("hours")
 
   const [{ table, stats, xg }, matchData] = await Promise.all([
     fetchTeamData(supabase, season, WANTED_STATS),
