@@ -49,7 +49,7 @@ async function runTests() {
   assert.equal(parsed.home, "Atlético Madrid")
   assert.equal(parsed.away, "Barcelona")
   assert.equal(parsed.status, "upcoming")
-  assert.equal(parsed.embedUrl, "https://es.matchora.pro/embed/match/2506279")
+  assert.equal(parsed.embedUrl, "https://matchora.pro/embed/match/2506279")
   assert.equal(parsed.dateIso, "2026-11-08")
 
   // 3. Channel parsing
@@ -63,7 +63,7 @@ async function runTests() {
   })
   assert.equal(ch.id, "118458")
   assert.equal(ch.name, "DAZN 2")
-  assert.equal(ch.embedUrl, "https://es.matchora.pro/embed/channel/118458")
+  assert.equal(ch.embedUrl, "https://matchora.pro/embed/channel/118458")
 
   console.log("✅ All Matchora client unit tests passed!")
 }

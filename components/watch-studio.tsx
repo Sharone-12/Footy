@@ -1356,7 +1356,7 @@ export function WatchStudio({
 
                           <iframe
                             key={`${currentSource.key}-${reloadKey}`}
-                            src={currentSource.url}
+                            src={currentSource.url.replace(/https?:\/\/es\.matchora\.pro/gi, "https://matchora.pro")}
                             title={`${fixture?.home ?? "Live"} vs ${fixture?.away ?? "Match"} — ${currentSource.label}`}
                             style={{ border: 0, contain: "paint layout", isolation: "isolate" }}
                             className={`border-0 bg-black block transition-all ${
@@ -1522,7 +1522,7 @@ export function WatchStudio({
                           <>
                             <iframe
                               key={`slot0-override-${slot0Override.streamUrl}-${reloadKey}`}
-                              src={slot0Override.streamUrl}
+                              src={slot0Override.streamUrl.replace(/https?:\/\/es\.matchora\.pro/gi, "https://matchora.pro")}
                               title={slot0Override.title}
                               className="w-full h-full border-0 bg-black block"
                               allow="autoplay; fullscreen; encrypted-media; picture-in-picture"

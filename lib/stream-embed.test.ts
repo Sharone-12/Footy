@@ -47,7 +47,7 @@ assert.deepEqual(embedFor("https://matchora.pro/embed/match/2506279"), {
 })
 assert.deepEqual(embedFor("https://es.matchora.pro/embed/channel/118458"), {
   kind: "iframe",
-  src: "https://es.matchora.pro/embed/channel/118458",
+  src: "https://matchora.pro/embed/channel/118458",
 })
 
 // Anything else is a link, not a frame: it would render blank.

@@ -754,7 +754,7 @@ export function MultiViewSlotPlayer({
       <div className="relative w-full h-full flex-1 bg-black overflow-hidden flex items-center justify-center">
         <iframe
           key={`${slotData.streamUrl}-${reloadKey}`}
-          src={slotData.streamUrl}
+          src={slotData.streamUrl.replace(/https?:\/\/es\.matchora\.pro/gi, "https://matchora.pro")}
           title={`${feedLabel} — ${slotData.title}`}
           className={`border-0 bg-black block transition-all ${
             slotData.providerId === "zlive"

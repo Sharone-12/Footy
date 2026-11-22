@@ -85,7 +85,8 @@ export function embedFor(url: string, parentHost?: string | null): StreamEmbed |
     (host === "matchora.to" || host === "matchora.pro" || host === "es.matchora.pro" || host.includes("matchora")) &&
     path[0] === "embed"
   ) {
-    return { kind: "iframe", src: u.toString() }
+    const fixedUrl = u.toString().replace(/https?:\/\/es\.matchora\.pro/gi, "https://matchora.pro")
+    return { kind: "iframe", src: fixedUrl }
   }
 
   if ((host === "cinevid.sbs" || host === "cinevid.st") && path[0] === "embed") {

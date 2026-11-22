@@ -84,6 +84,11 @@ const ORDER: StreamingProviderId[] = ["cinevid", "damitv", "matchora", "daddyliv
 const dedupe = (xs: (string | undefined)[]) =>
   Array.from(new Set(xs.filter((x): x is string => Boolean(x))))
 
+function cleanMatchoraUrl(url: string | undefined): string {
+  if (!url) return ""
+  return url.replace(/https?:\/\/es\.matchora\.pro/gi, "https://matchora.pro")
+}
+
 function matchoraProvider(m: MatchedMatchora | any): WatchProvider | null {
   if (!m) return null
   const event = m.event || (m.embedUrl ? m : null)
@@ -97,7 +102,7 @@ function matchoraProvider(m: MatchedMatchora | any): WatchProvider | null {
     key: `matchora:${event.id}`,
     label: "Main Player",
     quality: "HD",
-    url: event.embedUrl,
+    url: cleanMatchoraUrl(event.embedUrl),
     live: Boolean(event.status === "live"),
   })
 
@@ -110,7 +115,7 @@ function matchoraProvider(m: MatchedMatchora | any): WatchProvider | null {
           key: `matchora:ch:${ch.id}`,
           label: `${ch.name}${ch.lang ? ` (${ch.lang})` : ""}`,
           quality: ch.quality || "HD",
-          url: ch.embedUrl,
+          url: cleanMatchoraUrl(ch.embedUrl),
           live: Boolean(event.status === "live"),
         })
       }

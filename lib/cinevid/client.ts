@@ -18,7 +18,7 @@ export const CINEVID_BASE_URL = process.env.CINEVID_BASE_URL || "https://cinevid
 const CINEVID_HOSTS = [new URL(CINEVID_BASE_URL).hostname, "cinevid.st"]
 const EVENTS_CACHE_TTL_MS = 60_000 // 60 seconds
 const HEALTH_CACHE_TTL_MS = 30_000 // 30 seconds
-const REQUEST_TIMEOUT_MS = 16_000 // 16 seconds (Cinevid API can take 8-12s under peak load)
+const REQUEST_TIMEOUT_MS = 4_000 // 4 seconds (fast-fail when upstream is unreachable/521)
 
 const DEFAULT_HEADERS = {
   Accept: "application/json",
@@ -254,12 +254,15 @@ export async function fetchCinevidEvents(): Promise<CinevidParsedEvent[]> {
 
       if (!res.ok) {
         console.warn(`[cinevid] Events API returned status ${res.status}`)
-        return eventsCache?.data ?? []
+        // Cache empty list on failure for TTL so repeated calls fail fast
+        eventsCache = { timestamp: Date.now(), data: [] }
+        return []
       }
 
       const json: CinevidApiResponse = await res.json()
       if (!json || !Array.isArray(json.events)) {
-        return eventsCache?.data ?? []
+        eventsCache = { timestamp: Date.now(), data: [] }
+        return []
       }
 
       // Filter and parse football events with deduplication by event id
@@ -282,7 +285,8 @@ export async function fetchCinevidEvents(): Promise<CinevidParsedEvent[]> {
       return parsedList
     } catch (err) {
       console.error("[cinevid] Fetch events failed:", err)
-      return eventsCache?.data ?? []
+      eventsCache = { timestamp: Date.now(), data: [] }
+      return []
     } finally {
       clearTimeout(timer)
       inflightEvents = null

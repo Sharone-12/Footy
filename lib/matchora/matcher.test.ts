@@ -56,17 +56,17 @@ async function runTests() {
         name: "DAZN 2",
         country: "🇵🇹",
         lang: "Portuguese",
-        embedUrl: "https://es.matchora.pro/embed/channel/118458",
+        embedUrl: "https://matchora.pro/embed/channel/118458",
       },
     ],
-    embedUrl: "https://es.matchora.pro/embed/match/2506279",
+    embedUrl: "https://matchora.pro/embed/match/2506279",
   }
 
   const match = matchFixtureToMatchora(fixture, [matchoraEvent])
   assert.ok(match != null, "Should successfully match Atletico Madrid vs Barcelona")
   assert.ok(match!.confidence >= CONFIDENCE_CONFIRMED_THRESHOLD, `Score should be >= ${CONFIDENCE_CONFIRMED_THRESHOLD}, got ${match!.confidence}`)
   assert.equal(match!.event.id, "2506279")
-  assert.equal(match!.event.embedUrl, "https://es.matchora.pro/embed/match/2506279")
+  assert.equal(match!.event.embedUrl, "https://matchora.pro/embed/match/2506279")
 
   // 5. Test rejection if one team fails
   const fakeFixture: Fixture = {

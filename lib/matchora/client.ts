@@ -8,7 +8,6 @@ import type {
 
 export const MATCHO_HOSTS = [
   "https://matchora.pro",
-  "https://es.matchora.pro",
   "https://matchora.to",
 ] as const
 
@@ -26,13 +25,18 @@ const inflightSchedule = new Map<string, Promise<MatchoraParsedEvent[]>>()
 let singleEventCache = new Map<string, { data: MatchoraParsedEvent; timestamp: number }>()
 
 export function parseMatchoraChannel(ch: MatchoraRawChannel): MatchoraParsedChannel {
+  let embedUrl = ch.embed_url
+  if (embedUrl) {
+    // es.matchora.pro port 443 refuses connections; rewrite to matchora.pro
+    embedUrl = embedUrl.replace(/https?:\/\/es\.matchora\.pro/gi, "https://matchora.pro")
+  }
   return {
     id: String(ch.id),
     name: ch.name || "Broadcast Channel",
     country: ch.country,
     quality: ch.quality,
     lang: ch.lang,
-    embedUrl: ch.embed_url,
+    embedUrl,
   }
 }
 
@@ -71,6 +75,13 @@ export function normalizeMatchoraEvent(raw: MatchoraRawEvent): MatchoraParsedEve
 
   const channels: MatchoraParsedChannel[] = (raw.channels || []).map(parseMatchoraChannel)
 
+  let pageUrl = raw.page_url
+  if (pageUrl) {
+    pageUrl = pageUrl.replace(/https?:\/\/es\.matchora\.pro/gi, "https://matchora.pro")
+  }
+  let embedUrl = raw.embed_url || `https://matchora.pro/embed/match/${raw.id}`
+  embedUrl = embedUrl.replace(/https?:\/\/es\.matchora\.pro/gi, "https://matchora.pro")
+
   return {
     id: String(raw.id),
     home: (raw.home || "").trim(),
@@ -84,8 +95,8 @@ export function normalizeMatchoraEvent(raw: MatchoraRawEvent): MatchoraParsedEve
     score: raw.score || null,
     channelCount: raw.channel_count ?? channels.length,
     channels,
-    pageUrl: raw.page_url,
-    embedUrl: raw.embed_url || `https://matchora.pro/embed/match/${raw.id}`,
+    pageUrl,
+    embedUrl,
   }
 }
 

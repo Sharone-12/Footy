@@ -196,7 +196,7 @@ export function UnifiedPlayer({
   let providerDisplayName = "Matchora"
 
   if (selectedProvider === "matchora") {
-    currentUrl = activeMatchoraChannel?.embedUrl || matchora?.event?.embedUrl
+    currentUrl = (activeMatchoraChannel?.embedUrl || matchora?.event?.embedUrl)?.replace(/https?:\/\/es\.matchora\.pro/gi, "https://matchora.pro")
     isCurrentLive = Boolean(matchora?.event?.status === "live")
     currentStatusLabel = matchora?.event?.status === "live" ? "LIVE" : matchora?.event?.status === "finished" ? "OFFLINE" : "UPCOMING"
     providerDisplayName = activeMatchoraChannel?.name
