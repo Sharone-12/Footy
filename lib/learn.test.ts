@@ -154,6 +154,13 @@ const twoSeasons = [...season, ...season.map((x) => ({ ...x, season: "S2", event
 assert.equal(walkForward(twoSeasons, DEFAULT_PARAMS, "S2").n, walked.n)
 assert.equal(walkForward([], DEFAULT_PARAMS).n, 0)
 
+// A date holds out the back of a season without hiding it from the ledger:
+// fewer matches scored, and none of them before the cut.
+const held = walkForward(season, DEFAULT_PARAMS, undefined, "2026-09-07")
+assert.ok(held.n > 0 && held.n < walked.n, `${held.n} vs ${walked.n}`)
+assert.equal(walkForward(season, DEFAULT_PARAMS, undefined, "2026-09-01").n, walked.n)
+assert.equal(walkForward(season, DEFAULT_PARAMS, undefined, "2099-01-01").n, 0)
+
 // ── The fitter ──
 
 // Finds the floor of a simple bowl, within a step of the truth.

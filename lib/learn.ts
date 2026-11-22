@@ -367,11 +367,18 @@ const resultKey = (m: LearnMatch): keyof Probs =>
 /**
  * Replay matches in order, predicting each from the record before it.
  *
- * `scoreSeason` limits what counts toward the score without limiting what is
- * learnt from, which is how a fit trained on one season gets marked on the
- * next. Matches must already be in date order.
+ * `scoreSeason` and `scoreFrom` limit what counts toward the score without
+ * limiting what is learnt from, which is how a fit gets marked on matches it
+ * was never trained on: another season, or the back half of this one. Dates
+ * are YYYY-MM-DD, so comparing them as strings orders them correctly.
+ * Matches must already be in date order.
  */
-export function walkForward(matches: LearnMatch[], params: Params, scoreSeason?: string): Score {
+export function walkForward(
+  matches: LearnMatch[],
+  params: Params,
+  scoreSeason?: string,
+  scoreFrom?: string,
+): Score {
   const ledger = new Ledger()
   let n = 0
   let logLoss = 0
@@ -379,7 +386,7 @@ export function walkForward(matches: LearnMatch[], params: Params, scoreSeason?:
   let hits = 0
 
   for (const m of matches) {
-    if (!scoreSeason || m.season === scoreSeason) {
+    if ((!scoreSeason || m.season === scoreSeason) && (!scoreFrom || m.date >= scoreFrom)) {
       const home = ledger.team(m, m.home)
       const away = ledger.team(m, m.away)
       // Both sides need a record, or the match is only measuring the fallback.
