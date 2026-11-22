@@ -5,6 +5,7 @@ import { resolveSeason } from "@/lib/seasons"
 import { fetchTeamData } from "@/lib/teams"
 import { UCL } from "@/lib/competition"
 import { expectedGoals, uclStrengths, PREDICTION_STATS, UCL_HOME_MULT } from "@/lib/predictions"
+import { loadModelFit } from "@/lib/fitted-model"
 import type { Comp, SimPack, SimPlayer, SimRow } from "@/lib/simulate"
 
 /**
@@ -78,12 +79,15 @@ async function loadPack(season: string, comp: Comp): Promise<SimPack> {
   ])
 
   const finished = matches.map((m) => ({ ...m, date: m.date ?? "" }))
+  // The same learnt settings the predictions run on, so a simulated season
+  // and the odds on its fixtures never disagree.
   const lambdas = expectedGoals(
     upcoming.map((m) => ({ ...m, round: m.round as number })),
     finished,
     table,
     stats,
     xg,
+    (await loadModelFit(season)).params,
   )
 
   const ids: Record<string, number> = {}

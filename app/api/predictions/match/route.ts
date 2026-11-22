@@ -3,6 +3,7 @@ import { supabase, fetchAllRows } from "@/lib/supabase"
 import { resolveSeason } from "@/lib/seasons"
 import { fetchTeamData, isPredictable, TEAM_STAT_GROUPS, TEAM_RADAR_STATS } from "@/lib/teams"
 import { predictMatches, type MatchPrediction } from "@/lib/predictions"
+import { loadModelFit } from "@/lib/fitted-model"
 import { withFrozenPredictions } from "@/lib/predictions-freeze"
 
 const ALL_STATS = Array.from(
@@ -79,6 +80,7 @@ export async function getMatchPrediction(eventId: number): Promise<MatchPredicti
     table,
     stats,
     xg,
+    (await loadModelFit(season)).params,
   )
 
   const [pred] = await withFrozenPredictions(computed)

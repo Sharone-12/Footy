@@ -29,6 +29,8 @@ import { TeamRankingsExpand } from "@/components/team-rankings-expand"
 import { PredictionMatchCard } from "@/components/prediction-match-card"
 import { calibration, type Calibration } from "@/lib/calibration"
 import { formatDateIST } from "@/lib/time"
+import { loadModelFit, skillOf, type ModelFit } from "@/lib/fitted-model"
+import { DEFAULT_PARAMS, PARAM_LABEL, type Params } from "@/lib/learn"
 
 const OUTCOME_COLORS = {
   home: "oklch(0.80 0.19 150)",
@@ -144,6 +146,119 @@ function AccuracyCard({ acc, cal }: { acc: AccuracyStats; cal: Calibration }) {
           </p>
         </div>
       )}
+    </section>
+  )
+}
+
+/** 0.37 reads better than 0.3700; 0.030 would otherwise round away to 0.03. */
+const fmtParam = (v: number) => (Math.abs(v) >= 0.1 ? v.toFixed(2) : v.toFixed(3))
+
+/**
+ * What the model taught itself.
+ *
+ * The headline is the honest one: parameters fitted on last season only, then
+ * marked on this season's results, which they never saw, against the settings
+ * that used to be chosen by hand.
+ */
+function LearntCard({ fit }: { fit: ModelFit }) {
+  if (fit.trained === 0) return null
+  const moved = (Object.keys(DEFAULT_PARAMS) as (keyof Params)[])
+    .map((k) => ({ key: k, from: DEFAULT_PARAMS[k], to: fit.params[k] }))
+    .filter((p) => Math.abs(p.to - p.from) > 1e-9)
+
+  const t = fit.tested
+  const better = t ? skillOf(t.learnt.logLoss) - skillOf(t.handSet.logLoss) : 0
+
+  return (
+    <section className="surface rounded-2xl bg-card p-5">
+      <header className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 pb-4">
+        <h2
+          className="text-lg font-semibold tracking-tight uppercase"
+          style={{ fontFamily: "var(--font-condensed)" }}
+        >
+          What the model has learnt
+        </h2>
+        <span className="stat-label">
+          {fit.trained.toLocaleString()} matches · {fit.seasons.join(" + ")}
+        </span>
+      </header>
+
+      {t ? (
+        <>
+          <p className="text-sm mb-4">
+            <span className="stat-figure text-2xl mr-2" style={{ color: OUTCOME_COLORS.home }}>
+              {better > 0 ? "+" : ""}
+              {better.toFixed(1)}%
+            </span>
+            <span className="text-muted-foreground">
+              more skill than the settings we picked by hand, over {t.learnt.n} matches of{" "}
+              {t.season} that the learnt ones never saw.
+            </span>
+          </p>
+          <div className="grid grid-cols-3 gap-3 mb-5">
+            {([
+              ["Log-loss", t.handSet.logLoss, t.learnt.logLoss, 3, "lower"],
+              ["Brier", t.handSet.brier, t.learnt.brier, 3, "lower"],
+              ["Called right", t.handSet.hitRate * 100, t.learnt.hitRate * 100, 1, "higher"],
+            ] as const).map(([label, was, now, digits, good]) => {
+              const improved = good === "lower" ? now < was : now > was
+              return (
+                <div key={label}>
+                  <div className="stat-label">{label}</div>
+                  <div
+                    className="stat-figure text-lg"
+                    style={{ color: improved ? OUTCOME_COLORS.home : undefined }}
+                  >
+                    {now.toFixed(digits)}
+                    {label === "Called right" && "%"}
+                  </div>
+                  <div className="stat-label">
+                    was {was.toFixed(digits)}
+                    {label === "Called right" && "%"}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+          <p className="text-xs text-muted-foreground/70 mb-5">
+            It picks barely any more winners. What it gained is honesty about how sure it
+            is — which is most of what a prediction is worth.
+          </p>
+        </>
+      ) : (
+        <p className="text-sm text-muted-foreground mb-5">
+          Fitted on every finished league match. There is no earlier season here to mark it
+          against yet.
+        </p>
+      )}
+
+      {moved.length > 0 && (
+        <>
+          <h3 className="stat-label mb-2">It changed its mind about</h3>
+          <div className="grid sm:grid-cols-2 gap-x-6 gap-y-1.5">
+            {moved.map((p) => (
+              <div key={p.key} className="flex items-baseline gap-3 text-sm">
+                <span className="flex-1 min-w-0 truncate text-muted-foreground">
+                  {PARAM_LABEL[p.key]}
+                </span>
+                <span className="stat-figure text-sm tabular-nums text-muted-foreground/60">
+                  {fmtParam(p.from)}
+                </span>
+                <span className="text-muted-foreground/40 text-xs">to</span>
+                <span className="stat-figure text-sm tabular-nums w-12 text-right">
+                  {fmtParam(p.to)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+      <p className="text-xs text-muted-foreground/70 mt-4">
+        Every finished match is replayed in order and predicted from only what was known
+        before it kicked off; the settings that would have called the season best are the
+        ones used from here. Results land twice a day and it fits again. The Champions
+        League keeps its own model.
+      </p>
     </section>
   )
 }
@@ -294,7 +409,7 @@ type SeasonMatch = {
  * is identical for every visitor. The live scoreline on each card comes from
  * the client poll, not from here, so a minute of staleness costs nothing.
  */
-async function loadSeason(season: string) {
+async function loadSeason(season: string, params: Params) {
   "use cache"
   cacheLife("minutes")
 
@@ -346,6 +461,7 @@ async function loadSeason(season: string) {
     table,
     stats,
     xg,
+    params,
   )
 
   const uclIds: [string, number][] = []
@@ -369,7 +485,10 @@ async function Content({
   const leagueFilter = sp.league || "all"
   const leagueFullName = LEAGUE_FILTERS.find((f) => f.key === leagueFilter)?.full || null
 
-  const { computed, finished, xg, uclIds: uclIdPairs } = await loadSeason(season)
+  // The model's own settings, learnt from every finished league match. They
+  // key the cache below, so a refit moves the predictions with it.
+  const fit = await loadModelFit(season)
+  const { computed, finished, xg, uclIds: uclIdPairs } = await loadSeason(season, fit.params)
   const withFrozen = await withFrozenPredictions(computed)
   // Settled matches without a frozen row have no honest kickoff prediction;
   // keep them out of the display and the accuracy count.
@@ -399,6 +518,7 @@ async function Content({
     <>
       <PredictionsLeagueToggle active={leagueFilter} />
       <AccuracyCard acc={accuracy} cal={calibration(filtered)} />
+      <LearntCard fit={fit} />
       {uclModel && <UclRatings model={uclModel} ids={uclIds} />}
 
       {nextRoundPredictions.length > 0 && (

@@ -1,7 +1,13 @@
 import type { TeamTableRow, SeasonStatRow, MatchXg } from "@/lib/teams"
-import { indexStats, statValue, FULL_LEAGUES, SINGLE_CLUBS } from "@/lib/teams"
+import { indexStats, FULL_LEAGUES, SINGLE_CLUBS } from "@/lib/teams"
 import { UCL } from "@/lib/competition"
-import { matchProbabilities } from "@/lib/poisson"
+import {
+  leagueLambdas,
+  outcomeProbs,
+  DEFAULT_PARAMS,
+  type Params,
+  type TeamSeason,
+} from "@/lib/learn"
 
 export type MatchPrediction = {
   event_id: number
@@ -34,8 +40,6 @@ export type AccuracyStats = {
   awayCorrect: number
   awayTotal: number
 }
-
-const HOME_ADVANTAGE = 0.2
 
 // ── Champions League model ──
 //
@@ -206,25 +210,19 @@ function uclExpectedGoals(home: string, away: string, model: UclModel): [number,
   return [ha * ad * model.avg * UCL_HOME_MULT, (aa * hd * model.avg) / UCL_HOME_MULT]
 }
 
-type TeamProfile = {
-  xG: number
-  goals: number
-  goalsAgainst: number
-  shotsOnTarget: number
-  bigChances: number
-  shotsInBox: number
-  totalShots: number
-  possession: number
-  goalsPrevented: number
-  played: number
-}
-
+/**
+ * A club's season as the model reads it: goal totals from the table, stat
+ * averages from its per-match rows.
+ *
+ * The rating maths itself lives in lib/learn, where it is parameterised and
+ * fitted; this only shapes the season table into what it expects.
+ */
 function buildProfile(
   team: string,
   tableRow: TeamTableRow | undefined,
   byKey: Map<string, SeasonStatRow>,
-): TeamProfile | null {
-  if (!tableRow || tableRow.played < 2) return null
+): TeamSeason | null {
+  if (!tableRow || tableRow.played < 1) return null
 
   const s = (stat: string, pct = false) => {
     const row = byKey.get(`${team}|${stat}`)
@@ -234,64 +232,16 @@ function buildProfile(
   }
 
   return {
-    xG: s("Expected goals"),
-    goals: tableRow.goals_for / tableRow.played,
-    goalsAgainst: tableRow.goals_against / tableRow.played,
-    shotsOnTarget: s("Shots on target"),
-    bigChances: s("Big chances"),
-    shotsInBox: s("Shots inside box"),
-    totalShots: s("Total shots"),
-    possession: s("Ball possession", true),
-    goalsPrevented: s("Goals prevented"),
     played: tableRow.played,
+    goalsFor: tableRow.goals_for,
+    goalsAgainst: tableRow.goals_against,
+    xg: s("Expected goals"),
+    sot: s("Shots on target"),
+    bc: s("Big chances"),
+    sib: s("Shots inside box"),
+    poss: s("Ball possession", true),
+    gp: s("Goals prevented"),
   }
-}
-
-function estimateAttack(profile: TeamProfile, leagueAvgGoals: number): number {
-  if (profile.xG > 0) {
-    const xgStrength = profile.xG / Math.max(leagueAvgGoals, 0.5)
-    const goalStrength = profile.goals / Math.max(leagueAvgGoals, 0.5)
-    return xgStrength * 0.6 + goalStrength * 0.4
-  }
-  return profile.goals / Math.max(leagueAvgGoals, 0.5)
-}
-
-function estimateDefence(profile: TeamProfile, leagueAvgGoals: number): number {
-  let base = profile.goalsAgainst / Math.max(leagueAvgGoals, 0.5)
-
-  if (profile.goalsPrevented !== 0) {
-    const gpAdj = -profile.goalsPrevented * 0.06
-    base = Math.max(0.4, base + gpAdj)
-  }
-
-  return base
-}
-
-function shotQualityMultiplier(profile: TeamProfile, leagueAvg: { sot: number; bc: number; sib: number }): number {
-  let mult = 1.0
-
-  if (profile.shotsOnTarget > 0 && leagueAvg.sot > 0) {
-    const sotRatio = profile.shotsOnTarget / leagueAvg.sot
-    mult += (sotRatio - 1) * 0.08
-  }
-
-  if (profile.bigChances > 0 && leagueAvg.bc > 0) {
-    const bcRatio = profile.bigChances / leagueAvg.bc
-    mult += (bcRatio - 1) * 0.06
-  }
-
-  if (profile.shotsInBox > 0 && leagueAvg.sib > 0) {
-    const sibRatio = profile.shotsInBox / leagueAvg.sib
-    mult += (sibRatio - 1) * 0.04
-  }
-
-  return Math.max(0.75, Math.min(1.3, mult))
-}
-
-function possessionAdjustment(homePoss: number, awayPoss: number): number {
-  if (homePoss <= 0 || awayPoss <= 0) return 0
-  const diff = homePoss - awayPoss
-  return diff * 0.002
 }
 
 const PREDICTION_STATS = [
@@ -322,6 +272,9 @@ type Fixture = {
  * Expected goals for each side of every fixture, event_id -> [home, away].
  * The one rating the predictions and the season simulator share: the odds
  * are these through a Poisson, a simulated scoreline is a draw from it.
+ *
+ * `params` are the league model's learnt settings (lib/fitted-model). Left
+ * out, the hand-set ones stand in, so a caller with no fit still works.
  */
 export function expectedGoals(
   upcoming: Fixture[],
@@ -329,6 +282,7 @@ export function expectedGoals(
   table: TeamTableRow[],
   stats?: SeasonStatRow[],
   xg?: MatchXg,
+  params: Params = DEFAULT_PARAMS,
 ): Map<number, [number, number]> {
   // A club has one row per competition, so look it up in the match's own.
   const teamMap = new Map(table.map((t) => [`${t.league}|${t.team}`, t]))
@@ -387,45 +341,12 @@ export function expectedGoals(
     const homeProfile = buildProfile(m.home, homeTeam, byKey)
     const awayProfile = buildProfile(m.away, awayTeam, byKey)
 
-    let homeExpected: number
-    let awayExpected: number
+    const lambdas =
+      m.league === UCL
+        ? uclExpectedGoals(m.home, m.away, uclModel(m))
+        : leagueLambdas(homeProfile, awayProfile, avg, params)
 
-    if (m.league === UCL) {
-      ;[homeExpected, awayExpected] = uclExpectedGoals(m.home, m.away, uclModel(m))
-    } else if (homeProfile && awayProfile) {
-      const homeAttack = estimateAttack(homeProfile, avg.goals)
-      const homeDefence = estimateDefence(homeProfile, avg.goals)
-      const awayAttack = estimateAttack(awayProfile, avg.goals)
-      const awayDefence = estimateDefence(awayProfile, avg.goals)
-
-      homeExpected = homeAttack * awayDefence * avg.goals
-      awayExpected = awayAttack * homeDefence * avg.goals
-
-      const homeShotMult = shotQualityMultiplier(homeProfile, avg)
-      const awayShotMult = shotQualityMultiplier(awayProfile, avg)
-      homeExpected *= homeShotMult
-      awayExpected *= awayShotMult
-
-      const possAdj = possessionAdjustment(homeProfile.possession, awayProfile.possession)
-      homeExpected += possAdj
-      awayExpected -= possAdj * 0.5
-
-      homeExpected += HOME_ADVANTAGE
-    } else {
-      const ha = homeTeam && homeTeam.played >= 2
-        ? homeTeam.goals_for / homeTeam.played / avg.goals : 1
-      const hd = homeTeam && homeTeam.played >= 2
-        ? homeTeam.goals_against / homeTeam.played / avg.goals : 1
-      const aa = awayTeam && awayTeam.played >= 2
-        ? awayTeam.goals_for / awayTeam.played / avg.goals : 1
-      const ad = awayTeam && awayTeam.played >= 2
-        ? awayTeam.goals_against / awayTeam.played / avg.goals : 1
-
-      homeExpected = ha * ad * avg.goals + HOME_ADVANTAGE
-      awayExpected = aa * hd * avg.goals
-    }
-
-    out.set(m.event_id, [Math.max(0.3, homeExpected), Math.max(0.3, awayExpected)])
+    out.set(m.event_id, [Math.max(0.3, lambdas[0]), Math.max(0.3, lambdas[1])])
   }
   return out
 }
@@ -436,13 +357,16 @@ export function predictMatches(
   table: TeamTableRow[],
   stats?: SeasonStatRow[],
   xg?: MatchXg,
+  params: Params = DEFAULT_PARAMS,
 ): MatchPrediction[] {
   const finishedMap = new Map(finished.map((m) => [m.event_id, m]))
-  const lambdas = expectedGoals(upcoming, finished, table, stats, xg)
+  const lambdas = expectedGoals(upcoming, finished, table, stats, xg, params)
 
   return upcoming.map((m) => {
     const [homeExpected, awayExpected] = lambdas.get(m.event_id) ?? [1, 1]
-    const probs = matchProbabilities(homeExpected, awayExpected)
+    // The Champions League model is rated separately and carries no low-score
+    // correction, so rho applies only where it was fitted.
+    const probs = outcomeProbs(homeExpected, awayExpected, m.league === UCL ? 0 : params.rho)
 
     const predicted =
       probs.homeWin >= probs.draw && probs.homeWin >= probs.awayWin

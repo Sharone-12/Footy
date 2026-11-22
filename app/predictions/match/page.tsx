@@ -16,6 +16,7 @@ import {
   isPredictable,
 } from "@/lib/teams"
 import { predictMatches } from "@/lib/predictions"
+import { loadModelFit } from "@/lib/fitted-model"
 import { withFrozenPredictions } from "@/lib/predictions-freeze"
 import { percentileRank } from "@/lib/stats"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -313,6 +314,7 @@ async function Content({
     table,
     stats,
     xg,
+    (await loadModelFit(season)).params,
   )
   const [pred] = await withFrozenPredictions(computed)
 
