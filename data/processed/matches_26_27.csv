@@ -105,7 +105,7 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16363657,Premier League,2026/27,11,2026-11-21,Chelsea,38,Leeds United,34,finished,1.0,4.0,2026-11-21T15:00:00Z
 16363658,Premier League,2026/27,11,2026-11-21,Coventry City,11,Crystal Palace,7,finished,3.0,2.0,2026-11-21T15:00:00Z
 16363663,Premier League,2026/27,11,2026-11-21,Tottenham Hotspur,33,Ipswich Town,32,finished,2.0,0.0,2026-11-21T15:00:00Z
-16363662,Premier League,2026/27,11,2026-11-21,Newcastle United,39,Arsenal,42,upcoming,,,2026-11-21T17:30:00Z
+16363662,Premier League,2026/27,11,2026-11-21,Newcastle United,39,Arsenal,42,finished,2.0,2.0,2026-11-21T17:30:00Z
 16363659,Premier League,2026/27,11,2026-11-22,Hull City,96,Brighton & Hove Albion,30,upcoming,,,2026-11-22T14:00:00Z
 16363660,Premier League,2026/27,11,2026-11-22,Liverpool FC,44,Manchester United,35,upcoming,,,2026-11-22T16:30:00Z
 16363656,Premier League,2026/27,11,2026-11-23,Brentford,50,Everton,48,upcoming,,,2026-11-23T20:00:00Z
@@ -209,26 +209,26 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16363665,Premier League,2026/27,21,2027-01-16,Aston Villa,40,Manchester United,35,upcoming,,,2027-01-16T17:30:00Z
 16363674,Premier League,2026/27,21,2027-01-17,Bournemouth,60,Ipswich Town,32,upcoming,,,2027-01-17T14:00:00Z
 16363739,Premier League,2026/27,21,2027-01-17,Tottenham Hotspur,33,Leeds United,34,upcoming,,,2027-01-17T16:30:00Z
-16363746,Premier League,2026/27,22,2027-01-23,Arsenal,42,Newcastle United,39,upcoming,,,2027-01-23T15:00:00Z
-16363751,Premier League,2026/27,22,2027-01-23,Brighton & Hove Albion,30,Manchester City,17,upcoming,,,2027-01-23T15:00:00Z
-16363757,Premier League,2026/27,22,2027-01-23,Crystal Palace,7,Tottenham Hotspur,33,upcoming,,,2027-01-23T15:00:00Z
-16363762,Premier League,2026/27,22,2027-01-23,Everton,48,Brentford,50,upcoming,,,2027-01-23T15:00:00Z
 16363767,Premier League,2026/27,22,2027-01-23,Fulham,43,Aston Villa,40,upcoming,,,2027-01-23T15:00:00Z
 16363773,Premier League,2026/27,22,2027-01-23,Ipswich Town,32,Hull City,96,upcoming,,,2027-01-23T15:00:00Z
 16363779,Premier League,2026/27,22,2027-01-23,Leeds United,34,Chelsea,38,upcoming,,,2027-01-23T15:00:00Z
-16363781,Premier League,2026/27,22,2027-01-23,Manchester United,35,Liverpool FC,44,upcoming,,,2027-01-23T15:00:00Z
-16363782,Premier League,2026/27,22,2027-01-23,Nottingham Forest,14,Bournemouth,60,upcoming,,,2027-01-23T15:00:00Z
-16363783,Premier League,2026/27,22,2027-01-23,Sunderland,41,Coventry City,11,upcoming,,,2027-01-23T15:00:00Z
+16363746,Premier League,2026/27,22,2027-01-23,Arsenal,42,Newcastle United,39,upcoming,,,2027-01-23T17:30:00Z
+16363751,Premier League,2026/27,22,2027-01-23,Brighton & Hove Albion,30,Manchester City,17,upcoming,,,2027-01-23T20:00:00Z
+16363757,Premier League,2026/27,22,2027-01-24,Crystal Palace,7,Tottenham Hotspur,33,upcoming,,,2027-01-24T14:00:00Z
+16363762,Premier League,2026/27,22,2027-01-24,Everton,48,Brentford,50,upcoming,,,2027-01-24T14:00:00Z
+16363782,Premier League,2026/27,22,2027-01-24,Nottingham Forest,14,Bournemouth,60,upcoming,,,2027-01-24T14:00:00Z
+16363783,Premier League,2026/27,22,2027-01-24,Sunderland,41,Coventry City,11,upcoming,,,2027-01-24T14:00:00Z
+16363781,Premier League,2026/27,22,2027-01-24,Manchester United,35,Liverpool FC,44,upcoming,,,2027-01-24T16:30:00Z
+16363790,Premier League,2026/27,23,2027-01-30,Liverpool FC,44,Everton,48,upcoming,,,2027-01-30T12:30:00Z
 16363784,Premier League,2026/27,23,2027-01-30,Aston Villa,40,Ipswich Town,32,upcoming,,,2027-01-30T15:00:00Z
-16363785,Premier League,2026/27,23,2027-01-30,Bournemouth,60,Fulham,43,upcoming,,,2027-01-30T15:00:00Z
 16363786,Premier League,2026/27,23,2027-01-30,Brentford,50,Manchester United,35,upcoming,,,2027-01-30T15:00:00Z
-16363787,Premier League,2026/27,23,2027-01-30,Chelsea,38,Nottingham Forest,14,upcoming,,,2027-01-30T15:00:00Z
-16363788,Premier League,2026/27,23,2027-01-30,Coventry City,11,Leeds United,34,upcoming,,,2027-01-30T15:00:00Z
-16363789,Premier League,2026/27,23,2027-01-30,Hull City,96,Crystal Palace,7,upcoming,,,2027-01-30T15:00:00Z
-16363790,Premier League,2026/27,23,2027-01-30,Liverpool FC,44,Everton,48,upcoming,,,2027-01-30T15:00:00Z
-16363791,Premier League,2026/27,23,2027-01-30,Manchester City,17,Arsenal,42,upcoming,,,2027-01-30T15:00:00Z
 16363792,Premier League,2026/27,23,2027-01-30,Newcastle United,39,Brighton & Hove Albion,30,upcoming,,,2027-01-30T15:00:00Z
-16363793,Premier League,2026/27,23,2027-01-30,Tottenham Hotspur,33,Sunderland,41,upcoming,,,2027-01-30T15:00:00Z
+16363787,Premier League,2026/27,23,2027-01-30,Chelsea,38,Nottingham Forest,14,upcoming,,,2027-01-30T17:30:00Z
+16363785,Premier League,2026/27,23,2027-01-31,Bournemouth,60,Fulham,43,upcoming,,,2027-01-31T14:00:00Z
+16363788,Premier League,2026/27,23,2027-01-31,Coventry City,11,Leeds United,34,upcoming,,,2027-01-31T14:00:00Z
+16363789,Premier League,2026/27,23,2027-01-31,Hull City,96,Crystal Palace,7,upcoming,,,2027-01-31T14:00:00Z
+16363793,Premier League,2026/27,23,2027-01-31,Tottenham Hotspur,33,Sunderland,41,upcoming,,,2027-01-31T14:00:00Z
+16363791,Premier League,2026/27,23,2027-01-31,Manchester City,17,Arsenal,42,upcoming,,,2027-01-31T16:30:00Z
 16363794,Premier League,2026/27,24,2027-02-06,Arsenal,42,Liverpool FC,44,upcoming,,,2027-02-06T15:00:00Z
 16363795,Premier League,2026/27,24,2027-02-06,Brighton & Hove Albion,30,Hull City,96,upcoming,,,2027-02-06T15:00:00Z
 16363796,Premier League,2026/27,24,2027-02-06,Crystal Palace,7,Coventry City,11,upcoming,,,2027-02-06T15:00:00Z
@@ -503,8 +503,8 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16421112,La Liga,2026/27,13,2026-11-20,Athletic Club,2825,Espanyol,2814,finished,0.0,1.0,2026-11-20T20:00:00Z
 16421111,La Liga,2026/27,13,2026-11-21,Deportivo Alavés,2885,Deportivo de A Coruña,2832,finished,3.0,1.0,2026-11-21T13:00:00Z
 16421119,La Liga,2026/27,13,2026-11-21,Rayo Vallecano,2818,Valencia,2828,finished,0.0,1.0,2026-11-21T15:15:00Z
-16421125,La Liga,2026/27,13,2026-11-21,Sevilla,2833,Real Betis,2816,upcoming,,,2026-11-21T17:30:00Z
-16421116,La Liga,2026/27,13,2026-11-21,Real Madrid,2829,Celta Vigo,2821,upcoming,,,2026-11-21T20:00:00Z
+16421125,La Liga,2026/27,13,2026-11-21,Sevilla,2833,Real Betis,2816,finished,1.0,1.0,2026-11-21T17:30:00Z
+16421116,La Liga,2026/27,13,2026-11-21,Real Madrid,2829,Celta Vigo,2821,finished,2.0,1.0,2026-11-21T20:00:00Z
 16421113,La Liga,2026/27,13,2026-11-22,FC Barcelona,2817,Villarreal,2819,upcoming,,,2026-11-22T13:00:00Z
 16421114,La Liga,2026/27,13,2026-11-22,Real Racing Club,2835,Real Sociedad,2824,upcoming,,,2026-11-22T15:15:00Z
 16421117,La Liga,2026/27,13,2026-11-22,Osasuna,2820,Málaga CF,2830,upcoming,,,2026-11-22T17:30:00Z
@@ -872,8 +872,8 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16285076,Serie A,2026/27,11,2026-11-08,Fiorentina,2693,Juventus,2687,finished,2.0,2.0,2026-11-08T19:45:00Z
 16285089,Serie A,2026/27,12,2026-11-21,Como,2704,Cagliari,2719,finished,2.0,0.0,2026-11-21T14:00:00Z
 16285092,Serie A,2026/27,12,2026-11-21,Lazio,2699,Lecce,2689,finished,3.0,0.0,2026-11-21T14:00:00Z
-16285095,Serie A,2026/27,12,2026-11-21,Parma,2690,AS Roma,2702,upcoming,,,2026-11-21T17:00:00Z
-16285096,Serie A,2026/27,12,2026-11-21,SSC Napoli,2714,Torino,2696,upcoming,,,2026-11-21T19:45:00Z
+16285095,Serie A,2026/27,12,2026-11-21,Parma,2690,AS Roma,2702,finished,1.0,5.0,2026-11-21T17:00:00Z
+16285096,Serie A,2026/27,12,2026-11-21,SSC Napoli,2714,Torino,2696,finished,1.0,0.0,2026-11-21T19:45:00Z
 16285091,Serie A,2026/27,12,2026-11-22,Juventus,2687,Venezia,2688,upcoming,,,2026-11-22T11:30:00Z
 16285090,Serie A,2026/27,12,2026-11-22,Bologna,2685,Udinese,2695,upcoming,,,2026-11-22T14:00:00Z
 16285094,Serie A,2026/27,12,2026-11-22,Sassuolo,2793,Genoa,2713,upcoming,,,2026-11-22T14:00:00Z
@@ -1231,11 +1231,11 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16311004,Ligue 1,2026/27,10,2026-11-08,Stade Brestois,1715,Olympique Lyonnais,1649,finished,2.0,0.0,2026-11-08T16:15:00Z
 16311007,Ligue 1,2026/27,10,2026-11-08,RC Lens,1648,Olympique de Marseille,1641,finished,1.0,2.0,2026-11-08T19:45:00Z
 16311019,Ligue 1,2026/27,11,2026-11-20,Troyes,1652,Le Havre,1662,finished,3.0,1.0,2026-11-20T19:45:00Z
-16311016,Ligue 1,2026/27,11,2026-11-21,OGC Nice,1661,Paris Saint-Germain,1644,upcoming,,,2026-11-21T16:15:00Z
-16311015,Ligue 1,2026/27,11,2026-11-21,AS Monaco,1653,AJ Auxerre,1646,upcoming,,,2026-11-21T19:45:00Z
-16311012,Ligue 1,2026/27,11,2026-11-21,LOSC Lille,1643,Olympique Lyonnais,1649,upcoming,,,2026-11-21T19:45:00Z
-16311011,Ligue 1,2026/27,11,2026-11-21,RC Lens,1648,Toulouse,1681,upcoming,,,2026-11-21T19:45:00Z
-16311018,Ligue 1,2026/27,11,2026-11-21,RC Strasbourg,1659,Stade Brestois,1715,upcoming,,,2026-11-21T19:45:00Z
+16311016,Ligue 1,2026/27,11,2026-11-21,OGC Nice,1661,Paris Saint-Germain,1644,finished,2.0,3.0,2026-11-21T16:15:00Z
+16311015,Ligue 1,2026/27,11,2026-11-21,AS Monaco,1653,AJ Auxerre,1646,finished,1.0,1.0,2026-11-21T19:45:00Z
+16311012,Ligue 1,2026/27,11,2026-11-21,LOSC Lille,1643,Olympique Lyonnais,1649,finished,0.0,1.0,2026-11-21T19:45:00Z
+16311011,Ligue 1,2026/27,11,2026-11-21,RC Lens,1648,Toulouse,1681,finished,1.0,1.0,2026-11-21T19:45:00Z
+16311018,Ligue 1,2026/27,11,2026-11-21,RC Strasbourg,1659,Stade Brestois,1715,finished,0.0,1.0,2026-11-21T19:45:00Z
 16311017,Ligue 1,2026/27,11,2026-11-22,Paris FC,6070,Angers,1684,upcoming,,,2026-11-22T14:00:00Z
 16311013,Ligue 1,2026/27,11,2026-11-22,Lorient,1656,Stade Rennais,1658,upcoming,,,2026-11-22T16:15:00Z
 16311014,Ligue 1,2026/27,11,2026-11-22,Olympique de Marseille,1641,Le Mans,1672,upcoming,,,2026-11-22T19:45:00Z
@@ -1533,7 +1533,7 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16434103,Bundesliga,2026/27,10,2026-11-21,Borussia M'gladbach,2527,Borussia Dortmund,2673,finished,0.0,1.0,2026-11-21T14:30:00Z
 16434102,Bundesliga,2026/27,10,2026-11-21,Eintracht Frankfurt,2674,TSG Hoffenheim,2569,finished,1.0,0.0,2026-11-21T14:30:00Z
 16434106,Bundesliga,2026/27,10,2026-11-21,SV 07 Elversberg,2598,SC Freiburg,2538,finished,0.0,1.0,2026-11-21T14:30:00Z
-16434109,Bundesliga,2026/27,10,2026-11-21,FC Schalke 04,2530,VfB Stuttgart,2677,upcoming,,,2026-11-21T17:30:00Z
+16434109,Bundesliga,2026/27,10,2026-11-21,FC Schalke 04,2530,VfB Stuttgart,2677,finished,0.0,0.0,2026-11-21T17:30:00Z
 16434104,Bundesliga,2026/27,10,2026-11-22,FC Augsburg,2600,1. FSV Mainz 05,2556,upcoming,,,2026-11-22T14:30:00Z
 16434107,Bundesliga,2026/27,10,2026-11-22,SV Werder Bremen,2534,Hamburger SV,2676,upcoming,,,2026-11-22T16:30:00Z
 16434118,Bundesliga,2026/27,11,2026-11-27,SV Werder Bremen,2534,Borussia M'gladbach,2527,upcoming,,,2026-11-27T19:30:00Z
