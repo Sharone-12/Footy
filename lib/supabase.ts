@@ -18,18 +18,41 @@ export const supabase = createClient(
  */
 export const PAGE_ROWS = 1000
 
+/**
+ * How many pages are asked for at once. One page at a time meant a season of
+ * matches cost three or four round trips end to end, on the critical path of
+ * every heavy page. Pages do not depend on each other, so a wave goes out
+ * together and the requests past the end come back empty and cost little.
+ */
+const PAGE_BURST = 4
+
 export async function fetchAllRows<T>(
   page: (from: number, to: number) => PromiseLike<{ data: T[] | null }>,
   maxRows = 20_000,
 ): Promise<T[]> {
   const out: T[] = []
-  for (let i = 0; out.length < maxRows; i++) {
-    const { data } = await page(i * PAGE_ROWS, i * PAGE_ROWS + PAGE_ROWS - 1)
-    if (!data?.length) break
-    out.push(...data)
-    // A short page is the last one; this is also the guard against a server
-    // that ignores the range and would otherwise loop forever.
-    if (data.length < PAGE_ROWS) break
+  for (let wave = 0; out.length < maxRows; wave++) {
+    const pages = await Promise.all(
+      Array.from({ length: PAGE_BURST }, (_, i) => {
+        const from = (wave * PAGE_BURST + i) * PAGE_ROWS
+        return page(from, from + PAGE_ROWS - 1)
+      }),
+    )
+    let done = false
+    for (const { data } of pages) {
+      if (!data?.length) {
+        done = true
+        break
+      }
+      out.push(...data)
+      // A short page is the last one, and the guard against a server that
+      // ignores the range and would otherwise loop forever.
+      if (data.length < PAGE_ROWS) {
+        done = true
+        break
+      }
+    }
+    if (done) break
   }
   return out
 }
