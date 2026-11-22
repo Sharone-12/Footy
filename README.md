@@ -428,3 +428,12 @@ They cover the model maths and the places where a silent regression would be
 expensive: that the fitted defaults reproduce the hand-set model exactly, that
 the walk-forward never sees the future, that the bracket draw matches UEFA's
 seeding rules, and that a prediction locks at kickoff and not before.
+
+---
+
+## License
+
+[MIT](LICENSE).
+
+Statistics are scraped from Sofascore and are not covered by this licence; the
+licence applies to the code in this repository.
