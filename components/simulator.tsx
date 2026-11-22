@@ -16,6 +16,7 @@ import { Rondo } from "@/components/rondo"
 import { BARCA_ID, LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
 import { UCL } from "@/lib/competition"
 import { formatDateIST } from "@/lib/time"
+import { fetchJson } from "@/lib/fetch-json"
 import {
   drawBracket,
   knockoutRng,
@@ -328,14 +329,16 @@ export function Simulator({ nav }: { nav: ReactNode }) {
 
   useEffect(() => {
     if (!open || packs[comp]) return
-    let alive = true
-    fetch(`/api/simulate?comp=${comp}`)
-      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
-      .then((p: SimPack) => alive && setPacks((s) => ({ ...s, [comp]: p })))
-      .catch(() => alive && setPacks((s) => ({ ...s, [comp]: "error" })))
-    return () => {
-      alive = false
-    }
+    // Deadlined: the season pack is a heavy read, and without a limit a slow
+    // response left the panel on its loading state with no way out.
+    const ac = new AbortController()
+    fetchJson<SimPack>(`/api/simulate?comp=${comp}`, { signal: ac.signal, timeoutMs: 20000 }).then(
+      (p) => {
+        if (ac.signal.aborted) return
+        setPacks((s) => ({ ...s, [comp]: p ?? "error" }))
+      },
+    )
+    return () => ac.abort()
   }, [open, comp, packs])
 
   const total = ready ? roundsOf(ready).length : 0

@@ -10,6 +10,7 @@ import { BARCA_ID, LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
 import { PLAYING_MS, startOf } from "@/lib/live"
 import { LiveSignal } from "@/components/live-signal"
 import { TeamPicker } from "@/components/team-picker"
+import { fetchJson } from "@/lib/fetch-json"
 import {
   PREFERRED_TEAM_EVENT,
   readPreferredTeam,
@@ -88,20 +89,17 @@ export function NextBarca({ matches }: { matches: NextBarcaMatch[] }) {
   useEffect(() => {
     if (!pref || pref.id === BARCA_ID) return
     const id = pref.id
-    let alive = true
-    fetch(`/api/teams?team_id=${id}`)
-      .then((r) => (r.ok ? r.json() : { matches: [] }))
-      .then((j: { matches?: NextBarcaMatch[] }) => {
-        if (alive) setOverride({ id, matches: j.matches ?? [] })
-      })
-      .catch(() => {
-        // Resolve to empty rather than leaving it pending: a stuck spinner
-        // is worse than "no fixture", and the pencil stays reachable.
-        if (alive) setOverride({ id, matches: [] })
-      })
-    return () => {
-      alive = false
-    }
+    const ac = new AbortController()
+    // Resolve to empty rather than leaving it pending: a stuck spinner is
+    // worse than "no fixture", and the pencil stays reachable. The deadline
+    // is what makes that true — a request that hangs never rejects, so the
+    // old catch could not fire and the pill sat on --:--:-- indefinitely.
+    fetchJson<{ matches?: NextBarcaMatch[] }>(`/api/teams?team_id=${id}`, {
+      signal: ac.signal,
+    }).then((j) => {
+      if (!ac.signal.aborted) setOverride({ id, matches: j?.matches ?? [] })
+    })
+    return () => ac.abort()
   }, [pref])
 
   const following = pref ?? { id: BARCA_ID, name: "FC Barcelona" }
