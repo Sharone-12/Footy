@@ -89,7 +89,10 @@ export function embedFor(url: string, parentHost?: string | null): StreamEmbed |
     return { kind: "iframe", src: fixedUrl }
   }
 
-  if ((host === "cinevid.sbs" || host === "cinevid.st") && path[0] === "embed") {
+  if (
+    (host === "cinevid.sbs" || host === "cinevid.pro" || host === "cinevid.st" || host === "cinevid.vip" || host.includes("cinevid")) &&
+    path[0] === "embed"
+  ) {
     return { kind: "iframe", src: u.toString() }
   }
 

@@ -12,13 +12,23 @@ import type {
 
 // cinevid.st dropped off DNS in November 2026; the same API answers at
 // cinevid.sbs. Env-overridable so the next move is a config change.
-export const CINEVID_BASE_URL = process.env.CINEVID_BASE_URL || "https://cinevid.sbs"
+export const CINEVID_BASE_URL = process.env.CINEVID_BASE_URL || "https://cinevid.pro"
 
-/** Hosts an event may link to: the current one, plus the old one while the API still emits it. */
-const CINEVID_HOSTS = [new URL(CINEVID_BASE_URL).hostname, "cinevid.st"]
+export const CINEVID_API_HOSTS = [
+  "https://cinevid.pro",
+  "https://cinevid.sbs",
+] as const
+
+/** Hosts an event may link to: active domains and historical mirrors */
+export const CINEVID_HOSTS = [
+  "cinevid.pro",
+  "cinevid.sbs",
+  "cinevid.st",
+  "cinevid.vip",
+]
 const EVENTS_CACHE_TTL_MS = 60_000 // 60 seconds
 const HEALTH_CACHE_TTL_MS = 30_000 // 30 seconds
-const REQUEST_TIMEOUT_MS = 4_000 // 4 seconds (fast-fail when upstream is unreachable/521)
+const REQUEST_TIMEOUT_MS = 12_000 // 12 seconds
 
 const DEFAULT_HEADERS = {
   Accept: "application/json",
@@ -177,9 +187,26 @@ export function normalizeCinevidEvent(raw: CinevidRawEvent): CinevidParsedEvent 
   }
 }
 
+async function fetchFromCinevidHosts(path: string, signal?: AbortSignal): Promise<Response> {
+  let lastError: Error | null = null
+  for (const host of CINEVID_API_HOSTS) {
+    try {
+      const res = await fetch(`${host}${path}`, {
+        signal,
+        headers: DEFAULT_HEADERS,
+      })
+      if (res.ok) return res
+      lastError = new Error(`Cinevid host ${host} returned status ${res.status}`)
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err))
+    }
+  }
+  throw lastError ?? new Error("All Cinevid hosts failed")
+}
+
 /**
  * Health check for Cinevid API.
- * GET https://cinevid.st/api/public/events (limited check)
+ * GET /api/public/events across available hosts
  */
 export async function checkCinevidHealth(): Promise<{ status: string; ok: boolean; count?: number; latencyMs: number }> {
   const now = Date.now()
@@ -197,10 +224,7 @@ export async function checkCinevidHealth(): Promise<{ status: string; ok: boolea
     const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
 
     try {
-      const res = await fetch(`${CINEVID_BASE_URL}/api/public/events`, {
-        signal: controller.signal,
-        headers: DEFAULT_HEADERS,
-      })
+      const res = await fetchFromCinevidHosts("/api/public/events", controller.signal)
       const ok = res.ok
       let count = 0
       if (ok) {
@@ -247,10 +271,7 @@ export async function fetchCinevidEvents(): Promise<CinevidParsedEvent[]> {
     const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
 
     try {
-      const res = await fetch(`${CINEVID_BASE_URL}/api/public/events`, {
-        signal: controller.signal,
-        headers: DEFAULT_HEADERS,
-      })
+      const res = await fetchFromCinevidHosts("/api/public/events", controller.signal)
 
       if (!res.ok) {
         console.warn(`[cinevid] Events API returned status ${res.status}`)
