@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react"
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react"
 import Link from "next/link"
 
 export type SegmentItem = {
@@ -36,9 +36,15 @@ export function SlidingSegment({
   // snap back to the old position during the router.push → re-render window.
   // Cleared when the real prop catches up.
   const [optimisticKey, setOptimisticKey] = useState<string | null>(null)
-  useEffect(() => {
-    if (optimisticKey && optimisticKey === activeKey) setOptimisticKey(null)
-  }, [activeKey, optimisticKey])
+  // Drop the guess the moment the real key moves, whatever it moved to — a
+  // navigation that landed somewhere else should not leave the pill stranded.
+  // Adjusting state in render rather than an effect: React re-runs this
+  // component before painting, so the pill never shows the stale position.
+  const [lastActive, setLastActive] = useState(activeKey)
+  if (lastActive !== activeKey) {
+    setLastActive(activeKey)
+    setOptimisticKey(null)
+  }
 
   const effectiveKey = optimisticKey ?? activeKey
   const activeIdx = items.findIndex((it) => it.key === effectiveKey)
@@ -90,9 +96,10 @@ export function SlidingSegment({
             itemRefs.current[i] = el as HTMLElement | null
           },
           onClick: () => {
-            if (!it.href) {
-              setOptimisticKey(it.key)
-            }
+            // Link items too: a soft navigation costs a server round trip, and
+            // without this the pill sits on the old tab for all of it, which
+            // reads as the click having missed.
+            setOptimisticKey(it.key)
             it.onPick?.()
           },
           "data-active": active || undefined,

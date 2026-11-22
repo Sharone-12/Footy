@@ -3,9 +3,13 @@
 import { useSearchParams } from "next/navigation"
 import { SlidingSegment } from "@/components/sliding-segment"
 
-/** Cards or pitch for the squad. Rewrites ?view= like the other toggles. */
-export function SquadViewToggle({ active }: { active: "cards" | "pitch" }) {
+/**
+ * Cards or pitch for the squad. Rewrites ?view= like the other toggles, and
+ * reads its own active tab from the URL so the pill moves on click.
+ */
+export function SquadViewToggle() {
   const params = useSearchParams()
+  const active = params.get("view") === "pitch" ? "pitch" : "cards"
 
   function hrefFor(view: "cards" | "pitch"): string {
     const next = new URLSearchParams(params.toString())

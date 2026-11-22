@@ -5,8 +5,14 @@ import { SlidingSegment } from "@/components/sliding-segment"
 import { LeagueCrest } from "@/components/player-avatar"
 import { LEAGUE_FILTERS, LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
 
-export function PredictionsLeagueToggle({ active }: { active: string }) {
+/**
+ * Reads its own active tab from the URL rather than taking it from the
+ * server. The params are already here on the client, so the pill settles the
+ * instant the URL changes instead of waiting for the page to come back.
+ */
+export function PredictionsLeagueToggle() {
   const params = useSearchParams()
+  const active = params.get("league") ?? "all"
 
   function hrefFor(key: string): string {
     const next = new URLSearchParams(params.toString())

@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { Reveal } from "@/components/reveal"
 import { cacheLife } from "next/cache"
 import Link from "next/link"
@@ -516,7 +517,6 @@ async function Content({
 
   return (
     <>
-      <PredictionsLeagueToggle active={leagueFilter} />
       <AccuracyCard acc={accuracy} cal={calibration(filtered)} />
       <LearntCard fit={fit} />
       {uclModel && <UclRatings model={uclModel} ids={uclIds} />}
@@ -593,6 +593,14 @@ export default function PredictionsPage({
           Poisson model probabilities for every upcoming match — and a running
           accuracy tracker so you can see how we do.
         </p>
+      </div>
+
+      {/* Outside the boundary below, like every other page's filter: inside it
+          the control vanished into its own skeleton the moment it was used. */}
+      <div className="mb-6">
+        <Suspense fallback={<Skeleton className="h-10 w-72 rounded-full" />}>
+          <PredictionsLeagueToggle />
+        </Suspense>
       </div>
 
       <Reveal

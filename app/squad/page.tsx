@@ -299,13 +299,9 @@ async function Squad({
 
   return (
     <>
-      <div className="mb-6 flex flex-wrap items-center gap-3">
-        <SquadViewToggle active={pitch ? "pitch" : "cards"} />
-        {!pitch && <SquadPositionFilter active={pos} />}
-        <span className="text-xs text-muted-foreground">
-          {shown.length} player{shown.length === 1 ? "" : "s"} · {season}
-        </span>
-      </div>
+      <p className="text-xs text-muted-foreground mb-4">
+        {shown.length} player{shown.length === 1 ? "" : "s"} · {season}
+      </p>
       {pitch ? (
         <SquadPitch squad={squad} scope={scope} />
       ) : shown.length === 0 ? (
@@ -353,14 +349,15 @@ export default function SquadPage({
       <Suspense fallback={<Rondo label="Reading the season" className="h-[230px] mb-8" />}>
         <BarcaSeason searchParams={searchParams} />
       </Suspense>
-      <Suspense
-        fallback={
-          <>
-            <Skeleton className="h-10 w-80 rounded-full mb-6" />
-            <GridSkeleton />
-          </>
-        }
-      >
+      {/* Outside the boundary below, so the controls stay put and keep
+          responding while the grid behind them reloads. */}
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <Suspense fallback={<Skeleton className="h-10 w-80 rounded-full" />}>
+          <SquadViewToggle />
+          <SquadPositionFilter />
+        </Suspense>
+      </div>
+      <Suspense fallback={<GridSkeleton />}>
         <Squad searchParams={searchParams} />
       </Suspense>
     </div>
