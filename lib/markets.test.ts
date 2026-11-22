@@ -29,9 +29,15 @@ assert.ok(close(by("12").prob, p.homeWin + p.awayWin))
 
 // Ordering that must hold for any scoreline distribution.
 assert.ok(by("o1.5").prob > by("o2.5").prob && by("o2.5").prob > by("o3.5").prob)
-// Result legs are named after the clubs, not "1" and "2".
+// Labels say what they mean. Result legs carry the club name rather than "1"
+// and "2", and the two inverses are spelled out: "either team wins" and "a
+// clean sheet either way" both read as riddles.
 assert.equal(by("home").label, "Home FC win")
 assert.equal(by("away").label, "Away FC win")
+assert.equal(by("1X").label, "Home FC or draw")
+assert.equal(by("12").label, "No draw")
+assert.equal(by("btts-no").label, "At least one clean sheet")
+for (const l of legs) assert.ok(!/either/i.test(l.label), `vague label: ${l.label}`)
 
 // The likeliest scoreline is a real cell, and no cell beats it.
 const best = likeliestScore(grid)

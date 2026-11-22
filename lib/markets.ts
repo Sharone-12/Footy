@@ -45,7 +45,7 @@ export function marketsFor(grid: number[][], home: string, away: string): Leg[] 
     { key: "away", group: "result", label: `${away} win`, test: (h, a) => h < a },
     { key: "1X", group: "double-chance", label: `${home} or draw`, test: (h, a) => h >= a },
     { key: "X2", group: "double-chance", label: `${away} or draw`, test: (h, a) => h <= a },
-    { key: "12", group: "double-chance", label: "Either team wins", test: (h, a) => h !== a },
+    { key: "12", group: "double-chance", label: "No draw", test: (h, a) => h !== a },
     { key: "o1.5", group: "totals", label: "Over 1.5 goals", test: (h, a) => h + a > 1.5 },
     { key: "u1.5", group: "totals", label: "Under 1.5 goals", test: (h, a) => h + a < 1.5 },
     { key: "o2.5", group: "totals", label: "Over 2.5 goals", test: (h, a) => h + a > 2.5 },
@@ -56,7 +56,7 @@ export function marketsFor(grid: number[][], home: string, away: string): Leg[] 
     {
       key: "btts-no",
       group: "btts",
-      label: "A clean sheet either way",
+      label: "At least one clean sheet",
       test: (h, a) => h === 0 || a === 0,
     },
   ]
@@ -158,8 +158,8 @@ const FLOOR = 0.5
 /**
  * The single safest selection worth showing.
  *
- * Capped on purpose: "either team wins" at 93% is not a pick, it is a
- * description of football. Among what is left, the most likely one wins.
+ * Capped on purpose: "no draw" at 93% is not a pick, it is a description of
+ * football. Among what is left, the most likely one wins.
  */
 export function safestLeg(legs: Leg[]): Leg | null {
   const worth = legs.filter((l) => l.prob < CEILING && l.prob >= FLOOR)
