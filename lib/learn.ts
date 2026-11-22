@@ -118,28 +118,58 @@ function tau(h: number, a: number, lh: number, la: number, rho: number): number 
 export type Probs = { homeWin: number; draw: number; awayWin: number }
 
 /** Home win / draw / away win from both sides' expected goals. */
+/**
+ * Every scoreline's probability, `grid[h][a]`, normalised to sum to 1.
+ *
+ * The one source of truth for anything read off a scoreline. Win/draw/loss
+ * below and every market in lib/markets are summed from the same grid, so
+ * they can never disagree with each other.
+ */
+export function scoreGrid(
+  homeExpected: number,
+  awayExpected: number,
+  rho = 0,
+  maxGoals = 7,
+): number[][] {
+  const grid: number[][] = []
+  let total = 0
+  for (let h = 0; h <= maxGoals; h++) {
+    const row: number[] = []
+    for (let a = 0; a <= maxGoals; a++) {
+      const p =
+        poisson(homeExpected, h) *
+        poisson(awayExpected, a) *
+        tau(h, a, homeExpected, awayExpected, rho)
+      row.push(p)
+      total += p
+    }
+    grid.push(row)
+  }
+  for (const row of grid) {
+    for (let a = 0; a < row.length; a++) row[a] /= total
+  }
+  return grid
+}
+
 export function outcomeProbs(
   homeExpected: number,
   awayExpected: number,
   rho = 0,
   maxGoals = 7,
 ): Probs {
+  const grid = scoreGrid(homeExpected, awayExpected, rho, maxGoals)
   let homeWin = 0
   let draw = 0
   let awayWin = 0
-  for (let h = 0; h <= maxGoals; h++) {
-    for (let a = 0; a <= maxGoals; a++) {
-      const p =
-        poisson(homeExpected, h) *
-        poisson(awayExpected, a) *
-        tau(h, a, homeExpected, awayExpected, rho)
+  for (let h = 0; h < grid.length; h++) {
+    for (let a = 0; a < grid[h].length; a++) {
+      const p = grid[h][a]
       if (h > a) homeWin += p
       else if (h === a) draw += p
       else awayWin += p
     }
   }
-  const total = homeWin + draw + awayWin
-  return { homeWin: homeWin / total, draw: draw / total, awayWin: awayWin / total }
+  return { homeWin, draw, awayWin }
 }
 
 // ── Team ratings ──

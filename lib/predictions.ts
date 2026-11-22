@@ -22,6 +22,9 @@ export type MatchPrediction = {
   homeWin: number
   draw: number
   awayWin: number
+  /** Goals the model expects each side to score; markets are read off these. */
+  homeExpected: number
+  awayExpected: number
   predicted: "home" | "draw" | "away"
   homeGoals: number | null
   awayGoals: number | null
@@ -404,6 +407,8 @@ export function predictMatches(
       homeWin: Math.round(probs.homeWin * 100),
       draw: Math.round(probs.draw * 100),
       awayWin: Math.round(probs.awayWin * 100),
+      homeExpected,
+      awayExpected,
       predicted,
       homeGoals,
       awayGoals,

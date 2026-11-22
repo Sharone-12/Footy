@@ -31,7 +31,9 @@ import { PredictionMatchCard } from "@/components/prediction-match-card"
 import { calibration, type Calibration } from "@/lib/calibration"
 import { formatDateIST } from "@/lib/time"
 import { loadModelFit, skillOf, type ModelFit } from "@/lib/fitted-model"
-import { DEFAULT_PARAMS, PARAM_LABEL, type Params } from "@/lib/learn"
+import { DEFAULT_PARAMS, PARAM_LABEL, scoreGrid, type Params } from "@/lib/learn"
+import { marketsFor, safestLeg, safestDouble, likeliestScore, scorerChance } from "@/lib/markets"
+import type { BestBet } from "@/components/best-bet"
 
 const OUTCOME_COLORS = {
   home: "oklch(0.80 0.19 150)",
@@ -266,6 +268,85 @@ function LearntCard({ fit }: { fit: ModelFit }) {
 
 const WANTED_STATS = PREDICTION_STATS
 
+/** Markets shown beside the pick, for context. */
+const CONTEXT_MARKETS = ["o2.5", "btts", "1X"]
+
+type Scorer = { player: string; slug: string; team: string; goals: number }
+
+/**
+ * Each club's leading scorer, and the club's goal total to measure their
+ * share against.
+ *
+ * Filtering to three goals or more is a few hundred rows rather than the
+ * couple of thousand a full squad read costs, and nobody below that leads a
+ * club anyway.
+ */
+async function loadTopScorers(season: string) {
+  "use cache"
+  cacheLife("hours")
+
+  const { data } = await supabase
+    .from("players")
+    .select("player, slug, team, goals")
+    .eq("season", season)
+    .gte("goals", 3)
+    .order("goals", { ascending: false })
+
+  const best = new Map<string, Scorer>()
+  const teamGoals = new Map<string, number>()
+  for (const r of (data ?? []) as Scorer[]) {
+    const goals = Number(r.goals) || 0
+    teamGoals.set(r.team, (teamGoals.get(r.team) ?? 0) + goals)
+    // Rows arrive highest first, so the first seen per club leads it.
+    if (!best.has(r.team)) best.set(r.team, { ...r, goals })
+  }
+  return { best, teamGoals }
+}
+
+/**
+ * What the model says about a fixture's markets.
+ *
+ * Everything comes off one scoreline grid, the same one behind the win/draw/
+ * loss split, so a market can never contradict the headline probabilities.
+ */
+function bestBetFor(
+  p: MatchPrediction,
+  rho: number,
+  scorers: Awaited<ReturnType<typeof loadTopScorers>>,
+): BestBet {
+  const grid = scoreGrid(p.homeExpected, p.awayExpected, rho)
+  const legs = marketsFor(grid, p.home, p.away)
+  const top = safestLeg(legs)
+  const double = safestDouble(grid, legs)
+
+  // Whichever club's leading scorer is likelier to get on the scoresheet.
+  let scorer: BestBet["scorer"] = null
+  for (const [team, expected] of [
+    [p.home, p.homeExpected],
+    [p.away, p.awayExpected],
+  ] as const) {
+    const s = scorers.best.get(team)
+    if (!s) continue
+    const prob = scorerChance(s.goals, scorers.teamGoals.get(team) ?? 0, expected)
+    if (prob > 0 && (!scorer || prob > scorer.prob)) {
+      scorer = { player: s.player, slug: s.slug, team, prob }
+    }
+  }
+
+  return {
+    top: top && { label: top.label, prob: top.prob },
+    double: double && {
+      labels: [double.legs[0].label, double.legs[1].label],
+      prob: double.prob,
+    },
+    markets: CONTEXT_MARKETS.map((k) => legs.find((l) => l.key === k))
+      .filter((l) => l != null)
+      .map((l) => ({ label: l.label, prob: l.prob })),
+    scorer,
+    score: likeliestScore(grid),
+  }
+}
+
 function signed(n: number, digits = 2) {
   return `${n > 0 ? "+" : ""}${n.toFixed(digits)}`
 }
@@ -489,7 +570,10 @@ async function Content({
   // The model's own settings, learnt from every finished league match. They
   // key the cache below, so a refit moves the predictions with it.
   const fit = await loadModelFit(season)
-  const { computed, finished, xg, uclIds: uclIdPairs } = await loadSeason(season, fit.params)
+  const [{ computed, finished, xg, uclIds: uclIdPairs }, scorers] = await Promise.all([
+    loadSeason(season, fit.params),
+    loadTopScorers(season),
+  ])
   const withFrozen = await withFrozenPredictions(computed)
   // Settled matches without a frozen row have no honest kickoff prediction;
   // keep them out of the display and the accuracy count.
@@ -515,6 +599,15 @@ async function Content({
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 20)
 
+  // Markets for the fixtures still to come. The Champions League model has no
+  // low-score correction fitted, so its grid stays plain Poisson.
+  const bets = new Map(
+    upcomingPredictions.map((p) => [
+      p.event_id,
+      bestBetFor(p, p.league === UCL ? 0 : fit.params.rho, scorers),
+    ]),
+  )
+
   return (
     <>
       <AccuracyCard acc={accuracy} cal={calibration(filtered)} />
@@ -531,7 +624,7 @@ async function Content({
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 stagger">
             {nextRoundPredictions.map((p) => (
-              <PredictionMatchCard key={p.event_id} p={p} />
+              <PredictionMatchCard key={p.event_id} p={p} bet={bets.get(p.event_id)} />
             ))}
           </div>
         </section>
@@ -547,7 +640,7 @@ async function Content({
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {laterPredictions.slice(0, 30).map((p) => (
-              <PredictionMatchCard key={p.event_id} p={p} />
+              <PredictionMatchCard key={p.event_id} p={p} bet={bets.get(p.event_id)} />
             ))}
           </div>
         </section>
