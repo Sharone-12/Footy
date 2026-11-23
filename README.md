@@ -1,9 +1,27 @@
 # footyy
 
-A football statistics site built around Barcelona and the five leagues that feed
-the Champions League. It keeps its own database, rates every upcoming match,
-writes its predictions down before kickoff, and marks itself against them
-afterwards.
+**Every match in Europe's big five leagues and the Champions League, in one
+database — 53 statistics a fixture, 84 columns a player, two seasons deep —
+behind a model that prices every upcoming game, writes its prediction down
+before kickoff, and publishes its own scorecard afterwards.**
+
+| | |
+|---|---|
+| Competitions carried in full | Premier League · La Liga · Serie A · Bundesliga · Ligue 1 · Champions League |
+| Clubs | 96 league sides, plus the 36-club Champions League phase |
+| Fixtures stored | 3,800+ across 2025/26 and 2026/27 |
+| Per-match statistics | 53 per fixture, both sides — 124,000 rows and counting |
+| Players | 2,175 tracked, 84 columns each, every count with its per-90 rate |
+| Predictions | Locked at kickoff, graded forever, calibration published |
+| Typed in by hand | Nothing |
+
+Every single fixture gets its own page — the full scoreline grid priced into
+markets, a 53-stat profile comparison between the two sides, both teams' form,
+the head-to-head, and the prediction that was on record before anyone kicked a
+ball. Every player gets a style fingerprint and an archetype. Every club gets
+power rankings, expected points and a round-by-round table race. The rest of
+the season can be simulated out, scorers and all, including a Champions League
+bracket drawn to UEFA's actual seeding rules.
 
 Next.js 16 (App Router, Cache Components) · React 19 · Supabase · Tailwind v4 ·
 a Python scraper on a schedule.
@@ -15,12 +33,15 @@ a Python scraper on a schedule.
 - [Running it](#running-it)
 - [Where the numbers come from](#where-the-numbers-come-from)
 - [Predictions](#predictions)
+- [Match pages](#match-pages)
+- [Markets](#markets)
 - [How the model learns](#how-the-model-learns)
 - [The season simulator](#the-season-simulator)
-- [The Barça pages](#the-barça-pages)
 - [Players](#players)
 - [Signals](#signals)
 - [Teams](#teams)
+- [Ask](#ask)
+- [The Barça deep-dive](#the-barça-deep-dive)
 - [Live](#live)
 - [What it does not do](#what-it-does-not-do)
 - [Project layout](#project-layout)
@@ -75,15 +96,19 @@ Supabase via `sync_db.py` and commits the result.
 | Table | One row per | Holds |
 |---|---|---|
 | `matches` | fixture | competition, round, date, kickoff, both sides, score once it exists |
-| `match_stats` | statistic per match | both teams' values — xG, possession, shots, big chances, duels, distance, ~40 more |
-| `players` | player per competition per season | season totals and per-90 rates |
+| `match_stats` | statistic per match | both teams' values for all 53 — xG, possession, shots by type, big chances, duels, distance covered, corners, offsides, cards, throw-ins, goal kicks |
+| `players` | player per competition per season | 84 columns: every counting stat and its per-90 rate, plus position and role |
 | `predictions` | fixture | what the model said, written before kickoff |
 
 **Coverage.** The Premier League, La Liga, Serie A, Ligue 1 and the Bundesliga
-are carried in full, so their standings are real standings, and so is the
-Champions League. Anything else that appears — a cup tie, an international —
-rides in on a tracked club's calendar and is deliberately kept out of anything
-that needs a season of form behind it.
+are carried in full — all 96 clubs, every fixture, both sides' complete stat
+sheet — so their standings are real standings. The Champions League is carried
+the same way, all 36 clubs of the league phase. That is roughly 3,800 fixtures
+and 124,000 per-match statistic rows across the two seasons held.
+
+Anything else that appears — a cup tie, an international — rides in on a
+tracked club's calendar and is deliberately kept out of anything that needs a
+season of form behind it.
 
 A player holds a separate row per competition. Pages that rank players fold
 those rows together and recompute rates from the combined totals, because a
@@ -142,6 +167,58 @@ score identically when the favourite wins. So predictions are grouped by stated
 confidence and checked against how often they came in. The tick on each bar is
 the confidence claimed, the bar is how often it was right. Bar past the tick
 means it undersold itself; short of it means overconfidence.
+
+---
+
+## Match pages
+
+Every fixture in the database — all 3,800 of them, not a shortlist — has its
+own page, and it is the deepest thing on the site.
+
+**The scoreline grid.** The model does not produce a result, it produces a
+probability for every scoreline. The page shows what that grid implies: home,
+draw and away chances, the likeliest exact score, and the prediction frozen
+before kickoff sitting next to the actual result once there is one, labelled
+**CORRECT** or **WRONG** in public.
+
+**Playstyle, 53 stats deep.** Both sides' full statistical profile side by
+side, grouped into attack, build-up, defending, duels, set pieces and
+discipline. A toggle switches the whole board between two readings:
+
+| View | What it shows |
+|---|---|
+| **Season Averages** | How these two sides play across the season — the style clash, before a ball is kicked |
+| **This Match** | Once played, the actual numbers from that night, down to corners, offsides, free kicks, throw-ins and goal kicks |
+
+Each stat is placed as a percentile against the rest of the competition, so
+"64% possession" reads as *where that sits* rather than as a bare number.
+
+**Form, head-to-head and live.** Recent results for both clubs with the xG and
+shot counts behind them, every previous meeting held in the database, a live
+badge and ticking scoreboard while the match is on, and a watch button when a
+stream is up.
+
+---
+
+## Markets
+
+A scoreline grid is worth more than three percentages, so every fixture page
+prices it out properly.
+
+Each selection is a predicate over scorelines, and its probability is the sum
+of the grid cells where it holds — result, double chance, over/under at 1.5,
+2.5 and 3.5, both teams to score, clean sheet, likeliest exact score, and a
+scorer chance weighted by each player's goals, minutes and the side's expected
+goals.
+
+**Doubles are computed, not multiplied.** "Over 2.5" and "both teams score"
+lean the same way; multiplying them overstates the pair badly. Summing the
+cells where *both* hold gives the exact joint probability with the correlation
+already inside it — which is most of the reason to carry a full grid rather
+than three numbers.
+
+Near-certainties — over 0.5 goals, under 5.5 — are deliberately left out. They
+hold about 95% of the time and tell a reader nothing.
 
 ---
 
@@ -226,49 +303,11 @@ rating gap. You step through a round at a time.
 
 ---
 
-## The Barça pages
-
-**Season scarf.** One stripe per match, oldest on the left: blaugrana for a win,
-grey for a draw, black for a defeat. Every competition, in order.
-
-**Did we play like Barça?** Bars under the scarf score each match out of 100 on
-how much it looked like Barcelona's own football — possession, accurate passes,
-final-third entries, big chances, expected goals. Each stat is measured against
-the team's *own* season average rather than the league's. Against the league
-Barça play like Barça every week; the interesting question is which weeks they
-did not. 50 is a typical night and a standard deviation across the board is
-worth 25 points.
-
-**Title race.** The points gap to the nearest rivals after every round, with a
-dashed line alongside showing what the gap would be on expected points, so a
-lead built on finishing looks different from one built on chances.
-
-**Next opponent.** The upcoming side ranked inside their own league on points
-per game, goals scored and conceded, chances created and allowed, and
-possession. Red marks where they are strong, green where they can be got at.
-Their main threat is whoever has had a hand in the most goals.
-
-**Most-used eleven.** The squad in a 4-3-3 by minutes played. Picked on minutes
-because that is what the data can vouch for — it is who has played most, not a
-predicted line-up, and the page says so.
-
-**Fixtures and form.** Upcoming matches and recent results with the xG,
-possession and shot count from each night, always Barça-first. A match that
-finished without a score is treated as postponed rather than a draw, so it never
-lands in the form run.
-
-**Leaders.** Squad leaderboards grouped by the role a player actually fills
-rather than the broad position — centre-back separated from full-back, winger
-from midfielder, because clearances mean nothing when a full-back and a
-centre-back share a column. Per-90 boards need 180 minutes before anyone
-appears.
-
----
-
 ## Players
 
-Style, not quality. Two players match when they play the same way, whatever
-their output.
+All 2,175 of them, every one with its own page, 84 columns behind it, and a
+style fingerprint. The guiding idea is **style, not quality**: two players match
+when they play the same way, whatever their output.
 
 **Player DNA.** Every outfielder gets a fingerprint: per-90 rates turned into
 z-scores against everyone else in the cohort. The vector says "does more of this
@@ -325,14 +364,21 @@ The page also tracks the biggest movers against last season, in both directions.
 
 ## Teams
 
-**Power rankings.** Clubs ranked on underlying performance rather than points,
-top five shown and the rest behind an expander. Any two can be compared on the
-same radar axes.
+Full standings for all six competitions, every club clickable through to a
+comparison.
 
-**Owed points.** Every match's expected goals go through the same Poisson the
-predictions use, giving both sides an expected points figure for that night.
-Summed across a season, that is what a club deserved from the chances it created
-and allowed.
+**Power rankings.** Clubs ranked on underlying performance rather than points —
+points per game, goal difference, defence and xG, each scored against football
+norms rather than against the rest of the cohort, and shrunk toward league
+average so a 2-from-2 start cannot top a proven leader. Any two clubs can then
+be put on the same radar axes.
+
+**Expected points, in the table itself.** Every match's expected goals go
+through the same Poisson the predictions use, giving both sides an expected
+points figure for that night. Summed across a season, that is what a club
+deserved from the chances it created and allowed — carried as an `xPts` column
+in every league table, with an arrow for how many places higher or lower the
+club would sit on chances alone.
 
 ```
 points − expected points = how far a club is running ahead of its chances
@@ -348,16 +394,77 @@ round nine is the one people remember.
 
 ---
 
+## Ask
+
+A search box that takes a football question in plain English — "top 3 strikers
+in La Liga", "best defensive midfielders this season", "compare Lamine Yamal
+and Rodrygo" — and turns it into a retrieval plan over the player table:
+position group, how many, which season, rank or compare.
+
+The parsing is **regex, not an LLM call.** It runs in a millisecond, costs
+nothing and is testable, with everyday football words mapped onto the role
+values in the database — "number 6", "anchor" and "holding midfielder" all land
+on the same group, and longer phrases match first so "defensive midfielder"
+never resolves as plain "midfielder". The model is spent on judgement, not on
+parsing "top 3".
+
+There is also a command palette over every page, club and player in the
+database.
+
+---
+
+## The Barça deep-dive
+
+Barcelona is the site's home club and gets a set of pages nothing else does.
+Everything above applies to all 96 clubs equally; this part is the one club
+taken apart.
+
+**Season scarf.** One stripe per match, oldest on the left: blaugrana for a win,
+grey for a draw, black for a defeat. Every competition, in order.
+
+**Did we play like Barça?** Bars under the scarf score each match out of 100 on
+how much it looked like Barcelona's own football — possession, accurate passes,
+final-third entries, big chances, expected goals. Each stat is measured against
+the team's *own* season average rather than the league's. Against the league
+Barça play like Barça every week; the interesting question is which weeks they
+did not. 50 is a typical night and a standard deviation across the board is
+worth 25 points.
+
+**Title race.** The points gap to the nearest rivals after every round, with a
+dashed line alongside showing what the gap would be on expected points, so a
+lead built on finishing looks different from one built on chances.
+
+**Next opponent.** The upcoming side ranked inside their own league on points
+per game, goals scored and conceded, chances created and allowed, and
+possession. Red marks where they are strong, green where they can be got at.
+Their main threat is whoever has had a hand in the most goals.
+
+**Most-used eleven.** The squad in a 4-3-3 by minutes played. Picked on minutes
+because that is what the data can vouch for — it is who has played most, not a
+predicted line-up, and the page says so.
+
+**Fixtures and form.** Upcoming matches and recent results with the xG,
+possession and shot count from each night, always Barça-first. A match that
+finished without a score is treated as postponed rather than a draw, so it never
+lands in the form run.
+
+**Leaders.** Squad leaderboards grouped by the role a player actually fills
+rather than the broad position — centre-back separated from full-back, winger
+from midfielder, because clearances mean nothing when a full-back and a
+centre-back share a column. Per-90 boards need 180 minutes before anyone
+appears.
+
+---
+
 ## Live
 
 Matches are bucketed into in-play, starting soon and upcoming from their kickoff
 time, because the feed only ever says `upcoming` or `finished` and never `live`.
 A fixture counts as in play for two hours from kickoff.
 
-Any fixture opens to a full breakdown: the model's reasoning, both sides' season
-form, head-to-head statistics once played, and the prediction locked in
-beforehand. The countdown in the header follows Barcelona by default and can be
-pointed at any club with fixtures in the database.
+Any fixture opens to its [match page](#match-pages) — the full breakdown, live
+scoreboard and all. The countdown in the header follows Barcelona by default and
+can be pointed at any club with fixtures in the database.
 
 The streaming section is password-gated behind `LIVE_ACCESS_PASSWORD` and
 aggregates several third-party providers.
@@ -394,17 +501,20 @@ knowing what will happen.
 ```
 app/                  routes (App Router)
   predictions/        model output, accuracy tracker, calibration
+  predictions/match/  the per-fixture page: grid, markets, 53-stat compare, H2H
   squad/              Barça squad, fixtures, leaders, season simulator
   teams/  signals/  compare/  player/  live/
-  api/                route handlers
+  api/                route handlers (livescores, simulate, ask, streams)
 components/           client components and shared UI
 lib/
   learn.ts            model parameters, walk-forward scoring, the fitter
   fitted-model.ts     cached fit, out-of-sample comparison
   predictions.ts      match ratings, Champions League model
+  markets.ts          scoreline-grid markets, correlated doubles, best bet
   simulate.ts         season simulator and bracket draw
   justice.ts          expected points, table race
   dna.ts              player fingerprints, archetypes, similarity
+  ask.ts              plain-English question → retrieval plan
   barca.ts            scarf, played-like-us, title race
 data_loader.py        the Sofascore scraper
 refresh.py            scheduled fetch, rebuild, commit, push
