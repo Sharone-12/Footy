@@ -12,3 +12,12 @@ node_modules/
 *.tsbuildinfo
 data/browser_profile*/
 .refresh.lock
+
+# Agent tooling — skills, workflows and instruction files. Local only.
+# AGENTS.md is rewritten by `next dev` on every run, so tracking it just
+# produces a dirty tree.
+.agent/
+.agents/
+.claude/
+AGENTS.md
+skills-lock.json
