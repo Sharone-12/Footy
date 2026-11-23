@@ -416,71 +416,6 @@ function PowerRankings({
   )
 }
 
-function JusticeBoard({
-  rows,
-  link,
-  teamIds,
-}: {
-  rows: JusticeRow[]
-  link: (team: string) => string
-  teamIds: Map<string, number>
-}) {
-  // A couple of matches of luck is just a couple of matches.
-  const pool = rows.filter((r) => r.played >= 5)
-  if (pool.length < 10) return null
-  const sorted = [...pool].sort((a, b) => b.luck - a.luck)
-  const sides = [
-    { title: "Running hot", hint: "more points than their chances were worth", rows: sorted.slice(0, 5), tone: "oklch(0.80 0.15 75)" },
-    { title: "Owed points", hint: "the chances say they deserve more", rows: sorted.slice(-5).reverse(), tone: "var(--pitch)" },
-  ]
-  return (
-    <section className="surface rounded-2xl bg-card overflow-hidden">
-      <header className="px-5 pt-5 pb-3">
-        <h2
-          className="text-lg font-semibold tracking-tight uppercase"
-          style={{ fontFamily: "var(--font-condensed)" }}
-        >
-          Justice Table
-        </h2>
-        <p className="stat-label mt-1">
-          Real points against expected points — each match re-scored from its xG
-        </p>
-      </header>
-      <div className="grid md:grid-cols-2 gap-x-4 px-3 pb-4">
-        {sides.map((side) => (
-          <div key={side.title}>
-            <div className="px-3 pb-1.5 flex items-baseline justify-between gap-2">
-              <span className="stat-label" style={{ color: side.tone }}>{side.title}</span>
-              <span className="stat-label truncate">{side.hint}</span>
-            </div>
-            {side.rows.map((r) => (
-              <Link
-                key={`${r.league}|${r.team}`}
-                href={link(r.team)}
-                className="row-item flex items-center gap-3 px-3 py-2 rounded-xl"
-              >
-                {teamIds.get(r.team) != null && (
-                  <TeamCrest teamId={teamIds.get(r.team)!} name={r.team} size={22} />
-                )}
-                <span className="flex-1 min-w-0">
-                  <span className="block text-[0.9rem] font-medium leading-tight truncate">{r.team}</span>
-                  <span className="stat-label">
-                    {LEAGUE_ABBR[r.league] ?? r.league} · {r.points} pts · {r.xPoints.toFixed(1)} expected
-                  </span>
-                </span>
-                <span className="stat-figure text-xl w-14 text-right" style={{ color: side.tone }}>
-                  {r.luck > 0 ? "+" : ""}
-                  {r.luck.toFixed(1)}
-                </span>
-              </Link>
-            ))}
-          </div>
-        ))}
-      </div>
-    </section>
-  )
-}
-
 function computePowerRankings(
   table: TeamTableRow[],
   stats: SeasonStatRow[],
@@ -586,8 +521,6 @@ async function Tables({
       <PowerRankings ranked={ranked} link={link} teamIds={teamIds} />
 
       {races.length > 0 && <TableRace races={races} teamIds={teamIds} />}
-
-      <JusticeBoard rows={justice} link={link} teamIds={teamIds} />
 
       <div className="grid lg:grid-cols-2 gap-5">
         {FULL_LEAGUES.filter((lg) => inCompetition(lg, comp)).map((lg) => (

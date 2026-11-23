@@ -16,7 +16,7 @@ import { searchPlayers, LEAGUE_CODES, type IndexedPlayer } from "@/lib/search"
 
 const PAGES = [
   { href: "/", label: "Players", words: "home top scorers assists leaderboard" },
-  { href: "/teams", label: "Teams", words: "standings tables power rankings table race justice xpts" },
+  { href: "/teams", label: "Teams", words: "standings tables power rankings table race xpts" },
   { href: "/teams/compare", label: "Compare teams", words: "versus head to head" },
   { href: "/signals", label: "Signals", words: "metrics scatter breakouts declines" },
   { href: "/predictions", label: "Predictions", words: "predict odds accuracy calibration" },
