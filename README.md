@@ -1,4 +1,8 @@
-# footyy
+<p align="center">
+  <img src="app/icon.svg" width="96" height="96" alt="footyy">
+</p>
+
+<h1 align="center">footyy</h1>
 
 **Every match in Europe's big five leagues and the Champions League, in one
 database — 53 statistics a fixture, 84 columns a player, two seasons deep —
