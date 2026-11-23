@@ -30,6 +30,8 @@ bracket drawn to UEFA's actual seeding rules.
 Next.js 16 (App Router, Cache Components) · React 19 · Supabase · Tailwind v4 ·
 a Python scraper on a schedule.
 
+![A match page: Barcelona 3-2 Villarreal, the frozen prediction marked CORRECT, and the win probability the model published before kickoff](docs/screenshots/match.png)
+
 ---
 
 ## Contents
@@ -172,6 +174,8 @@ confidence and checked against how often they came in. The tick on each bar is
 the confidence claimed, the bar is how often it was right. Bar past the tick
 means it undersold itself; short of it means overconfidence.
 
+![The accuracy tracker over 203 settled matches, the calibration bars for each confidence band, and what the model changed its mind about when it was fitted](docs/screenshots/accuracy.png)
+
 ---
 
 ## Match pages
@@ -196,6 +200,8 @@ discipline. A toggle switches the whole board between two readings:
 
 Each stat is placed as a percentile against the rest of the competition, so
 "64% possession" reads as *where that sits* rather than as a bare number.
+
+![The stat comparison board on a played match, attacking and build-up groups expanded: 3.29 xG against 0.17, 30 shots against 4, 70% possession](docs/screenshots/match-stats.png)
 
 **Form, head-to-head and live.** Recent results for both clubs with the xG and
 shot counts behind them, every previous meeting held in the database, a live
@@ -223,6 +229,8 @@ than three numbers.
 
 Near-certainties — over 0.5 goals, under 5.5 — are deliberately left out. They
 hold about 95% of the time and tell a reader nothing.
+
+![The markets panel on Arsenal against Borussia Dortmund: safest call over 1.5 goals at 79%, safest double no draw plus over 1.5 at 62%, first scorer, and the likeliest score](docs/screenshots/markets.png)
 
 ---
 
@@ -305,6 +313,8 @@ laid out so 1/2 can only meet 7/8 at the quarter-final stage. Ties are two legs
 on aggregate, extra time when level, penalties settled by a weighted coin on the
 rating gap. You step through a round at a time.
 
+![A fully simulated season: every remaining fixture with its scoreline, scorers and assists by minute, and the final table with Barcelona champions on 101 points](docs/screenshots/simulator.png)
+
 ---
 
 ## Players
@@ -328,6 +338,8 @@ Full-Back. Goalkeepers get none, and nobody is labelled before 270 minutes.
 **Percentiles and comparison.** Stats shown as percentiles against the player's
 own position group, so a defender is judged against defenders. Players can be
 put side by side on the same axes, as totals or per 90.
+
+![A player page: the percentile radar, the DNA fingerprint reading CREATOR, and the most similar players by cosine similarity with the nearest match in each other league](docs/screenshots/player.png)
 
 ---
 
@@ -364,6 +376,14 @@ all the data supports, and a count tracks position.
 
 The page also tracks the biggest movers against last season, in both directions.
 
+**Plot any two.** Beneath the boards is a scatter plot you drive yourself: pick
+any metric for each axis, filter to a role and a minutes floor, toggle the five
+leagues and the Champions League on or off, and the bubble size carries minutes
+played so a small sample looks small. The outliers label themselves, so the
+players who separate from the cloud are the ones you can read.
+
+![The scatter plot with npxG plus xA against successful dribbles for wingers, every league in its own colour, outliers labelled](docs/screenshots/signals.png)
+
 ---
 
 ## Teams
@@ -395,6 +415,8 @@ would report two games' worth of points as luck.
 **Table race.** The season replayed round by round. Keyed by round rather than
 date, so a postponed fixture lands in the round it belongs to and the table at
 round nine is the one people remember.
+
+![The teams page: power rankings with ratings and bars, and the table race replaying the Premier League round by round](docs/screenshots/teams.png)
 
 ---
 
@@ -437,6 +459,8 @@ worth 25 points.
 **Title race.** The points gap to the nearest rivals after every round, with a
 dashed line alongside showing what the gap would be on expected points, so a
 lead built on finishing looks different from one built on chances.
+
+![The Barça page: the season scarf with the played-like-us bars beneath it, the next opponent scouted on six metrics, and the title race chart with its deserved line](docs/screenshots/barca.png)
 
 **Next opponent.** The upcoming side ranked inside their own league on points
 per game, goals scored and conceded, chances created and allowed, and
