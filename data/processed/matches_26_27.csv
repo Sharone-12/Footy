@@ -108,7 +108,7 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16363662,Premier League,2026/27,11,2026-11-21,Newcastle United,39,Arsenal,42,finished,2.0,2.0,2026-11-21T17:30:00Z
 16363659,Premier League,2026/27,11,2026-11-22,Hull City,96,Brighton & Hove Albion,30,finished,2.0,0.0,2026-11-22T14:00:00Z
 16363660,Premier League,2026/27,11,2026-11-22,Liverpool FC,44,Manchester United,35,finished,4.0,0.0,2026-11-22T16:30:00Z
-16363656,Premier League,2026/27,11,2026-11-23,Brentford,50,Everton,48,upcoming,,,2026-11-23T20:00:00Z
+16363656,Premier League,2026/27,11,2026-11-23,Brentford,50,Everton,48,finished,4.0,0.0,2026-11-23T20:00:00Z
 16363673,Premier League,2026/27,12,2026-11-27,Nottingham Forest,14,Chelsea,38,upcoming,,,2026-11-27T20:00:00Z
 16363671,Premier League,2026/27,12,2026-11-28,Leeds United,34,Coventry City,11,upcoming,,,2026-11-28T15:00:00Z
 16363672,Premier League,2026/27,12,2026-11-28,Manchester United,35,Brentford,50,upcoming,,,2026-11-28T15:00:00Z
@@ -509,7 +509,7 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16421114,La Liga,2026/27,13,2026-11-22,Real Racing Club,2835,Real Sociedad,2824,finished,3.0,2.0,2026-11-22T15:15:00Z
 16421117,La Liga,2026/27,13,2026-11-22,Osasuna,2820,Málaga CF,2830,finished,1.0,0.0,2026-11-22T17:30:00Z
 16421115,La Liga,2026/27,13,2026-11-22,Getafe,2859,Atlético Madrid,2836,finished,0.0,3.0,2026-11-22T20:00:00Z
-16421118,La Liga,2026/27,13,2026-11-23,Levante UD,2849,Elche,2846,upcoming,,,2026-11-23T20:00:00Z
+16421118,La Liga,2026/27,13,2026-11-23,Levante UD,2849,Elche,2846,finished,1.0,1.0,2026-11-23T20:00:00Z
 16421127,La Liga,2026/27,14,2026-11-27,Levante UD,2849,Real Racing Club,2835,upcoming,,,2026-11-27T20:00:00Z
 16421120,La Liga,2026/27,14,2026-11-28,Real Betis,2816,Rayo Vallecano,2818,upcoming,,,2026-11-28T13:00:00Z
 16421128,La Liga,2026/27,14,2026-11-28,Málaga CF,2830,Athletic Club,2825,upcoming,,,2026-11-28T15:15:00Z
@@ -879,7 +879,7 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16285094,Serie A,2026/27,12,2026-11-22,Sassuolo,2793,Genoa,2713,finished,0.0,2.0,2026-11-22T14:00:00Z
 16285098,Serie A,2026/27,12,2026-11-22,AC Milan,2692,Frosinone,2801,finished,5.0,1.0,2026-11-22T17:00:00Z
 16285088,Serie A,2026/27,12,2026-11-22,Atalanta,2686,Inter,2697,finished,4.0,4.0,2026-11-22T19:45:00Z
-16285093,Serie A,2026/27,12,2026-11-23,Monza,2729,Fiorentina,2693,upcoming,,,2026-11-23T19:45:00Z
+16285093,Serie A,2026/27,12,2026-11-23,Monza,2729,Fiorentina,2693,finished,3.0,0.0,2026-11-23T19:45:00Z
 16285108,Serie A,2026/27,13,2026-11-27,Venezia,2688,Bologna,2685,upcoming,,,2026-11-27T19:45:00Z
 16285100,Serie A,2026/27,13,2026-11-28,Frosinone,2801,Parma,2690,upcoming,,,2026-11-28T14:00:00Z
 16285106,Serie A,2026/27,13,2026-11-28,Torino,2696,Lazio,2699,upcoming,,,2026-11-28T17:00:00Z
