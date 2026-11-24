@@ -211,7 +211,6 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16363684,Premier League,2026/27,21,2027-01-18,Brentford,50,Brighton & Hove Albion,30,upcoming,,,2027-01-18T20:00:00Z
 16363767,Premier League,2026/27,22,2027-01-23,Fulham,43,Aston Villa,40,upcoming,,,2027-01-23T15:00:00Z
 16363773,Premier League,2026/27,22,2027-01-23,Ipswich Town,32,Hull City,96,upcoming,,,2027-01-23T15:00:00Z
-16363779,Premier League,2026/27,22,2027-01-23,Leeds United,34,Chelsea,38,upcoming,,,2027-01-23T15:00:00Z
 16363746,Premier League,2026/27,22,2027-01-23,Arsenal,42,Newcastle United,39,upcoming,,,2027-01-23T17:30:00Z
 16363751,Premier League,2026/27,22,2027-01-23,Brighton & Hove Albion,30,Manchester City,17,upcoming,,,2027-01-23T20:00:00Z
 16363757,Premier League,2026/27,22,2027-01-24,Crystal Palace,7,Tottenham Hotspur,33,upcoming,,,2027-01-24T14:00:00Z
@@ -219,6 +218,7 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16363782,Premier League,2026/27,22,2027-01-24,Nottingham Forest,14,Bournemouth,60,upcoming,,,2027-01-24T14:00:00Z
 16363783,Premier League,2026/27,22,2027-01-24,Sunderland,41,Coventry City,11,upcoming,,,2027-01-24T14:00:00Z
 16363781,Premier League,2026/27,22,2027-01-24,Manchester United,35,Liverpool FC,44,upcoming,,,2027-01-24T16:30:00Z
+16363779,Premier League,2026/27,22,2027-01-25,Leeds United,34,Chelsea,38,upcoming,,,2027-01-25T20:00:00Z
 16363790,Premier League,2026/27,23,2027-01-30,Liverpool FC,44,Everton,48,upcoming,,,2027-01-30T12:30:00Z
 16363784,Premier League,2026/27,23,2027-01-30,Aston Villa,40,Ipswich Town,32,upcoming,,,2027-01-30T15:00:00Z
 16363786,Premier League,2026/27,23,2027-01-30,Brentford,50,Manchester United,35,upcoming,,,2027-01-30T15:00:00Z
