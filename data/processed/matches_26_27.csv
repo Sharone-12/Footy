@@ -1824,15 +1824,15 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16939005,Champions League,2026/27,4,2026-11-04,RC Lens,1648,Como,2704,finished,1.0,9.0,2026-11-04T20:00:00Z
 16939009,Champions League,2026/27,4,2026-11-04,SK Slavia Praha,2216,Arsenal,42,finished,1.0,2.0,2026-11-04T20:00:00Z
 16939024,Champions League,2026/27,4,2026-11-04,Viking FK,1164,Sabah FK,267828,finished,4.0,1.0,2026-11-04T20:00:00Z
-16938933,Champions League,2026/27,5,2026-11-24,Bodø/Glimt,656,LASK,2058,upcoming,,,2026-11-24T17:45:00Z
-16938980,Champions League,2026/27,5,2026-11-24,Galatasaray,3061,Aston Villa,40,upcoming,,,2026-11-24T17:45:00Z
-16938806,Champions League,2026/27,5,2026-11-24,Arsenal,42,Borussia Dortmund,2673,upcoming,,,2026-11-24T20:00:00Z
-16939035,Champions League,2026/27,5,2026-11-24,Como,2704,AEK Athens,3250,upcoming,,,2026-11-24T20:00:00Z
-16938972,Champions League,2026/27,5,2026-11-24,Feyenoord,2959,FC Porto,3002,upcoming,,,2026-11-24T20:00:00Z
-16938774,Champions League,2026/27,5,2026-11-24,Manchester City,17,SSC Napoli,2714,upcoming,,,2026-11-24T20:00:00Z
-16938941,Champions League,2026/27,5,2026-11-24,RB Leipzig,36360,RC Lens,1648,upcoming,,,2026-11-24T20:00:00Z
-16938769,Champions League,2026/27,5,2026-11-24,Real Madrid,2829,PSV Eindhoven,2952,upcoming,,,2026-11-24T20:00:00Z
-16939039,Champions League,2026/27,5,2026-11-24,ŠK Slovan Bratislava,2404,Real Betis,2816,upcoming,,,2026-11-24T20:00:00Z
+16938933,Champions League,2026/27,5,2026-11-24,Bodø/Glimt,656,LASK,2058,finished,1.0,0.0,2026-11-24T17:45:00Z
+16938980,Champions League,2026/27,5,2026-11-24,Galatasaray,3061,Aston Villa,40,finished,1.0,0.0,2026-11-24T17:45:00Z
+16938806,Champions League,2026/27,5,2026-11-24,Arsenal,42,Borussia Dortmund,2673,finished,1.0,1.0,2026-11-24T20:00:00Z
+16939035,Champions League,2026/27,5,2026-11-24,Como,2704,AEK Athens,3250,finished,1.0,0.0,2026-11-24T20:00:00Z
+16938972,Champions League,2026/27,5,2026-11-24,Feyenoord,2959,FC Porto,3002,finished,0.0,1.0,2026-11-24T20:00:00Z
+16938774,Champions League,2026/27,5,2026-11-24,Manchester City,17,SSC Napoli,2714,finished,2.0,2.0,2026-11-24T20:00:00Z
+16938941,Champions League,2026/27,5,2026-11-24,RB Leipzig,36360,RC Lens,1648,finished,3.0,1.0,2026-11-24T20:00:00Z
+16938769,Champions League,2026/27,5,2026-11-24,Real Madrid,2829,PSV Eindhoven,2952,finished,5.0,1.0,2026-11-24T20:00:00Z
+16939039,Champions League,2026/27,5,2026-11-24,ŠK Slovan Bratislava,2404,Real Betis,2816,finished,0.0,2.0,2026-11-24T20:00:00Z
 16939011,Champions League,2026/27,5,2026-11-25,SK Slavia Praha,2216,Villarreal,2819,upcoming,,,2026-11-25T17:45:00Z
 16939014,Champions League,2026/27,5,2026-11-25,Sabah FK,267828,FC Barcelona,2817,upcoming,,,2026-11-25T17:45:00Z
 16938791,Champions League,2026/27,5,2026-11-25,Atlético Madrid,2836,Viking FK,1164,upcoming,,,2026-11-25T20:00:00Z
