@@ -1,23 +1,28 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Canvas, useThree } from "@react-three/fiber"
+import { Canvas, useFrame, useThree } from "@react-three/fiber"
+import { Color, type Mesh } from "three"
 import { cssColor, cssToken } from "@/lib/css-color"
 import { bandFor, type Band } from "@/lib/scorelines"
 
 /**
- * The scoreline grid as a landscape.
+ * The scoreline grid as a board that probability stands up out of.
  *
- * The table above it is the authoritative version and says everything this
- * does. What the third dimension adds is shape: a distribution with one spike
- * and a distribution spread over a ridge are the same set of tinted squares
- * until you stand them up, and then they are obviously not the same forecast.
- * Height is probability and nothing else; colour is the outcome band and
- * nothing else — one variable per channel, so there is nothing to decode.
+ * The table above is the authoritative version and says everything this does.
+ * What the third dimension adds is shape: a distribution with one spike and a
+ * distribution spread along a ridge are the same set of tinted squares until
+ * you stand them up, and then they are obviously not the same forecast.
  *
- * Yaw only. Dragging spins the landscape so you can see behind a tall bar,
- * which is the one thing a fixed view actually prevents; a free camera would
- * add pitch, roll, zoom and four clamping bugs to solve a problem nobody has.
+ * Two channels, both carrying the same two facts the table carries. Height is
+ * probability. Colour is the outcome band, faded toward the board by the same
+ * square-rooted weight the table tints with — so the tail reads as the
+ * near-nothing it is instead of shouting as loudly as the likeliest scoreline
+ * just because both are tiles on the same board.
+ *
+ * Yaw only. Dragging spins the board so you can see behind a tall bar, which
+ * is the one thing a fixed view actually prevents; a free camera would add
+ * pitch, roll, zoom and four clamping bugs to solve a problem nobody has.
  */
 
 /** Matches `BAND_COLOR` in `scoreline-grid.tsx`, resolved for WebGL. */
@@ -28,12 +33,16 @@ const BAND_EXPR: Record<Band, string> = {
   mixed: "var(--muted-foreground)",
 }
 
-/** Tallest bar, in world units. The plate is `n` units across. */
-const PEAK = 1.6
-/** So a zero cell is still a tile on the plate rather than nothing. */
-const FLOOR = 0.02
+/** Tallest bar, in world units. The board is `n` units across. */
+const PEAK = 2.2
+/** So a zero cell is still a tile on the board rather than nothing. */
+const FLOOR = 0.05
+/** Colour a cell keeps at zero probability, before weight is added. */
+const BASE_TINT = 0.12
+/** Taller than this casts a shadow; below it, a tile would only self-shadow. */
+const CASTS = 0.25
 
-type Palette = Record<Band, string> & { plate: string }
+type Palette = Record<Band, string> & { board: string }
 
 function readPalette(): Palette {
   return {
@@ -41,69 +50,125 @@ function readPalette(): Palette {
     draw: cssColor(BAND_EXPR.draw),
     away: cssColor(BAND_EXPR.away),
     mixed: cssToken("--muted-foreground"),
-    plate: cssToken("--border"),
+    board: cssToken("--border"),
   }
 }
 
+type Bar = {
+  x: number
+  z: number
+  height: number
+  color: Color
+  casts: boolean
+  /** Rings out from the likeliest scoreline, in cells. */
+  delay: number
+}
+
+function layout(cells: number[][], last: number, palette: Palette): Bar[] {
+  const n = cells.length
+  const offset = (n - 1) / 2
+  let peak = 1e-9
+  let topH = 0
+  let topA = 0
+  for (let h = 0; h < n; h++) {
+    for (let a = 0; a < cells[h].length; a++) {
+      if (cells[h][a] > peak) {
+        peak = cells[h][a]
+        topH = h
+        topA = a
+      }
+    }
+  }
+
+  const board = new Color(palette.board)
+  const bars: Bar[] = []
+  for (let h = 0; h < n; h++) {
+    for (let a = 0; a < cells[h].length; a++) {
+      const p = cells[h][a]
+      const height = Math.max(FLOOR, (p / peak) * PEAK)
+      const weight = Math.sqrt(Math.max(0, p) / peak)
+      bars.push({
+        x: a - offset,
+        z: h - offset,
+        height,
+        color: board
+          .clone()
+          .lerp(new Color(palette[bandFor(h, a, last)]), BASE_TINT + (1 - BASE_TINT) * weight),
+        casts: height > CASTS,
+        delay: Math.hypot(h - topH, a - topA),
+      })
+    }
+  }
+  return bars
+}
+
+/** Entrance, in milliseconds: one bar's rise, and the gap between rings. */
+const RISE = 620
+const RING = 55
+
 /**
- * Keep the scene still until something changes.
+ * The bars, and the one orchestrated moment this view gets.
  *
- * `frameloop="demand"` means no render loop at all — no battery spent holding
- * a static picture, which is most of this component's life. React commits
- * invalidate on their own; the theme toggle changes no React state here, so
- * the palette effect below asks for the one frame it needs.
+ * They grow out of the board in a ring spreading from the likeliest scoreline,
+ * so the eye is on the spike before the tail arrives. It runs once, on the
+ * click that opened the view, which is the only reason it is here: motion that
+ * answers an action shows what changed, where motion on a loop is decoration.
+ *
+ * `frameloop="demand"` means there is no render loop to ride, so the frame
+ * callback asks for the next frame itself and stops asking when the animation
+ * is done. After that the scene costs nothing until something changes.
  */
+function Bars({ bars, still }: { bars: Bar[]; still: boolean }) {
+  const refs = useRef<(Mesh | null)[]>([])
+  const start = useRef<number | null>(null)
+  const invalidate = useThree((s) => s.invalidate)
+
+  useFrame(() => {
+    if (still) return
+    if (start.current === null) start.current = performance.now()
+    const t = performance.now() - start.current
+
+    let running = false
+    for (let i = 0; i < bars.length; i++) {
+      const mesh = refs.current[i]
+      if (!mesh) continue
+      const local = (t - bars[i].delay * RING) / RISE
+      if (local < 1) running = true
+      const eased = 1 - Math.pow(1 - Math.min(1, Math.max(0, local)), 3)
+      const s = Math.max(0.0001, eased)
+      mesh.scale.y = s
+      mesh.position.y = (bars[i].height * s) / 2
+    }
+    if (running) invalidate()
+  })
+
+  return (
+    <>
+      {bars.map((b, i) => (
+        <mesh
+          key={i}
+          ref={(m) => {
+            refs.current[i] = m
+          }}
+          position={[b.x, still ? b.height / 2 : 0, b.z]}
+          scale={[1, still ? 1 : 0.0001, 1]}
+          castShadow={b.casts}
+        >
+          <boxGeometry args={[0.74, b.height, 0.74]} />
+          <meshStandardMaterial color={b.color} roughness={0.6} metalness={0} />
+        </mesh>
+      ))}
+    </>
+  )
+}
+
+/** Keep the scene still until something changes. */
 function Redraw({ on }: { on: unknown }) {
   const invalidate = useThree((s) => s.invalidate)
   useEffect(() => {
     invalidate()
   }, [invalidate, on])
   return null
-}
-
-function Bars({
-  cells,
-  last,
-  palette,
-  peak,
-}: {
-  cells: number[][]
-  last: number
-  palette: Palette
-  peak: number
-}) {
-  const n = cells.length
-  const offset = (n - 1) / 2
-
-  return (
-    <>
-      {/* The footprint, so the empty corners still read as part of the grid. */}
-      <mesh position={[0, -0.03, 0]} receiveShadow={false}>
-        <boxGeometry args={[n, 0.06, n]} />
-        <meshStandardMaterial color={palette.plate} roughness={0.95} />
-      </mesh>
-
-      {cells.map((row, h) =>
-        row.map((p, a) => {
-          const height = Math.max(FLOOR, (p / peak) * PEAK)
-          const band = bandFor(h, a, last)
-          return (
-            <mesh
-              key={`${h}-${a}`}
-              position={[a - offset, height / 2, h - offset]}
-            >
-              <boxGeometry args={[0.82, height, 0.82]} />
-              <meshStandardMaterial
-                color={palette[band]}
-                roughness={0.45}
-                metalness={0.05}
-              />
-            </mesh>
-          )
-        }),
-      )}
-    </>
-  )
 }
 
 export default function ScorelineSurfaceCanvas({
@@ -117,7 +182,12 @@ export default function ScorelineSurfaceCanvas({
   const [palette, setPalette] = useState<Palette | null>(null)
   const drag = useRef<{ x: number; yaw: number } | null>(null)
 
-  const peak = useMemo(() => Math.max(...cells.flat(), 1e-9), [cells])
+  const still = useMemo(
+    () =>
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    [],
+  )
 
   // Resolve on the client, where the stylesheet exists, and again whenever the
   // theme class on <html> flips — the palette is defined in CSS, so the only
@@ -144,7 +214,13 @@ export default function ScorelineSurfaceCanvas({
     return () => observer.disconnect()
   }, [])
 
-  if (!palette) return null
+  const bars = useMemo(
+    () => (palette ? layout(cells, last, palette) : null),
+    [cells, last, palette],
+  )
+
+  if (!palette || !bars) return null
+  const n = cells.length
 
   return (
     <div
@@ -171,21 +247,42 @@ export default function ScorelineSurfaceCanvas({
       }}
     >
       <Canvas
+        shadows
         frameloop="demand"
         dpr={[1, 2]}
-        camera={{ position: [0, 6.4, 8.2], fov: 32 }}
-        // No alpha-to-black: the card shows through, so the landscape sits on
-        // the surface it belongs to instead of in a grey box.
+        camera={{ position: [0, 6, 8.6], fov: 30 }}
+        // No alpha-to-black: the card shows through, so the board sits on the
+        // surface it belongs to instead of in a grey box.
         gl={{ alpha: true, antialias: true }}
       >
-        <Redraw on={`${yaw}|${palette.home}|${palette.plate}`} />
-        <ambientLight intensity={1.1} />
+        <Redraw on={`${yaw}|${palette.home}|${palette.board}`} />
+        <ambientLight intensity={0.55} />
         {/* Raking, from the reader's left, so a bar's own height is legible
-            from the shadow side rather than flat-lit. */}
-        <directionalLight position={[-5, 8, 6]} intensity={1.5} />
-        <directionalLight position={[4, 3, -5]} intensity={0.35} />
-        <group rotation={[0, yaw, 0]}>
-          <Bars cells={cells} last={last} palette={palette} peak={peak} />
+            from the shadow side rather than flat-lit. The biases are what keep
+            the board from self-shadowing into a stipple under every tile. */}
+        <directionalLight
+          castShadow
+          position={[-5, 9, 6]}
+          intensity={2.1}
+          shadow-mapSize={[1024, 1024]}
+          shadow-bias={-0.0015}
+          shadow-normalBias={0.06}
+          shadow-camera-left={-6}
+          shadow-camera-right={6}
+          shadow-camera-top={6}
+          shadow-camera-bottom={-6}
+        />
+        <directionalLight position={[4, 3, -5]} intensity={0.45} />
+
+        <group rotation={[0, yaw, 0]} position={[0, -0.6, 0]}>
+          {/* The board, so the empty corners still read as part of the grid.
+              Its top sits just under zero: level with the bars' base, the two
+              faces would z-fight into speckles across the flat tail. */}
+          <mesh position={[0, -0.06, 0]} receiveShadow>
+            <boxGeometry args={[n + 0.3, 0.08, n + 0.3]} />
+            <meshStandardMaterial color={palette.board} roughness={1} metalness={0} />
+          </mesh>
+          <Bars bars={bars} still={still} />
         </group>
       </Canvas>
     </div>

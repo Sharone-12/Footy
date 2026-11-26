@@ -10,6 +10,7 @@ import { clubColor } from "@/lib/club-colors"
 import { formatDateIST } from "@/lib/time"
 import { loadFingerprints } from "@/components/player-dna"
 import { TeamCrest } from "@/components/player-avatar"
+import { SeasonWave } from "@/components/season-wave"
 import { PlayerTitle } from "@/components/player-title"
 import { playerTitleName } from "@/lib/view-transition"
 import { TitleRaceChart } from "@/components/title-race-chart"
@@ -322,6 +323,17 @@ export async function BarcaSeason({
             </p>
           </>
         )}
+
+        {/* The same season with the two threads woven together: the scarf says
+            which nights were won, the gold bars say how they were played, and
+            neither says by how much. */}
+        <SeasonWave
+          matches={scarf.map((s) => ({
+            gd: s.gf - s.ga,
+            result: s.result,
+            like: s.like,
+          }))}
+        />
       </section>
 
       <div className="grid lg:grid-cols-2 gap-5">
