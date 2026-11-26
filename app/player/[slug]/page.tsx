@@ -18,6 +18,8 @@ import { notFound } from "next/navigation"
 import { RADAR_STATS, STAT_GROUPS, percentileRank } from "@/lib/stats"
 import { PlayerRadar, StatBarChart } from "@/components/charts"
 import { PlayerAvatar, TeamCrest } from "@/components/player-avatar"
+import { PlayerTitle } from "@/components/player-title"
+import { playerTitleName } from "@/lib/view-transition"
 import { PlayerDna } from "@/components/player-dna"
 import { clubColor } from "@/lib/club-colors"
 import {
@@ -70,12 +72,14 @@ async function Loading({ params }: { params: Promise<{ slug: string }> }) {
         )}
         <div className="min-w-0">
           {who ? (
-            <h1
-              className="text-3xl sm:text-5xl font-bold tracking-[-0.035em] leading-none mb-3"
-              style={{ fontFamily: "var(--font-condensed)" }}
-            >
-              {who.player}
-            </h1>
+            <PlayerTitle name={playerTitleName(slug)}>
+              <h1
+                className="text-3xl sm:text-5xl font-bold tracking-[-0.035em] leading-none mb-3"
+                style={{ fontFamily: "var(--font-condensed)" }}
+              >
+                {who.player}
+              </h1>
+            </PlayerTitle>
           ) : (
             <Skeleton className="h-10 w-72 mb-3" />
           )}
@@ -243,12 +247,14 @@ async function PlayerContent({
         </ViewTransition>
         <div className="min-w-0">
           <div className="flex items-center justify-center sm:justify-start gap-2.5 sm:gap-3 mb-2 flex-wrap">
-            <h1
-              className="text-3xl sm:text-5xl font-bold tracking-[-0.035em] leading-none"
-              style={{ fontFamily: "var(--font-condensed)" }}
-            >
-              {name}
-            </h1>
+            <PlayerTitle name={playerTitleName(slug)}>
+              <h1
+                className="text-3xl sm:text-5xl font-bold tracking-[-0.035em] leading-none"
+                style={{ fontFamily: "var(--font-condensed)" }}
+              >
+                {name}
+              </h1>
+            </PlayerTitle>
             <Badge
               variant="outline"
               className="stat-label border-white/15 bg-white/5"

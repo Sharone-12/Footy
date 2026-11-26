@@ -14,6 +14,8 @@ import {
 } from "@/lib/competition"
 import { CompetitionToggle } from "@/components/competition-toggle"
 import { TeamCrest, LeagueCrest } from "@/components/player-avatar"
+import { PlayerTitle } from "@/components/player-title"
+import { playerNames } from "@/lib/view-transition"
 import { LEAGUE_TOURNAMENT_ID } from "@/lib/teams"
 import { confidence, confidenceK, rankPlayers, ROLE_PROFILES, type Row } from "@/lib/rank"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -185,6 +187,7 @@ function SignalBoard({
   ranks,
   scope,
   ranked,
+  claim,
 }: {
   signal: Signal
   rows: Array<PlayerRow & { value: number }>
@@ -192,6 +195,8 @@ function SignalBoard({
   ranks: SignalRank[]
   scope: string
   ranked: number
+  /** Claims the shared-element name for a player, once per page. */
+  claim: (slug: string | null | undefined) => string | undefined
 }) {
   return (
     <section className="surface rounded-2xl bg-card overflow-hidden">
@@ -241,9 +246,11 @@ function SignalBoard({
               {i + 1}
             </span>
             <span className="flex-1 min-w-0">
-              <span className="block text-[0.9rem] font-medium leading-tight truncate">
-                {p.player}
-              </span>
+              <PlayerTitle name={claim(p.slug)}>
+                <span className="block text-[0.9rem] font-medium leading-tight truncate">
+                  {p.player}
+                </span>
+              </PlayerTitle>
               <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 {p.team_id != null && (
                   <TeamCrest teamId={p.team_id} name={p.team} size={14} />
@@ -395,12 +402,15 @@ function MoverBoard({
   rows,
   scope,
   prev,
+  claim,
 }: {
   title: string
   hint: string
   rows: Mover[]
   scope: string
   prev: string
+  /** Claims the shared-element name for a player, once per page. */
+  claim: (slug: string | null | undefined) => string | undefined
 }) {
   return (
     <section className="surface rounded-2xl bg-card overflow-hidden">
@@ -427,9 +437,11 @@ function MoverBoard({
                 {i + 1}
               </span>
               <span className="flex-1 min-w-0">
-                <span className="block text-[0.9rem] font-medium leading-tight truncate">
-                  {p.player}
-                </span>
+                <PlayerTitle name={claim(p.slug)}>
+                  <span className="block text-[0.9rem] font-medium leading-tight truncate">
+                    {p.player}
+                  </span>
+                </PlayerTitle>
                 <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   {p.team_id != null && <TeamCrest teamId={p.team_id} name={p.team} size={14} />}
                   <span className="truncate">{p.team} · {p.role}</span>
@@ -513,6 +525,11 @@ async function Content({
     ? await loadMovers(season, prevSeason, comp === "ucl" ? "ucl" : "league")
     : null
 
+  // One claimer for the page. A standout player is on several signal boards
+  // and often in Breakouts too, so the signal boards claim first — they are
+  // the page's subject, and Breakouts sits below the fold.
+  const claim = playerNames()
+
   return (
     <>
       <p className="stat-label mb-4">
@@ -544,6 +561,7 @@ async function Content({
             dir={dir}
             ranks={b.ranks}
             scope={scope}
+            claim={claim}
           />
         ))}
       </div>
@@ -561,8 +579,8 @@ async function Content({
             its own role cohort · regulars in both
           </p>
           <div className="grid lg:grid-cols-2 gap-5 stagger">
-            <MoverBoard title="Breakouts" hint="Biggest jump on last season" rows={movers.up} scope={scope} prev={prevSeason!} />
-            <MoverBoard title="Declines" hint="Furthest off last season's level" rows={movers.down} scope={scope} prev={prevSeason!} />
+            <MoverBoard title="Breakouts" hint="Biggest jump on last season" rows={movers.up} scope={scope} prev={prevSeason!} claim={claim} />
+            <MoverBoard title="Declines" hint="Furthest off last season's level" rows={movers.down} scope={scope} prev={prevSeason!} claim={claim} />
           </div>
         </div>
       )}
