@@ -19,6 +19,8 @@
  * No @/ imports: `node lib/learn.test.ts` runs this bare, like lib/barca.ts.
  */
 
+import { scorelineMatrix } from "./poisson.ts"
+
 export type Params = {
   /** Goals added to the home side. */
   homeAdv: number
@@ -93,15 +95,6 @@ export const PARAM_LABEL: Record<keyof Params, string> = {
 
 // ── Scorelines ──
 
-const FACTORIAL = Array.from({ length: 12 }, (_, n) => {
-  let r = 1
-  for (let i = 2; i <= n; i++) r *= i
-  return r
-})
-
-const poisson = (lambda: number, k: number) =>
-  (Math.pow(lambda, k) * Math.exp(-lambda)) / FACTORIAL[k]
-
 /**
  * Dixon-Coles tau: nudges the four scorelines where treating the two sides as
  * independent is worst. Every other scoreline is left alone.
@@ -131,22 +124,25 @@ export function scoreGrid(
   rho = 0,
   maxGoals = 7,
 ): number[][] {
-  const grid: number[][] = []
+  // The independent-Poisson product comes from lib/poisson.ts, which is where
+  // the truncation and the normalisation convention live. This function's own
+  // contribution is tau: the four low scorelines where independence is worst.
+  // Normalising twice is not a problem — scaling every cell by a constant and
+  // then dividing by the new total lands on the same grid — and it means
+  // neither module has to know the other skips a step.
+  const grid = scorelineMatrix(homeExpected, awayExpected, maxGoals)
+
   let total = 0
-  for (let h = 0; h <= maxGoals; h++) {
-    const row: number[] = []
-    for (let a = 0; a <= maxGoals; a++) {
-      const p =
-        poisson(homeExpected, h) *
-        poisson(awayExpected, a) *
-        tau(h, a, homeExpected, awayExpected, rho)
-      row.push(p)
-      total += p
+  for (let h = 0; h < grid.length; h++) {
+    for (let a = 0; a < grid[h].length; a++) {
+      grid[h][a] *= tau(h, a, homeExpected, awayExpected, rho)
+      total += grid[h][a]
     }
-    grid.push(row)
   }
-  for (const row of grid) {
-    for (let a = 0; a < row.length; a++) row[a] /= total
+  if (total > 0) {
+    for (const row of grid) {
+      for (let a = 0; a < row.length; a++) row[a] /= total
+    }
   }
   return grid
 }

@@ -8,6 +8,8 @@ import { resolveCompetition, scopeLeague, scopeQuery, COMPETITION_LABEL, UCL, ty
 import { CompetitionToggle } from "@/components/competition-toggle"
 import { LEAGUE_TOURNAMENT_ID, isTop10FifaMatch } from "@/lib/teams"
 import { PlayerSearch } from "@/components/player-search"
+import { PlayerTitle } from "@/components/player-title"
+import { playerNames } from "@/lib/view-transition"
 import { LeagueCrest, TeamCrest } from "@/components/player-avatar"
 import { UpcomingTicker, type UpcomingMatch } from "@/components/upcoming-ticker"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -97,12 +99,15 @@ function Board({
   statKey,
   label,
   scope,
+  claim,
 }: {
   title: string
   rows: Row[]
   statKey: "goals" | "assists"
   label: string
   scope: string
+  /** Claims the shared-element name for a player, once per page. */
+  claim: (slug: string | null | undefined) => string | undefined
 }) {
   return (
     <section className="surface rounded-2xl bg-card overflow-hidden">
@@ -126,9 +131,11 @@ function Board({
               {i + 1}
             </span>
             <span className="flex-1 min-w-0">
-              <span className="block text-[0.85rem] sm:text-[0.9rem] font-medium leading-tight truncate">
-                {p.player}
-              </span>
+              <PlayerTitle name={claim(p.slug)}>
+                <span className="block text-[0.85rem] sm:text-[0.9rem] font-medium leading-tight truncate">
+                  {p.player}
+                </span>
+              </PlayerTitle>
               <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 {p.team_id != null && (
                   <TeamCrest teamId={p.team_id} name={p.team} size={14} />
@@ -324,6 +331,12 @@ async function Content({
   const leader = topScorers[0]
   const creator = topAssisters[0]
 
+  // One claimer for the whole page. The two headline cards are rendered from
+  // this function body and so claim first; the boards below ask afterwards and
+  // skip the two players already spoken for — which is exactly the pair that
+  // would otherwise collide, since the headline is row one of each board.
+  const claim = playerNames()
+
   const headline = [
     {
       icon: <BallIcon />,
@@ -363,9 +376,11 @@ async function Content({
               <span style={{ color: "var(--pitch)" }} className="shrink-0">{s.icon}</span>
               <span className="flex-1 min-w-0">
                 <span className={`stat-label text-[0.65rem] sm:text-xs block ${isBarca ? "!text-white/80" : ""}`}>{s.label}</span>
-                <span className={`block text-sm sm:text-base font-semibold truncate leading-snug ${isBarca ? "text-white" : "text-foreground"}`}>
-                  {s.name}
-                </span>
+                <PlayerTitle name={claim(s.slug)}>
+                  <span className={`block text-sm sm:text-base font-semibold truncate leading-snug ${isBarca ? "text-white" : "text-foreground"}`}>
+                    {s.name}
+                  </span>
+                </PlayerTitle>
                 <span className={`flex items-center gap-1.5 text-xs ${isBarca ? "text-white/80" : "text-muted-foreground"}`}>
                   {s.team_id != null && s.team && (
                     <TeamCrest teamId={s.team_id} name={s.team} size={14} />
@@ -385,8 +400,8 @@ async function Content({
       </div>
 
       <div className="grid md:grid-cols-2 gap-4 sm:gap-5 stagger">
-        <Board title="TOP SCORERS" rows={topScorers} statKey="goals" label={label} scope={scope} />
-        <Board title="TOP ASSISTS" rows={topAssisters} statKey="assists" label={label} scope={scope} />
+        <Board title="TOP SCORERS" rows={topScorers} statKey="goals" label={label} scope={scope} claim={claim} />
+        <Board title="TOP ASSISTS" rows={topAssisters} statKey="assists" label={label} scope={scope} claim={claim} />
       </div>
     </>
   )

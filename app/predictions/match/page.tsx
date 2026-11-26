@@ -31,6 +31,7 @@ import {
   MatchWatchStreamCTA,
 } from "@/components/prediction-match-card"
 import { PredictionStatCompare } from "@/components/prediction-stat-compare"
+import { ScorelineGrid } from "@/components/scoreline-grid"
 import { getUnifiedMatchStats } from "@/lib/livescores-stats"
 import { formatDateIST } from "@/lib/time"
 
@@ -323,10 +324,18 @@ async function Content({
   )
   const [pred] = await withFrozenPredictions(computed)
 
+  // The Champions League model carries no fitted low-score correction.
+  const rho = match.league === UCL ? 0 : fit.params.rho
+
+  // The joint distribution over exact scorelines. The markets are priced off
+  // it and the page shows it, so it is built once here rather than inside the
+  // markets branch, which only runs for a fixture still to come.
+  const grid = pred ? scoreGrid(pred.homeExpected, pred.awayExpected, rho) : null
+
   // Markets for a fixture still to come. Only the two clubs here, so this is
   // a handful of rows rather than the league-wide read the card version did.
   let bet = null
-  if (pred && pred.actual === null) {
+  if (pred && grid && pred.actual === null) {
     const { data: squads } = await supabase
       .from("players")
       .select("player, slug, team, goals")
@@ -361,14 +370,7 @@ async function Content({
       })
       .filter((c) => c != null)
 
-    // The Champions League model carries no fitted low-score correction.
-    const rho = match.league === UCL ? 0 : fit.params.rho
-    bet = buildBestBet(
-      scoreGrid(pred.homeExpected, pred.awayExpected, rho),
-      match.home,
-      match.away,
-      candidates,
-    )
+    bet = buildBestBet(grid, match.home, match.away, candidates)
   }
 
   const homeRow = table.find((t) => t.team === match.home && t.league === match.league)
@@ -529,6 +531,16 @@ async function Content({
             away={match.away}
             predicted={pred.predicted}
           />
+        </div>
+      )}
+
+      {/* Where those three percentages actually come from. Shown under them,
+          on the same condition, so the summary is read first and the
+          distribution is there for anyone who wants to know how it was
+          arrived at. */}
+      {pred && grid && (!isSettled || pred.frozen) && (
+        <div className="mb-6">
+          <ScorelineGrid grid={grid} home={match.home} away={match.away} />
         </div>
       )}
 
