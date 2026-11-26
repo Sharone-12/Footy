@@ -1833,15 +1833,15 @@ event_id,league,season,round,date,home,home_id,away,away_id,status,home_goals,aw
 16938941,Champions League,2026/27,5,2026-11-24,RB Leipzig,36360,RC Lens,1648,finished,3.0,1.0,2026-11-24T20:00:00Z
 16938769,Champions League,2026/27,5,2026-11-24,Real Madrid,2829,PSV Eindhoven,2952,finished,5.0,1.0,2026-11-24T20:00:00Z
 16939039,Champions League,2026/27,5,2026-11-24,ŠK Slovan Bratislava,2404,Real Betis,2816,finished,0.0,2.0,2026-11-24T20:00:00Z
-16939011,Champions League,2026/27,5,2026-11-25,SK Slavia Praha,2216,Villarreal,2819,upcoming,,,2026-11-25T17:45:00Z
-16939014,Champions League,2026/27,5,2026-11-25,Sabah FK,267828,FC Barcelona,2817,upcoming,,,2026-11-25T17:45:00Z
-16938791,Champions League,2026/27,5,2026-11-25,Atlético Madrid,2836,Viking FK,1164,upcoming,,,2026-11-25T20:00:00Z
-16938840,Champions League,2026/27,5,2026-11-25,Club Brugge KV,2888,Liverpool FC,44,upcoming,,,2026-11-25T20:00:00Z
-16938779,Champions League,2026/27,5,2026-11-25,Inter,2697,VfB Stuttgart,2677,upcoming,,,2026-11-25T20:00:00Z
-16938990,Champions League,2026/27,5,2026-11-25,LOSC Lille,1643,FC Bayern München,2672,upcoming,,,2026-11-25T20:00:00Z
-16938794,Champions League,2026/27,5,2026-11-25,Paris Saint-Germain,1644,AS Roma,2702,upcoming,,,2026-11-25T20:00:00Z
-16938917,Champions League,2026/27,5,2026-11-25,Shakhtar Donetsk,3313,Fenerbahçe,3052,upcoming,,,2026-11-25T20:00:00Z
-16938887,Champions League,2026/27,5,2026-11-25,Sporting CP,3001,Manchester United,35,upcoming,,,2026-11-25T20:00:00Z
+16939011,Champions League,2026/27,5,2026-11-25,SK Slavia Praha,2216,Villarreal,2819,finished,0.0,1.0,2026-11-25T17:45:00Z
+16939014,Champions League,2026/27,5,2026-11-25,Sabah FK,267828,FC Barcelona,2817,finished,1.0,4.0,2026-11-25T17:45:00Z
+16938791,Champions League,2026/27,5,2026-11-25,Atlético Madrid,2836,Viking FK,1164,finished,2.0,0.0,2026-11-25T20:00:00Z
+16938840,Champions League,2026/27,5,2026-11-25,Club Brugge KV,2888,Liverpool FC,44,finished,0.0,3.0,2026-11-25T20:00:00Z
+16938779,Champions League,2026/27,5,2026-11-25,Inter,2697,VfB Stuttgart,2677,finished,2.0,0.0,2026-11-25T20:00:00Z
+16938990,Champions League,2026/27,5,2026-11-25,LOSC Lille,1643,FC Bayern München,2672,finished,2.0,1.0,2026-11-25T20:00:00Z
+16938794,Champions League,2026/27,5,2026-11-25,Paris Saint-Germain,1644,AS Roma,2702,finished,2.0,2.0,2026-11-25T20:00:00Z
+16938917,Champions League,2026/27,5,2026-11-25,Shakhtar Donetsk,3313,Fenerbahçe,3052,finished,0.0,1.0,2026-11-25T20:00:00Z
+16938887,Champions League,2026/27,5,2026-11-25,Sporting CP,3001,Manchester United,35,finished,2.0,2.0,2026-11-25T20:00:00Z
 16939023,Champions League,2026/27,6,2026-12-08,Viking FK,1164,Feyenoord,2959,upcoming,,,2026-12-08T17:45:00Z
 16938925,Champions League,2026/27,6,2026-12-08,Villarreal,2819,Sabah FK,267828,upcoming,,,2026-12-08T17:45:00Z
 16939049,Champions League,2026/27,6,2026-12-08,AEK Athens,3250,Galatasaray,3061,upcoming,,,2026-12-08T20:00:00Z
