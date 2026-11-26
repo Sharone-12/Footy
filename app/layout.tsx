@@ -102,6 +102,9 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
+        {/* Dither over the body vignette. Sits above the photo backdrops and
+            below page content, which carries its own z-10. */}
+        <div className="grain" aria-hidden />
         <GoalBanner />
         <Suspense fallback={null}>
           <TopProgressBar />

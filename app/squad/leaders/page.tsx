@@ -18,6 +18,8 @@ import {
   type Ranked,
 } from "@/lib/leaders"
 import { PlayerAvatar, TeamCrest } from "@/components/player-avatar"
+import { PlayerTitle } from "@/components/player-title"
+import { playerNames } from "@/lib/view-transition"
 import { BarcaNav } from "@/components/barca-nav"
 import { Rondo } from "@/components/rondo"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -53,7 +55,14 @@ type Board = {
   rows: BoardRow[]
 }
 
-function RoleBoard({ board }: { board: Board }) {
+function RoleBoard({
+  board,
+  claim,
+}: {
+  board: Board
+  /** Claims the shared-element name for a player, once per page. */
+  claim: (slug: string | null | undefined) => string | undefined
+}) {
   if (board.rows.length === 0) return null
 
   return (
@@ -100,7 +109,9 @@ function RoleBoard({ board }: { board: Board }) {
                     {p.playerId != null && (
                       <PlayerAvatar playerId={p.playerId} name={p.player} size={26} />
                     )}
-                    <span className="truncate font-semibold text-[0.9rem]">{p.player}</span>
+                    <PlayerTitle name={claim(p.slug)}>
+                      <span className="truncate font-semibold text-[0.9rem]">{p.player}</span>
+                    </PlayerTitle>
                   </Link>
                 </td>
                 <td
@@ -250,6 +261,12 @@ async function Leaders({
     return <p className="text-muted-foreground">No squad data for {season}.</p>
   }
 
+  // One claimer for the page: a player qualifies for more than one role board,
+  // so the same slug reaches this more than once and only the first board to
+  // ask gets to animate it. Boards run top to bottom, which is the order the
+  // eye reaches them.
+  const claim = playerNames()
+
   return (
     <>
       <p className="stat-label text-[0.65rem] mb-4">
@@ -258,7 +275,7 @@ async function Leaders({
       </p>
       <div className="flex flex-col gap-4 stagger">
         {boards.map((b) => (
-          <RoleBoard key={b.title} board={b} />
+          <RoleBoard key={b.title} board={b} claim={claim} />
         ))}
       </div>
     </>

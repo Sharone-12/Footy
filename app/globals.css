@@ -356,6 +356,28 @@ html:not(.dark) :is(
   line-height: 1;
 }
 
+/* ---------------------------------------------------------------------------
+   .stagger — reveal on sight rather than on mount.
+
+   The delay chain below animated every child the moment the page mounted,
+   wherever that child happened to be. A grid six rows down finished its whole
+   cascade while still a screenful under the fold, so by the time it was
+   scrolled to it had already arrived: the motion was spent where nobody was
+   looking, and the cards that were on screen at load were the ones made to
+   wait 540ms.
+
+   Driving the same keyframes from a `view()` timeline spends it where it is
+   seen. Each child animates across its own entry into the viewport, so the
+   cascade comes from the order the eye reaches things instead of from a
+   hardcoded nth-child delay — which also means it no longer stops at ten.
+
+   A child already on screen at load sits past the end of its range and so
+   holds the settled end state. That is deliberate: the first screenful gets
+   one orchestrated arrival from `.stagger` itself, as a block, rather than
+   nine cards fading up in sequence in front of someone who is already
+   looking at them.
+--------------------------------------------------------------------------- */
+
 .stagger>* {
   animation: slide-up 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   will-change: transform, opacity;
@@ -399,6 +421,34 @@ html:not(.dark) :is(
 
 .stagger>*:nth-child(10) {
   animation-delay: 540ms;
+}
+
+@supports (animation-timeline: view()) {
+  .stagger {
+    /* The arrival moment for whatever is already on screen. One move for the
+       whole group, not one per card. */
+    animation: fade-in 0.45s ease-out both;
+  }
+
+  /* :nth-child(n) matches every child and carries the same specificity as
+     the delay chain above, which would otherwise outrank a plain `.stagger>*`
+     reset and leave the old delays in place. */
+  .stagger>*:nth-child(n) {
+    animation-timeline: view();
+    /* Starts on the first sliver, done before the card is centred, so the
+       reveal never feels like it is lagging the scroll. */
+    animation-range: entry 5% cover 20%;
+    animation-delay: 0s;
+    /* The compositor owns a scroll-driven animation; the hint only pins a
+       layer for every child of every grid on the page. */
+    will-change: auto;
+  }
+
+  /* Opt out for a group whose children must not move independently —
+     a `.lineup`, a table body, anything measured by script. */
+  .stagger[data-reveal="group"]>* {
+    animation-timeline: auto;
+  }
 }
 
 /* Clean, subtle card hover — no chasing colored glow beams */
@@ -1436,6 +1486,11 @@ main h1 > span:nth-child(2) {
   }
 
 
+  /* Both halves of the stagger: the children, and the group-level arrival the
+     scroll-driven version adds on the container itself. Listing only the
+     children would leave that container fade running for a reader who asked
+     the OS for no animation. */
+  .stagger,
   .stagger>*,
   .stat-pop,
   .dna-bar,
@@ -1887,3 +1942,50 @@ html:not(.dark) .squad-card span.stat-label {
   fill: var(--muted-foreground) !important;
 }
 
+
+/* ---------------------------------------------------------------------------
+   Film grain.
+
+   Large flat areas of a near-black zero-chroma palette are where 8-bit colour
+   runs out of steps: the vignette behind the page fades over most of a screen
+   height, and on an OLED panel that fade shows as banding. A sparse noise
+   field laid over everything breaks the bands up by dithering them — the same
+   reason a mastering engineer leaves dither on a quiet fade.
+
+   It is one SVG filter, resolution-independent, no image to download, and
+   `pointer-events: none` so nothing below it loses a click. Keep the opacity
+   low enough that it reads as material rather than as texture; the point is
+   that nobody notices it, only that the gradients stopped stepping.
+--------------------------------------------------------------------------- */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.035;
+  /* Grain belongs to the surface, so it should not also lighten it. */
+  mix-blend-mode: overlay;
+  /* baseFrequency near 0.8 lands the speckle around a pixel at 1x; stitchTiles
+     keeps the tile seams from showing when the filter region is repeated. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 160px 160px;
+}
+
+/* On a light background the same overlay reads as dirt rather than as grain,
+   and there is no banding to fix — a light page has headroom at the top of
+   the range. Pull it most of the way out. */
+html:not(.dark) .grain {
+  opacity: 0.012;
+  mix-blend-mode: multiply;
+}
+
+/* A high-density display already resolves a pixel of noise below the eye's
+   limit, so the field only costs battery to composite. Coarsen it instead of
+   dropping it, and the dither still works. */
+@media (min-resolution: 2dppx) {
+  .grain {
+    background-size: 240px 240px;
+    opacity: 0.03;
+  }
+}

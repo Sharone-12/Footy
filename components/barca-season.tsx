@@ -10,6 +10,8 @@ import { clubColor } from "@/lib/club-colors"
 import { formatDateIST } from "@/lib/time"
 import { loadFingerprints } from "@/components/player-dna"
 import { TeamCrest } from "@/components/player-avatar"
+import { PlayerTitle } from "@/components/player-title"
+import { playerTitleName } from "@/lib/view-transition"
 import { TitleRaceChart } from "@/components/title-race-chart"
 
 const BARCA = "FC Barcelona"
@@ -391,7 +393,14 @@ export async function BarcaSeason({
                 <Link href={`/player/${next.threat.slug}`} className="min-w-0 hover:underline">
                   <span className="stat-label block">Main threat</span>
                   <span className="text-sm font-medium">
-                    {next.threat.player}
+                    {/* Only the name travels — the archetype and the tallies
+                        belong to this card and have nothing to pair with on
+                        the player page. No claimer here: the card names one
+                        player, and the squad page around it pairs portraits
+                        under `player-<id>`, a separate namespace. */}
+                    <PlayerTitle name={playerTitleName(next.threat.slug)}>
+                      <span>{next.threat.player}</span>
+                    </PlayerTitle>
                     <span className="text-muted-foreground font-normal">
                       {" "}· {next.threat.archetype} · {next.threat.goals}G {next.threat.assists}A
                     </span>
