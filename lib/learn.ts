@@ -497,3 +497,85 @@ export function fitLeagueParams(
 ): Fit<Params> {
   return coordinateFit(start, PARAM_KNOBS, (p) => walkForward(matches, p).logLoss)
 }
+
+// ── Learning day to day ──
+
+/** The verdict on a day's refit: what it was judged on, and whether it won. */
+export type Gate = {
+  /** Start of the held-out run; matches from here on were kept out of the fit. */
+  from: string
+  /** How many matches the verdict rests on. */
+  n: number
+  /** Mean log-loss of the parameters currently live, over those matches. */
+  incumbent: number
+  /** Mean log-loss of the refit, over the identical matches. */
+  candidate: number
+  accepted: boolean
+}
+
+export type DailyFit = { params: Params; gate: Gate | null }
+
+/**
+ * One day's learning: refit from where the live parameters left off, and keep
+ * the result only if it would have called the recent past better than they did.
+ *
+ * The reward is log-loss, which pays for probability on the result that came
+ * in and charges for the rest — a plain "was the pick right" would score a
+ * lucky 51% call the same as a confident 85% one, and the whole point of the
+ * shrink and rho parameters is how sure to be, not who to pick.
+ *
+ * The last `holdoutDays` of football is kept out of the fit entirely, so the
+ * comparison is between two sets of parameters on matches NEITHER has seen.
+ * Scoring a refit on the matches it just learnt from would accept every
+ * candidate: more parameters fitted to more data always looks better in
+ * sample. The incumbent is scored over exactly the same matches.
+ *
+ * A tie keeps the incumbent. Churning live parameters for no measured gain is
+ * how a model drifts while looking like it is learning.
+ *
+ * Starting from `incumbent` rather than DEFAULT_PARAMS is what makes this a
+ * walk: a day of new results nudges the parameters instead of relocating them.
+ * When there is too little football to judge on — early season, a winter break
+ * — there is no verdict to give, and it fits on everything and says so with a
+ * null gate.
+ */
+export function dailyFit(
+  matches: LearnMatch[],
+  incumbent: Params,
+  opts: {
+    /** Limit scoring to one season, as `walkForward` does. */
+    season?: string
+    holdoutDays?: number
+    /** Below this many matches to learn from, nothing is fitted at all. */
+    minTrain?: number
+    /** Below this many matches to judge on, no verdict is given. */
+    minHoldout?: number
+  } = {},
+): DailyFit {
+  const { season, holdoutDays = 21, minTrain = 200, minHoldout = 30 } = opts
+  if (matches.length < minTrain) return { params: incumbent, gate: null }
+
+  // Measured back from the last match rather than from today, so a stale
+  // database or an off-season still gets judged on real football.
+  const latest = matches[matches.length - 1].date
+  const cutoff = new Date(Date.parse(latest) - holdoutDays * 864e5).toISOString().slice(0, 10)
+  const learnFrom = matches.filter((m) => m.date < cutoff)
+  if (learnFrom.length < minTrain) {
+    return { params: fitLeagueParams(matches, incumbent).params, gate: null }
+  }
+
+  const candidate = fitLeagueParams(learnFrom, incumbent).params
+  const held = walkForward(matches, candidate, season, cutoff)
+  const was = walkForward(matches, incumbent, season, cutoff)
+  if (held.n < minHoldout) {
+    return { params: fitLeagueParams(matches, incumbent).params, gate: null }
+  }
+
+  const accepted = held.logLoss < was.logLoss - 1e-9
+  return {
+    // Refit on everything once the candidate has earnt it: strictly more data
+    // than the gated fit saw, started from the parameters that passed.
+    params: accepted ? fitLeagueParams(matches, candidate).params : incumbent,
+    gate: { from: cutoff, n: held.n, incumbent: was.logLoss, candidate: held.logLoss, accepted },
+  }
+}

@@ -1,0 +1,40 @@
+[
+  {
+    "at": "2026-11-28T17:22:27.747Z",
+    "from": "2026-11-07",
+    "n": 102,
+    "incumbent": 0.9313835202941451,
+    "candidate": 0.942563287975792,
+    "accepted": false,
+    "params": {
+      "homeAdv": 0.37,
+      "xgWeight": 0.8688,
+      "gpCoef": 0,
+      "sotCoef": 0.21,
+      "bcCoef": 0.05,
+      "sibCoef": 0.25,
+      "possCoef": 0.0301,
+      "shrink": 0.55,
+      "rho": -0.175
+    }
+  },
+  {
+    "at": "2026-11-28T17:23:52.620Z",
+    "from": "2026-11-07",
+    "n": 102,
+    "incumbent": 0.9313835202941451,
+    "candidate": 0.942563287975792,
+    "accepted": false,
+    "params": {
+      "homeAdv": 0.37,
+      "xgWeight": 0.8688,
+      "gpCoef": 0,
+      "sotCoef": 0.21,
+      "bcCoef": 0.05,
+      "sibCoef": 0.25,
+      "possCoef": 0.0301,
+      "shrink": 0.55,
+      "rho": -0.175
+    }
+  }
+]

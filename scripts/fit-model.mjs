@@ -13,12 +13,17 @@ import { createClient } from "@supabase/supabase-js"
 import fs from "node:fs"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
-import { fitLeagueParams, walkForward, DEFAULT_PARAMS } from "../lib/learn.ts"
+import { dailyFit, fitLeagueParams, walkForward, DEFAULT_PARAMS } from "../lib/learn.ts"
+// The site's own season list: a rollover edited there must not leave this
+// script fitting last season, which `loadModelFit` answers by silently
+// reverting the whole site to the hand-set model.
+import { SEASONS as SITE_SEASONS } from "../lib/seasons.ts"
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const OUT = path.join(ROOT, "lib", "model-params.json")
+const HISTORY = path.join(ROOT, "lib", "model-history.json")
 
-const SEASONS = ["2026/27", "2025/26"]
+const SEASONS = [...SITE_SEASONS]
 const LEAGUES = ["Premier League", "La Liga", "Serie A", "Ligue 1", "Bundesliga"]
 const STAT_MAP = {
   "Expected goals": "xg",
@@ -30,6 +35,14 @@ const STAT_MAP = {
 }
 const STATS = Object.keys(STAT_MAP)
 const MIN_TRAINING_MATCHES = 200
+
+// How much recent football is kept out of the fit to judge it on. Three weeks
+// is ~100 matches across the five leagues: enough that a log-loss gap means
+// something, short enough that the shipped fit is never far behind the data.
+const HOLDOUT_DAYS = 21
+const MIN_HOLDOUT = 30
+// Rows of the learning log. Two refreshes a day, so ~two months of verdicts.
+const HISTORY_KEEP = 120
 
 function loadEnv() {
   for (const name of [".env.local", ".env"]) {
@@ -141,14 +154,47 @@ console.log(`loaded ${matches.length} finished league matches`)
 const season = SEASONS[0]
 const prior = SEASONS[1]
 
+const readJson = (file, fallback) => {
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf8"))
+  } catch {
+    return fallback
+  }
+}
+
+/**
+ * What is live on the site right now, and so what a new fit has to beat.
+ *
+ * A file fitted for another season is not an incumbent — it would be judged
+ * on matches its parameters were never about — so that starts over from the
+ * hand-set model, which is what the site is serving in that case anyway.
+ */
+const stored = readJson(OUT, null)
+const incumbent =
+  stored?.season === season && stored?.trained > 0 && stored?.params
+    ? stored.params
+    : DEFAULT_PARAMS
+
 let out
+let gate = null
 if (matches.length < MIN_TRAINING_MATCHES) {
   console.log("too few matches to learn from; keeping the hand-set model")
   out = { season, seasons: SEASONS, trained: 0, params: DEFAULT_PARAMS, tested: null }
 } else {
-  const params = fitLeagueParams(matches).params
+  // The day's lesson, and the verdict on it. The rule itself lives in
+  // lib/learn.ts beside the model it adjusts, where `node lib/learn.test.ts`
+  // can hold it to account without a database.
+  const day = dailyFit(matches, incumbent, {
+    season,
+    holdoutDays: HOLDOUT_DAYS,
+    minTrain: MIN_TRAINING_MATCHES,
+    minHoldout: MIN_HOLDOUT,
+  })
+  const params = day.params
+  gate = day.gate
 
-  // The honest mark: fitted on the previous season alone, scored on this one.
+  // The headline mark, unchanged: parameters fitted on the previous season
+  // alone, scored on this one, against the settings that were chosen by hand.
   let tested = null
   const trainOnly = matches.filter((m) => m.season === prior)
   if (trainOnly.length >= MIN_TRAINING_MATCHES) {
@@ -162,13 +208,51 @@ if (matches.length < MIN_TRAINING_MATCHES) {
 }
 
 out.fittedAt = new Date().toISOString()
-fs.writeFileSync(OUT, `${JSON.stringify(out, null, 2)}\n`)
 
-console.log(`wrote ${path.relative(ROOT, OUT)} in ${((Date.now() - started) / 1000).toFixed(1)}s`)
+// ── Writing ──
+//
+// Only when the model itself moved. Every run would otherwise rewrite the file
+// with nothing but a new `fittedAt`, and the refresh would commit and push a
+// no-op twice a day.
+const body = (o) => JSON.stringify({ ...o, fittedAt: undefined })
+if (!stored || body(stored) !== body(out)) {
+  fs.writeFileSync(OUT, `${JSON.stringify(out, null, 2)}\n`)
+  console.log(`wrote ${path.relative(ROOT, OUT)}`)
+} else {
+  console.log(`${path.relative(ROOT, OUT)} unchanged`)
+}
+
+// The learning log: one row per run, kept whatever the verdict. A rejection is
+// as much a result as an acceptance, and a run of them is the signal that the
+// parameters have settled.
+if (gate) {
+  const history = readJson(HISTORY, [])
+  history.push({
+    at: out.fittedAt,
+    ...gate,
+    params: Object.fromEntries(
+      Object.entries(out.params).map(([k, v]) => [k, Number(v.toFixed(4))]),
+    ),
+  })
+  fs.writeFileSync(
+    HISTORY,
+    `${JSON.stringify(history.slice(-HISTORY_KEEP), null, 2)}\n`,
+  )
+}
+
+console.log(`fitted in ${((Date.now() - started) / 1000).toFixed(1)}s`)
 console.log(
   "params:",
   Object.fromEntries(Object.entries(out.params).map(([k, v]) => [k, Number(v.toFixed(4))])),
 )
+if (gate) {
+  const g = gate
+  console.log(
+    `held out ${g.n} matches since ${g.from}: ` +
+      `live ${g.incumbent.toFixed(4)} vs new ${g.candidate.toFixed(4)} -> ` +
+      (g.accepted ? "ACCEPTED, parameters updated" : "rejected, keeping live parameters"),
+  )
+}
 if (out.tested) {
   console.log(
     `out of sample on ${out.tested.learnt.n} matches: ` +

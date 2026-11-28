@@ -6,6 +6,7 @@ import {
   leagueLambdas,
   coordinateFit,
   fitLeagueParams,
+  dailyFit,
   walkForward,
   Ledger,
   DEFAULT_PARAMS,
@@ -220,6 +221,48 @@ assert.ok(
 )
 // Fitting is deterministic: same matches, same answer.
 assert.deepEqual(fitLeagueParams(generated).params, fitted.params)
+
+// ── The daily gate keeps the better of the two, and never leaks ──
+
+{
+  // The incumbent here IS the answer the generator was built around, so a
+  // refit cannot beat it on held-out matches and must be turned down.
+  const strong = fitLeagueParams(generated).params
+  const held = dailyFit(generated, strong, { minTrain: 50, minHoldout: 10 })
+  assert.ok(held.gate, "a season of generated matches should produce a verdict")
+  assert.deepEqual(held.params, strong, "a losing refit must not reach the live parameters")
+  assert.equal(held.gate!.accepted, false)
+
+  // ...and from deliberately bad parameters it has somewhere to go, so it
+  // should accept, and the accepted parameters must actually be the new ones.
+  const poor: Params = { ...DEFAULT_PARAMS, homeAdv: 0, shrink: 1.3, xgWeight: 0 }
+  const moved = dailyFit(generated, poor, { minTrain: 50, minHoldout: 10 })
+  assert.ok(moved.gate, "expected a verdict")
+  assert.equal(moved.gate!.accepted, true, "a clearly better refit should be accepted")
+  assert.notDeepEqual(moved.params, poor)
+  assert.ok(
+    moved.gate!.candidate < moved.gate!.incumbent,
+    "acceptance must mean a lower held-out loss",
+  )
+
+  // The verdict is earnt on matches kept out of the fit: everything from the
+  // cutoff on, and nothing before it. A cutoff that let the holdout into the
+  // training set would accept every candidate, silently and forever.
+  const scored = generated.filter((m) => m.date >= moved.gate!.from)
+  assert.equal(moved.gate!.n <= scored.length, true, "scored more matches than were held out")
+  assert.ok(moved.gate!.n >= 10, `holdout too small to mean anything: ${moved.gate!.n}`)
+
+  // Too little to judge on: no verdict, and the live parameters still improve.
+  const quiet = dailyFit(generated, poor, { minTrain: 50, minHoldout: 10 ** 6 })
+  assert.equal(quiet.gate, null, "no verdict is possible below the holdout floor")
+  assert.notDeepEqual(quiet.params, poor, "it should still have fitted on everything")
+
+  // Below the training floor it declines to learn rather than fitting noise.
+  assert.deepEqual(dailyFit(generated.slice(0, 20), poor, { minTrain: 50 }), {
+    params: poor,
+    gate: null,
+  })
+}
 
 console.log(
   `learn ok · synthetic log-loss ${before.toFixed(4)} -> ${fitted.loss.toFixed(4)}, ` +

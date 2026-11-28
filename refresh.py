@@ -20,7 +20,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 LOG = ROOT / "refresh.log"
 LOCK = ROOT / ".refresh.lock"
-OUTPUTS = ["data/processed"]
+# The fitted model ships as a file, so it has to be committed like the data.
+# Left out, the model learnt twice a day on this laptop and the site kept
+# serving whatever was last pushed by hand.
+OUTPUTS = ["data/processed", "lib/model-params.json", "lib/model-history.json"]
 
 # A laptop that wakes at 08:00 fires this before Wi-Fi is up: on 2026-10-08 both
 # `git pull` and the Sofascore fetch died on "Could not resolve host", three
@@ -167,6 +170,20 @@ def _run(push: bool) -> None:
     log("mirroring images")
     if with_retry("image mirror", sync_images):
         log("image mirror done")
+
+    # Learn from the day's results: refit, judged against the parameters now
+    # live on the three weeks held out of the fit, and keep the better of the
+    # two. Reads the data that was just synced, so it runs after the sync.
+    #
+    # Non-fatal by design: a failed fit leaves yesterday's parameters in place,
+    # which is a model a day behind rather than no predictions at all.
+    log("fitting the model")
+    try:
+        for line in sh("npm", "run", "--silent", "fit").splitlines():
+            if "held out" in line or "params:" in line or "out of sample" in line:
+                log(line.strip())
+    except SystemExit:
+        log("model fit FAILED, keeping the parameters already in place")
 
     changed = [
         line[3:] for line in sh("git", "status", "--porcelain", "--", *OUTPUTS).splitlines()
