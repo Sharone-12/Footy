@@ -1,8 +1,13 @@
 import type { ZLiveChannel, ZLiveManifest } from "./types"
 
-const MANIFEST_URL = "https://zlive.st/embed/manifest.json"
+const ZLIVE_HOSTS = ["https://zlive.cc", "https://zlive.st"] as const
+const DEFAULT_ZLIVE_HOST = "https://zlive.cc"
 const CACHE_TTL_MS = 60_000
-const TIMEOUT_MS = 15_000
+const TIMEOUT_MS = 10_000
+
+function normalizeZLiveUrl(url: string, activeHost = DEFAULT_ZLIVE_HOST): string {
+  return url.replace(/https?:\/\/zlive\.(?:st|cc)/gi, activeHost)
+}
 
 const DEFAULT_BROWSER_UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
@@ -30,32 +35,51 @@ export async function fetchZLiveManifest(forceRefresh = false): Promise<ZLiveMan
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
 
     try {
-      const res = await fetch(MANIFEST_URL, {
-        signal: controller.signal,
-        headers: {
-          Accept: "application/json",
-          "User-Agent": DEFAULT_BROWSER_UA,
-        },
-      })
+      let json: ZLiveManifest | null = null
+      let activeHost = DEFAULT_ZLIVE_HOST
 
-      if (!res.ok) {
-        console.warn(`[zlive] Manifest fetch failed with status ${res.status}`)
+      for (const host of ZLIVE_HOSTS) {
+        try {
+          const res = await fetch(`${host}/embed/manifest.json`, {
+            signal: controller.signal,
+            headers: {
+              Accept: "application/json",
+              "User-Agent": DEFAULT_BROWSER_UA,
+            },
+          })
+
+          if (!res.ok) {
+            console.warn(`[zlive] Manifest fetch on ${host} failed with status ${res.status}`)
+            continue
+          }
+
+          const candidate = (await res.json()) as ZLiveManifest
+          if (candidate && Array.isArray(candidate.channels)) {
+            json = candidate
+            activeHost = host
+            break
+          }
+        } catch (err) {
+          const isAbort = err instanceof Error && err.name === "AbortError"
+          console.warn(`[zlive] Manifest fetch error on ${host} (${isAbort ? "timeout" : String(err)})`)
+        }
+      }
+
+      if (!json) {
         return manifestCache?.data ?? null
       }
 
-      const json = (await res.json()) as ZLiveManifest
-
-      if (!json || !Array.isArray(json.channels)) {
-        console.warn("[zlive] Invalid manifest payload structure")
-        return manifestCache?.data ?? null
+      // Rewrite dead zlive.st embed URLs to the active working mirror
+      json = {
+        ...json,
+        channels: json.channels.map((c) => ({
+          ...c,
+          url: c.url ? normalizeZLiveUrl(c.url, activeHost) : `${activeHost}/embed/${c.id}`,
+        })),
       }
 
       manifestCache = { timestamp: Date.now(), data: json }
       return json
-    } catch (err: unknown) {
-      const isAbort = err instanceof Error && err.name === "AbortError"
-      console.warn(`[zlive] Manifest fetch error (${isAbort ? "timeout" : String(err)})`)
-      return manifestCache?.data ?? null
     } finally {
       clearTimeout(timer)
       inflightManifest = null
@@ -133,6 +157,10 @@ export async function getGenericFootballChannels(): Promise<ZLiveChannel[]> {
 export async function checkZLiveHealth(): Promise<{ ok: boolean; count?: number; latencyMs: number }> {
   const start = Date.now()
   try {
+    const manifest = await fetchZLiveManifest()
+    if (!manifest) {
+      return { ok: false, count: 0, latencyMs: Date.now() - start }
+    }
     const channels = await fetchFootballChannels()
     return {
       ok: true,

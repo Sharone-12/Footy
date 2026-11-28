@@ -4,7 +4,7 @@ import { matchFixtureToZLive } from "@/lib/zlive/matcher"
 
 export const zliveAdapter: ProviderAdapter = {
   name: "ZLive",
-  baseUrl: "https://zlive.st",
+  baseUrl: "https://zlive.cc",
   async discover(fixture: Fixture, _signal: AbortSignal): Promise<DiscoveredEvent[]> {
     const channels = await fetchFootballChannels()
     const matched = matchFixtureToZLive(fixture, channels)
@@ -21,7 +21,7 @@ export const zliveAdapter: ProviderAdapter = {
         competition: fixture.league,
         kickoff: null,
         status: ch.live ? "live" : "scheduled",
-        url: ch.url || `https://zlive.st/embed/${ch.id}`,
+        url: ch.url || `https://zlive.cc/embed/${ch.id}`,
         embeddable: true,
         confidence: matched.confidence,
       },

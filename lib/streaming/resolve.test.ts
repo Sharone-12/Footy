@@ -147,7 +147,7 @@ assert.equal(all[2].sources.length, 2) // matchora (main + c1)
 assert.deepEqual(all[2].sources.map((s) => s.url), ["https://matchora.pro/embed/match/m1", "https://matchora.pro/embed/channel/c1"])
 assert.deepEqual(all[3].sources.map((s) => s.label), ["Sky Main"]) // daddyLive
 assert.deepEqual(all[4].sources.map((s) => s.url), ["https://live24/1"]) // live24
-assert.equal(all[5].sources[0].url, "https://zlive.st/embed/z1") // zLive
+assert.equal(all[5].sources[0].url, "https://zlive.cc/embed/z1") // zLive
 assert.equal(allSources(all).length, 9)
 
 // ── A provider with nothing playable is omitted, not shown dead ──

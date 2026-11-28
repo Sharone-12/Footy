@@ -107,8 +107,17 @@ export function embedFor(url: string, parentHost?: string | null): StreamEmbed |
     return { kind: "iframe", src: u.toString() }
   }
 
-  if (host === "zlive.st" && path[0] === "embed") {
-    return { kind: "iframe", src: u.toString() }
+  if (
+    (host === "strmfree.pk" || host === "strmfree.st" || host === "streamfree.top" || host.includes("strmfree") || host.includes("streamfree")) &&
+    path[0] === "embed"
+  ) {
+    const fixedUrl = u.toString().replace(/https?:\/\/(?:strmfree\.st|streamfree\.top)/gi, "https://strmfree.pk")
+    return { kind: "iframe", src: fixedUrl }
+  }
+
+  if ((host === "zlive.st" || host === "zlive.cc") && path[0] === "embed") {
+    const fixedUrl = u.toString().replace(/https?:\/\/zlive\.st/gi, "https://zlive.cc")
+    return { kind: "iframe", src: fixedUrl }
   }
 
   if (

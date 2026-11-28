@@ -281,7 +281,7 @@ function zLiveProvider(
       key: `zlive:${primary.id}`,
       label: primary.name || "Channel",
       quality: primary.quality,
-      url: primary.url || `https://zlive.st/embed/${primary.id}`,
+      url: primary.url ? primary.url.replace(/https?:\/\/zlive\.st/gi, "https://zlive.cc") : `https://zlive.cc/embed/${primary.id}`,
       live: Boolean(primary.live ?? true),
     })
   }
@@ -295,7 +295,7 @@ function zLiveProvider(
           key: `zlive:${ch.id}`,
           label: ch.name || "Channel",
           quality: ch.quality,
-          url: ch.url || `https://zlive.st/embed/${ch.id}`,
+          url: ch.url ? ch.url.replace(/https?:\/\/zlive\.st/gi, "https://zlive.cc") : `https://zlive.cc/embed/${ch.id}`,
           live: Boolean(ch.live ?? true),
         })
       }

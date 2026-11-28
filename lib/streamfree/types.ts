@@ -21,6 +21,8 @@ export type StreamFreeItem = {
   viewers?: number
   is_external?: boolean
   thumbnail_url?: string
+  iframe?: string
+  additional_sources?: Array<{ quality?: string; label?: string; name?: string; url?: string; iframe?: string; live?: boolean } | string>
   sources: StreamFreeSource[]
   team1?: {
     name: string

@@ -49,9 +49,13 @@ export type MultiViewSlotData = {
 }
 
 export function resolveZLiveChannelUrl(channel: ZLiveChannel): string {
-  if (channel.url && channel.url.startsWith("http")) return channel.url
-  if (channel.id && channel.id.startsWith("http")) return channel.id
-  return `https://zlive.st/embed/${channel.id}`
+  if (channel.url && channel.url.startsWith("http")) {
+    return channel.url.replace(/https?:\/\/zlive\.st/gi, "https://zlive.cc")
+  }
+  if (channel.id && channel.id.startsWith("http")) {
+    return channel.id.replace(/https?:\/\/zlive\.st/gi, "https://zlive.cc")
+  }
+  return `https://zlive.cc/embed/${channel.id}`
 }
 
 export async function fetchBestStreamForFixture(fixture: LiveFixture): Promise<{

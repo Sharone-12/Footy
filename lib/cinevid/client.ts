@@ -28,7 +28,7 @@ export const CINEVID_HOSTS = [
 ]
 const EVENTS_CACHE_TTL_MS = 60_000 // 60 seconds
 const HEALTH_CACHE_TTL_MS = 30_000 // 30 seconds
-const REQUEST_TIMEOUT_MS = 12_000 // 12 seconds
+const REQUEST_TIMEOUT_MS = 8_000 // 8 seconds per-race across active mirrors
 
 const DEFAULT_HEADERS = {
   Accept: "application/json",
@@ -188,20 +188,24 @@ export function normalizeCinevidEvent(raw: CinevidRawEvent): CinevidParsedEvent 
 }
 
 async function fetchFromCinevidHosts(path: string, signal?: AbortSignal): Promise<Response> {
-  let lastError: Error | null = null
-  for (const host of CINEVID_API_HOSTS) {
-    try {
-      const res = await fetch(`${host}${path}`, {
-        signal,
-        headers: DEFAULT_HEADERS,
-      })
-      if (res.ok) return res
-      lastError = new Error(`Cinevid host ${host} returned status ${res.status}`)
-    } catch (err) {
-      lastError = err instanceof Error ? err : new Error(String(err))
+  // Race all active hosts in parallel so a stalled/503 mirror never blocks a healthy one
+  try {
+    return await Promise.any(
+      CINEVID_API_HOSTS.map(async (host) => {
+        const res = await fetch(`${host}${path}`, {
+          signal,
+          headers: DEFAULT_HEADERS,
+        })
+        if (res.ok) return res
+        throw new Error(`Cinevid host ${host} returned status ${res.status}`)
+      }),
+    )
+  } catch (err) {
+    if (err instanceof AggregateError && err.errors.length > 0) {
+      throw err.errors[0] instanceof Error ? err.errors[0] : new Error(String(err.errors[0]))
     }
+    throw err instanceof Error ? err : new Error("All Cinevid hosts failed")
   }
-  throw lastError ?? new Error("All Cinevid hosts failed")
 }
 
 /**

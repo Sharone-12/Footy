@@ -238,8 +238,8 @@ export function UnifiedPlayer({
       : "DaddyLiveHD"
   } else {
     currentUrl =
-      activeZLiveChannel?.url ||
-      (activeZLiveChannel?.id ? `https://zlive.st/embed/${activeZLiveChannel.id}` : undefined)
+      (activeZLiveChannel?.url ? activeZLiveChannel.url.replace(/https?:\/\/zlive\.st/gi, "https://zlive.cc") : undefined) ||
+      (activeZLiveChannel?.id ? `https://zlive.cc/embed/${activeZLiveChannel.id}` : undefined)
     isCurrentLive = Boolean(activeZLiveChannel?.live)
     currentStatusLabel = isCurrentLive ? "LIVE" : "OFFLINE"
     providerDisplayName = activeZLiveChannel?.name

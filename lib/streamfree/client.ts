@@ -1,8 +1,135 @@
 import type { StreamFreeItem, StreamFreeResponse, StreamFreeSource } from "./types"
 
-const BASE_URL = process.env.STREAMFREE_BASE_URL || "https://streamfree.top"
-const DEFAULT_TIMEOUT_MS = 15_000
+const DEFAULT_STREAMFREE_HOSTS = [
+  "https://strmfree.pk",
+  "https://strmfree.st",
+  "https://streamfree.top",
+]
+const BASE_URL = process.env.STREAMFREE_BASE_URL || DEFAULT_STREAMFREE_HOSTS[0]
+const STREAMFREE_MIRROR_INDEX = "https://strmfree.link/api/domains"
+const DEFAULT_TIMEOUT_MS = 10_000
 const CACHE_TTL_MS = 60_000
+
+let activeBaseUrl = BASE_URL
+
+function normalizeStreamFreeUrl(url: string, targetHost = activeBaseUrl): string {
+  return url.replace(/https?:\/\/(?:strmfree\.(?:pk|st)|streamfree\.top)/gi, targetHost)
+}
+
+function inferQualityFromUrl(url: string): string {
+  const lower = url.toLowerCase()
+  if (lower.includes("4k") || lower.includes("2160")) return "4K"
+  if (lower.includes("1080") || lower.includes("fhd")) return "FHD"
+  if (lower.includes("480") || lower.includes("360") || lower.endsWith("sd")) return "SD"
+  return "HD"
+}
+
+function normalizeStreamFreeItem(item: StreamFreeItem, targetHost = activeBaseUrl): StreamFreeItem {
+  const isLive = item.match_timestamp
+    ? Date.now() >= item.match_timestamp * 1000 - 15 * 60_000 && Date.now() <= item.match_timestamp * 1000 + 150 * 60_000
+    : true
+
+  let sources: StreamFreeSource[] = []
+  if (Array.isArray(item.sources) && item.sources.length > 0) {
+    sources = item.sources
+      .filter((s) => Boolean(s?.url))
+      .map((s) => ({
+        ...s,
+        url: normalizeStreamFreeUrl(s.url, targetHost),
+      }))
+  } else {
+    if (item.iframe && typeof item.iframe === "string") {
+      const url = normalizeStreamFreeUrl(item.iframe, targetHost)
+      sources.push({
+        quality: inferQualityFromUrl(url),
+        url,
+        live: isLive,
+      })
+    }
+    if (Array.isArray(item.additional_sources)) {
+      for (const extra of item.additional_sources) {
+        if (typeof extra === "string" && extra.startsWith("http")) {
+          const url = normalizeStreamFreeUrl(extra, targetHost)
+          sources.push({ quality: inferQualityFromUrl(url), url, live: isLive })
+        } else if (extra && typeof extra === "object") {
+          const rawUrl = extra.url || extra.iframe
+          if (rawUrl && typeof rawUrl === "string") {
+            const url = normalizeStreamFreeUrl(rawUrl, targetHost)
+            sources.push({
+              quality: extra.quality || extra.label || extra.name || inferQualityFromUrl(url),
+              url,
+              live: extra.live ?? isLive,
+            })
+          }
+        }
+      }
+    }
+  }
+
+  return {
+    ...item,
+    thumbnail_url: item.thumbnail_url ? normalizeStreamFreeUrl(item.thumbnail_url, targetHost) : undefined,
+    iframe: item.iframe ? normalizeStreamFreeUrl(item.iframe, targetHost) : undefined,
+    sources,
+  }
+}
+
+async function fetchFromStreamFreeHosts(path: string, timeoutMs: number): Promise<{ res: Response; host: string }> {
+  const candidates = Array.from(new Set([activeBaseUrl, ...DEFAULT_STREAMFREE_HOSTS]))
+  let lastError: Error | null = null
+
+  for (const host of candidates) {
+    try {
+      const res = await fetch(`${host}${path}`, {
+        signal: AbortSignal.timeout(Math.min(timeoutMs, 6_000)),
+        headers: {
+          Accept: "application/json",
+          "User-Agent": DEFAULT_BROWSER_UA,
+        },
+      })
+      if (res.ok) {
+        activeBaseUrl = host
+        return { res, host }
+      }
+      lastError = new Error(`StreamFree host ${host} returned HTTP ${res.status}`)
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err))
+    }
+  }
+
+  // Fallback: query official mirror directory at strmfree.link/api/domains
+  try {
+    const dirRes = await fetch(STREAMFREE_MIRROR_INDEX, {
+      signal: AbortSignal.timeout(4_000),
+      headers: { Accept: "application/json", "User-Agent": DEFAULT_BROWSER_UA },
+    })
+    if (dirRes.ok) {
+      const domains = (await dirRes.json()) as string[]
+      if (Array.isArray(domains)) {
+        for (const domain of domains) {
+          const host = domain.startsWith("http") ? domain : `https://${domain}`
+          if (candidates.includes(host)) continue
+          try {
+            const res = await fetch(`${host}${path}`, {
+              signal: AbortSignal.timeout(Math.min(timeoutMs, 6_000)),
+              headers: { Accept: "application/json", "User-Agent": DEFAULT_BROWSER_UA },
+            })
+            if (res.ok) {
+              activeBaseUrl = host
+              return { res, host }
+            }
+          } catch {
+            // Try next discovered mirror
+          }
+        }
+      }
+    }
+  } catch {
+    // Mirror directory unreachable
+  }
+
+  throw lastError ?? new Error("All StreamFree hosts failed")
+}
 
 const DEFAULT_BROWSER_UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
@@ -45,33 +172,23 @@ export async function fetchSoccerStreams(
 
   const fetchPromise = (async () => {
     try {
-      const signal = AbortSignal.timeout(timeoutMs)
-      const res = await fetch(`${BASE_URL}/api/v1/streams?category=soccer`, {
-        signal,
-        headers: {
-          Accept: "application/json",
-          "User-Agent": DEFAULT_BROWSER_UA,
-        },
-      })
-
-      if (!res.ok) {
-        console.warn(`[streamfree] Directory returned HTTP ${res.status}`)
-        return cachedStreams ?? []
-      }
-
+      const { res, host } = await fetchFromStreamFreeHosts("/api/v1/streams?category=soccer", timeoutMs)
       const json = (await res.json()) as StreamFreeResponse
       const streams = Array.isArray(json.streams) ? json.streams : []
 
-      // Validate and clean each stream
-      const validStreams = streams.filter((s): s is StreamFreeItem => {
-        return (
-          Boolean(s) &&
-          typeof s.name === "string" &&
-          typeof s.stream_key === "string" &&
-          (s.category === "soccer" || !s.category) &&
-          Array.isArray(s.sources)
-        )
-      })
+      // Validate, clean, and rewrite dead mirror URLs to the active host
+      const validStreams = streams
+        .filter((s): s is StreamFreeItem => {
+          return (
+            Boolean(s) &&
+            typeof s.name === "string" &&
+            typeof s.stream_key === "string" &&
+            (s.category === "soccer" || !s.category) &&
+            (Array.isArray(s.sources) || typeof s.iframe === "string")
+          )
+        })
+        .map((s) => normalizeStreamFreeItem(s, host))
+        .filter((s) => s.sources.length > 0)
 
       cachedStreams = validStreams
       cacheTimestamp = Date.now()
@@ -108,24 +225,10 @@ export async function fetchSingleStream(
 
   const p = (async () => {
     try {
-      const signal = AbortSignal.timeout(timeoutMs)
-      const res = await fetch(`${BASE_URL}/api/v1/streams/${encodeURIComponent(key)}`, {
-        signal,
-        headers: {
-          Accept: "application/json",
-          "User-Agent": DEFAULT_BROWSER_UA,
-        },
-      })
-
-      if (!res.ok) {
-        if (res.status === 404) return null
-        console.warn(`[streamfree] Stream ${key} returned HTTP ${res.status}`)
-        return null
-      }
-
+      const { res, host } = await fetchFromStreamFreeHosts(`/api/v1/streams/${encodeURIComponent(key)}`, timeoutMs)
       const data = (await res.json()) as StreamFreeItem
-      if (data && typeof data.name === "string" && Array.isArray(data.sources)) {
-        return data
+      if (data && typeof data.name === "string" && (Array.isArray(data.sources) || typeof data.iframe === "string")) {
+        return normalizeStreamFreeItem(data, host)
       }
       return null
     } catch (err) {
@@ -152,19 +255,18 @@ export async function fetchStreamSources(
   if (!key) return []
 
   try {
-    const signal = AbortSignal.timeout(timeoutMs)
-    const res = await fetch(`${BASE_URL}/api/v1/sources/${encodeURIComponent(key)}`, {
-      signal,
-      headers: {
-        Accept: "application/json",
-        "User-Agent": DEFAULT_BROWSER_UA,
-      },
-    })
-
-    if (res.ok) {
-      const json = await res.json()
-      if (Array.isArray(json)) return json
-      if (Array.isArray(json.sources)) return json.sources
+    const { res, host } = await fetchFromStreamFreeHosts(`/api/v1/sources/${encodeURIComponent(key)}`, timeoutMs)
+    const json = await res.json()
+    const rawSources: StreamFreeSource[] = Array.isArray(json)
+      ? json
+      : Array.isArray(json.sources)
+        ? json.sources
+        : []
+    if (rawSources.length > 0) {
+      return rawSources.map((s) => ({
+        ...s,
+        url: s.url ? normalizeStreamFreeUrl(s.url, host) : s.url,
+      }))
     }
   } catch {
     // /sources endpoint may be unavailable on some hosts, fall back to /streams/{key}
@@ -177,9 +279,9 @@ export async function fetchStreamSources(
 export async function checkStreamFreeHealth(): Promise<{ ok: boolean; count?: number; latencyMs: number }> {
   const start = Date.now()
   try {
-    const streams = await fetchSoccerStreams()
+    const streams = await fetchSoccerStreams({ forceRefresh: true })
     return {
-      ok: true,
+      ok: cachedStreams !== null,
       count: streams.length,
       latencyMs: Date.now() - start,
     }
